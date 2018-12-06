@@ -1,6 +1,5 @@
 package io.odysz.antson;
 
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -9,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 
+@SuppressWarnings("deprecation")
 class AnparserTest {
 
 	@Test
@@ -23,7 +23,7 @@ class AnparserTest {
         // Anparser classListener = new Anparser();
 		Anlistner lsner = new Anlistner();
         anparser.json().enterRule(lsner);
-        Object obj = lsner.getObj();
+        Object obj = lsner.getValue();
         
         Utils.logi(obj.toString());
 	}
