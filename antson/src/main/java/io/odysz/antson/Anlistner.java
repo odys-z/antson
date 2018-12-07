@@ -1,6 +1,7 @@
 package io.odysz.antson;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -31,11 +32,25 @@ value: STRING | NUMBER | obj | array | 'true' | 'false' | 'null' ;</pre>
 public class Anlistner extends JSONBaseListener {
 
 	class ObjListener extends JSONBaseListener {
-		private Axby javaObj;
+		@Override
+		public void enterObj(ObjContext ctx) {
+			// super.enterObj(ctx);
+			List<PairContext> px = ctx.pair();
+			px.forEach(p -> p.enterRule(this));
+		}
+
+
+//		@Override
+//		public void enterEveryRule(ParserRuleContext ctx) {
+//			super.enterEveryRule(ctx);
+//		}
+
+		private Ason javaObj;
 		
 		ObjListener () {
-			javaObj = new Axby();
+			javaObj = new Ason();
 		}
+		
 
 		@Override
 		public void enterPair(PairContext ctx) {
@@ -47,10 +62,12 @@ public class Anlistner extends JSONBaseListener {
 			// String v = ctx.value().getText();
 			Object v = vl.getValue();
 
+			if (a != null)
+				a = a.replaceAll("^\"", "").replaceAll("\"$", "");
 			if ("a".equals(a))
 				javaObj.a = v.toString();
 			else if ("b".equals(a))
-				javaObj.b = v.toString();
+				javaObj.b = (Ason[]) v;
 			else Utils.warn("no property, ignored: %s - %s", a, v);
 		}
 		
@@ -101,28 +118,24 @@ public class Anlistner extends JSONBaseListener {
 			}
 		}
 
-		public Object[] getArr() {return javaArr.toArray();}
-	}
-
-	public class Axby {
-		String a;
-		String b;
-
-		@Override
-		public String toString() {
-			return String.format("Axby: a = %s, b = %s", a, b);
-		}
+		public Ason[] getArr() {return (Ason[]) javaArr.toArray(new Ason[] {});}
 	}
 
 	private Object javaVal;
 
 	@Override
 	public void enterJson(JsonContext ctx) {
-//		super.enterJson(ctx);
 		ValueContext vc = ctx.value();
 		vc.enterRule(this);
+		super.enterJson(ctx);
 	}
 
+//	@Override
+//	public void enterObj(ObjContext ctx) {
+//		ObjListener ol = new ObjListener();
+//		ctx.enterRule(ol);
+//		javaVal = ol.getObj();
+//	}
 	
 	@Override
 	public void enterValue(ValueContext ctx) {
@@ -153,12 +166,14 @@ public class Anlistner extends JSONBaseListener {
 			try { javaVal = Integer.parseInt(tx.getText()); }
 			catch (Exception e) { javaVal = Double.parseDouble(tx.getText()); }
 		}
+		super.enterValue(ctx);
 	}
 
 	@Override
 	public void enterArray(ArrayContext ctx) {
 		ArrListener arrListener = new ArrListener(ctx.getChildCount());
 		ctx.enterRule(arrListener);
+		super.enterArray(ctx);
 	}
 
 //	@Override
