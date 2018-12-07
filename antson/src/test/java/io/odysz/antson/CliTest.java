@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
 /**
- * Unit test for simple main.
+ * Unit test for simple main. 
  */
 public class CliTest extends TestCase {
     /**
