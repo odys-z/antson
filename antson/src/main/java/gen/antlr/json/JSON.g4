@@ -9,12 +9,17 @@ json
    ;
 
 obj
-   : '{' pair (',' pair)* '}'
+   : '{' (type_pair,)? pair (',' pair)* '}'
    | '{' '}'
    ;
 
 pair
    : STRING ':' value
+   ;
+
+// odys-z
+type_pair
+   : TYPE ':' STRING
    ;
 
 array
@@ -62,6 +67,10 @@ NUMBER
    : '-'? INT ('.' [0-9] +)? EXP?
    ;
 
+// odys-z
+TYPE
+	: 'TYPE' | 'type'
+	;
 
 fragment INT
    : '0' | [1-9] [0-9]*

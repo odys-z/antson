@@ -162,7 +162,7 @@ class AnparserTest {
 		}
 	}
 	
-	/**<pre>
+	/**Find out various information can get with reflection.<pre>
 addr, io.odysz.antson.AnparserTest$Ason3, io.odysz.antson.AnparserTest$Ason3$Address, 	| null
 	java.lang.Object
 orders, io.odysz.antson.AnparserTest$Ason3, java.util.HashMap, 	| Ljava/util/HashMap<Ljava/lang/String;*>;
