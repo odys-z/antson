@@ -1,6 +1,10 @@
-// Original from https://raw.githubusercontent.com/antlr/grammars-v4/master/json/JSON.g4
-
-/** Taken from "The Definitive ANTLR 4 Reference" by Terence Parr */
+/** 
+ * Original from https://raw.githubusercontent.com/antlr/grammars-v4/master/json/JSON.g4
+ *
+ * Taken from "The Definitive ANTLR 4 Reference" by Terence Parr 
+ * 
+ * java -jar /home/ody/d/ubuntu/antlr4/antlr-4.7.1-complete.jar JSON.g4 -package gen.antlr.json
+ */
 
 // Derived from http://json.org
 grammar JSON;
@@ -20,7 +24,7 @@ obj
 // for qualifiedName, see Antlr4 java grammar:
 // https://github.com/antlr/grammars-v4/blob/master/java/JavaParser.g4
 type_pair
-   : TYPE ':' ('[' qualifiedName ']' | qualifiedName)
+   : TYPE ':' ('[' qualifiedName ']' | qualifiedName)	// [] means it's a list
    ;
 
 qualifiedName
@@ -46,7 +50,6 @@ value
    | 'false'
    | 'null'
    ;
-
 
 STRING
    : '"' (ESC | SAFECODEPOINT)* '"'
@@ -91,10 +94,15 @@ fragment EXP
 // \- since - means "range" inside [...]
 
 
-// ody: for grammar, see
 // section: type name extension
+// ody: for grammar, see
 // https://github.com/antlr/grammars-v4/blob/master/java/JavaLexer.g4
-IDENTIFIER:         Letter LetterOrDigit*;
+TYPE
+	: 'TYPE' | 'type'
+	;
+
+IDENTIFIER
+	:         Letter LetterOrDigit*;
 
 fragment LetterOrDigit
     : Letter

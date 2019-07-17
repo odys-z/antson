@@ -1,5 +1,5 @@
 
-/** Taken from "The Definitive ANTLR 4 Reference" by Terence Parr */
+/** Taken from "The Definitive ANTLR 4 Reference" by Terence Parr * /
 
 // Derived from http://json.org
 grammar JSON;
@@ -87,3 +87,4 @@ fragment EXP
 WS
    : [ \t\n\r] + -> skip
    ;
+*/

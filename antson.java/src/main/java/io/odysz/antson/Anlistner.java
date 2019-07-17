@@ -10,6 +10,7 @@ import gen.antlr.json.JSONParser.ArrayContext;
 import gen.antlr.json.JSONParser.JsonContext;
 import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
+import gen.antlr.json.JSONParser.Type_pairContext;
 import gen.antlr.json.JSONParser.ValueContext;
 
 /**Antlr4 Listener based json string parser.<br>
@@ -32,6 +33,7 @@ value: STRING | NUMBER | obj | array | 'true' | 'false' | 'null' ;</pre>
 public class Anlistner extends JSONBaseListener {
 
 	class ObjListener extends JSONBaseListener {
+
 		@Override
 		public void enterObj(ObjContext ctx) {
 			// super.enterObj(ctx);
@@ -48,20 +50,27 @@ public class Anlistner extends JSONBaseListener {
 		private Ason javaObj;
 		
 		ObjListener () {
-			javaObj = new Ason();
+			// javaObj = new Ason();
 		}
 		
+		@Override
+		public void exitType_pair(Type_pairContext ctx) {
+			// super.exitType_pair(ctx);
+			// String t = ctx.TYPE().getText();
+			String tp = ctx.qualifiedName().getText();
+		}
 
 		@Override
 		public void enterPair(PairContext ctx) {
-			// a = "a" | "b"
-			String a = ctx.STRING().getText();
+			// field name
+			String fd = ctx.STRING().getText();
 			
 			Anlistner vl = new Anlistner();
 			ctx.value().enterRule(vl);
 			// String v = ctx.value().getText();
 			Object v = vl.getValue();
 
+			/*
 			if (a != null)
 				a = a.replaceAll("^\"", "").replaceAll("\"$", "");
 			if ("a".equals(a))
@@ -69,6 +78,7 @@ public class Anlistner extends JSONBaseListener {
 			else if ("b".equals(a))
 				javaObj.b = (Ason[]) v;
 			else Utils.warn("no property, ignored: %s - %s", a, v);
+			*/
 		}
 		
 		public Object getObj() {return javaObj;}

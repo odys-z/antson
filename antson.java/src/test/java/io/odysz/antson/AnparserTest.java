@@ -8,20 +8,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 
 @SuppressWarnings("deprecation")
 class AnparserTest {
-	@BeforeAll
+	@Before
 	static void init() {
 		Utils.printCaller(false);
 	}
@@ -162,7 +161,7 @@ class AnparserTest {
 		}
 	}
 	
-	/**Find out various information can get with reflection.<pre>
+	/**Find out various information that can get with reflection.<pre>
 addr, io.odysz.antson.AnparserTest$Ason3, io.odysz.antson.AnparserTest$Ason3$Address, 	| null
 	java.lang.Object
 orders, io.odysz.antson.AnparserTest$Ason3, java.util.HashMap, 	| Ljava/util/HashMap<Ljava/lang/String;*>;
