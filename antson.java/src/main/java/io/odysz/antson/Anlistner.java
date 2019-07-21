@@ -52,18 +52,20 @@ public class Anlistner extends JSONBaseListener {
 			// super.exitType_pair(ctx);
 			// String t = ctx.TYPE().getText();
 			String tp = ctx.qualifiedName().getText();
-			TO BE CONTINUED
+			Utils.logi(tp);
 		}
 
 		@Override
 		public void enterPair(PairContext ctx) {
 			// field name
 			String fd = ctx.STRING().getText();
+			Utils.logi(fd);
 			
 			Anlistner vl = new Anlistner();
 			ctx.value().enterRule(vl);
 			// String v = ctx.value().getText();
 			Object v = vl.getValue();
+			Utils.logi(v.toString());
 		}
 		
 		public Object getObj() {return javaObj;}
