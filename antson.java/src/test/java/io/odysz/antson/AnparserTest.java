@@ -12,15 +12,15 @@ import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 
 @SuppressWarnings("deprecation")
 class AnparserTest {
-	@Before
+	@BeforeAll
 	static void init() {
 		Utils.printCaller(false);
 	}
@@ -127,8 +127,6 @@ class AnparserTest {
 	}
 	
 	/**types: [{io.odysz.antson.AnparserTest$Ason2: { a: int, name: String}}]
-	 * @author ody
-	 *
 	 */
 	class Ason2 extends Ason {
 		int c;
@@ -140,8 +138,6 @@ class AnparserTest {
 	 *  {io.odysz.antson.AnparserTest$Ason3$Address: { country: String, province: String, zip: String }},
 	 *  {io.odysz.antson.AnparserTest$Ason2: { a: int, name: String} }
 	 * ]
-	 * @author ody
-	 *
 	 */
 	class Ason3 <U extends Ason> extends Ason2 {
 		Address addr;
@@ -180,7 +176,7 @@ this$0, io.odysz.antson.AnparserTest$Ason2, io.odysz.antson.AnparserTest, 	| nul
 	 * @throws SecurityException
 	 */
 	@Test
-	void temp () throws NoSuchFieldException, SecurityException {
+	void temp () throws ReflectiveOperationException {
 		Ason3<Ason1> a3 = new Ason3<Ason1>();
 
 		Field sf = Field.class.getDeclaredField("signature");
@@ -208,8 +204,7 @@ this$0, io.odysz.antson.AnparserTest$Ason2, io.odysz.antson.AnparserTest, 	| nul
 					gt,
 					sper);
 		}
-		
-		
+	
 		Class<?> scls = a3.getClass().getSuperclass();
 		flist = a3.getClass().getSuperclass().getDeclaredFields();
 
@@ -237,7 +232,6 @@ this$0, io.odysz.antson.AnparserTest$Ason2, io.odysz.antson.AnparserTest, 	| nul
 		}
 	
 	}
-	
 
 	private static String getDeclaration(Type genericType) {
 		/*

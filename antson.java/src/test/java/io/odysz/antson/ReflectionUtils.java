@@ -1,5 +1,7 @@
 package io.odysz.antson;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -7,8 +9,7 @@ import java.lang.reflect.TypeVariable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.odysz.antson.AnparserTest.Ason1;
 
@@ -152,10 +153,10 @@ public class ReflectionUtils {
 	    GenericDefinition gd = new GenericDefinition();
 	    Field field = ReflectionUtils.getField(gd, "t");
 	    Class<?> clazz = ReflectionUtils.determineType(field, gd);
-	    Assert.assertEquals(clazz, Integer.class);
+	    assertEquals(clazz, Integer.class);
 	    field = ReflectionUtils.getField(gd, "b");
 	    clazz = ReflectionUtils.determineType(field, gd);
-	    Assert.assertEquals(clazz, BigDecimal.class);
+	    assertEquals(clazz, BigDecimal.class);
 	}
 
 	class MiddleClass<A, E> extends GenericSuperClass<E, Integer, A> { }
@@ -168,13 +169,13 @@ public class ReflectionUtils {
 	    SimpleTopClass stc = new SimpleTopClass();
 	    Field field = ReflectionUtils.getField(stc, "t");
 	    Class<?> clazz = ReflectionUtils.determineType(field, stc);
-	    Assert.assertEquals(clazz, Integer.class);
+	    assertEquals(clazz, Integer.class);
 	    field = ReflectionUtils.getField(stc, "e");
 	    clazz = ReflectionUtils.determineType(field, stc);
-	    Assert.assertEquals(clazz, String.class);
+	    assertEquals(clazz, String.class);
 	    field = ReflectionUtils.getField(stc, "a");
 	    clazz = ReflectionUtils.determineType(field, stc);
-	    Assert.assertEquals(clazz, Double.class);
+	    assertEquals(clazz, Double.class);
 	}
 
 	class TopMiddleClass<A> extends MiddleClass<A, Double> { }
@@ -187,13 +188,13 @@ public class ReflectionUtils {
 	    ComplexTopClass ctc = new ComplexTopClass();
 	    Field field = ReflectionUtils.getField(ctc, "t");
 	    Class<?> clazz = ReflectionUtils.determineType(field, ctc);
-	    Assert.assertEquals(clazz, Integer.class);
+	    assertEquals(clazz, Integer.class);
 	    field = ReflectionUtils.getField(ctc, "e");
 	    clazz = ReflectionUtils.determineType(field, ctc);
-	    Assert.assertEquals(clazz, Double.class);
+	    assertEquals(clazz, Double.class);
 	    field = ReflectionUtils.getField(ctc, "a");
 	    clazz = ReflectionUtils.determineType(field, ctc);
-	    Assert.assertEquals(clazz, Float.class);
+	    assertEquals(clazz, Float.class);
 	}
 
 	class ConfusingClass<A, E> extends MiddleClass<E, A> {}
@@ -205,16 +206,16 @@ public class ReflectionUtils {
 	    TopConfusingClass tcc = new TopConfusingClass();
 	    Field field = ReflectionUtils.getField(tcc, "t");
 	    Class<?> clazz = ReflectionUtils.determineType(field, tcc);
-	    Assert.assertEquals(clazz, Integer.class);
+	    assertEquals(clazz, Integer.class);
 	    field = ReflectionUtils.getField(tcc, "e");
 	    clazz = ReflectionUtils.determineType(field, tcc);
-	    Assert.assertEquals(clazz, Double.class);
+	    assertEquals(clazz, Double.class);
 	    field = ReflectionUtils.getField(tcc, "a");
 	    clazz = ReflectionUtils.determineType(field, tcc);
-	    Assert.assertEquals(clazz, Float.class);
+	    assertEquals(clazz, Float.class);
 	    field = ReflectionUtils.getField(tcc, "b");
 	    clazz = ReflectionUtils.determineType(field, tcc);
-	    Assert.assertEquals(clazz, BigDecimal.class);
+	    assertEquals(clazz, BigDecimal.class);
 	}
 
 	class Pojo {
@@ -226,6 +227,6 @@ public class ReflectionUtils {
 	    Pojo pojo = new Pojo();
 	    Field field = ReflectionUtils.getField(pojo, "z");
 	    Class<?> clazz = ReflectionUtils.determineType(field, pojo);
-	    Assert.assertEquals(clazz, Byte.class);
+	    assertEquals(clazz, Byte.class);
 	}
 }
