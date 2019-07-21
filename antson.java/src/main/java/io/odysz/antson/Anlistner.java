@@ -42,15 +42,9 @@ public class Anlistner extends JSONBaseListener {
 		}
 
 
-//		@Override
-//		public void enterEveryRule(ParserRuleContext ctx) {
-//			super.enterEveryRule(ctx);
-//		}
-
 		private Ason javaObj;
 		
 		ObjListener () {
-			// javaObj = new Ason();
 		}
 		
 		@Override
@@ -58,6 +52,7 @@ public class Anlistner extends JSONBaseListener {
 			// super.exitType_pair(ctx);
 			// String t = ctx.TYPE().getText();
 			String tp = ctx.qualifiedName().getText();
+			TO BE CONTINUED
 		}
 
 		@Override
@@ -69,16 +64,6 @@ public class Anlistner extends JSONBaseListener {
 			ctx.value().enterRule(vl);
 			// String v = ctx.value().getText();
 			Object v = vl.getValue();
-
-			/*
-			if (a != null)
-				a = a.replaceAll("^\"", "").replaceAll("\"$", "");
-			if ("a".equals(a))
-				javaObj.a = v.toString();
-			else if ("b".equals(a))
-				javaObj.b = (Ason[]) v;
-			else Utils.warn("no property, ignored: %s - %s", a, v);
-			*/
 		}
 		
 		public Object getObj() {return javaObj;}
