@@ -27,8 +27,9 @@ class AnparserTest {
 
 	@Test
 	void test() {
+		// https://jakubdziworski.github.io/java/2016/04/01/antlr_visitor_vs_listener.html
 		
-		String json = "{\"a\":\"1\", \"b\":[{\"a\":\"x\"}]}";
+		String json = "{\"type\":\"java.lang.Object\", \"a\":\"1\", \"b\":[{\"a\":\"x\"}]}";
 		ANTLRInputStream inputStream = new ANTLRInputStream(json);
         JSONLexer lex = new JSONLexer(inputStream);
         CommonTokenStream commonTokenStream = new CommonTokenStream(lex);

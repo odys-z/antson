@@ -43,6 +43,7 @@ public class Anlistner extends JSONBaseListener {
 
 
 		private Ason javaObj;
+		private String type;
 		
 		ObjListener () {
 		}
@@ -51,8 +52,8 @@ public class Anlistner extends JSONBaseListener {
 		public void exitType_pair(Type_pairContext ctx) {
 			// super.exitType_pair(ctx);
 			// String t = ctx.TYPE().getText();
-			String tp = ctx.qualifiedName().getText();
-			Utils.logi(tp);
+			type = ctx.qualifiedName().getText();
+			Utils.logi(type);
 		}
 
 		@Override
@@ -172,11 +173,6 @@ public class Anlistner extends JSONBaseListener {
 		ctx.enterRule(arrListener);
 		super.enterArray(ctx);
 	}
-
-//	@Override
-//	public void exitArray(ArrayContext ctx) {
-//		// ctx.enterRule(this);
-//	}
 
 	public Object getValue() {
 		return javaVal;
