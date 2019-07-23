@@ -1,13 +1,22 @@
-/** 
+/**
  * Original from https://raw.githubusercontent.com/antlr/grammars-v4/master/json/JSON.g4
  *
- * Taken from "The Definitive ANTLR 4 Reference" by Terence Parr 
- * 
+ * Taken from "The Definitive ANTLR 4 Reference" by Terence Parr
+ *
  * java -jar /home/ody/d/ubuntu/antlr4/antlr-4.7.1-complete.jar JSON.g4 -package gen.antlr.json
  */
 
 // Derived from http://json.org
 grammar JSON;
+
+// ody:
+// Used for dividing large data blocks - antlr don't work in stream mode.
+// This rule can not been handlered by antlr parser, but by BlockParser.
+// block:
+//    : json
+//    : json '{' '}' block
+//    ;
+
 
 json
    : value
@@ -16,7 +25,7 @@ json
 obj
 // ody  : '{' pair (',' pair)* '}'
    : '{' type_pair (',' pair)* '}'
-   | '{' '}'
+   // | '{' '}' This is a block separator
    ;
 
 // section: type extension

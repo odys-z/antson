@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
+import io.odysz.common.Utils;
 
 @SuppressWarnings("deprecation")
 class AnparserTest {

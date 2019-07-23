@@ -8,7 +8,7 @@ import java.lang.reflect.Field;
 
 import com.infochange.frame.util.FrameHelper;
 
-import io.odysz.antson.Utils;
+import io.odysz.common.Utils;
 
 /**Base class for persisted bean and inter activity bean.<br/>
  * Because Serializable is a mark interface,

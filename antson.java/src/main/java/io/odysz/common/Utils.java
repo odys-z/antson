@@ -1,6 +1,7 @@
-package io.odysz.antson;
+package io.odysz.common;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class Utils {
@@ -10,7 +11,7 @@ public class Utils {
 	 * In this way, the java compiler will optimize the code to nothing if the <i>staticBoolean</i> is false.
 	 * This flag is used for find out {@link #logi(String, String...)} calling that's not controlled by the flag.
 	 * */
-	private static boolean printCaller = true;
+	private static boolean printCaller = false;
 	
 	/**See {@link #printCaller}
 	 * @param printcall
@@ -29,7 +30,7 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("log by        %s.%s(%s:%s)", 
+				System.out.println(String.format("\nlog by        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 				if (stElements.length > 3)
@@ -51,7 +52,25 @@ public class Utils {
 		}
 	}
 
-	public static <T> void logi(ArrayList<T> list, Object... args) {
+	public static void logi(String[] row) {
+		try {
+			if (printCaller) {
+				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+								stElements[2].getClassName(), stElements[2].getMethodName(),
+								stElements[2].getFileName(), stElements[2].getLineNumber()));
+			}
+
+			if (row != null)
+				System.out.println(LangExt.toString(row));
+		} catch (Exception ex) {
+			System.err.println("logi(): Can't print. Error:");
+			ex.printStackTrace();
+		}
+
+	}
+
+	public static <T> void logi(List<T> list, Object... args) {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
@@ -62,7 +81,9 @@ public class Utils {
 
 			if (list != null)
 				for (T it : list)
-					if (args != null && args.length > 0)
+					if (it == null)
+						System.out.println("null");
+					else if (args != null && args.length > 0)
 						System.out.println(String.format(it.toString(), args));
 					else
 						System.out.println(it.toString());
@@ -73,6 +94,28 @@ public class Utils {
 		}
 	}
 
+	public static void logArr(List<String[]> list, Object... args) {
+		try {
+			if (printCaller) {
+				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+								stElements[2].getClassName(), stElements[2].getMethodName(),
+								stElements[2].getFileName(), stElements[2].getLineNumber()));
+			}
+
+			if (list != null)
+				for (String[] it : list)
+					if (args != null && args.length > 0)
+						System.out.println(String.format(LangExt.toString(it), args));
+					else
+						System.out.println(LangExt.toString(it));
+
+		} catch (Exception ex) {
+			System.err.println("logi(): Can't print. Error:");
+			ex.printStackTrace();
+		}
+	}
+	
 	public static void logkeys(Map<String, ?> map) {
 		try {
 			if (map != null)
@@ -90,7 +133,7 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("log by        %s.%s(%s:%s)", 
+				System.out.println(String.format("\nlog by        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 				if (stElements.length > 3)
@@ -112,12 +155,34 @@ public class Utils {
 		}
 	}
 
-	public static void warn(String title, ArrayList<String> list, Object... args) {
-		System.err.println(title);
-		warn(list, args);
-	}
+//	public static void warn(String title, ArrayList<String> list, Object... args) {
+//		System.err.println(title);
+//		warn(list, args);
+//	}
 
-	public static void warn(ArrayList<String> list, Object... args) {
+//	public static void warn(ArrayList<String> list, Object... args) {
+//		try {
+//			if (printCaller) {
+//				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+//				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+//								stElements[2].getClassName(), stElements[2].getMethodName(),
+//								stElements[2].getFileName(), stElements[2].getLineNumber()));
+//			}
+//
+//			if (list != null)
+//				for (String it : list)
+//					if (args != null && args.length > 0)
+//						System.err.println(String.format(it, args));
+//					else
+//						System.err.println(it);
+//
+//		} catch (Exception ex) {
+//			System.err.println("logi(): Can't print. Error:");
+//			ex.printStackTrace();
+//		}
+//	}
+
+	public static void warn(ArrayList<Object> list, Object... args) {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
@@ -127,9 +192,9 @@ public class Utils {
 			}
 
 			if (list != null)
-				for (String it : list)
+				for (Object it : list)
 					if (args != null && args.length > 0)
-						System.err.println(String.format(it, args));
+						System.err.println(String.format(it.toString(), args));
 					else
 						System.err.println(it);
 

@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**Base class of antson handled class.
+/**@deprecated
+ * Base class of antson handled class.
  * @author ody
  *
  */
 public class Ason {
 	static class fmt {
-		// static final String pairPrmv = "\"%s\": %s";
 		static final String pairPrmv = "%s: %s";
 		static final String pairStrv = "\"%s\": \"%s\"";
 	}
