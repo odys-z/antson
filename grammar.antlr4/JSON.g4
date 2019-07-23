@@ -12,6 +12,7 @@ grammar JSON;
 // ody:
 // Used for dividing large data blocks - antlr don't work in stream mode.
 // This rule can not been handlered by antlr parser, but by BlockParser.
+// see https://groups.google.com/forum/#!msg/antlr-discussion/B06iG6Dht6w/S9m7IlvMslgJ
 // block:
 //    : json
 //    : json '{' '}' block
