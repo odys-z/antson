@@ -43,25 +43,7 @@ public class Anson {
 		for (int i = 0; i < flist.length; i++) {
 			Field f = flist[i];
 			f.setAccessible(true);
-			if (f.getType().isArray()) {
-				// iterate
-				Object arr = f.get(this);
-				for (int e = 0; e < Array.getLength(arr); e++) {
-					Object elem = Array.get(f.get(this), e);
-					append(sbuf, elem);
-					if (e < Array.getLength(arr) - 1)
-						sbuf.append(", ");
-				}
-			}
-			else if (!f.getType().isPrimitive() && (parentCls == null || !parentCls.equals(f.getType())))
-				sbuf.append(f.getName())
-						.append(": \"")
-						.append(f.get(this).toString().getBytes())
-						.append("\"");
-			else if (f.getType().isPrimitive())
-				sbuf.append(f.getName())
-					.append(": ")
-					.append(String.valueOf(f.get(this)).getBytes());
+			appendPair(sbuf, f.getName(), f.get(this), parentCls);
 
 			if (i < flist.length - 1)
 				sbuf.append(",");
@@ -69,6 +51,55 @@ public class Anson {
 		
 		sbuf.append("}");
 		return this;
+	}
+
+	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls)
+			throws IllegalArgumentException, IllegalAccessException, IOException {
+		if (v instanceof Anson)
+			((Anson)v).toJson(sbuf);
+		else if (!v.getClass().isPrimitive() && (parentCls == null || !parentCls.equals(v.getClass())))
+			// what's this?
+			sbuf.append(n)
+				.append(": \"")
+				.append(v.toString())
+				.append("\"");
+		else if (v.getClass().isPrimitive())
+			sbuf.append(n)
+				.append(": ")
+				.append(String.valueOf(v));
+		else if (v.getClass().isArray()) {
+			for (int e = 0; e < Array.getLength(v); e++) {
+				Object elem = Array.get(v, e);
+				sbuf.append(n)
+					.append(": [");
+				appendArr(sbuf, elem);
+				if (e < Array.getLength(v) - 1)
+					sbuf.append(", ");
+			}
+		}
+	}
+
+	private static void appendArr(StringBuffer sbuf, Object e) 
+			throws IllegalArgumentException, IllegalAccessException, IOException {
+		if (e instanceof Anson)
+			((Anson)e).toJson(sbuf);
+		else if (e.getClass().isPrimitive())
+			sbuf.append(String.valueOf(e));
+		else if (e instanceof String)
+			sbuf.append("\"")
+				.append((String)e)
+				.append("\"");
+		else // java.lang.Object
+			appendObjStr(sbuf, e);
+	}
+
+	private static void appendObjStr(StringBuffer sbuf, Object e) {
+		sbuf.append("{")
+			.append("type: \"")
+			.append(e.getClass().getName())
+			.append("\", ")
+			.append(String.valueOf(e))
+			.append("}");
 	}
 
 	protected Anson fromBlock(InputStream stream) throws IOException {
