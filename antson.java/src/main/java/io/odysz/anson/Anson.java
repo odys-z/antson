@@ -102,16 +102,32 @@ public class Anson {
 			.append("}");
 	}
 
+	/**@deprecated After reading some docs about Kafka like <a href='https://kafka.apache.org/intro.html'>
+	 * kafka.Apache.org</a>, thinking may be it's better let this been handlered
+	 * by Kafka, in any style as users liked.
+	 * @param stream
+	 * @return
+	 * @throws IOException
+	 */
 	protected Anson fromBlock(InputStream stream) throws IOException {
 		byte[] buf = new byte[bufLength];
 		int len = stream.read(buf);
 		while (len != -1) {
-			
+			// kafka?
 		}
 
 		return this;
 	}
 
+	/**Parse Anson object from json string.
+	 * <p><b>Note: </b><br>
+	 * As LL(*) parsing like Antlr won't work in stream mode,
+	 * this method won't have a input stream version.</p>
+	 * @param json
+	 * @return
+	 * @throws IllegalArgumentException
+	 * @throws ReflectiveOperationException
+	 */
 	protected Anson fromJson(String json)
 			throws IllegalArgumentException, ReflectiveOperationException {
 		Field flist[] = this.getClass().getDeclaredFields();
