@@ -105,7 +105,7 @@ public class Anson {
 	protected Anson fromBlock(InputStream stream) throws IOException {
 		byte[] buf = new byte[bufLength];
 		int len = stream.read(buf);
-		while (len > 0) {
+		while (len != -1) {
 			
 		}
 
