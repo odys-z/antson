@@ -29,7 +29,7 @@ consuming the data object like normal Java objects, and only take care of it's b
 
 If you are comfort with MS .net webservice framework, you are not supprised with this idea.
 
-# Why no Stream mode?
+# Why no Stream Mode?
 
 Antson provid only output stream writing API, and deserializing json string, no input
 stream mode is supported.
@@ -38,3 +38,9 @@ The reason behind this is that Antson is based on Antlr, it's an LL(\*) parsing 
 
 If your json data is large, try breack it into small chunks, or may be let it work
 as a [Karfka](https://kafka.apache.org/intro) message consummer - might try a test in the future.
+
+# What's it for?
+
+Antson will be used as the transport protocol layer for semantic-\*. see his home page for it.
+
+It's also planned publish it as an independent lib, at least with jar and DLL.
