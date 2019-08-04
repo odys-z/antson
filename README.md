@@ -25,7 +25,7 @@ of json data to Java object needing user implement business handlers, one proble
 
 Antson is trying to go further. Users only needing to define their business gramma -
 the application layer protocol, then send packages back and forth with the help of Antson API,
-consuming the data object like normal Java object, and only caring about it's business processing.
+consuming the data object like normal Java objects, and only take care of it's business processing.
 
 If you are comfort with MS .net webservice framework, you are not supprised with this idea.
 
@@ -34,7 +34,7 @@ If you are comfort with MS .net webservice framework, you are not supprised with
 Antson provid only output stream writing API, and deserializing json string, no input
 stream mode is supported.
 
-The reason behind this is that Antson is based on Antlr, is a LL(\*) parsing tool.
+The reason behind this is that Antson is based on Antlr, it's an LL(\*) parsing tool.
 
 If your json data is large, try breack it into small chunks, or may be let it work
-as a [Karfka](https://kafka.apache.org/intro) message consummer?
+as a [Karfka](https://kafka.apache.org/intro) message consummer - might try a test in the future.
