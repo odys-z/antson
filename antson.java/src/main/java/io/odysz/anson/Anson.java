@@ -7,6 +7,14 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+
+import gen.antlr.json.JSONLexer;
+import gen.antlr.json.JSONListener;
+import gen.antlr.json.JSONParser;
+import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.common.Utils;
 
 public class Anson {
@@ -139,13 +147,22 @@ public class Anson {
 	
 	public static void parse(String json, Object obj, Class<?> parentCls, Field[] flist)
 			throws IllegalArgumentException, IllegalAccessException {
-		for (Field f : flist) {
-			f.setAccessible(true);
-			// prevent serialize parent class instance, which is not serializable.
-			if (!f.getType().isPrimitive() && (parentCls == null || !parentCls.equals(f.getType())))
-				f.set(obj, f.getName());
-			else if (f.getType().isPrimitive())
-				f.set(obj, 1);;
-		}
+//		for (Field f : flist) {
+//			f.setAccessible(true);
+//			// prevent serialize parent class instance, which is not serializable.
+//			if (!f.getType().isPrimitive() && (parentCls == null || !parentCls.equals(f.getType())))
+//				f.set(obj, f.getName());
+//			else if (f.getType().isPrimitive())
+//				f.set(obj, 1);;
+//		}
+		
+		JSONLexer lexer = new JSONLexer(CharStreams.fromString(json));
+
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		JSONParser parser = new JSONParser(tokens);
+		JsonContext ctx = parser.json();
+		ParseTreeWalker walker = new ParseTreeWalker();
+		JSONListener lstner = new JSONAnsonListener();
+		walker.walk(lstner, ctx);
 	}
 }
