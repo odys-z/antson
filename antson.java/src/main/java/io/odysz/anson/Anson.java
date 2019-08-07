@@ -138,14 +138,14 @@ public class Anson {
 	 */
 	protected Anson fromJson(String json)
 			throws IllegalArgumentException, ReflectiveOperationException {
-		Field flist[] = this.getClass().getDeclaredFields();
-		Class<?> parentCls = getClass().getDeclaringClass();
+//		Field flist[] = this.getClass().getDeclaredFields();
+//		Class<?> parentCls = getClass().getDeclaringClass();
 		
-		parse(json, this, parentCls, flist);
+		parse(json, this);
 		return this;
 	}
 	
-	public static void parse(String json, Object obj, Class<?> parentCls, Field[] flist)
+	public static void parse(String json, Object obj)
 			throws IllegalArgumentException, IllegalAccessException {
 //		for (Field f : flist) {
 //			f.setAccessible(true);
