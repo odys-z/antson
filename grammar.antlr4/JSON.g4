@@ -34,8 +34,11 @@ obj
 // for qualifiedName, see Antlr4 java grammar:
 // https://github.com/antlr/grammars-v4/blob/master/java/JavaParser.g4
 type_pair
-   : TYPE ':' ('[' qualifiedName ']' | qualifiedName)	// [] means it's a list
-   ;
+	// Type can't specified as a list because it's a type_pair also a property of object {}.
+	// Object can not be an array.
+	// : TYPE ':' ('[' qualifiedName ']' | qualifiedName)	// [] means it's a list
+	: TYPE ':' qualifiedName
+	;
 
 qualifiedName
     : IDENTIFIER ('.' IDENTIFIER)*
