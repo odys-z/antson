@@ -20,14 +20,14 @@ grammar JSON;
 
 
 json
-   : value
-   ;
+	: value
+	;
 
 obj
-// ody  : '{' pair (',' pair)* '}'
-   : '{' type_pair (',' pair)* '}'
-   // | '{' '}' This is a block separator
-   ;
+	// ody  : '{' pair (',' pair)* '}'
+	: '{' type_pair (',' pair)* '}'
+	// | '{' '}' This is a block separator
+	;
 
 // section: type extension
 // ody: e.g. type : [(java.lang.)String]
@@ -42,64 +42,71 @@ qualifiedName
     ;
 // section end
 
+// Ody: tolerate property without quote
+// pair
+//    : STRING ':' value
+//    ;
 pair
-   : STRING ':' value
-   ;
+	: propname ':' value
+	;
+
+propname
+	: STRING
+	| IDENTIFIER
+	;
 
 array
-   : '[' value (',' value)* ']'
-   | '[' ']'
-   ;
+	: '[' value (',' value)* ']'
+	| '[' ']'
+	;
 
 value
-   : STRING
-   | NUMBER
-   | obj
-   | array
-   | 'true'
-   | 'false'
-   | 'null'
-   ;
+	: STRING
+	| NUMBER
+	| obj
+	| array
+	| 'true'
+	| 'false'
+	| 'null'
+	;
 
 STRING
-   : '"' (ESC | SAFECODEPOINT)* '"'
-   ;
+	: '"' (ESC | SAFECODEPOINT)* '"'
+	;
 
 
 fragment ESC
-   : '\\' (["\\/bfnrt] | UNICODE)
-   ;
+	: '\\' (["\\/bfnrt] | UNICODE)
+	;
 
 
 fragment UNICODE
-   : 'u' HEX HEX HEX HEX
-   ;
-
+	: 'u' HEX HEX HEX HEX
+	;
 
 fragment HEX
-   : [0-9a-fA-F]
-   ;
-
+	: [0-9a-fA-F]
+	;
 
 fragment SAFECODEPOINT
-   : ~ ["\\\u0000-\u001F]
-   ;
+	: ~ ["\\\u0000-\u001F]
+	;
 
 
 NUMBER
-   : '-'? INT ('.' [0-9] +)? EXP?
-   ;
+	: '-'? INT ('.' [0-9] +)? EXP?
+	;
 
 
 fragment INT
-   : '0' | [1-9] [0-9]*
-   ;
+	: '0' | [1-9] [0-9]*
+	;
 
 // no leading zeros
 
 fragment EXP
-   : [Ee] [+\-]? INT
-   ;
+	: [Ee] [+\-]? INT
+	;
 
 // \- since - means "range" inside [...]
 
@@ -115,16 +122,17 @@ IDENTIFIER
 	:         Letter LetterOrDigit*;
 
 fragment LetterOrDigit
-    : Letter
-    | [0-9]
-    ;
+	: Letter
+	| [0-9]
+	;
+
 fragment Letter
-    : [a-zA-Z] // these are the "java letters" below 0x7F
+	: [a-zA-Z] // these are the "java letters" below 0x7F
 //  | ~[\u0000-\u007F\uD800-\uDBFF] // covers all characters above 0x7F which are not a surrogate
 //  | [\uD800-\uDBFF] [\uDC00-\uDFFF] // covers UTF-16 surrogate pairs encodings for U+10000 to U+10FFFF
-    ;
+	;
 // section end
 
 WS
-   : [ \t\n\r] + -> skip
-   ;
+	: [ \t\n\r] + -> skip
+	;

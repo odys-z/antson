@@ -76,6 +76,18 @@ public class JSONBaseListener implements JSONListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterPropname(JSONParser.PropnameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPropname(JSONParser.PropnameContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterArray(JSONParser.ArrayContext ctx) { }
 	/**
 	 * {@inheritDoc}

@@ -60,7 +60,7 @@ public class Anlistner extends JSONBaseListener {
 		@Override
 		public void enterPair(PairContext ctx) {
 			// field name
-			String fd = ctx.STRING().getText();
+			String fd = ctx.propname().getText();
 			Utils.logi(fd);
 			
 			Anlistner vl = new Anlistner();

@@ -58,6 +58,16 @@ public interface JSONListener extends ParseTreeListener {
 	 */
 	void exitPair(JSONParser.PairContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link JSONParser#propname}.
+	 * @param ctx the parse tree
+	 */
+	void enterPropname(JSONParser.PropnameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JSONParser#propname}.
+	 * @param ctx the parse tree
+	 */
+	void exitPropname(JSONParser.PropnameContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link JSONParser#array}.
 	 * @param ctx the parse tree
 	 */
