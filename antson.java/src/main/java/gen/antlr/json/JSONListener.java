@@ -18,6 +18,16 @@ public interface JSONListener extends ParseTreeListener {
 	 */
 	void exitJson(JSONParser.JsonContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link JSONParser#envelope}.
+	 * @param ctx the parse tree
+	 */
+	void enterEnvelope(JSONParser.EnvelopeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JSONParser#envelope}.
+	 * @param ctx the parse tree
+	 */
+	void exitEnvelope(JSONParser.EnvelopeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link JSONParser#obj}.
 	 * @param ctx the parse tree
 	 */

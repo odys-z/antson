@@ -18,8 +18,8 @@ class AnsonTest {
 
 	@Test
 	void testFromJson() throws IllegalArgumentException, ReflectiveOperationException {
-		Anson anson = new Anson().fromJson("{type:io.odysz.anson.Anson, seq: \"1\"}");
-		assertEquals("1", anson.seq);
+		AnsT1 anson = (AnsT1) Anson.fromJson("{type:io.odysz.anson.AnsT1, seq: 1, ver: \"v0.1\", m: {\"name\": \"x\"}}");
+		assertEquals(1, anson.seq);
 	}
 
 }

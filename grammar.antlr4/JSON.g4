@@ -3,7 +3,7 @@
  *
  * Taken from "The Definitive ANTLR 4 Reference" by Terence Parr
  *
- * java -jar /home/ody/d/ubuntu/antlr4/antlr-4.7.1-complete.jar JSON.g4 -package gen.antlr.json
+ * java -jar ~/antlr4/antlr-4.7.1-complete.jar JSON.g4 -package gen.antlr.json
  */
 
 // Derived from http://json.org
@@ -19,14 +19,22 @@ grammar JSON;
 //    ;
 
 
+// ody:
+// Type must presented in evelope
+// json
+// 	: value
+// 	;
 json
-	: value
+	: (envelope)+
+	;
+
+envelope // top obj
+	: '{' type_pair (',' pair)* '}'
 	;
 
 obj
-	// ody  : '{' pair (',' pair)* '}'
-	: '{' type_pair (',' pair)* '}'
-	// | '{' '}' This is a block separator
+	: '{' pair (',' pair)* '}'
+	| '{' '}'
 	;
 
 // section: type extension

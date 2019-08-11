@@ -20,6 +20,8 @@ import io.odysz.common.Utils;
 public class Anson {
 	private static final int bufLength = 64;
 
+	private String test;
+
 	protected String ver;
 	protected int seq;
 
@@ -136,16 +138,15 @@ public class Anson {
 	 * @throws IllegalArgumentException
 	 * @throws ReflectiveOperationException
 	 */
-	protected Anson fromJson(String json)
+	public static Anson fromJson(String json)
 			throws IllegalArgumentException, ReflectiveOperationException {
 //		Field flist[] = this.getClass().getDeclaredFields();
 //		Class<?> parentCls = getClass().getDeclaringClass();
 		
-		parse(json, this);
-		return this;
+		return parse(json);
 	}
 	
-	public static void parse(String json, Object obj)
+	public static Anson parse(String json)
 			throws IllegalArgumentException, IllegalAccessException {
 //		for (Field f : flist) {
 //			f.setAccessible(true);
@@ -162,7 +163,8 @@ public class Anson {
 		JSONParser parser = new JSONParser(tokens);
 		JsonContext ctx = parser.json();
 		ParseTreeWalker walker = new ParseTreeWalker();
-		JSONListener lstner = new JSONAnsonListener();
+		JSONAnsonListener lstner = new JSONAnsonListener();
 		walker.walk(lstner, ctx);
+		return lstner.parsed();
 	}
 }
