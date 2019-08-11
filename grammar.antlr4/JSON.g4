@@ -25,7 +25,7 @@ grammar JSON;
 // 	: value
 // 	;
 json
-	: (envelope)+
+	: envelope (',' envelope)*
 	;
 
 envelope // top obj

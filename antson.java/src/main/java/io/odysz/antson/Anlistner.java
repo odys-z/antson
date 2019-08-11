@@ -124,9 +124,9 @@ public class Anlistner extends JSONBaseListener {
 
 	@Override
 	public void enterJson(JsonContext ctx) {
-		ValueContext vc = ctx.value();
-		vc.enterRule(this);
-		super.enterJson(ctx);
+//		ValueContext vc = ctx.value();
+//		vc.enterRule(this);
+//		super.enterJson(ctx);
 	}
 
 //	@Override
