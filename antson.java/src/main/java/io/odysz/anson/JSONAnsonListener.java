@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import gen.antlr.json.JSONBaseListener;
 import gen.antlr.json.JSONListener;
+import gen.antlr.json.JSONParser.EnvelopeContext;
 import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
 import gen.antlr.json.JSONParser.Type_pairContext;
@@ -17,62 +18,106 @@ import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
 	/**Parsing objects stack<br>
-	 * Top = Current parsing object.<br>
+	 * Top = Current parsingVal object.<br>
 	 * Currently all object must be an Anson object. */
-	ArrayList<Anson> elems;
+	// ArrayList<Anson> elems;
+	private AbstractCollection<?> collection;
 
 	HashMap<String, Field> fmap;
 
-	private Anson vOnExit;
+	private Anson enclosing;
 
-	private AbstractCollection collection; 
+	private ArrayList<Object[]> stack;
+
+//	private Object parsingVal; 
+	private String parsingProp;
+
+	private String envetype; 
 	
-//	public JSONAnsonListener() {
-//		super();
-//		elems = new ArrayList<Anson>();
-//	}
-
 	@Override
 	public void exitObj(ObjContext ctx) {
-		// ParseTree f = ctx.getChild(0);
-		// f.getText();
-		
-		
 		// All object must an Anson object
-		 vOnExit = elems.remove(elems.size() - 1);
+		// enclosing = elems.remove(elems.size() - 1);
+//		try {
+//			Anson parsingVal = enclosing;
+//			Field f = fmap.get(parsingProp);
+//			f.set(enclosing, parsingVal);
+			pop();
+//		} catch (IllegalArgumentException e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+	@Override
+	public void enterObj(ObjContext ctx) {
+		try {
+			if (fmap == null || !fmap.containsKey(parsingProp))
+				throw new AnsonException("internal", "Obj type not found. property: %s", parsingProp);
+			push(fmap.get(parsingProp).getType());
+		} catch (SecurityException | ReflectiveOperationException | AnsonException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Anson parsed() {
-		return vOnExit;
+		return enclosing;
 	}
 
-
-	/**Semantics of entering a type pair is found and parsing an Anson object.<br>
+	@Override
+	public void enterEnvelope(EnvelopeContext ctx) {
+		stack = new ArrayList<Object[]>();
+		envetype = null;
+		super.enterEnvelope(ctx);
+	}
+	
+	/**Semantics of entering a type pair is found and parsingVal an Anson object.<br>
 	 * This is always happening on entering an object.
 	 * The logic opposite is exit object.
 	 * @see gen.antlr.json.JSONBaseListener#enterType_pair(gen.antlr.json.JSONParser.Type_pairContext)
 	 */
 	@Override
 	public void enterType_pair(Type_pairContext ctx) {
-		// Utils.logi("Type: %s", ctx.getChild(2).getText());
-		String className = ctx.getChild(2).getText();
+		if (envetype != null)
+			// ignore this type specification, keep consist with java type
+			return;
+
+		envetype = ctx.getChild(2).getText();
 		
 		try {
-			Class<?> clazz = Class.forName(className);
-			Constructor<?> ctor = clazz.getConstructor(new Class[0]);
-			if (elems == null)
-				elems = new ArrayList<Anson>();
-			elems.add((Anson) ctor.newInstance(new Object[0]));
-
-			if (fmap == null) {
-				fmap = new HashMap<String, Field>();
-				fmap = mergeFields(clazz, fmap);
-//				for (Field f : flist)
-//					fmap.put(f.getName(), f);
-			}
+			Class<?> clazz = Class.forName(envetype);
+//			Constructor<?> ctor = clazz.getConstructor(new Class[0]);
+//
+//			if (fmap == null) {
+//				fmap = new HashMap<String, Field>();
+//				fmap = mergeFields(clazz, fmap);
+//			}
+//			parsingVal =  ctor.newInstance(new Object[0]);
+			push(clazz);
 		} catch (ReflectiveOperationException | SecurityException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**Push parsingVal anson
+	 * @param clazz 
+	 * @param fmap
+	 * @param parsingVal
+	 * @throws SecurityException 
+	 * @throws ReflectionOperationException 
+	 */
+	private void push(Class<?> clazz) throws ReflectiveOperationException, SecurityException {
+		fmap = new HashMap<String, Field>();
+		fmap = mergeFields(clazz, fmap);
+		Constructor<?> ctor = clazz.getConstructor(new Class[0]);
+		enclosing =  (Anson) ctor.newInstance(new Object[0]);
+		stack.add(0, new Object[] {fmap, enclosing});
+	}
+
+	@SuppressWarnings("unchecked")
+	private void pop() {
+		Object[] top = stack.remove(0);
+		fmap = (HashMap<String, Field>) top[0];
+		enclosing = (Anson) top[1];
 	}
 
 	private static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
@@ -93,17 +138,14 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return fmap;
 	}
 
+
 	@Override
 	public void enterPair(PairContext ctx) {
 		super.enterPair(ctx);
-
 		// create a container for Collection
 		try {
-			String fn = ctx.getChild(0).getText();
-			Field f = fmap.get(fn);
-			if (f == null)
-				throw new AnsonException("internal", "Field not found: %s", fn);
-			Class<?> ft = f.getType();
+			parsingProp = ctx.getChild(0).getText();
+			Class<?> ft = getType(parsingProp);
 			if (ft.isAssignableFrom(AbstractCollection.class)){
 				Constructor<?> ctor = ft.getConstructor(String.class);
 				collection = (AbstractCollection<?>) ctor.newInstance(new Object[0]);
@@ -111,6 +153,22 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		} catch (ReflectiveOperationException | AnsonException e) {
 			e.printStackTrace();
 		}
+
+	}
+
+	/**Get prop's type from stack's top element.
+	 * @param prop
+	 * @return type
+	 * @throws AnsonException
+	 */
+	private Class<?> getType(String prop) throws AnsonException {
+		Object[] top = stack.get(0);
+		@SuppressWarnings("unchecked")
+		Field f = ((HashMap<String,Field>) top[0]).get(prop);
+		if (f == null)
+			throw new AnsonException("internal", "Field not found: %s", prop);
+		Class<?> ft = f.getType();
+		return ft;
 	}
 
 	public void exitPair(PairContext ctx) {
@@ -119,7 +177,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		Utils.logi("Property-value: %s", ctx.getChild(2).getText());
 
 		try {
-			Anson enclosing = elems.get(elems.size() - 1);
 			String fn = ctx.getChild(0).getText();
 			Field f = fmap.get(fn);
 			if (f == null) throw new AnsonException("internal", "Field not found: %s", fn);
@@ -151,7 +208,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
-	private void setPrimitive(Anson obj, Field f, String v) throws RuntimeException, ReflectiveOperationException, AnsonException {
+	private void setPrimitive(Anson obj, Field f, String v)
+			throws RuntimeException, ReflectiveOperationException, AnsonException {
 		if (f.getType() == int.class || f.getType() == Integer.class)
 			f.set(obj, Integer.valueOf(v));
 		else if (f.getType() == float.class || f.getType() == Float.class)
