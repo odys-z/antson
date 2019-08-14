@@ -7,8 +7,15 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import gen.antlr.json.JSONBaseListener;
+import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONListener;
+import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.EnvelopeContext;
 import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
@@ -17,15 +24,49 @@ import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
+	/**Merge clazz's fields up to the Anson ancestor.
+	 * @param clazz
+	 * @param fmap
+	 * @return
+	 */
+	private static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
+		Field flist[] = clazz.getDeclaredFields();
+		for (Field f : flist) {
+			int mod = f.getModifiers();
+			if (Modifier.isPrivate(mod) || Modifier.isAbstract(mod) || Modifier.isFinal(mod) || Modifier.isStatic(mod))
+				continue;
+			// Overriden
+			if (fmap.containsKey(f.getName()))
+				continue;
+			fmap.put(f.getName(), f);
+		}
+
+		Class<?> pclz = clazz.getSuperclass();
+		if (Anson.class.isAssignableFrom(pclz))
+			fmap = mergeFields(pclz, fmap);
+		return fmap;
+	}
+
+	public static Anson fromObj(String obj) {
+		JSONLexer lexer = new JSONLexer(CharStreams.fromString(obj));
+
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		JSONParser parser = new JSONParser(tokens);
+		ObjContext ctx = parser.obj();
+		ParseTreeWalker walker = new ParseTreeWalker();
+		JSONAnsonListener lstner = new JSONAnsonListener();
+		walker.walk(lstner, ctx);
+		return lstner.parsed();
+	}
+
 	/**Parsing objects stack<br>
 	 * Top = Current parsingVal object.<br>
 	 * Currently all object must be an Anson object. */
 	// ArrayList<Anson> elems;
 	private AbstractCollection<?> collection;
 
-	HashMap<String, Field> fmap;
-
-	private Anson enclosing;
+	// HashMap<String, Field> fmap;
+	// private Anson enclosing;
 
 	private ArrayList<Object[]> stack;
 
@@ -51,6 +92,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	@Override
 	public void enterObj(ObjContext ctx) {
 		try {
+			@SuppressWarnings("unchecked")
+			HashMap<String, Field> fmap = stack.size() > 0 ?
+					(HashMap<String, Field>)stack.get(0)[0] : null;
 			if (fmap == null || !fmap.containsKey(parsingProp))
 				throw new AnsonException("internal", "Obj type not found. property: %s", parsingProp);
 			push(fmap.get(parsingProp).getType());
@@ -60,7 +104,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	}
 
 	public Anson parsed() {
-		return enclosing;
+		// return enclosing;
+		return (Anson) stack.get(0)[1];
 	}
 
 	@Override
@@ -106,45 +151,26 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @throws ReflectionOperationException 
 	 */
 	private void push(Class<?> clazz) throws ReflectiveOperationException, SecurityException {
-		fmap = new HashMap<String, Field>();
+		HashMap<String, Field> fmap = new HashMap<String, Field>();
 		fmap = mergeFields(clazz, fmap);
 		Constructor<?> ctor = clazz.getConstructor(new Class[0]);
-		enclosing =  (Anson) ctor.newInstance(new Object[0]);
+		Anson enclosing =  (Anson) ctor.newInstance(new Object[0]);
 		stack.add(0, new Object[] {fmap, enclosing});
 	}
 
-	@SuppressWarnings("unchecked")
 	private void pop() {
+		@SuppressWarnings("unused")
 		Object[] top = stack.remove(0);
-		fmap = (HashMap<String, Field>) top[0];
-		enclosing = (Anson) top[1];
+		// fmap = (HashMap<String, Field>) top[0];
+		// enclosing = (Anson) top[1];
 	}
-
-	private static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
-		Field flist[] = clazz.getDeclaredFields();
-		for (Field f : flist) {
-			int mod = f.getModifiers();
-			if (Modifier.isPrivate(mod) || Modifier.isAbstract(mod) || Modifier.isFinal(mod) || Modifier.isStatic(mod))
-				continue;
-			// Overriden
-			if (fmap.containsKey(f.getName()))
-				continue;
-			fmap.put(f.getName(), f);
-		}
-
-		Class<?> pclz = clazz.getSuperclass();
-		if (Anson.class.isAssignableFrom(pclz))
-			fmap = mergeFields(pclz, fmap);
-		return fmap;
-	}
-
 
 	@Override
 	public void enterPair(PairContext ctx) {
 		super.enterPair(ctx);
 		// create a container for Collection
 		try {
-			parsingProp = ctx.getChild(0).getText();
+			parsingProp = getProp(ctx); //.getChild(0).getText();
 			Class<?> ft = getType(parsingProp);
 			if (ft.isAssignableFrom(AbstractCollection.class)){
 				Constructor<?> ctor = ft.getConstructor(String.class);
@@ -154,6 +180,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			e.printStackTrace();
 		}
 
+	}
+
+	private static String getProp(PairContext ctx) {
+		TerminalNode p = ctx.propname().IDENTIFIER();
+		return p == null ?
+				ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
+				: p.getText();
 	}
 
 	/**Get prop's type from stack's top element.
@@ -177,9 +210,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		Utils.logi("Property-value: %s", ctx.getChild(2).getText());
 
 		try {
-			String fn = ctx.getChild(0).getText();
-			Field f = fmap.get(fn);
-			if (f == null) throw new AnsonException("internal", "Field not found: %s", fn);
+			// String fn = ctx.getChild(0).getText();
+			String fn = getProp(ctx);
+			@SuppressWarnings("unchecked")
+			Field f = ((HashMap<String,Field>) stack.get(0)[0]).get(fn);
+			Anson enclosing = (Anson) stack.get(0)[1];
+			if (f == null)
+				throw new AnsonException("internal", "Field not found: %s", fn);
 			Class<?> ft = f.getType();
 			if (ft == String.class) {
 				String v = ctx.getChild(2).getText();
@@ -190,19 +227,20 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				String v = ctx.getChild(2).getText();
 				setPrimitive(enclosing, f, v);
 			}
-			else if (ft.isAssignableFrom(AbstractCollection.class)){
+			else if (AbstractCollection.class.isAssignableFrom(ft)){
 				f.set(enclosing, collection);
 			}
-			else if (ft.isAssignableFrom(Anson.class)){
-				String json = ctx.getChild(2).getText();
-				Anson v = Anson.fromJson(json);
+			else if (Anson.class.isAssignableFrom(ft)) {
+				String obj = ctx.getChild(2).getText();
+				Anson v = fromObj(obj);
 				f.set(enclosing, v);
 			}
-			else if (ft.isAssignableFrom(Object.class)){
+			else if (Object.class.isAssignableFrom(ft)){
 				Utils.warn("Unsupported type's value of %s deserialized as Java.Lang.String", fn);
 				String v = ctx.getChild(2).getText();
 				f.set(enclosing, v);
 			}
+			else throw new AnsonException("internal", "sholdn't happen");
 		} catch (ReflectiveOperationException | RuntimeException | AnsonException e) {
 			e.printStackTrace();
 		}
