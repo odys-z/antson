@@ -12,15 +12,12 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import gen.antlr.json.JSONLexer;
-import gen.antlr.json.JSONListener;
 import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.common.Utils;
 
 public class Anson {
 	private static final int bufLength = 64;
-
-	private String test;
 
 	protected String ver;
 	protected int seq;
