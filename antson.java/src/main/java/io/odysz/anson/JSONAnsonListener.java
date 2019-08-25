@@ -1,5 +1,6 @@
 package io.odysz.anson;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -221,18 +222,27 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
-	public void exitValue(ValueContext ctx) {
-		if (parsingArr != null) {
-			// TODO TO BE CONTINUED;
-			// TODO TO BE CONTINUED;
-			// TODO TO BE CONTINUED;
-			// TODO TO BE CONTINUED;
-			// TODO TO BE CONTINUED;
-			// TODO TO BE CONTINUED;
-		}
+	public void exitArray(ArrayContext ctx) {
+		// list2Array(parsingArrElemCls, parsingArr);
 	}
+
+	public static <C, T extends C> C[] toArray(Class<C> componentType, List<T> list) {
+	    @SuppressWarnings("unchecked")
+	    C[] array = (C[])Array.newInstance(componentType, list.size());
+	    return list.toArray(array);
+	}	
+
+	public static <T> T[] list2Array(Class<T[]> clazz, List<T> elements) {
+	    T[] array = clazz.cast(Array.newInstance(clazz.getComponentType(), elements.size()));
+	    return elements.toArray(array);
+	}
+//	@Override
+//	public void exitValue(ValueContext ctx) {
+//		if (parsingArr != null) {
+//		}
+//	}
 
 	@Override
 	public void exitPair(PairContext ctx) {
