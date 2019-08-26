@@ -18,6 +18,7 @@ import gen.antlr.json.JSONParser.EnvelopeContext;
 import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
 import gen.antlr.json.JSONParser.Type_pairContext;
+import gen.antlr.json.JSONParser.ValueContext;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
@@ -146,7 +147,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	}
 
 	private Object[] pop() {
-		@SuppressWarnings("unused")
 		Object[] top = stack.remove(0);
 		// fmap = (HashMap<String, Field>) top[0];
 		// enclosing = (Anson) top[1];
@@ -171,8 +171,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private static String getProp(PairContext ctx) {
 		TerminalNode p = ctx.propname().IDENTIFIER();
-		return p == null ?
-				ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
+		return p == null
+				? ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
 				: p.getText();
 	}
 
@@ -183,15 +183,26 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 */
 	private static String getStringVal(PairContext ctx) {
 		TerminalNode str = ctx.value().STRING();
+		String txt = ctx.value().getText();
+		return getStringVal(str, txt);
+	}
+
+	private static String getStringVal(ValueContext ctx) {
+		TerminalNode str = ctx.STRING();
+		String txt = ctx.getText();
+		return getStringVal(str, txt);
+	}
+
+	private static String getStringVal(TerminalNode str, String rawTxt) {
 		if (str == null) {
-				String s = ctx.value().getText();
+				// String s = ctx.value().getText();
 				try { 
-					if (LangExt.isblank(s))
+					if (LangExt.isblank(rawTxt))
 						return null;
-					else if ("null".equals(s))
+					else if ("null".equals(rawTxt))
 						return null;
 				} catch (Exception e) { }
-				return s;
+				return rawTxt;
 		}
 		else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
 	}
@@ -202,9 +213,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @throws AnsonException
 	 */
 	private Class<?> getType(String prop) throws AnsonException {
-		Object[] top = stack.get(0);
+		// Object[] top = stack.get(0);
 		@SuppressWarnings("unchecked")
-		Field f = ((HashMap<String,Field>) top[0]).get(prop);
+		Field f = ((HashMap<String,Field>) top(0)).get(prop);
 		if (f == null)
 			throw new AnsonException("internal", "Field not found: %s", prop);
 		Class<?> ft = f.getType();
@@ -223,26 +234,92 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void exitArray(ArrayContext ctx) {
 		// list2Array(parsingArrElemCls, parsingArr);
+		parsedVal = toPrimitiveArray(parsingArr,
+				 ((HashMap<String, Field>)stack.get(0)[0]).get(parsingProp).getType());	
+		//f.set(enclosing, parsedVal);
+		parsingArr = null;
 	}
 
-	public static <C, T extends C> C[] toArray(Class<C> componentType, List<T> list) {
-	    @SuppressWarnings("unchecked")
-	    C[] array = (C[])Array.newInstance(componentType, list.size());
-	    return list.toArray(array);
-	}	
+	/**https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
+	 * 
+	 * Unboxes a List in to a primitive array.
+	 *
+	 * @param  list      the List to convert to a primitive array
+	 * @param  arrayType the primitive array type to convert to
+	 * @param  <P>       the primitive array type to convert to
+	 * @return an array of P with the elements of the specified List
+	 * @throws NullPointerException
+	 *         if either of the arguments are null, or if any of the elements
+	 *         of the List are null
+	 * @throws IllegalArgumentException
+	 *         if the specified Class does not represent an array type, if
+	 *         the component type of the specified Class is not a primitive
+	 *         type, or if the elements of the specified List can not be
+	 *         stored in an array of type P
+	 */
+	private static <P> P toPrimitiveArray(List<?> list, Class<P> arrayType) {
+	    if (!arrayType.isArray()) {
+	        throw new IllegalArgumentException(arrayType.toString());
+	    }
+	    Class<?> primitiveType = arrayType.getComponentType();
+//	    if (!primitiveType.isPrimitive()) {
+//	        throw new IllegalArgumentException(primitiveType.toString());
+//	    }
 
-	public static <T> T[] list2Array(Class<T[]> clazz, List<T> elements) {
-	    T[] array = clazz.cast(Array.newInstance(clazz.getComponentType(), elements.size()));
-	    return elements.toArray(array);
+	    P array = arrayType.cast(Array.newInstance(primitiveType, list.size()));
+
+	    for (int i = 0; i < list.size(); i++) {
+	        Array.set(array, i, list.get(i));
+	    }
+
+	    return array;
 	}
-//	@Override
-//	public void exitValue(ValueContext ctx) {
-//		if (parsingArr != null) {
-//		}
-//	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void exitValue(ValueContext ctx) {
+		if (parsingArr != null) {
+			// FIXME E != String
+			// ((ArrayList<?>)parsingArr).add(parsedVal);
+			Field f = ((HashMap<String, Field>)top(0)).get(parsingProp);
+			Class<?> ft = f.getType().getComponentType();
+			String txt = ctx.getText();
+			if (ft == int.class || ft == Integer.class)
+				((List<Integer>)parsingArr).add(Integer.valueOf(getStringVal(ctx.NUMBER(), txt)));
+			else if (ft == float.class || ft == Float.class)
+				((List<Float>)parsingArr).add(Float.valueOf(getStringVal(ctx.NUMBER(), txt)));
+			else if (ft == double.class || ft == Double.class)
+				((List<Double>)parsingArr).add(Double.valueOf(getStringVal(ctx.NUMBER(), txt)));
+			else if (ft == long.class || ft == Long.class)
+				((List<Long>)parsingArr).add(Long.valueOf(getStringVal(ctx.NUMBER(), txt)));
+			else if (ft == short.class || ft == Short.class)
+				((List<Short>)parsingArr).add(Short.valueOf(getStringVal(ctx.NUMBER(), txt)));
+			else if (ft == byte.class || ft == Byte.class)
+				((List<Byte>)parsingArr).add(Byte.valueOf(getStringVal(ctx.NUMBER(), txt)));
+			else if (ft == String.class) {
+				((List<String>)parsingArr).add(getStringVal(ctx));
+			}
+			else if (Anson.class.isAssignableFrom(ft))
+				((List<Anson>)parsingArr).add((Anson) parsedVal);
+			else if (Object.class.isAssignableFrom(ft))
+				((List<Object>)parsingArr).add(parsedVal);
+			else
+				// what's else?
+				throw new NullPointerException(String.format("internal", "Unsupported array for type: %s (field %s)",
+						f.getType().getName(), f.getName()));
+
+			parsedVal = null;
+		}
+	}
+
+	private Object top(int ix) {
+		return stack.get(0)[ix];
+	}
+
 
 	@Override
 	public void exitPair(PairContext ctx) {
@@ -270,11 +347,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (ft.isArray()) {
 				// Class<?> cls = ft.getComponentType();
-				if (parsingArr != null) {
-					Object[] arr = parsingArr.toArray();
-					f.set(enclosing, arr);
-					parsingArr = null;
-				}
+//				if (parsingArr != null) {
+//					Object[] arr = parsingArr.toArray();
+//					f.set(enclosing, arr);
+//					parsingArr = null;
+//				}
+				f.set(enclosing, parsedVal);
 			}
 			else if (AbstractCollection.class.isAssignableFrom(ft)){
 				f.set(enclosing, collection);
@@ -293,7 +371,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
-	private void setPrimitive(Anson obj, Field f, String v)
+	private static void setPrimitive(Anson obj, Field f, String v)
 			throws RuntimeException, ReflectiveOperationException, AnsonException {
 		if (f.getType() == int.class || f.getType() == Integer.class)
 			f.set(obj, Integer.valueOf(v));
