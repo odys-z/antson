@@ -18,7 +18,6 @@ import gen.antlr.json.JSONParser.EnvelopeContext;
 import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
 import gen.antlr.json.JSONParser.Type_pairContext;
-import gen.antlr.json.JSONParser.ValueContext;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
@@ -52,6 +51,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	protected AbstractCollection<?> collection;
 
 	/**Parsing objects stack<br>
+	 * Element: [0]: field-map, [1]: enclosing {@link Anson} object<br>
 	 * Top = Current parsingVal object.<br>
 	 * Currently all object must be an Anson object. */
 	private ArrayList<Object[]> stack;
@@ -59,7 +59,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	protected Object parsedVal; 
 	protected String parsingProp;
 
-	protected String envetype; 
+	/**Envelope Type Name */
+ 	protected String envetype; 
 	
 	@Override
 	public void exitObj(ObjContext ctx) {
@@ -91,7 +92,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	}
 
 	public Anson parsed() {
-		// return enclosing;
 		return (Anson) stack.get(0)[1];
 	}
 
