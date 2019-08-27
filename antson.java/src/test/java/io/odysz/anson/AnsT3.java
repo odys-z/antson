@@ -10,4 +10,6 @@ public class AnsT3 extends Anson {
 
 	// FIXME what about [0 Anson1, 1 Anson2] ?
 	Anson[] m;
+	
+	public AnsT3() {}
 }

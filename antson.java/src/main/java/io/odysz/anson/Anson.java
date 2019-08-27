@@ -21,6 +21,8 @@ public class Anson {
 
 	protected String ver;
 	protected int seq;
+	
+	public Anson() {}
 
 	protected Anson toBlock(OutputStream stream)
 			throws IllegalArgumentException, ReflectiveOperationException, IOException {
@@ -162,6 +164,6 @@ public class Anson {
 		ParseTreeWalker walker = new ParseTreeWalker();
 		JSONAnsonListener lstner = new JSONAnsonListener();
 		walker.walk(lstner, ctx);
-		return lstner.parsed();
+		return lstner.parsedEnvelope();
 	}
 }

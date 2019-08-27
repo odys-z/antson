@@ -19,19 +19,18 @@ import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
 import gen.antlr.json.JSONParser.Type_pairContext;
 import gen.antlr.json.JSONParser.ValueContext;
-import io.odysz.anson.JSONAnsonListener.ParsingCtx;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
 	public class ParsingCtx {
-		protected String parsingProp;
-
+		// primitive, list and string structure helpers
 		protected List<?> parsingArr;
 		protected Class<?> parsingArrElemCls; 
 		protected AbstractCollection<?> collection;
 
+		protected String parsingProp;
 		protected Object parsedVal;
 
 		private Anson enclosing;
@@ -95,6 +94,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 //			f.set(enclosing, parsingVal);
 
 			ParsingCtx top = pop();
+			top().parsedVal = top.enclosing;
+			// top.enclosing = null;
 			// parsedVal = top[1];
 
 //		} catch (IllegalArgumentException e) {
@@ -105,7 +106,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	@Override
 	public void enterObj(ObjContext ctx) {
 		try {
-			@SuppressWarnings("unchecked")
 			HashMap<String, Field> fmap = stack.size() > 0 ?
 					// (HashMap<String, Field>)stack.get(0)[0] : null;
 					(HashMap<String, Field>)top().fmap : null;
@@ -118,8 +118,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
-	public Anson parsed() {
-		return (Anson) stack.get(0).parsedVal;
+	public Anson parsedEnvelope() {
+		return (Anson) stack.get(0).enclosing;
 	}
 
 	@Override
@@ -127,6 +127,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		stack = new ArrayList<ParsingCtx>();
 		envetype = null;
 		super.enterEnvelope(ctx);
+	}
+	
+	@Override
+	public void exitEnvelope(EnvelopeContext ctx) {
+		super.exitEnvelope(ctx);
+		// pop();
 	}
 	
 	/**Semantics of entering a type pair is found and parsingVal an Anson object.<br>
@@ -167,7 +173,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	private void push(Class<?> clazz) throws ReflectiveOperationException, SecurityException {
 		HashMap<String, Field> fmap = new HashMap<String, Field>();
 		fmap = mergeFields(clazz, fmap);
-		Constructor<?> ctor = clazz.getConstructor(new Class[0]);
+		Constructor<?> ctor = clazz.getConstructor();
 		Anson enclosing =  (Anson) ctor.newInstance(new Object[0]);
 		// stack.add(0, new Object[] {fmap, enclosing});
 		stack.add(0, new ParsingCtx(fmap, enclosing));
@@ -252,24 +258,24 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	@Override
 	public void enterArray(ArrayContext ctx) {
 		try {
-			parsingArr = (ArrayList<?>)Class.forName("java.util.ArrayList").newInstance();
-			@SuppressWarnings("unchecked")
+			ParsingCtx top = top();
+			top.parsingArr = (ArrayList<?>)Class.forName("java.util.ArrayList").newInstance();
 			// Field f = ((HashMap<String,Field>) stack.get(0)[0]).get(parsingProp);
-			Field f = ((HashMap<String,Field>) top(0)).get(parsingProp);
-			parsingArrElemCls = f.getType().getComponentType();
+			Field f = top().fmap.get(top.parsingProp);
+			top.parsingArrElemCls = f.getType().getComponentType();
 		} catch (ReflectiveOperationException e) {
 			e.printStackTrace();
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void exitArray(ArrayContext ctx) {
 		// list2Array(parsingArrElemCls, parsingArr);
-		parsedVal = toPrimitiveArray(parsingArr,
-				 ((HashMap<String, Field>)stack.get(0)[0]).get(parsingProp).getType());	
+		ParsingCtx top = top();
+		top.parsedVal = toPrimitiveArray(top.parsingArr,
+				 top.fmap.get(top.parsingProp).getType());	
 		//f.set(enclosing, parsedVal);
-		parsingArr = null;
+		top.parsingArr = null;
 	}
 
 	/**https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
@@ -310,36 +316,38 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void exitValue(ValueContext ctx) {
-		if (parsingArr != null) {
+		ParsingCtx top = top();
+		if (top != null && top.parsingArr != null) {
 			// FIXME E != String
 			// ((ArrayList<?>)parsingArr).add(parsedVal);
-			Field f = ((HashMap<String, Field>)top(0)).get(parsingProp);
+			Field f = top().fmap.get(top.parsingProp);
 			Class<?> ft = f.getType().getComponentType();
 			String txt = ctx.getText();
+			List<?> arr = top.parsingArr;
 			if (ft == int.class || ft == Integer.class)
-				((List<Integer>)parsingArr).add(Integer.valueOf(getStringVal(ctx.NUMBER(), txt)));
+				((List<Integer>)arr).add(Integer.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == float.class || ft == Float.class)
-				((List<Float>)parsingArr).add(Float.valueOf(getStringVal(ctx.NUMBER(), txt)));
+				((List<Float>)arr).add(Float.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == double.class || ft == Double.class)
-				((List<Double>)parsingArr).add(Double.valueOf(getStringVal(ctx.NUMBER(), txt)));
+				((List<Double>)arr).add(Double.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == long.class || ft == Long.class)
-				((List<Long>)parsingArr).add(Long.valueOf(getStringVal(ctx.NUMBER(), txt)));
+				((List<Long>)arr).add(Long.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == short.class || ft == Short.class)
-				((List<Short>)parsingArr).add(Short.valueOf(getStringVal(ctx.NUMBER(), txt)));
+				((List<Short>)arr).add(Short.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == byte.class || ft == Byte.class)
-				((List<Byte>)parsingArr).add(Byte.valueOf(getStringVal(ctx.NUMBER(), txt)));
+				((List<Byte>)arr).add(Byte.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == String.class) 
-				((List<String>)parsingArr).add(getStringVal(ctx));
+				((List<String>)arr).add(getStringVal(ctx));
 			else if (Anson.class.isAssignableFrom(ft))
-				((List<Anson>)parsingArr).add((Anson) parsedVal);
+				((List<Anson>)arr).add((Anson) top.parsedVal);
 			else if (Object.class.isAssignableFrom(ft))
-				((List<Object>)parsingArr).add(parsedVal);
+				((List<Object>)arr).add(top.parsedVal);
 			else
 				// what's else?
 				throw new NullPointerException(String.format("internal", "Unsupported array for type: %s (field %s)",
 						f.getType().getName(), f.getName()));
 
-			parsedVal = null;
+			top.parsedVal = null;
 		}
 	}
 
@@ -351,9 +359,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 		try {
 			String fn = getProp(ctx);
-			@SuppressWarnings("unchecked")
-			Field f = ((HashMap<String,Field>) stack.get(0)[0]).get(fn);
-			Anson enclosing = (Anson) stack.get(0)[1];
+			// Field f = ((HashMap<String,Field>) stack.get(0)[0]).get(fn);
+			Field f = top().fmap.get(fn);
+			Anson enclosing = top().enclosing;
 			if (f == null)
 				throw new AnsonException("internal", "Field not found: %s", fn);
 			Class<?> ft = f.getType();
@@ -374,13 +382,15 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 //					f.set(enclosing, arr);
 //					parsingArr = null;
 //				}
-				f.set(enclosing, parsedVal);
+				f.set(enclosing, top().parsedVal);
 			}
 			else if (AbstractCollection.class.isAssignableFrom(ft)){
-				f.set(enclosing, collection);
+				f.set(enclosing, top().collection);
 			}
 			else if (Anson.class.isAssignableFrom(ft)) {
-				f.set(enclosing, parsedVal);
+				// ParsingCtx top = pop(); // pushed by enterObject()
+				// Anson enclosing0 = top().enclosing;
+				f.set(enclosing, top().parsedVal);
 			}
 			else if (Object.class.isAssignableFrom(ft)){
 				Utils.warn("Unsupported type's value of %s deserialized as Java.Lang.String", fn);
