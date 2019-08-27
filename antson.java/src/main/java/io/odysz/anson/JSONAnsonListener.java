@@ -19,11 +19,30 @@ import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
 import gen.antlr.json.JSONParser.Type_pairContext;
 import gen.antlr.json.JSONParser.ValueContext;
+import io.odysz.anson.JSONAnsonListener.ParsingCtx;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
+	public class ParsingCtx {
+		protected String parsingProp;
+
+		protected List<?> parsingArr;
+		protected Class<?> parsingArrElemCls; 
+		protected AbstractCollection<?> collection;
+
+		protected Object parsedVal;
+
+		private Anson enclosing;
+		private HashMap<String, Field> fmap; 
+
+		public ParsingCtx(HashMap<String, Field> fmap, Anson enclosing) {
+			this.fmap = fmap;
+			this.enclosing = enclosing;
+		}
+	}
+
 	/**Merge clazz's fields up to the Anson ancestor.
 	 * @param clazz
 	 * @param fmap
@@ -47,18 +66,21 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return fmap;
 	}
 
-	protected List<?> parsingArr;
-	protected Class<?> parsingArrElemCls; 
-	protected AbstractCollection<?> collection;
+	// protected List<?> parsingArr;
+	// protected Class<?> parsingArrElemCls; 
+	// protected AbstractCollection<?> collection;
 
 	/**Parsing objects stack<br>
 	 * Element: [0]: field-map, [1]: enclosing {@link Anson} object<br>
 	 * Top = Current parsingVal object.<br>
 	 * Currently all object must be an Anson object. */
-	private ArrayList<Object[]> stack;
+	// private ArrayList<Object[]> stack;
+	private ArrayList<ParsingCtx> stack;
 
-	protected Object parsedVal; 
-	protected String parsingProp;
+	private ParsingCtx top() { return stack.get(0); }
+
+	// protected Object parsedVal; 
+	// protected String parsingProp;
 
 	/**Envelope Type Name */
  	protected String envetype; 
@@ -71,8 +93,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 //			Anson parsingVal = enclosing;
 //			Field f = fmap.get(parsingProp);
 //			f.set(enclosing, parsingVal);
-			Object[] top = pop();
-			parsedVal = top[1];
+
+			ParsingCtx top = pop();
+			// parsedVal = top[1];
+
 //		} catch (IllegalArgumentException e) {
 //			e.printStackTrace();
 //		}
@@ -83,22 +107,24 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		try {
 			@SuppressWarnings("unchecked")
 			HashMap<String, Field> fmap = stack.size() > 0 ?
-					(HashMap<String, Field>)stack.get(0)[0] : null;
-			if (fmap == null || !fmap.containsKey(parsingProp))
-				throw new AnsonException("internal", "Obj type not found. property: %s", parsingProp);
-			push(fmap.get(parsingProp).getType());
+					// (HashMap<String, Field>)stack.get(0)[0] : null;
+					(HashMap<String, Field>)top().fmap : null;
+			ParsingCtx top = top();
+			if (fmap == null || !fmap.containsKey(top .parsingProp))
+				throw new AnsonException("internal", "Obj type not found. property: %s", top.parsingProp);
+			push(fmap.get(top.parsingProp).getType());
 		} catch (SecurityException | ReflectiveOperationException | AnsonException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public Anson parsed() {
-		return (Anson) stack.get(0)[1];
+		return (Anson) stack.get(0).parsedVal;
 	}
 
 	@Override
 	public void enterEnvelope(EnvelopeContext ctx) {
-		stack = new ArrayList<Object[]>();
+		stack = new ArrayList<ParsingCtx>();
 		envetype = null;
 		super.enterEnvelope(ctx);
 	}
@@ -143,11 +169,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		fmap = mergeFields(clazz, fmap);
 		Constructor<?> ctor = clazz.getConstructor(new Class[0]);
 		Anson enclosing =  (Anson) ctor.newInstance(new Object[0]);
-		stack.add(0, new Object[] {fmap, enclosing});
+		// stack.add(0, new Object[] {fmap, enclosing});
+		stack.add(0, new ParsingCtx(fmap, enclosing));
 	}
 
-	private Object[] pop() {
-		Object[] top = stack.remove(0);
+	private ParsingCtx pop() {
+		ParsingCtx top = stack.remove(0);
 		// fmap = (HashMap<String, Field>) top[0];
 		// enclosing = (Anson) top[1];
 		return top;
@@ -158,11 +185,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		super.enterPair(ctx);
 		// create a container for Collection
 		try {
-			parsingProp = getProp(ctx); //.getChild(0).getText();
-			Class<?> ft = getType(parsingProp);
+			ParsingCtx top = top();
+			top.parsingProp = getProp(ctx); //.getChild(0).getText();
+			Class<?> ft = getType(top.parsingProp);
 			if (ft.isAssignableFrom(AbstractCollection.class)){
 				Constructor<?> ctor = ft.getConstructor(String.class);
-				collection = (AbstractCollection<?>) ctor.newInstance(new Object[0]);
+				top.collection = (AbstractCollection<?>) ctor.newInstance(new Object[0]);
 			}
 		} catch (ReflectiveOperationException | AnsonException e) {
 			e.printStackTrace();
@@ -214,8 +242,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 */
 	private Class<?> getType(String prop) throws AnsonException {
 		// Object[] top = stack.get(0);
-		@SuppressWarnings("unchecked")
-		Field f = ((HashMap<String,Field>) top(0)).get(prop);
+		Field f = top().fmap.get(prop);
 		if (f == null)
 			throw new AnsonException("internal", "Field not found: %s", prop);
 		Class<?> ft = f.getType();
@@ -227,7 +254,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		try {
 			parsingArr = (ArrayList<?>)Class.forName("java.util.ArrayList").newInstance();
 			@SuppressWarnings("unchecked")
-			Field f = ((HashMap<String,Field>) stack.get(0)[0]).get(parsingProp);
+			// Field f = ((HashMap<String,Field>) stack.get(0)[0]).get(parsingProp);
+			Field f = ((HashMap<String,Field>) top(0)).get(parsingProp);
 			parsingArrElemCls = f.getType().getComponentType();
 		} catch (ReflectiveOperationException e) {
 			e.printStackTrace();
@@ -302,7 +330,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				((List<Byte>)parsingArr).add(Byte.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == String.class) 
 				((List<String>)parsingArr).add(getStringVal(ctx));
-			
 			else if (Anson.class.isAssignableFrom(ft))
 				((List<Anson>)parsingArr).add((Anson) parsedVal);
 			else if (Object.class.isAssignableFrom(ft))
@@ -315,11 +342,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			parsedVal = null;
 		}
 	}
-
-	private Object top(int ix) {
-		return stack.get(0)[ix];
-	}
-
 
 	@Override
 	public void exitPair(PairContext ctx) {
