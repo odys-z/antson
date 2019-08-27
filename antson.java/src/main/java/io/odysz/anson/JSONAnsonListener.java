@@ -300,9 +300,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				((List<Short>)parsingArr).add(Short.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == byte.class || ft == Byte.class)
 				((List<Byte>)parsingArr).add(Byte.valueOf(getStringVal(ctx.NUMBER(), txt)));
-			else if (ft == String.class) {
+			else if (ft == String.class) 
 				((List<String>)parsingArr).add(getStringVal(ctx));
-			}
+			
 			else if (Anson.class.isAssignableFrom(ft))
 				((List<Anson>)parsingArr).add((Anson) parsedVal);
 			else if (Object.class.isAssignableFrom(ft))

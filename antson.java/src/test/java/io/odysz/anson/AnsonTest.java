@@ -28,7 +28,7 @@ class AnsonTest {
 		assertEquals("e2", anson2.m[1]);
 
 		// AnsT3.m is typeof AnsT2
-		AnsT3 anson3 = (AnsT3) Anson.fromJson("{type:io.odysz.anson.AnsT2, seq: 3, ver: \"v0.1\", m: [" +
+		AnsT3 anson3 = (AnsT3) Anson.fromJson("{type:io.odysz.anson.AnsT3, seq: 3, ver: \"v0.1\", m: [" +
 				"{seq: 4, ver: \"v0.1\"}, {seq: 5, ver: \"v0.1\"}]}");
 		assertEquals(4, anson3.m[0].seq);
 	}
