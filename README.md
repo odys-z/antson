@@ -63,7 +63,7 @@ So I'v added a new type of value (envelope) to value's declaration, like this:
 	: STRING
 	| NUMBER
 	| obj		// all array's obj value can't parsed as Anson, taken as HashMap
-	| envelope
+	| envelope	// the java equivalent is io.odysz.anson.Anson
 	| array
 	| 'true'
 	| 'false'
@@ -98,3 +98,5 @@ can be parsed into java type of
     class Outter {
         Inner[] arr; // element's can be subclasses
     }
+
+See test case [AnsonTest#testFromJson_asonArr](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
