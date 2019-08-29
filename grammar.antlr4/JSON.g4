@@ -74,7 +74,8 @@ array
 value
 	: STRING
 	| NUMBER
-	| obj
+	| obj		// all array's obj value can't parsed as Anson, taken as HashMap - TODO doc: known issue
+	| envelope
 	| array
 	| 'true'
 	| 'false'

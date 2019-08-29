@@ -8,6 +8,8 @@ import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -65,42 +67,21 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return fmap;
 	}
 
-	// protected List<?> parsingArr;
-	// protected Class<?> parsingArrElemCls; 
-	// protected AbstractCollection<?> collection;
-
 	/**Parsing objects stack<br>
 	 * Element: [0]: field-map, [1]: enclosing {@link Anson} object<br>
 	 * Top = Current parsingVal object.<br>
 	 * Currently all object must be an Anson object. */
-	// private ArrayList<Object[]> stack;
 	private ArrayList<ParsingCtx> stack;
 
 	private ParsingCtx top() { return stack.get(0); }
-
-	// protected Object parsedVal; 
-	// protected String parsingProp;
 
 	/**Envelope Type Name */
  	protected String envetype; 
 	
 	@Override
 	public void exitObj(ObjContext ctx) {
-		// All object must an Anson object
-		// enclosing = elems.remove(elems.size() - 1);
-//		try {
-//			Anson parsingVal = enclosing;
-//			Field f = fmap.get(parsingProp);
-//			f.set(enclosing, parsingVal);
-
-			ParsingCtx top = pop();
-			top().parsedVal = top.enclosing;
-			// top.enclosing = null;
-			// parsedVal = top[1];
-
-//		} catch (IllegalArgumentException e) {
-//			e.printStackTrace();
-//		}
+		ParsingCtx top = pop();
+		top().parsedVal = top.enclosing;
 	}
 	
 	@Override
@@ -109,14 +90,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		if (top.parsingArr != null) {
 			// an Anson Array occurred here, the element should only be an envelope
 			// (needing type to construct object), that's can't been parsed
-			throw new NullPointerException("An Anson Array occurred here, the element should only be an envelope (has type-pair): "
+			if (Map.class.isAssignableFrom(top.parsingArrElemCls)
+				|| Set.class.isAssignableFrom(top.parsingArrElemCls)) {
+				throw new NullPointerException("TODO handling map or set: " + ctx.getText());
+			}
+			else
+				throw new NullPointerException("An Anson Array occurred here, the element should only be an envelope (has type-pair): "
 					+ ctx.getText());
 		}
 		try {
 			HashMap<String, Field> fmap = stack.size() > 0 ?
-					// (HashMap<String, Field>)stack.get(0)[0] : null;
 					top.fmap : null;
-			if (fmap == null || !fmap.containsKey(top .parsingProp))
+			if (fmap == null || !fmap.containsKey(top.parsingProp))
 				throw new AnsonException("internal", "Obj type not found. property: %s", top.parsingProp);
 			push(fmap.get(top.parsingProp).getType());
 		} catch (SecurityException | ReflectiveOperationException | AnsonException e) {
@@ -130,15 +115,23 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	@Override
 	public void enterEnvelope(EnvelopeContext ctx) {
-		stack = new ArrayList<ParsingCtx>();
-		envetype = null;
-		super.enterEnvelope(ctx);
+		if (stack == null) {
+			stack = new ArrayList<ParsingCtx>();
+			envetype = null;
+		}
+		else {
+		}
+//		super.enterEnvelope(ctx);
 	}
 	
 	@Override
 	public void exitEnvelope(EnvelopeContext ctx) {
 		super.exitEnvelope(ctx);
-		// pop();
+		if (stack.size() > 1) {
+			ParsingCtx top = pop();
+			top().parsedVal = top.enclosing;
+		}
+		// else keep last one (root) as return value
 	}
 	
 	/**Semantics of entering a type pair is found and parsingVal an Anson object.<br>
@@ -156,13 +149,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		
 		try {
 			Class<?> clazz = Class.forName(envetype);
-//			Constructor<?> ctor = clazz.getConstructor(new Class[0]);
-//
-//			if (fmap == null) {
-//				fmap = new HashMap<String, Field>();
-//				fmap = mergeFields(clazz, fmap);
-//			}
-//			parsingVal =  ctor.newInstance(new Object[0]);
 			push(clazz);
 		} catch (ReflectiveOperationException | SecurityException e) {
 			e.printStackTrace();
@@ -233,7 +219,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private static String getStringVal(TerminalNode str, String rawTxt) {
 		if (str == null) {
-				// String s = ctx.value().getText();
 				try { 
 					if (LangExt.isblank(rawTxt))
 						return null;
@@ -274,11 +259,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	@Override
 	public void exitArray(ArrayContext ctx) {
-		// list2Array(parsingArrElemCls, parsingArr);
 		ParsingCtx top = top();
 		top.parsedVal = toPrimitiveArray(top.parsingArr,
 				 top.fmap.get(top.parsingProp).getType());	
-		//f.set(enclosing, parsedVal);
 		top.parsingArr = null;
 	}
 
@@ -304,9 +287,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        throw new IllegalArgumentException(arrayType.toString());
 	    }
 	    Class<?> primitiveType = arrayType.getComponentType();
-//	    if (!primitiveType.isPrimitive()) {
-//	        throw new IllegalArgumentException(primitiveType.toString());
-//	    }
 
 	    P array = arrayType.cast(Array.newInstance(primitiveType, list.size()));
 
