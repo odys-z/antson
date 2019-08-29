@@ -44,3 +44,57 @@ as a [Karfka](https://kafka.apache.org/intro) message consummer - might try a te
 Antson will be used as the transport protocol layer for semantic-\*. see his home page for it.
 
 It's also planned publish it as an independent lib, at least with jar and DLL.
+
+# Known Issues
+
+## Array element's type must specified
+
+The json gramma is taken and modified from [Antlr4's Gramma Page](https://github.com/antlr/grammars-v4/blob/master/json/JSON.g4), which is kept consistency with [JSON Gramma](https://www.json.org/)
+
+The problem of this official version is that an object value's type present in an array can not been figured out automatically.
+So I'v added a new type of value (envelope) to value's declaration, like this:
+
+    array
+	: '[' value (',' value)* ']'
+	| '[' ']'
+	;
+
+    value
+	: STRING
+	| NUMBER
+	| obj		// all array's obj value can't parsed as Anson, taken as HashMap
+	| envelope
+	| array
+	| 'true'
+	| 'false'
+	| 'null'
+	;
+
+The difference between envelope and obj is evelope must has a type-pair:
+
+    envelope // also top node
+	: '{' type_pair (',' pair)* '}'
+	;
+
+    obj
+	: '{' pair (',' pair)* '}'
+	| '{' '}'
+	;
+
+In short, if an element in an array should been parsed as an Anson object in java, it must include a 'type_pair':
+
+    type_pair
+	: TYPE ':' qualifiedName
+	;
+  
+e.g., the json string
+
+    { type: "Outter",
+      arr: [{type: "Inner", prop: "v..."}, ...]
+    }
+    
+can be parsed into java type of 
+
+    class Outter {
+        Inner[] arr; // element's can be subclasses
+    }
