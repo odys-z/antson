@@ -99,4 +99,4 @@ can be parsed into java type of
         Inner[] arr; // element's can be subclasses
     }
 
-See test case [AnsonTest#testFromJson_asonArr](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
+See test case [AnsonTest#testFromJson_asonArr()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
