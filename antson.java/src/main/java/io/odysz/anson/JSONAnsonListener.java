@@ -105,11 +105,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	
 	@Override
 	public void enterObj(ObjContext ctx) {
+		ParsingCtx top = top();
+		if (top.parsingArr != null) {
+			// an Anson Array occurred here, the element should only be an envelope
+			// (needing type to construct object), that's can't been parsed
+			throw new NullPointerException("An Anson Array occurred here, the element should only be an envelope (has type-pair): "
+					+ ctx.getText());
+		}
 		try {
 			HashMap<String, Field> fmap = stack.size() > 0 ?
 					// (HashMap<String, Field>)stack.get(0)[0] : null;
-					(HashMap<String, Field>)top().fmap : null;
-			ParsingCtx top = top();
+					top.fmap : null;
 			if (fmap == null || !fmap.containsKey(top .parsingProp))
 				throw new AnsonException("internal", "Obj type not found. property: %s", top.parsingProp);
 			push(fmap.get(top.parsingProp).getType());
@@ -163,12 +169,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
-	/**Push parsingVal anson
-	 * @param clazz 
-	 * @param fmap
-	 * @param parsingVal
-	 * @throws SecurityException 
-	 * @throws ReflectionOperationException 
+	/**Push parsingVal anson.
+	 * @param clazz new parsing Anson object's class
+	 * @throws ReflectiveOperationException
+	 * @throws SecurityException
 	 */
 	private void push(Class<?> clazz) throws ReflectiveOperationException, SecurityException {
 		HashMap<String, Field> fmap = new HashMap<String, Field>();

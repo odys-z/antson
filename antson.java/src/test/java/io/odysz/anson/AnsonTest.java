@@ -26,7 +26,11 @@ class AnsonTest {
 		assertEquals(2, anson2.seq);
 		assertEquals("e1", anson2.m[0]);
 		assertEquals("e2", anson2.m[1]);
+	}
+	
 
+	@Test
+	void testFromJson_asonArr() throws IllegalArgumentException, ReflectiveOperationException {
 		// AnsT3.m is typeof AnsT2
 		AnsT3 anson3 = (AnsT3) Anson.fromJson("{type:io.odysz.anson.AnsT3, seq: 3, ver: \"v0.1\", m: [" +
 				"{seq: 4, ver: \"v0.1\"}, {seq: 5, ver: \"v0.1\"}]}");
