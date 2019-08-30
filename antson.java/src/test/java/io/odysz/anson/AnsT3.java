@@ -8,7 +8,7 @@ import io.odysz.anson.Anson;
  */
 public class AnsT3 extends Anson {
 
-	// FIXME what about [0 Anson1, 1 Anson2] ?
+	/** Elements can be subclass*/
 	Anson[] m;
 	
 	public AnsT3() {}

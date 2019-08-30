@@ -49,7 +49,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param fmap
 	 * @return
 	 */
-	private static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
+	static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
 		Field flist[] = clazz.getDeclaredFields();
 		for (Field f : flist) {
 			int mod = f.getModifiers();
@@ -120,8 +120,22 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			envetype = null;
 		}
 		else {
+			// push and parse sub envelope
+			ParsingCtx top = top();
+			if (top.parsingArr != null) {
+				// an Anson Array occurred here, the element should only be an envelope
+				// (needing type to construct object), that's can't been parsed
+				// A complementary branch of #enterObj()
+				if (! Anson.class.isAssignableFrom(top.parsingArrElemCls)) {
+					throw new NullPointerException("Elements in array must be an evelope. " + ctx.getText());
+				}
+				else {
+					// An Anson Array occurred here, the element should only be an envelope (has type-pair)
+					// let #enterType_pair() handle this
+					envetype = null;
+				}
+			}
 		}
-//		super.enterEnvelope(ctx);
 	}
 	
 	@Override
@@ -184,7 +198,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			ParsingCtx top = top();
 			top.parsingProp = getProp(ctx); //.getChild(0).getText();
 			Class<?> ft = getType(top.parsingProp);
-			if (ft.isAssignableFrom(AbstractCollection.class)){
+			if (AbstractCollection.class.isAssignableFrom(ft)){
 				Constructor<?> ctor = ft.getConstructor(String.class);
 				top.collection = (AbstractCollection<?>) ctor.newInstance(new Object[0]);
 			}
@@ -236,7 +250,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @throws AnsonException
 	 */
 	private Class<?> getType(String prop) throws AnsonException {
-		// Object[] top = stack.get(0);
 		Field f = top().fmap.get(prop);
 		if (f == null)
 			throw new AnsonException("internal", "Field not found: %s", prop);

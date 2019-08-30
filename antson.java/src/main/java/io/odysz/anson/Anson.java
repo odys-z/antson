@@ -6,6 +6,8 @@ import java.io.NotSerializableException;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.AbstractCollection;
+import java.util.HashMap;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -26,23 +28,94 @@ public class Anson {
 
 	protected Anson toBlock(OutputStream stream)
 			throws IllegalArgumentException, ReflectiveOperationException, IOException {
-		Field flist[] = this.getClass().getDeclaredFields();
-		Class<?> parentCls = getClass().getDeclaringClass();
-		for (Field f : flist) {
+		stream.write("{type: ".getBytes());
+		stream.write((getClass().getName() + ", ").getBytes());
+
+		HashMap<String, Field> fmap = new HashMap<String, Field>();
+		fmap = JSONAnsonListener.mergeFields(this.getClass(), fmap);
+
+		boolean moreFields = false;
+		for (Field f : fmap.values()) {
 			f.setAccessible(true);
-			if (!f.getType().isPrimitive() && (parentCls == null || !parentCls.equals(f.getType())))
-				try { stream.write(f.get(this).toString().getBytes()); }
-				catch (NotSerializableException e) {
-					Utils.warn("Filed %s of %s can't been serialized.",
-							f.getName(), f.getClass().getName());
+
+			if (moreFields)
+				stream.write(new byte[] {',', ' '});
+			else moreFields = true;
+
+			stream.write((f.getName() + ": ").getBytes());
+
+			if (!f.getType().isPrimitive()) {
+				Object v = f.get(this);
+				if (v == null)
+					stream.write(new byte[] {'n', 'u', 'l', 'l'});
+				else if (Anson.class.isAssignableFrom(v.getClass()))
+					((Anson)v).toBlock(stream);
+				else if (AbstractCollection.class.isAssignableFrom(v.getClass())) {
+					toCollectionBlock(stream, (AbstractCollection<?>) v);
 				}
+				else if (f.getType().isArray()) {
+					toArrayBlock(stream, (Object[]) v);
+				}
+				else if (v instanceof String)
+					stream.write(("\"" + v.toString() + "\"").getBytes());
+				else
+					try { stream.write(v.toString().getBytes()); }
+					catch (NotSerializableException e) {
+						Utils.warn("Filed %s of %s can't been serialized.",
+								f.getName(), f.getClass().getName());
+					}
+			}
 			else if (f.getType().isPrimitive())
 				stream.write(String.valueOf(f.get(this)).getBytes());
 		}
+		stream.write("}".getBytes());
 		stream.flush();
 		return this;
 	}
 	
+	private void toArrayBlock(OutputStream stream, Object[] v)
+			throws IllegalArgumentException, ReflectiveOperationException, IOException {
+		if (v == null) return;
+
+		boolean the1st = true;
+		stream.write('[');
+		Class<?> elemtype = v.getClass().getComponentType();
+		for (Object o : v) {
+			if (the1st) the1st = false;
+			else stream.write(new byte[] {',', ' '});
+
+			if (Anson.class.isAssignableFrom(elemtype))
+				((Anson)o).toBlock(stream);
+			else if (AbstractCollection.class.isAssignableFrom(elemtype))
+				toCollectionBlock(stream, (AbstractCollection<?>) o);
+			else if (o instanceof String) {
+				stream.write('"');
+				stream.write(o.toString().getBytes());
+				stream.write('"');
+			}
+			else stream.write(o.toString().getBytes());
+		}
+		stream.write(']');
+	}
+
+	private void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
+			throws IllegalArgumentException, ReflectiveOperationException, IOException {
+		stream.write('[');
+		boolean is1st = true;
+		for (Object e : collect) {
+			if (!is1st)
+				stream.write(",".getBytes());
+			else 
+				is1st = false;
+
+			if (Anson.class.isAssignableFrom(collect.getClass()))
+				((Anson)e).toBlock(stream);
+			else 
+				stream.write(e.toString().getBytes());
+		}
+		stream.write(']');
+	}
+
 	protected Anson toJson(StringBuffer sbuf)
 			throws IOException, IllegalArgumentException, IllegalAccessException {
 		sbuf.append("{");
