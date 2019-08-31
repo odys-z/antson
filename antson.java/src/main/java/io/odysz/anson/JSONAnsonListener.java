@@ -30,7 +30,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		// primitive, list and string structure helpers
 		protected List<?> parsingArr;
 		protected Class<?> parsingArrElemCls; 
-		protected AbstractCollection<?> collection;
+//		protected AbstractCollection<?> collection;
 
 		protected String parsingProp;
 		protected Object parsedVal;
@@ -121,20 +121,21 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 		else {
 			// push and parse sub envelope
-			ParsingCtx top = top();
-			if (top.parsingArr != null) {
-				// an Anson Array occurred here, the element should only be an envelope
-				// (needing type to construct object), that's can't been parsed
-				// A complementary branch of #enterObj()
-				if (! Anson.class.isAssignableFrom(top.parsingArrElemCls)) {
-					throw new NullPointerException("Elements in array must be an evelope. " + ctx.getText());
-				}
-				else {
-					// An Anson Array occurred here, the element should only be an envelope (has type-pair)
-					// let #enterType_pair() handle this
-					envetype = null;
-				}
-			}
+			// ParsingCtx top = top();
+			envetype = null;
+//			if (top.parsingArr != null) {
+//				// an Anson Array occurred here, the element should only be an envelope
+//				// (needing type to construct object), that's can't been parsed
+//				// A complementary branch of #enterObj()
+//				if (! Anson.class.isAssignableFrom(top.parsingArrElemCls)) {
+//					throw new NullPointerException("Elements in array must be an evelope. " + ctx.getText());
+//				}
+//				else {
+//					// An Anson Array occurred here, the element should only be an envelope (has type-pair)
+//					// let #enterType_pair() handle this
+//					envetype = null;
+//				}
+//			}
 		}
 	}
 	
@@ -198,11 +199,14 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			ParsingCtx top = top();
 			top.parsingProp = getProp(ctx); //.getChild(0).getText();
 			Class<?> ft = getType(top.parsingProp);
-			if (AbstractCollection.class.isAssignableFrom(ft)){
-				Constructor<?> ctor = ft.getConstructor(String.class);
-				top.collection = (AbstractCollection<?>) ctor.newInstance(new Object[0]);
+			if (List.class.isAssignableFrom(ft)){
+				// Constructor<?> ctor = ft.getConstructor(Object.class);
+				// top.parsingArr = (List<?>) ctor.newInstance(new Object[0]);
+
+				// Because of Java type erasing, list should be safely changed into ArrayList<Object>
+				top.parsingArr = new ArrayList<Object>();
 			}
-		} catch (ReflectiveOperationException | AnsonException e) {
+		} catch (AnsonException e) {
 			e.printStackTrace();
 		}
 	}
@@ -273,14 +277,20 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	@Override
 	public void exitArray(ArrayContext ctx) {
 		ParsingCtx top = top();
-		top.parsedVal = toPrimitiveArray(top.parsingArr,
-				 top.fmap.get(top.parsingProp).getType());	
+		Class<?> ft = top.fmap.get(top.parsingProp).getType();
+	    if (ft.isArray())
+	    	top.parsedVal = toPrimitiveArray(top.parsingArr, ft);	
+	    else
+	    	// keep the List as value
+	    	top.parsedVal = top.parsingArr;
+
 		top.parsingArr = null;
 	}
 
-	/**https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
-	 * 
+	/**
 	 * Unboxes a List in to a primitive array.
+	 * reference:
+	 * https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
 	 *
 	 * @param  list      the List to convert to a primitive array
 	 * @param  arrayType the primitive array type to convert to
@@ -315,13 +325,24 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	public void exitValue(ValueContext ctx) {
 		ParsingCtx top = top();
 		if (top != null && top.parsingArr != null) {
-			// FIXME E != String
-			// ((ArrayList<?>)parsingArr).add(parsedVal);
 			Field f = top().fmap.get(top.parsingProp);
+			// NOTE: ft can only work for Array, collection's ft is null
 			Class<?> ft = f.getType().getComponentType();
 			String txt = ctx.getText();
 			List<?> arr = top.parsingArr;
-			if (ft == int.class || ft == Integer.class)
+			if (List.class.isAssignableFrom(f.getType())) {
+				// for List, ft is null
+				if (top.parsedVal == null) // simple value like String
+					((List<Object>)arr).add(getStringVal(ctx.STRING(), txt));
+				else {
+					((List<Object>)arr).add(top.parsedVal);
+					top.parsedVal = null;
+				}
+			}
+//			else if (Map.class.isAssignableFrom(f.getType()))
+//				// ft is null?
+//				;
+			else if (ft == int.class || ft == Integer.class)
 				((List<Integer>)arr).add(Integer.valueOf(getStringVal(ctx.NUMBER(), txt)));
 			else if (ft == float.class || ft == Float.class)
 				((List<Float>)arr).add(Float.valueOf(getStringVal(ctx.NUMBER(), txt)));
@@ -363,7 +384,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				throw new AnsonException("internal", "Field not found: %s", fn);
 			Class<?> ft = f.getType();
 			if (ft == String.class) {
-				// String v = ctx.getChild(2).getText();
 				String v = getStringVal(ctx);
 				f.set(enclosing, v);
 			}
@@ -373,24 +393,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				setPrimitive(enclosing, f, v);
 			}
 			else if (ft.isArray()) {
-				// Class<?> cls = ft.getComponentType();
-//				if (parsingArr != null) {
-//					Object[] arr = parsingArr.toArray();
-//					f.set(enclosing, arr);
-//					parsingArr = null;
-//				}
 				f.set(enclosing, top().parsedVal);
 			}
-			else if (AbstractCollection.class.isAssignableFrom(ft)){
-				f.set(enclosing, top().collection);
+			else if (List.class.isAssignableFrom(ft)
+				|| AbstractCollection.class.isAssignableFrom(ft)){
+				f.set(enclosing, top().parsedVal);
 			}
 			else if (Anson.class.isAssignableFrom(ft)) {
-				// ParsingCtx top = pop(); // pushed by enterObject()
-				// Anson enclosing0 = top().enclosing;
+				// pushed by enterObject()
 				f.set(enclosing, top().parsedVal);
 			}
 			else if (Object.class.isAssignableFrom(ft)){
-				Utils.warn("Unsupported type's value of %s deserialized as Java.Lang.String", fn);
+				Utils.warn("Unsupported type's value of %s deserialized as %s", fn, ft.getName());
 				String v = ctx.getChild(2).getText();
 				f.set(enclosing, v);
 			}

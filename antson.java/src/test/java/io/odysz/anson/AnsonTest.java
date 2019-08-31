@@ -85,11 +85,32 @@ class AnsonTest {
 	}
 		
 	@Test
-	void testFromJson_collect() throws IllegalArgumentException, ReflectiveOperationException {
+	void testFromJson_list() throws IllegalArgumentException, ReflectiveOperationException {
 		AnsTCollect cll = (AnsTCollect) Anson.fromJson("{type: io.odysz.anson.AnsTCollect, ver: null, lst: [\"A\", \"B\"], seq: 0}");
 		assertEquals(2, cll.lst.size());
 		assertEquals("A", cll.lst.get(0));
 		assertEquals("B", cll.lst.get(1));
+		
+		
+		cll = (AnsTCollect) Anson.fromJson("{type: io.odysz.anson.AnsTCollect, anss: ["
+				+ "{type: io.odysz.anson.AnsT3, seq: 11}, "
+				+ "{type: io.odysz.anson.AnsT3, seq: 12}"
+				+ "], seq: 1}");
+		assertEquals(2, cll.anss.size());
+		assertEquals(11, cll.anss.get(0).seq);
+		assertEquals(12, cll.anss.get(1).seq);
+
+		cll = (AnsTCollect) Anson.fromJson("{type: io.odysz.anson.AnsTCollect, anss: ["
+				+ "{type: io.odysz.anson.AnsT3, seq: 11 ver: \"v0.1\", m: ["
+					+ "{type: io.odysz.anson.AnsT2, s: 4 }, "
+					+ "{type: io.odysz.anson.AnsT1, ver: \"x\" }]}, "
+				+ "{type: io.odysz.anson.AnsT3, seq: 12}"
+				+ "], seq: 1}");
+		assertEquals(2, cll.anss.size());
+		assertEquals(11, cll.anss.get(0).seq);
+		assertEquals(4, ((AnsT2)cll.anss.get(0).m[0]).s);
+		assertEquals("x", ((AnsT1)cll.anss.get(0).m[1]).ver);
+		assertEquals(12, cll.anss.get(1).seq);
 	}
 
 }
