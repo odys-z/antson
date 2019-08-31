@@ -86,6 +86,8 @@ public class Anson {
 
 			if (Anson.class.isAssignableFrom(elemtype))
 				((Anson)o).toBlock(stream);
+			else if (elemtype.isArray())
+				toArrayBlock(stream, (Object[]) o);
 			else if (AbstractCollection.class.isAssignableFrom(elemtype))
 				toCollectionBlock(stream, (AbstractCollection<?>) o);
 			else if (o instanceof String) {
@@ -104,12 +106,17 @@ public class Anson {
 		boolean is1st = true;
 		for (Object e : collect) {
 			if (!is1st)
-				stream.write(",".getBytes());
+				stream.write(new byte[] {',', ' '});
 			else 
 				is1st = false;
 
 			if (Anson.class.isAssignableFrom(collect.getClass()))
 				((Anson)e).toBlock(stream);
+			else if (e instanceof String) {
+				stream.write('"');
+				stream.write(e.toString().getBytes());
+				stream.write('"');
+			}
 			else 
 				stream.write(e.toString().getBytes());
 		}

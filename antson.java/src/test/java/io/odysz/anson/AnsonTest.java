@@ -31,6 +31,26 @@ class AnsonTest {
 		a2.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsT2, ver: null, s: 0, m: [\"e0\", \"e1\"], seq: 2}", s);
+		
+		Ans2dArr a2d = new Ans2dArr();
+		a2d.strs = new String[][] {
+			new String[] {"0.0", "0.1"},
+			new String[] {"1.0", "1.1", "1.2"},
+			new String[] {"2.0"},
+			new String[] {"3.0", "3.1"},
+			new String[] {} };
+		bos = new ByteArrayOutputStream(); 
+		a2d.toBlock(bos);
+		s = bos.toString(StandardCharsets.UTF_8.name());
+		assertEquals("{type: io.odysz.anson.Ans2dArr, ver: null, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []], seq: 0}", s);
+		
+		AnsTCollect cll = new AnsTCollect();
+		cll.lst.add("A");
+		cll.lst.add("B");
+		bos = new ByteArrayOutputStream(); 
+		cll.toBlock(bos);
+		s = bos.toString(StandardCharsets.UTF_8.name());
+		assertEquals("{type: io.odysz.anson.AnsTCollect, ver: null, lst: [\"A\", \"B\"], seq: 0}", s);
 	}
 
 	@Test
@@ -62,6 +82,14 @@ class AnsonTest {
 		assertEquals(2, anson3.m.length);
 		assertEquals(4, ((AnsT2)anson3.m[0]).s);
 		assertEquals("x", ((AnsT1)anson3.m[1]).ver);
+	}
+		
+	@Test
+	void testFromJson_collect() throws IllegalArgumentException, ReflectiveOperationException {
+		AnsTCollect cll = (AnsTCollect) Anson.fromJson("{type: io.odysz.anson.AnsTCollect, ver: null, lst: [\"A\", \"B\"], seq: 0}");
+		assertEquals(2, cll.lst.size());
+		assertEquals("A", cll.lst.get(0));
+		assertEquals("B", cll.lst.get(1));
 	}
 
 }
