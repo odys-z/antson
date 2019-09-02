@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
-import io.odysz.antson.AnparserTest.Ason1;
+import io.odysz.anson.Anson;
 
 /**
  * @author javaBeCool @ https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
@@ -127,17 +127,17 @@ public class ReflectionUtils {
 		return null;
 	}
 
-	class Ason4<T extends Ason> {
+	class Ason4<T extends Anson> {
 		ArrayList<T> strlst;
 	}
 
-	@Test
-	public void testAson4 () {
-		Ason4<Ason1> ason4 = new Ason4<Ason1>();
-	    Field field = ReflectionUtils.getField(ason4, "strlst");
-	    Class<?> clazz = ReflectionUtils.determineType(field, ason4);
-//	    Assert.assertEquals(clazz, Ason1.class);
-	}
+//	@Test
+//	public void testAson4 () {
+//		Ason4<AnsT1> ason4 = new Ason4<AnsT1>();
+//	    Field field = ReflectionUtils.getField(ason4, "strlst");
+//	    Class<?> clazz = ReflectionUtils.determineType(field, ason4);
+////	    Assert.assertEquals(clazz, Ason1.class);
+//	}
 
 	class GenericSuperClass<E, T, A> {
 	    T t;

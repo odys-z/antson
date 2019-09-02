@@ -219,23 +219,11 @@ public class Anson {
 	 */
 	public static Anson fromJson(String json)
 			throws IllegalArgumentException, ReflectiveOperationException {
-//		Field flist[] = this.getClass().getDeclaredFields();
-//		Class<?> parentCls = getClass().getDeclaringClass();
-		
 		return parse(json);
 	}
 	
 	public static Anson parse(String json)
 			throws IllegalArgumentException, IllegalAccessException {
-//		for (Field f : flist) {
-//			f.setAccessible(true);
-//			// prevent serialize parent class instance, which is not serializable.
-//			if (!f.getType().isPrimitive() && (parentCls == null || !parentCls.equals(f.getType())))
-//				f.set(obj, f.getName());
-//			else if (f.getType().isPrimitive())
-//				f.set(obj, 1);;
-//		}
-		
 		JSONLexer lexer = new JSONLexer(CharStreams.fromString(json));
 
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
