@@ -113,4 +113,8 @@ class AnsonTest {
 		assertEquals(12, cll.anss.get(1).seq);
 	}
 
+	@Test
+	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException {
+		
+	}
 }
