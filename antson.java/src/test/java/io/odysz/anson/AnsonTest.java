@@ -50,7 +50,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		cll.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTCollect, ver: null, lst: [\"A\", \"B\"], seq: 0}", s);
+		assertEquals("{type: io.odysz.anson.AnsTCollect, anss: null, ver: null, lst: [\"A\", \"B\"], seq: 0}", s);
 	}
 
 	@Test
