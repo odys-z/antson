@@ -1,12 +1,10 @@
 package io.odysz.anson;
 
-import io.odysz.module.rs.SResultset;
-
 public class AnsTRs extends Anson {
 
-	SResultset rs;
+	AnsonResultset rs;
 	
 	public AnsTRs() {
-		rs = new SResultset(3, 4);
+		rs = new AnsonResultset(3, 4);
 	}
 }

@@ -56,7 +56,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		anrs.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTRs, rs: [what's here?], ver: null, seq: 0}", s);
+		assertEquals("{type: io.odysz.anson.AnsTRs, rs: {type: io.odysz.anson.AnsonResultset, ver: null, seq: 0}, ver: null, seq: 0}", s);
 	}
 
 	@Test

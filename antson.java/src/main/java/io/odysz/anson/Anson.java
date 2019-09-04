@@ -16,9 +16,10 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
+import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
 
-public class Anson {
+public class Anson implements IJsonable {
 	private static final int bufLength = 64;
 
 	protected String ver;
@@ -26,8 +27,9 @@ public class Anson {
 	
 	public Anson() {}
 
-	protected Anson toBlock(OutputStream stream)
-			throws IllegalArgumentException, ReflectiveOperationException, IOException {
+	@Override
+	public Anson toBlock(OutputStream stream)
+			throws AnsonException, IOException {
 		stream.write("{type: ".getBytes());
 		stream.write((getClass().getName() + ", ").getBytes());
 
@@ -44,29 +46,33 @@ public class Anson {
 
 			stream.write((f.getName() + ": ").getBytes());
 
-			if (!f.getType().isPrimitive()) {
-				Object v = f.get(this);
-				if (v == null)
-					stream.write(new byte[] {'n', 'u', 'l', 'l'});
-				else if (Anson.class.isAssignableFrom(v.getClass()))
-					((Anson)v).toBlock(stream);
-				else if (AbstractCollection.class.isAssignableFrom(v.getClass())) {
-					toCollectionBlock(stream, (AbstractCollection<?>) v);
-				}
-				else if (f.getType().isArray()) {
-					toArrayBlock(stream, (Object[]) v);
-				}
-				else if (v instanceof String)
-					stream.write(("\"" + v.toString() + "\"").getBytes());
-				else
-					try { stream.write(v.toString().getBytes()); }
-					catch (NotSerializableException e) {
-						Utils.warn("Filed %s of %s can't been serialized.",
-								f.getName(), f.getClass().getName());
+			try {
+				if (!f.getType().isPrimitive()) {
+					Object v = f.get(this);
+					if (v == null)
+						stream.write(new byte[] {'n', 'u', 'l', 'l'});
+					else if (IJsonable.class.isAssignableFrom(v.getClass()))
+						((IJsonable)v).toBlock(stream);
+					else if (AbstractCollection.class.isAssignableFrom(v.getClass())) {
+						toCollectionBlock(stream, (AbstractCollection<?>) v);
 					}
+					else if (f.getType().isArray()) {
+						toArrayBlock(stream, (Object[]) v);
+					}
+					else if (v instanceof String)
+						stream.write(("\"" + v.toString() + "\"").getBytes());
+					else
+						try { stream.write(v.toString().getBytes()); }
+						catch (NotSerializableException e) {
+							Utils.warn("Filed %s of %s can't been serialized.",
+									f.getName(), f.getClass().getName());
+						}
+				}
+				else if (f.getType().isPrimitive())
+					stream.write(String.valueOf(f.get(this)).getBytes());
+			} catch (IllegalArgumentException | IllegalAccessException e1) {
+				throw new AnsonException(0, e1.getMessage());
 			}
-			else if (f.getType().isPrimitive())
-				stream.write(String.valueOf(f.get(this)).getBytes());
 		}
 		stream.write("}".getBytes());
 		stream.flush();
@@ -74,7 +80,7 @@ public class Anson {
 	}
 	
 	private void toArrayBlock(OutputStream stream, Object[] v)
-			throws IllegalArgumentException, ReflectiveOperationException, IOException {
+			throws AnsonException, IOException {
 		if (v == null) return;
 
 		boolean the1st = true;
@@ -84,8 +90,8 @@ public class Anson {
 			if (the1st) the1st = false;
 			else stream.write(new byte[] {',', ' '});
 
-			if (Anson.class.isAssignableFrom(elemtype))
-				((Anson)o).toBlock(stream);
+			if (IJsonable.class.isAssignableFrom(elemtype))
+				((IJsonable)o).toBlock(stream);
 			else if (elemtype.isArray())
 				toArrayBlock(stream, (Object[]) o);
 			else if (AbstractCollection.class.isAssignableFrom(elemtype))
@@ -101,7 +107,7 @@ public class Anson {
 	}
 
 	private void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
-			throws IllegalArgumentException, ReflectiveOperationException, IOException {
+			throws AnsonException, IOException {
 		stream.write('[');
 		boolean is1st = true;
 		for (Object e : collect) {
@@ -110,7 +116,7 @@ public class Anson {
 			else 
 				is1st = false;
 
-			if (Anson.class.isAssignableFrom(collect.getClass()))
+			if (IJsonable.class.isAssignableFrom(collect.getClass()))
 				((Anson)e).toBlock(stream);
 			else if (e instanceof String) {
 				stream.write('"');
@@ -123,8 +129,8 @@ public class Anson {
 		stream.write(']');
 	}
 
-	protected Anson toJson(StringBuffer sbuf)
-			throws IOException, IllegalArgumentException, IllegalAccessException {
+	@Override
+	public IJsonable toJson(StringBuffer sbuf) throws IOException, AnsonException {
 		sbuf.append("{");
 
 		Field flist[] = this.getClass().getDeclaredFields();
@@ -132,7 +138,11 @@ public class Anson {
 		for (int i = 0; i < flist.length; i++) {
 			Field f = flist[i];
 			f.setAccessible(true);
-			appendPair(sbuf, f.getName(), f.get(this), parentCls);
+			try {
+				appendPair(sbuf, f.getName(), f.get(this), parentCls);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new AnsonException(0, e.getMessage());
+			}
 
 			if (i < flist.length - 1)
 				sbuf.append(",");
@@ -143,8 +153,8 @@ public class Anson {
 	}
 
 	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls)
-			throws IllegalArgumentException, IllegalAccessException, IOException {
-		if (v instanceof Anson)
+			throws IOException, AnsonException {
+		if (v instanceof IJsonable)
 			((Anson)v).toJson(sbuf);
 		else if (!v.getClass().isPrimitive() && (parentCls == null || !parentCls.equals(v.getClass())))
 			// what's this?
@@ -169,9 +179,9 @@ public class Anson {
 	}
 
 	private static void appendArr(StringBuffer sbuf, Object e) 
-			throws IllegalArgumentException, IllegalAccessException, IOException {
+			throws AnsonException, IOException {
 		if (e instanceof Anson)
-			((Anson)e).toJson(sbuf);
+			((IJsonable)e).toJson(sbuf);
 		else if (e.getClass().isPrimitive())
 			sbuf.append(String.valueOf(e));
 		else if (e instanceof String)
@@ -217,12 +227,12 @@ public class Anson {
 	 * @throws IllegalArgumentException
 	 * @throws ReflectiveOperationException
 	 */
-	public static Anson fromJson(String json)
+	public static IJsonable fromJson(String json)
 			throws IllegalArgumentException, ReflectiveOperationException {
 		return parse(json);
 	}
 	
-	public static Anson parse(String json)
+	public static IJsonable parse(String json)
 			throws IllegalArgumentException, IllegalAccessException {
 		JSONLexer lexer = new JSONLexer(CharStreams.fromString(json));
 

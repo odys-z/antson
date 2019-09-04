@@ -4,13 +4,12 @@ public class AnsonException extends Exception {
 	/** * */
 	private static final long serialVersionUID = 1L;
 
-	private String c;
-	public String code() { return c; }
+	@SuppressWarnings("unused")
+	private int c;
+//	public String code() { return c; }
 
-	// private String ex;
-
-	public AnsonException(String code, String template, Object... param) {
-		super(template != null ? String.format(template, param) : code);
+	public AnsonException(int code, String template, Object... param) {
+		super(template != null ? String.format(template, param) : "");
 		this.c = code;
 	}
 }
