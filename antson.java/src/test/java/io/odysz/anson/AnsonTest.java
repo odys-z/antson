@@ -51,6 +51,12 @@ class AnsonTest {
 		cll.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsTCollect, anss: null, ver: null, lst: [\"A\", \"B\"], seq: 0}", s);
+
+		AnsTRs anrs = new AnsTRs();
+		bos = new ByteArrayOutputStream(); 
+		anrs.toBlock(bos);
+		s = bos.toString(StandardCharsets.UTF_8.name());
+		assertEquals("{type: io.odysz.anson.AnsTRs, rs: [what's here?], ver: null, seq: 0}", s);
 	}
 
 	@Test
@@ -115,6 +121,5 @@ class AnsonTest {
 
 	@Test
 	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException {
-		
 	}
 }
