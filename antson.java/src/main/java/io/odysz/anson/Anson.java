@@ -52,13 +52,12 @@ public class Anson implements IJsonable {
 				if (!f.getType().isPrimitive()) {
 					Object v = f.get(this);
 					Class<? extends Object> vclz = v == null ? null : v.getClass();
+					
+					/*
 					if (v == null)
 						stream.write(new byte[] {'n', 'u', 'l', 'l'});
 					else if (IJsonable.class.isAssignableFrom(vclz))
 						((IJsonable)v).toBlock(stream);
-//					else if (AbstractCollection.class.isAssignableFrom(v.getClass())) {
-//						toCollectionBlock(stream, (AbstractCollection<?>) v);
-//					}
 					else if (List.class.isAssignableFrom(v.getClass()))
 						toListBlock(stream, (AbstractCollection<?>) v);
 					else if ( Map.class.isAssignableFrom(vclz))
@@ -76,6 +75,8 @@ public class Anson implements IJsonable {
 							Utils.warn("Filed %s of %s can't been serialized.",
 									f.getName(), f.getClass().getName());
 						}
+					*/
+					writeNonPrimitive(stream, f, v, vclz);
 				}
 				else if (f.getType().isPrimitive())
 					stream.write(String.valueOf(f.get(this)).getBytes());
@@ -88,7 +89,7 @@ public class Anson implements IJsonable {
 		return this;
 	}
 	
-	private void toArrayBlock(OutputStream stream, Object[] v)
+	private static void toArrayBlock(OutputStream stream, Object[] v)
 			throws AnsonException, IOException {
 		if (v == null) return;
 
@@ -117,36 +118,71 @@ public class Anson implements IJsonable {
 		stream.write(']');
 	}
 
-	private void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
+	private static void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
 			throws AnsonException, IOException {
 		TODO
 	}
 
-	private void toMapBlock(OutputStream stream, AbstractCollection<?> collect)
+	private static void toMapBlock(OutputStream stream, AbstractCollection<?> collect)
 			throws AnsonException, IOException {
 
 		TODO
 	}
 
-	private void toListBlock(OutputStream stream, AbstractCollection<?> collect)
+	private static void toListBlock(OutputStream stream, AbstractCollection<?> list)
 			throws AnsonException, IOException {
 		stream.write('[');
 		boolean is1st = true;
-		for (Object e : collect) {
+		for (Object e : list) {
+			if (e == null)
+				continue;
 			if (!is1st)
 				stream.write(new byte[] {',', ' '});
 			else 
 				is1st = false;
 
-			if (IJsonable.class.isAssignableFrom(collect.getClass()))
-				((Anson)e).toBlock(stream);
-			else if (e instanceof String) {
-				stream.write('"');
-				stream.write(e.toString().getBytes());
-				stream.write('"');
-			}
-			else 
-				stream.write(e.toString().getBytes());
+//			if (IJsonable.class.isAssignableFrom(list.getClass()))
+//				((Anson)e).toBlock(stream);
+//			else if (e instanceof String) {
+//				stream.write('"');
+//				stream.write(e.toString().getBytes());
+//				stream.write('"');
+//			}
+//			else 
+//				stream.write(e.toString().getBytes());
+
+				if (!e.getClass().isPrimitive()) {
+//					Object v = f.get(this);
+//					Class<? extends Object> vclz = v == null ? null : v.getClass();
+					
+					/*
+					if (v == null)
+						stream.write(new byte[] {'n', 'u', 'l', 'l'});
+					else if (IJsonable.class.isAssignableFrom(vclz))
+						((IJsonable)v).toBlock(stream);
+					else if (List.class.isAssignableFrom(v.getClass()))
+						toListBlock(stream, (AbstractCollection<?>) v);
+					else if ( Map.class.isAssignableFrom(vclz))
+						toMapBlock(stream, (AbstractCollection<?>) v);
+					else if (AbstractCollection.class.isAssignableFrom(vclz))
+						toCollectionBlock(stream, (AbstractCollection<?>) v);
+					else if (f.getType().isArray()) {
+						toArrayBlock(stream, (Object[]) v);
+					}
+					else if (v instanceof String)
+						stream.write(("\"" + v.toString() + "\"").getBytes());
+					else
+						try { stream.write(v.toString().getBytes()); }
+						catch (NotSerializableException e) {
+							Utils.warn("Filed %s of %s can't been serialized.",
+									f.getName(), f.getClass().getName());
+						}
+					*/
+					writeNonPrimitive(stream, f, e, e.getClass());
+				}
+				else if (f.getType().isPrimitive())
+					stream.write(String.valueOf(e).getBytes());
+
 		}
 		stream.write(']');
 	}
@@ -174,6 +210,31 @@ public class Anson implements IJsonable {
 		return this;
 	}
 
+	private static void writeNonPrimitive(OutputStream stream,
+			Field fd, Object v, Class<? extends Object> vclz) throws AnsonException, IOException {
+		if (v == null)
+			stream.write(new byte[] {'n', 'u', 'l', 'l'});
+		else if (IJsonable.class.isAssignableFrom(vclz))
+			((IJsonable)v).toBlock(stream);
+		else if (List.class.isAssignableFrom(v.getClass()))
+			toListBlock(stream, (AbstractCollection<?>) v);
+		else if ( Map.class.isAssignableFrom(vclz))
+			toMapBlock(stream, (AbstractCollection<?>) v);
+		else if (AbstractCollection.class.isAssignableFrom(vclz))
+			toCollectionBlock(stream, (AbstractCollection<?>) v);
+		else if (f.getType().isArray()) {
+			toArrayBlock(stream, (Object[]) v);
+		}
+		else if (v instanceof String)
+			stream.write(("\"" + v.toString() + "\"").getBytes());
+		else
+			try { stream.write(v.toString().getBytes()); }
+			catch (NotSerializableException e) {
+				throw new AnsonException(0, "Filed %s of %s can't been serialized: %s",
+						f.getName(), vclz.getName(), e.getMessage());
+			}
+	}
+	
 	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls)
 			throws IOException, AnsonException {
 		if (v instanceof IJsonable)
