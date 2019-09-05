@@ -59,11 +59,12 @@ public class Anson implements IJsonable {
 //					else if (AbstractCollection.class.isAssignableFrom(v.getClass())) {
 //						toCollectionBlock(stream, (AbstractCollection<?>) v);
 //					}
-					else if (List.class.isAssignableFrom(v.getClass())
-						|| Map.class.isAssignableFrom(vclz)
-						|| AbstractCollection.class.isAssignableFrom(vclz)) {
+					else if (List.class.isAssignableFrom(v.getClass()))
+						toListBlock(stream, (AbstractCollection<?>) v);
+					else if ( Map.class.isAssignableFrom(vclz))
+						toMapBlock(stream, (AbstractCollection<?>) v);
+					else if (AbstractCollection.class.isAssignableFrom(vclz))
 						toCollectionBlock(stream, (AbstractCollection<?>) v);
-					}
 					else if (f.getType().isArray()) {
 						toArrayBlock(stream, (Object[]) v);
 					}
@@ -117,6 +118,11 @@ public class Anson implements IJsonable {
 	}
 
 	private void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
+			throws AnsonException, IOException {
+
+	}
+
+	private void toListBlock(OutputStream stream, AbstractCollection<?> collect)
 			throws AnsonException, IOException {
 		stream.write('[');
 		boolean is1st = true;

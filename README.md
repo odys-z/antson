@@ -26,7 +26,7 @@ On way to do this is use semantics defined by structure, like this:
 
     {port: p-name, data : {method-quest-type-data}}
 
-It's not simply a map now, it's a structured data. If this structure getting more complex,
+It's not simply a map now, it's structured data. If this structure getting more complex,
 user will have to explain the semantics. Then (de)serializer will getting complicate.
 The down side of this is your architecture will turn into mess because you can't separate the
 protocol layer from the application's business handling.
@@ -40,7 +40,7 @@ Antson is trying to go further. Users only needing to define their business gram
 the application business data defined in java type, then send packages back and forth with the help of Antson API,
 consuming the data object like normal Java objects, and only take care of it's business processing.
 
-# Why no Stream Mode?
+# Why no stream mode?
 
 Antson provid only output stream writing API, for serializing into json string. No input
 stream mode is supported.
