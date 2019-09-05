@@ -119,7 +119,13 @@ public class Anson implements IJsonable {
 
 	private void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
 			throws AnsonException, IOException {
+		TODO
+	}
 
+	private void toMapBlock(OutputStream stream, AbstractCollection<?> collect)
+			throws AnsonException, IOException {
+
+		TODO
 	}
 
 	private void toListBlock(OutputStream stream, AbstractCollection<?> collect)
