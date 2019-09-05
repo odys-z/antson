@@ -8,6 +8,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.AbstractCollection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -49,11 +51,17 @@ public class Anson implements IJsonable {
 			try {
 				if (!f.getType().isPrimitive()) {
 					Object v = f.get(this);
+					Class<? extends Object> vclz = v == null ? null : v.getClass();
 					if (v == null)
 						stream.write(new byte[] {'n', 'u', 'l', 'l'});
-					else if (IJsonable.class.isAssignableFrom(v.getClass()))
+					else if (IJsonable.class.isAssignableFrom(vclz))
 						((IJsonable)v).toBlock(stream);
-					else if (AbstractCollection.class.isAssignableFrom(v.getClass())) {
+//					else if (AbstractCollection.class.isAssignableFrom(v.getClass())) {
+//						toCollectionBlock(stream, (AbstractCollection<?>) v);
+//					}
+					else if (List.class.isAssignableFrom(v.getClass())
+						|| Map.class.isAssignableFrom(vclz)
+						|| AbstractCollection.class.isAssignableFrom(vclz)) {
 						toCollectionBlock(stream, (AbstractCollection<?>) v);
 					}
 					else if (f.getType().isArray()) {
@@ -94,8 +102,10 @@ public class Anson implements IJsonable {
 				((IJsonable)o).toBlock(stream);
 			else if (elemtype.isArray())
 				toArrayBlock(stream, (Object[]) o);
+
 			else if (AbstractCollection.class.isAssignableFrom(elemtype))
 				toCollectionBlock(stream, (AbstractCollection<?>) o);
+
 			else if (o instanceof String) {
 				stream.write('"');
 				stream.write(o.toString().getBytes());
@@ -232,7 +242,7 @@ public class Anson implements IJsonable {
 		return parse(json);
 	}
 	
-	public static IJsonable parse(String json)
+	private static IJsonable parse(String json)
 			throws IllegalArgumentException, IllegalAccessException {
 		JSONLexer lexer = new JSONLexer(CharStreams.fromString(json));
 

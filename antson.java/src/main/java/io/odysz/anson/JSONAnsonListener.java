@@ -388,6 +388,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				|| AbstractCollection.class.isAssignableFrom(ft)){
 				f.set(enclosing, top().parsedVal);
 			}
+			else if (Map.class.isAssignableFrom(ft)) {
+				throw new AnsonException(0, "TODO");
+			}
 			else if (IJsonable.class.isAssignableFrom(ft)) {
 				// pushed by enterObject()
 				f.set(enclosing, top().parsedVal);
