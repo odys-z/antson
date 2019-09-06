@@ -210,11 +210,26 @@ public class Anson implements IJsonable {
 		return this;
 	}
 
-	private static void writeNonPrimitive(OutputStream stream,
-			Field fd, Object v, Class<? extends Object> vclz) throws AnsonException, IOException {
-		if (v == null)
+	/**Write field (element)'s value to stream.<br>
+	 * The field type (fdClz) is not always the same as value's type.
+	 * When field is an array, collection, etc., they are different.
+	 * @param stream
+	 * @param fdName
+	 * @param fdClz
+	 * @param v
+	 * @throws AnsonException
+	 * @throws IOException
+	 */
+	private static void writeNonPrimitive(OutputStream stream, String fdName,
+			Class<? extends Object> fdClz, Object v)
+			throws AnsonException, IOException {
+		if (v == null) {
 			stream.write(new byte[] {'n', 'u', 'l', 'l'});
-		else if (IJsonable.class.isAssignableFrom(vclz))
+			return;
+		}
+
+		Class<? extends Object> vclz = v.getClass();
+		if (IJsonable.class.isAssignableFrom(vclz))
 			((IJsonable)v).toBlock(stream);
 		else if (List.class.isAssignableFrom(v.getClass()))
 			toListBlock(stream, (AbstractCollection<?>) v);
@@ -222,7 +237,7 @@ public class Anson implements IJsonable {
 			toMapBlock(stream, (AbstractCollection<?>) v);
 		else if (AbstractCollection.class.isAssignableFrom(vclz))
 			toCollectionBlock(stream, (AbstractCollection<?>) v);
-		else if (f.getType().isArray()) {
+		else if (fdClz.isArray()) {
 			toArrayBlock(stream, (Object[]) v);
 		}
 		else if (v instanceof String)
@@ -231,7 +246,7 @@ public class Anson implements IJsonable {
 			try { stream.write(v.toString().getBytes()); }
 			catch (NotSerializableException e) {
 				throw new AnsonException(0, "Filed %s of %s can't been serialized: %s",
-						f.getName(), vclz.getName(), e.getMessage());
+						fdName, vclz.getName(), e.getMessage());
 			}
 	}
 	
