@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,11 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		anrs.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTRs, rs: {type: io.odysz.anson.AnsonResultset, ver: null, seq: 0}, ver: null, seq: 0}", s);
+		assertEquals("{type: io.odysz.anson.AnsTRs, rs: "
+				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, ver: null, rowCnt: 3, colCnt: 4,"
+				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
+				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]],"
+				+ " seq: 0}, ver: null, seq: 0}", s);
 	}
 
 	@Test
@@ -120,6 +125,15 @@ class AnsonTest {
 	}
 
 	@Test
-	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException {
+	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException, SQLException {
+		AnsTRs rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
+				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, ver: null, rowCnt: 3, colCnt: 4,"
+				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
+				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]],"
+				+ " seq: 0}, ver: null, seq: 0}");
+		
+		assertEquals(3, rs.rs.getRowCount());
+		rs.rs.beforeFirst().next();
+		assertEquals("0, 1", rs.rs.getString("1"));
 	}
 }

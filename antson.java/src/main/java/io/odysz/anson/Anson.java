@@ -19,7 +19,6 @@ import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.anson.x.AnsonException;
-import io.odysz.common.Utils;
 
 public class Anson implements IJsonable {
 	private static final int bufLength = 64;
@@ -40,6 +39,11 @@ public class Anson implements IJsonable {
 
 		boolean moreFields = false;
 		for (Field f : fmap.values()) {
+			// is this ignored?
+			AnsonField af = f.getAnnotation(AnsonField.class);
+			if (af != null && af.ignoreTo())
+				continue;
+			
 			f.setAccessible(true);
 
 			if (moreFields)
@@ -76,7 +80,7 @@ public class Anson implements IJsonable {
 									f.getName(), f.getClass().getName());
 						}
 					*/
-					writeNonPrimitive(stream, f, v, vclz);
+					writeNonPrimitive(stream, vclz, v);
 				}
 				else if (f.getType().isPrimitive())
 					stream.write(String.valueOf(f.get(this)).getBytes());
@@ -120,13 +124,39 @@ public class Anson implements IJsonable {
 
 	private static void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
 			throws AnsonException, IOException {
-		TODO
+		if (collect == null) return;
+
+		boolean the1st = true;
+		stream.write('[');
+		for (Object o : collect) {
+			if (the1st) the1st = false;
+			else stream.write(new byte[] {',', ' '});
+
+			Class<?> elemtype = o.getClass();
+			writeNonPrimitive(stream, elemtype, o);
+		}
+		stream.write(']');
 	}
 
-	private static void toMapBlock(OutputStream stream, AbstractCollection<?> collect)
+	private static void toMapBlock(OutputStream stream, Map<?, ?> map)
 			throws AnsonException, IOException {
+		if (map == null) return;
 
-		TODO
+		boolean the1st = true;
+		stream.write('{');
+		for (Object k : map.keySet()) {
+			if (the1st) the1st = false;
+			else stream.write(new byte[] {',', ' '});
+
+			stream.write('\"');
+			stream.write(k.toString().getBytes());
+			stream.write(new byte[] {'\"', ':', ' '});
+
+			Object v = map.get(k);
+			Class<?> elemtype = v.getClass();
+			writeNonPrimitive(stream, elemtype, v);
+		}
+		stream.write('}');
 	}
 
 	private static void toListBlock(OutputStream stream, AbstractCollection<?> list)
@@ -178,9 +208,10 @@ public class Anson implements IJsonable {
 									f.getName(), f.getClass().getName());
 						}
 					*/
-					writeNonPrimitive(stream, f, e, e.getClass());
+					writeNonPrimitive(stream, e.getClass(), e);
 				}
-				else if (f.getType().isPrimitive())
+				else // if (f.getType().isPrimitive())
+					// must be primitive?
 					stream.write(String.valueOf(e).getBytes());
 
 		}
@@ -220,7 +251,7 @@ public class Anson implements IJsonable {
 	 * @throws AnsonException
 	 * @throws IOException
 	 */
-	private static void writeNonPrimitive(OutputStream stream, String fdName,
+	private static void writeNonPrimitive(OutputStream stream,
 			Class<? extends Object> fdClz, Object v)
 			throws AnsonException, IOException {
 		if (v == null) {
@@ -234,7 +265,7 @@ public class Anson implements IJsonable {
 		else if (List.class.isAssignableFrom(v.getClass()))
 			toListBlock(stream, (AbstractCollection<?>) v);
 		else if ( Map.class.isAssignableFrom(vclz))
-			toMapBlock(stream, (AbstractCollection<?>) v);
+			toMapBlock(stream, (Map<?, ?>) v);
 		else if (AbstractCollection.class.isAssignableFrom(vclz))
 			toCollectionBlock(stream, (AbstractCollection<?>) v);
 		else if (fdClz.isArray()) {
@@ -245,8 +276,8 @@ public class Anson implements IJsonable {
 		else
 			try { stream.write(v.toString().getBytes()); }
 			catch (NotSerializableException e) {
-				throw new AnsonException(0, "Filed %s of %s can't been serialized: %s",
-						fdName, vclz.getName(), e.getMessage());
+				throw new AnsonException(0, "A filed of type %s can't been serialized: %s",
+						vclz.getName(), e.getMessage());
 			}
 	}
 	

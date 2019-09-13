@@ -41,14 +41,23 @@ for (String coln : colnames.keySet())
 		</pre>
 	 * */
 	private HashMap<String, Object[]> colnames;
+
+	@AnsonField(ignoreTo = true)
 	private ResultSet rs;
+
+	@AnsonField(ignoreTo = true, ignoreFrom = true)
 	private Connection conn;
+
+	@AnsonField(ignoreTo = true, ignoreFrom = true)
 	private Statement stmt;
 
 	/**For paged query, this the total row count*/
 	private int total = 0;
 
 	private HashMap<Class<?>,String> stringFormats;
+
+	/** for deserializing */
+	public AnsonResultset() { }
 
 	public AnsonResultset(ResultSet rs) throws SQLException {
 		ICRconstructor(rs);
