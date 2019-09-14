@@ -59,11 +59,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		private Object enclosing;
 		private HashMap<String, Field> fmap;
 
-//		public ParsingCtx(HashMap<String, Field> fmap, IJsonable enclosing) {
-//			this.fmap = fmap;
-//			this.enclosing = enclosing;
-//		}
-
 		public ParsingCtx(HashMap<String, Field> fmap, IJsonable enclosing) {
 			this.fmap = fmap;
 			this.enclosing = enclosing;
@@ -72,6 +67,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		public ParsingCtx(HashMap<String, Field> fmap, HashMap<String, ?> enclosing) {
 			this.fmap = fmap;
 			this.enclosing = enclosing;
+		}
+
+		public boolean isInMap() {
+			return enclosing instanceof HashMap;
 		}
 	}
 
@@ -235,11 +234,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	public void enterPair(PairContext ctx) {
 		super.enterPair(ctx);
 		ParsingCtx top = top();
-//		if (top.parsingMap != null) {
-//			// we are parsing map, prop can't be a field name
-//			top.parsingProp = getProp(ctx);
-//		}
-//		else {
+		if (top.isInMap()) {
+			// we are parsing map, prop can't be a field name
+			top.parsingProp = getProp(ctx);
+			top.parsedVal = null;
+		}
+		else {
 			// create a container for Collection
 			try {
 				top.parsingProp = getProp(ctx);
@@ -251,7 +251,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			} catch (AnsonException e) {
 				e.printStackTrace();
 			}
-//		}
+		}
 	}
 	
 	/**Parse property name, tolerate enclosing quotes presenting or not. 
@@ -292,7 +292,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				} catch (Exception e) { }
 				return rawTxt;
 		}
-		else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		// else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		else return rawTxt == null ? null : rawTxt.trim();
 	}
 	
 	/**Get prop's type from stack's top element.
@@ -315,13 +316,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			top.parsingArr = (ArrayList<?>)Class.forName("java.util.ArrayList").newInstance();
 
 			// top.parsingProp can be a map key or an Anson field 
-//			if (top.parsingMap != null) {
-//				// top.parsingArrElemCls = top.parsingMap.getComponentType();
-//			}
-//			else {
+			if (!(top.isInMap())) {
 				Field f = top.fmap.get(top.parsingProp);
 				top.parsingArrElemCls = f.getType().getComponentType();
-//			}
+			}
+			else // it's HashMap, let the top.parsingArrElemCls unresolved
+				top.parsingArrElemCls = Object.class;
 		} catch (ReflectiveOperationException e) {
 			e.printStackTrace();
 		}
@@ -330,17 +330,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	@Override
 	public void exitArray(ArrayContext ctx) {
 		ParsingCtx top = top();
-//		if (top.parsingMap != null) {
-//			top.parsedVal = top.parsingArr;
-//		}
-//		else {
+		if (top.isInMap()) {
+			top.parsedVal = top.parsingArr;
+		}
+		else {
 			Class<?> ft = top.fmap.get(top.parsingProp).getType();
 			if (ft.isArray())
 				top.parsedVal = toPrimitiveArray(top.parsingArr, ft);	
 			else
 				// keep the List as value
 				top.parsedVal = top.parsingArr;
-//		}
+		}
 		top.parsingArr = null;
 	}
 
@@ -382,18 +382,28 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	public void exitValue(ValueContext ctx) {
 		ParsingCtx top = top();
 		if (top != null && top.parsingArr != null) {
-			// if in a map, parsingProp is the map key
-//			if (top.parsingMap != null) {
-//				 top.parsedVal = top.parsingMap;
-//				 top.parsingMap = null;
+			// if in a map, parsingProp is the map key, element type can only handled with a guess
+//			if (top.isInMap()) {
+//				// other values are handled when exiting pair
+//				// only list (array) needing a help here
+//				List<Object> arr = (List<Object>) top.parsingArr;
+//				if (arr != null)
+//					arr.add(top.parsedVal);
 //			}
 //			else {
-				Field f = top().fmap.get(top.parsingProp);
 				// NOTE: ft can only work for Array, collection's ft is null
-				Class<?> ft = f.getType().getComponentType();
+				Field f = top().fmap.get(top.parsingProp);
+				Class<?> elemtype = null;
+
+				// if in a map, parsingProp is the map key, element type can only handled with a guess
+				if (!(top.isInMap())) {
+					elemtype = f.getType().getComponentType();
+				}
 				String txt = ctx.getText();
 				List<?> arr = top.parsingArr;
-				if (List.class.isAssignableFrom(f.getType())) {
+				if (!top.isInMap()
+					// only when not in a map, field type can be retrieved from filed, otherwise only key string available
+					&& List.class.isAssignableFrom(f.getType())) {
 					// for List, ft is null
 					if (top.parsedVal == null) // simple value like String
 						((List<Object>)arr).add(getStringVal(ctx.STRING(), txt));
@@ -402,34 +412,44 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 						top.parsedVal = null;
 					}
 				}
-				else if (ft == int.class || ft == Integer.class)
+				else if (top.isInMap()) {
+					// complex value is helped deserialized in parsedVal
+					if (top.parsedVal != null) {
+						((List<Object>)arr).add(top.parsedVal);
+						top.parsedVal = null;
+					}
+					else
+						((List<Object>)arr).add(getStringVal(ctx.STRING(), txt));
+				}
+				else if (elemtype == int.class || elemtype == Integer.class)
 					((List<Integer>)arr).add(Integer.valueOf(getStringVal(ctx.NUMBER(), txt)));
-				else if (ft == float.class || ft == Float.class)
+				else if (elemtype == float.class || elemtype == Float.class)
 					((List<Float>)arr).add(Float.valueOf(getStringVal(ctx.NUMBER(), txt)));
-				else if (ft == double.class || ft == Double.class)
+				else if (elemtype == double.class || elemtype == Double.class)
 					((List<Double>)arr).add(Double.valueOf(getStringVal(ctx.NUMBER(), txt)));
-				else if (ft == long.class || ft == Long.class)
+				else if (elemtype == long.class || elemtype == Long.class)
 					((List<Long>)arr).add(Long.valueOf(getStringVal(ctx.NUMBER(), txt)));
-				else if (ft == short.class || ft == Short.class)
+				else if (elemtype == short.class || elemtype == Short.class)
 					((List<Short>)arr).add(Short.valueOf(getStringVal(ctx.NUMBER(), txt)));
-				else if (ft == byte.class || ft == Byte.class)
+				else if (elemtype == byte.class || elemtype == Byte.class)
 					((List<Byte>)arr).add(Byte.valueOf(getStringVal(ctx.NUMBER(), txt)));
-				else if (ft == String.class) 
+				else if (elemtype == String.class) 
 					((List<String>)arr).add(getStringVal(ctx));
-				else if (IJsonable.class.isAssignableFrom(ft))
+				else if (elemtype != null && IJsonable.class.isAssignableFrom(elemtype))
 					((List<IJsonable>)arr).add((IJsonable) top.parsedVal);
-				else if (Object.class.isAssignableFrom(ft))
+				else if (elemtype != null && Object.class.isAssignableFrom(elemtype))
 					((List<Object>)arr).add(top.parsedVal);
 				else
 					// what's else?
 					throw new NullPointerException(String.format("internal", "Unsupported array for type: %s (field %s)",
-							f.getType().getName(), f.getName()));
+							elemtype.getName(), top.parsingProp));
 
 				top.parsedVal = null;
 //			}
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void exitPair(PairContext ctx) {
 		super.exitPair(ctx);
@@ -437,11 +457,22 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		Utils.logi("Property-value: %s", ctx.getChild(2).getText());
 
 		try {
-			String fn = getProp(ctx);
-			Field f = top().fmap.get(fn);
-			if (f == null)
-				throw new AnsonException(0, "Field not found: %s", fn);
+			// String fn = getProp(ctx);
+			ParsingCtx top = top();
+			String fn = top.parsingProp;
+//			if (f == null)
+//				throw new AnsonException(0, "Field not found: %s", fn);
+			// map's pairs also exits here - map helper
+			if (top.isInMap()) {
+				((HashMap<String, Object>)top.enclosing).put(top.parsingProp, top.parsedVal);
+				top.parsedVal = null;
+				top.parsingProp = null;
+				return;
+			}
+			// not map ...
+//			else
 
+			Field f = top.fmap.get(fn);
 			AnsonField af = f.getAnnotation(AnsonField.class);
 			if (af != null && af.ignoreFrom()) {
 				if (verbose)
@@ -453,16 +484,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			Class<?> ft = f.getType();
 			f.setAccessible(true);
 			
-			ParsingCtx top = top();
-
-			// map's pairs also exits here - map helper
-//			if (top.parsingMap != null) {
-//				top.parsingMap.put(top.parsingProp, top.parsedVal);
-//				top.parsedVal = null;
-//				top.parsingProp = null;
-//			}
-//			// not map ...
-//			else
 			if (ft == String.class) {
 				String v = getStringVal(ctx);
 				f.set(enclosing, v);
