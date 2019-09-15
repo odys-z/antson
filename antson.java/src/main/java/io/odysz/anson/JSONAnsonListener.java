@@ -319,7 +319,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	/**Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
 	 * Can't handle NUMBER | obj | array.
 	 * @param ctx
-	 * @return
+	 * @return value in string
 	 */
 	private static String getStringVal(PairContext ctx) {
 		TerminalNode str = ctx.value().STRING();
@@ -351,7 +351,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param prop
 	 * @return type
 	 * @throws AnsonException
-	 */
 	private Class<?> getType(String prop) throws AnsonException {
 		Field f = top().fmap.get(prop);
 		if (f == null)
@@ -359,7 +358,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		Class<?> ft = f.getType();
 		return ft;
 	}
+	 */
 
+	/* (non-Javadoc)
+	 * @see gen.antlr.json.JSONBaseListener#enterArray(gen.antlr.json.JSONParser.ArrayContext)
+	 */
 	@Override
 	public void enterArray(ArrayContext ctx) {
 		try {
@@ -375,10 +378,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 //			else // it's HashMap, let the top.parsingArrElemCls unresolved
 //				top.parsingArrElemCls = Object.class;
 			
-			if (top.isInList())
+			if (top.isInList() || top.isInMap())
 				push(ArrayList.class);
-			else if (top.isInMap())
-				push(HashMap.class);
 			else {
 				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				push(ft);
@@ -468,8 +469,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 							:f.getType().getComponentType();
 				}
 				String txt = ctx.getText();
-				List<?> arr = (List<?>) top.enclosing;
 				if (top.isInList()) {
+					List<?> arr = (List<?>) top.enclosing;
 					// for List, ft is not null
 					if (top.parsedVal == null) {
 						// simple value like String FIXME shouldn't happen
@@ -478,10 +479,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					}
 					else {
 						((List<Object>)arr).add(top.parsedVal);
-						top.parsedVal = null;
 					}
+					top.parsedVal = null;
 
-					else if (elemtype == int.class || elemtype == Integer.class)
+					/*
+					if (elemtype == int.class || elemtype == Integer.class)
 						((List<Integer>)arr).add(Integer.valueOf(getStringVal(ctx.NUMBER(), txt)));
 					else if (elemtype == float.class || elemtype == Float.class)
 						((List<Float>)arr).add(Float.valueOf(getStringVal(ctx.NUMBER(), txt)));
@@ -503,19 +505,20 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 						// what's else?
 						throw new NullPointerException(String.format("internal", "Unsupported array for type: %s (field %s)",
 								elemtype.getName(), top.parsingProp));
-
-
+								*/
 				}
 				else if (top.isInMap()) {
 					// complex value is helped deserialized in parsedVal
-					if (top.parsedVal != null) {
-						((List<Object>)arr).add(top.parsedVal);
-						top.parsedVal = null;
-					}
-					else
-						((List<Object>)arr).add(getStringVal(ctx.STRING(), txt));
+//					HashMap<String, ?> map = (HashMap<String, ?>) top.enclosing;
+//					if (top.parsedVal != null) {
+//						map.put(top.parsedVal);
+//						top.parsedVal = null;
+//					}
+//					else
+//						((List<Object>)arr).add(getStringVal(ctx.STRING(), txt));
+					top.parsedVal = getStringVal(ctx.STRING(), txt);
 				}
-				top.parsedVal = null;
+//				top.parsedVal = null;
 //			}
 		}
 	}

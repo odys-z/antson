@@ -129,6 +129,16 @@ class AnsonTest {
 		AnsTRs rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
 				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, ver: null, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
+				+ " rowIdx: 0, results: [[\"0 1\", \"0 2\", \"0 3\", \"0 4\"], [\"1 1\", \"1 2\", \"1 3\", \"1 4\"], [\"2 1\", \"2 2\", \"2 3\", \"2 4\"]],"
+				+ " seq: 0}, ver: null, seq: 0}");
+		
+		assertEquals(3, rs.rs.getRowCount());
+		rs.rs.beforeFirst().next();
+		assertEquals("0 1", rs.rs.getString("1"));
+
+		rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
+				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, ver: null, rowCnt: 3, colCnt: 4,"
+				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]],"
 				+ " seq: 0}, ver: null, seq: 0}");
 		
