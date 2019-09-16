@@ -15,4 +15,9 @@ import java.lang.annotation.*;
 public @interface AnsonField {
 	boolean ignoreTo() default false;
 	boolean ignoreFrom() default false;
+
+	/**Specifying array type information.<br>
+	 * Example: for Object[], use @ AnsonField(valType="[Ljava.lang.Object;")
+	 */
+	String valType() default "";
 }

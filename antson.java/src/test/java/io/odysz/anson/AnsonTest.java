@@ -45,7 +45,7 @@ class AnsonTest {
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.Ans2dArr, ver: null, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []], seq: 0}", s);
 		
-		AnsTCollect cll = new AnsTCollect();
+		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
 		cll.lst.add("B");
 		bos = new ByteArrayOutputStream(); 
@@ -97,13 +97,13 @@ class AnsonTest {
 		
 	@Test
 	void testFromJson_list() throws IllegalArgumentException, ReflectiveOperationException {
-		AnsTCollect cll = (AnsTCollect) Anson.fromJson("{type: io.odysz.anson.AnsTCollect, ver: null, lst: [\"A\", \"B\"], seq: 0}");
+		AnsTList cll = (AnsTList) Anson.fromJson("{type: io.odysz.anson.AnsTList, ver: null, lst: [\"A\", \"B\"], seq: 0}");
 		assertEquals(2, cll.lst.size());
 		assertEquals("A", cll.lst.get(0));
 		assertEquals("B", cll.lst.get(1));
 		
 		
-		cll = (AnsTCollect) Anson.fromJson("{type: io.odysz.anson.AnsTCollect, anss: ["
+		cll = (AnsTList) Anson.fromJson("{type: io.odysz.anson.AnsTList, anss: ["
 				+ "{type: io.odysz.anson.AnsT3, seq: 11}, "
 				+ "{type: io.odysz.anson.AnsT3, seq: 12}"
 				+ "], seq: 1}");
@@ -111,8 +111,8 @@ class AnsonTest {
 		assertEquals(11, cll.anss.get(0).seq);
 		assertEquals(12, cll.anss.get(1).seq);
 
-		cll = (AnsTCollect) Anson.fromJson("{type: io.odysz.anson.AnsTCollect, anss: ["
-				+ "{type: io.odysz.anson.AnsT3, seq: 11 ver: \"v0.1\", m: ["
+		cll = (AnsTList) Anson.fromJson("{type: io.odysz.anson.AnsTList, anss: ["
+				+ "{type: io.odysz.anson.AnsT3, seq: 11, ver: \"v0.1\", m: ["
 					+ "{type: io.odysz.anson.AnsT2, s: 4 }, "
 					+ "{type: io.odysz.anson.AnsT1, ver: \"x\" }]}, "
 				+ "{type: io.odysz.anson.AnsT3, seq: 12}"
@@ -124,6 +124,19 @@ class AnsonTest {
 		assertEquals(12, cll.anss.get(1).seq);
 	}
 
+	@Test
+	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException {
+		AnsTMap m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
+		assertEquals(null, m.ver);
+		assertEquals("B", m.map.get("A"));
+
+		m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, map: {\"A\": \"B\"}, mapArr: {a: [1, \"s\"]}}");
+		assertEquals("B", m.map.get("A"));
+		assertEquals(2, m.mapArr.get("a").length);
+		assertEquals(1, m.mapArr.get("a")[0]);
+		assertEquals("s", m.mapArr.get("a")[1]);
+	}
+		
 	@Test
 	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException, SQLException {
 		AnsTRs rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "

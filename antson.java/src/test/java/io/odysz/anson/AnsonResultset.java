@@ -40,6 +40,7 @@ for (String coln : colnames.keySet())
 	colnames.put(coln.toUpperCase(), new Object[] {colnames.get(coln), coln});
 		</pre>
 	 * */
+	@AnsonField(valType="[Ljava.lang.Object;")
 	private HashMap<String, Object[]> colnames;
 
 	@AnsonField(ignoreTo = true)

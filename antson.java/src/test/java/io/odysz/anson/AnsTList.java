@@ -3,13 +3,13 @@ package io.odysz.anson;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AnsTCollect extends Anson {
+public class AnsTList extends Anson {
 
 	List<String> lst;
 	
 	List<AnsT3> anss;
 	
-	public AnsTCollect() {
+	public AnsTList() {
 		lst = new ArrayList<String>();
 	}
 }

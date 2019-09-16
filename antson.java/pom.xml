@@ -4,12 +4,28 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
-  <url>http://maven.apache.org</url>
+  <url>http://github.com/odys-z/antson</url>
 
+  <licenses>
+    <license>
+    	<name>MIT License</name>
+    	<url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Odys Zhou</name>
+      <email>odys.zhou@gmail.com</email>
+      <organization>odysz.github.io</organization>
+      <organizationUrl>https://odysz.github.io</organizationUrl>
+    </developer>
+  </developers>
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	<maven.compiler.source>1.8</maven.compiler.source>
@@ -33,7 +49,7 @@
    	<dependency>
 	    <groupId>io.github.odys-z</groupId>
 	    <artifactId>semantic.DA</artifactId>
-	    <version>0.9.7-SNAPSHOT</version>
+	    <version>0.9.8-SNAPSHOT</version>
 	    <scope>test</scope>
 	</dependency>
 
@@ -44,4 +60,127 @@
     	<scope>test</scope>
     </dependency>
   </dependencies>
+  
+  <scm>
+  	<connection>scm:git:git://github.com/odys-z/antson.git</connection>
+  	<developerConnection>scm:git:odys-z@github.com:odys-z/antson.git</developerConnection>
+  	<url>https://github.com/odys-z/antson</url>
+  	<tag>HEAD</tag>
+  </scm>
+
+  <distributionManagement>
+  	<snapshotRepository>
+  		<id>ossrh</id>
+  		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+  		<uniqueVersion>false</uniqueVersion>
+  	</snapshotRepository>
+  	<repository>
+  		<id>ossrh</id>
+  		<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+	</repository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <plugin>
+      	<artifactId>maven-compiler-plugin</artifactId>
+        <version>3.7.0</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
+      </plugin>
+
+	  <plugin>
+	  	<artifactId>maven-deploy-plugin</artifactId>
+	  	<version>2.8.2</version>
+	  	<executions>
+	  		<execution>
+	  			<id>default-deploy</id>
+	  			<phase>deploy</phase>
+	  			<goals>
+	  				<goal>deploy</goal>
+	  			</goals>
+	  		</execution>
+	  	</executions>
+	  </plugin>
+
+	  <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-release-plugin</artifactId>
+		<version>2.5.3</version>
+		<configuration>
+			<localCheckout>true</localCheckout>
+			<pushChanges>false</pushChanges>
+			<mavenExecutorId>forked-path</mavenExecutorId>
+			<arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
+		</configuration>
+		<dependencies>
+			<dependency>
+				<groupId>org.apache.maven.scm</groupId>
+				<artifactId>maven-scm-provider-gitexe</artifactId>
+				<version>1.9.5</version>
+			</dependency>
+		</dependencies>
+	  </plugin>
+
+	  <plugin>
+		<groupId>org.sonatype.plugins</groupId>
+		<artifactId>nexus-staging-maven-plugin</artifactId>
+		<version>1.6.7</version>
+		<extensions>true</extensions>
+		<configuration>
+			<serverId>ossrh</serverId>
+			<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+			<autoReleaseAfterClose>true</autoReleaseAfterClose>
+		</configuration>
+	  </plugin>
+
+	  <!-- JavaDoc and source attachment -->
+	  <plugin>
+	      <groupId>org.apache.maven.plugins</groupId>
+	      <artifactId>maven-source-plugin</artifactId>
+	      <version>2.2.1</version>
+	      <executions>
+	        <execution>
+	          <id>attach-sources</id>
+	          <goals>
+	            <goal>jar-no-fork</goal>
+	          </goals>
+	        </execution>
+	      </executions>
+	  </plugin>
+
+	  <plugin>
+	      <groupId>org.apache.maven.plugins</groupId>
+	      <artifactId>maven-javadoc-plugin</artifactId>
+	      <version>2.9.1</version>
+	      <executions>
+	        <execution>
+	          <id>attach-javadocs</id>
+	          <goals>
+	            <goal>jar</goal>
+	          </goals>
+	        </execution>
+	      </executions>
+	  </plugin>
+	
+	<!-- 
+	  <plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-gpg-plugin</artifactId>
+		<version>1.5</version>
+		<executions>
+			<execution>
+			  <id>antson</id>
+			  <phase>verify</phase>
+			  <goals>
+				<goal>sign</goal>
+			  </goals>
+			</execution>
+		</executions>
+	  </plugin>
+	 -->
+     </plugins>
+   </build>
 </project>

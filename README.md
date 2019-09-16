@@ -37,8 +37,9 @@ handle java fields with type information and (de)serialize back forth. Every Gso
 of json data to Java object needing user implementing business handlers, one problem a time.
 
 Antson is trying to go further. Users only needing to define their business gramma -
-the application business data defined in java type, then send packages back and forth with the help of Antson API,
-consuming the data object like normal Java objects, and only take care of it's business processing.
+the application business data defined in strictly typed language like java or c#,
+then send packages back and forth with the help of Antson API, consuming the data
+objects like normal structured objects, and only take care of it's business processing.
 
 # Why no stream mode?
 
@@ -115,3 +116,24 @@ can be parsed into java type of
 Note that all envelopes in java are instances of io.odysz.anson.Anson.
 
 See the test case [AnsonTest#testFromJson_asonArr()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
+
+## You need provide annotation if your type in List or Map is complicate
+
+If the value's type is more complicate than string, you must provide the information.
+
+In the current version, it's already proved at least java version needing this information
+because java is [type erasure](https://docs.oracle.com/javase/tutorial/java/generics/erasure.html)
+for generic type parameters.
+
+Here is the test case:
+
+~~~
+    public class AnsonResultset {
+        @AnsonField(valType="[Ljava.lang.Object;")
+        private HashMap<String, Object[]> colnames;
+    }
+~~~
+
+For usable valType string, see [Class.forName() API](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName(java.lang.String).
+
+For test case, see [AnsonTest#testFromJson_rs()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
