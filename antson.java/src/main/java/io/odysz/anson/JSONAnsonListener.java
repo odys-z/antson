@@ -93,32 +93,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		public String valType() {
 			return this.valType;
 		}
-
-		/*
-		@SuppressWarnings("unchecked")
-		public ParsingCtx pushArr(ArrayList<?> arrayList) {
-			if (parsingArrs == null)
-				parsingArrs = arrayList;
-			else ((List<Object>)parsingArrs).add((Object)arrayList);
-			
-			return this;
-		}
-		
-		@SuppressWarnings("unchecked")
-		public List<?> popArr() {
-			// must not null when poping
-			List<?> arr = parsingArrs;
-			while (arr.size() > 0 && List.class.isAssignableFrom(arr.get(arr.size() - 1).getClass()))
-				arr = (List<Object>) arr.get(arr.size() - 1);
-			
-			arr
-			return arr;
-		}
-
-		public List<?> parsingArr() {
-			return null;
-		}
-		*/
 	}
 
 	/**Merge clazz's field meta up to the IJsonable ancestor.
