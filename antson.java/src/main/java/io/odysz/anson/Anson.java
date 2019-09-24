@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -358,12 +359,18 @@ public class Anson implements IJsonable {
 	 */
 	public static IJsonable fromJson(String json)
 			throws IllegalArgumentException, ReflectiveOperationException {
-		return parse(json);
+		return parse(CharStreams.fromString(json));
 	}
 	
-	private static IJsonable parse(String json)
+	public static IJsonable fromJson(InputStream is)
+			throws IOException, IllegalArgumentException, IllegalAccessException {
+		return parse(CharStreams.fromStream(is));
+	}
+
+	private static IJsonable parse(CharStream ins)
 			throws IllegalArgumentException, IllegalAccessException {
-		JSONLexer lexer = new JSONLexer(CharStreams.fromString(json));
+
+		JSONLexer lexer = new JSONLexer(ins);
 
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		JSONParser parser = new JSONParser(tokens);
