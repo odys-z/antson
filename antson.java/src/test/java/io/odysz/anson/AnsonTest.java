@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.odysz.anson.x.AnsonException;
+
 class AnsonTest {
 
 	@BeforeEach
@@ -65,7 +67,7 @@ class AnsonTest {
 	}
 
 	@Test
-	void testFromJson() throws IllegalArgumentException, ReflectiveOperationException {
+	void testFromJson() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
 		AnsT1 anson = (AnsT1) Anson.fromJson("{type:io.odysz.anson.AnsT1, seq: 1, ver: \"v0.1\", m: {\"name\": \"x\"}}");
 		assertEquals(1, anson.seq);
 		assertEquals("x", anson.m.name);
@@ -85,7 +87,7 @@ class AnsonTest {
 	}
 	
 	@Test
-	void testFromJson_asonArr() throws IllegalArgumentException, ReflectiveOperationException {
+	void testFromJson_asonArr() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
 		// AnsT3.m is typeof AnsT2
 		AnsT3 anson3 = (AnsT3) Anson.fromJson("{type: io.odysz.anson.AnsT3, seq: 3, ver: \"v0.1\", m: [" +
 				"{type: io.odysz.anson.AnsT2, s: 4 }, " + 
@@ -96,7 +98,7 @@ class AnsonTest {
 	}
 		
 	@Test
-	void testFromJson_list() throws IllegalArgumentException, ReflectiveOperationException {
+	void testFromJson_list() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
 		AnsTList cll = (AnsTList) Anson.fromJson("{type: io.odysz.anson.AnsTList, ver: null, lst: [\"A\", \"B\"], seq: 0}");
 		assertEquals(2, cll.lst.size());
 		assertEquals("A", cll.lst.get(0));
@@ -125,7 +127,7 @@ class AnsonTest {
 	}
 
 	@Test
-	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException {
+	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
 		AnsTMap m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
 		assertEquals(null, m.ver);
 		assertEquals("B", m.map.get("A"));
@@ -138,7 +140,7 @@ class AnsonTest {
 	}
 		
 	@Test
-	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException, SQLException {
+	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException, SQLException, AnsonException {
 		AnsTRs rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
 				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, ver: null, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"

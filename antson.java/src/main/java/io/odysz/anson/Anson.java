@@ -1,11 +1,13 @@
 package io.odysz.anson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.AbstractCollection;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +24,21 @@ import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.anson.x.AnsonException;
 
 public class Anson implements IJsonable {
+	/**For debug, print, etc. The string can not been used for json data.
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+			toBlock(bos);
+			return bos.toString(StandardCharsets.UTF_8.name());
+		} catch (AnsonException | IOException e) {
+			e.printStackTrace();
+			return super.toString();
+		}
+	}
+
 	private static final int bufLength = 64;
 
 	protected String ver;
@@ -358,17 +375,17 @@ public class Anson implements IJsonable {
 	 * @throws ReflectiveOperationException
 	 */
 	public static IJsonable fromJson(String json)
-			throws IllegalArgumentException, ReflectiveOperationException {
+			throws AnsonException {
 		return parse(CharStreams.fromString(json));
 	}
 	
 	public static IJsonable fromJson(InputStream is)
-			throws IOException, IllegalArgumentException, IllegalAccessException {
+			throws IOException, AnsonException {
 		return parse(CharStreams.fromStream(is));
 	}
 
 	private static IJsonable parse(CharStream ins)
-			throws IllegalArgumentException, IllegalAccessException {
+			throws AnsonException {
 
 		JSONLexer lexer = new JSONLexer(ins);
 
