@@ -127,6 +127,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private ParsingCtx top() { return stack.get(0); }
 
+	private ParsingCtx toparent() { return stack.size() > 1 ? stack.get(1) : null; }
+
 	/**Push parsing node (a envelope, map).
 	 * @param enclosingClazz new parsing IJsonable object's class
 	 * @throws ReflectiveOperationException
@@ -335,19 +337,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return null;
 	}
 
-	/**Get prop's type from stack's top element.
-	 * @param prop
-	 * @return type
-	 * @throws AnsonException
-	private Class<?> getType(String prop) throws AnsonException {
-		Field f = top().fmap.get(prop);
-		if (f == null)
-			throw new AnsonException(0, "Field not found: %s", prop);
-		Class<?> ft = f.getType();
-		return ft;
-	}
-	 */
-
 	@Override
 	public void enterArray(ArrayContext ctx) {
 		try {
@@ -463,12 +452,14 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void exitPair(PairContext ctx) {
 		super.exitPair(ctx);
-		Utils.logi("Property-name: %s", ctx.getChild(0).getText());
-		Utils.logi("Property-value: %s", ctx.getChild(2).getText());
+		if (AnsonFlags.parser) {
+			Utils.logi("[AnsonFlags.parser] Property-name: %s", ctx.getChild(0).getText());
+			Utils.logi("[AnsonFlags.parser] Property-value: %s", ctx.getChild(2).getText());
+		}
 
 		try {
 			// String fn = getProp(ctx);
@@ -486,17 +477,24 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// not map ...
 //			else
 
+			Object enclosing = top().enclosing;
 			Field f = top.fmap.get(fn);
+			f.setAccessible(true);
 			AnsonField af = f.getAnnotation(AnsonField.class);
 			if (af != null && af.ignoreFrom()) {
 				if (verbose)
 					Utils.logi("%s ignored", fn);
 				return;
 			}
+			else if (af != null && af.ref() == AnsonField.enclosing) {
+				Object parent = toparent();
+				if (parent == null)
+					Utils.warn("parent %s is ignored: reference is null", fn);
 
-			Object enclosing = top().enclosing;
+				f.set(enclosing, parent);
+			}
+
 			Class<?> ft = f.getType();
-			f.setAccessible(true);
 			
 			if (ft == String.class) {
 				String v = getStringVal(ctx);
@@ -506,6 +504,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				// construct primitive value
 				String v = ctx.getChild(2).getText();
 				setPrimitive((IJsonable) enclosing, f, v);
+			}
+			else if (ft.isEnum()) {
+				String v = getStringVal(ctx);
+				if (!LangExt.isblank(v))
+					f.set(enclosing, Enum.valueOf((Class<Enum>) f.getType(), v));
 			}
 			else if (ft.isArray())
 				f.set(enclosing, toPrimitiveArray((List<?>)top.parsedVal, ft));
@@ -519,7 +522,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				f.set(enclosing, top.parsedVal);
 			}
 			else if (Object.class.isAssignableFrom(ft)) {
-				Utils.warn("Unsupported type's value of %s deserialized as %s", fn, ft.getName());
+				Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
+						fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
 				String v = ctx.getChild(2).getText();
 				f.set(enclosing, v);
 			}
