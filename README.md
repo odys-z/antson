@@ -153,11 +153,11 @@ the looping:
 This will successfully serialize java object into json. But the problem is it can
 not deserialize the reference correctly.
 
-To re-establish this relation is not implemented except the "enclosing" relationship.
-Use the "enclosing" annotation to deserialize the relation automatically:
+To re-establish this relation is not implemented except the "parent" relationship.
+Use the "ref=AnsonField.enclosing" annotation to deserialize the relation automatically:
 
 ~~~
-    @AnsonField(enclosing)
+    @AnsonField(ref=AnsonField.enclosing)
 ~~~
 
 This will make Antson deserialize an object with a guess - just set it to the enclosing
