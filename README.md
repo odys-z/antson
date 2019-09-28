@@ -7,23 +7,21 @@ Antson is ANother Tool for JSON (de)serialize java object to / from json.
 For short, there is no such tool / lib that can convert javascript object to or
 from java or other programming language like C#.
 
-Why? Because js object has no types. You can not define a "io.app.User" type in
-js. All js objects are only a HashMap for Java. Any json data are converted into
-java.lang.Map in java world traditionally. There are a lot of tools helping to do
-this. For java, json is data without type, this is every upsetting to java programmers,
-at least to the author.
+Why? Because js object has no structure types with support of compiler. You can
+not define a "io.app.User" type in js. All js objects are only a HashMap for Java.
+Any json data are converted into java.lang.Map in java world traditionally. There
+are a lot of tools helping to do this. For java, js object is data without type,
+this is every upsetting to java programmers, at least to the author.
 
-In many cases, only HashMap structure is not enought. Take a SOA architecture for example,
-protocol packages needing a way to tell the reciever how to deserialize the package.
-Servers needing to know how the request been parsed, even finding a parser - like finding the
-correct mothod for a [SOAP Envelope](https://en.wikipedia.org/wiki/SOAP#Example_message_(encapsulated_in_HTTP)).
+In many cases, only HashMap structure is not enought. Take a SOA architecture for
+example, protocol packages needing a way to tell the reciever how to deserialize
+the package. Server needing to know how the request been parsed, even for finding
+the parser - like finding the correct mothod for a
+[SOAP Envelope](https://en.wikipedia.org/wiki/SOAP#Example_message_(encapsulated_in_HTTP)).
 
 If all envelopes can not parsed before dispatched, the dispatcher must atleast
 first try to docode "port" name, then let the reciever handle the rest of the
-content - because it's not understandable by dispatcher. Typed data should been
-deserialized and handled here by logic model, also should transparently exchanged
-between client and server. If you are comfort with MS .net webservice framework,
-you are not supprised with this idea.
+content - because it's not understandable by dispatcher.
 
 On way to do this is use semantics defined by structure, like this:
 
@@ -35,10 +33,14 @@ It's no longer simply a map now, it's structured data. If this structure getting
 more complex, data user will have to explain the structure, otherwise it won't been
 deserialized properly. Then the (de)serializer will getting complicate. The down
 side of this is your architecture will turn into mess because you can't separate
-the protocol layer from the application's business handling.
+the protocol layer from the application's business handling - your massage parsing
+depends on business logics.
 
 For java or c# data type, the structure is supported at language level. The server
-and client should talk on the same data type and exchange object at ease.
+and client should talk on the same data type and exchange object at ease. To achieve
+this, typed data should been deserialized transparently, and exchanged between the
+client and server. If you are comfort with MS .net webservice framework, you are
+not supprised with this idea.
 
 [Gson](https://github.com/google/gson) is a good try to go further. But the method
 is still not enough. The main weakness is it's not smart enough - it doesn't handle
@@ -52,13 +54,13 @@ then send json packages back and forth with the help of Antson API, consuming th
 data objects like normal structured objects, and only take care of it's business
 processing.
 
-# Why no stream mode?
+# Why no input stream mode?
 
 Antson provid only output stream writing API, for serializing into json string.
 No input stream mode is supported.
 
-The reason behind this is that Antson is based on Antlr, which is an LL(\*) parsing
-tool that can not work in stream mode.
+The reason behind this is that Antson is based on [Antlr4](https://github.com/antlr/antlr4),
+which is an LL(\*) parsing tool that can not work in stream mode.
 
 If your json data is large, try breack it into small chunks, or may be let Anston
 working as a [Karfka](https://kafka.apache.org/intro) message consummer - might
