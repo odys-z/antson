@@ -3,12 +3,15 @@ package io.odysz.anson;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.odysz.anson.AnsT4Enum.MsgCode;
+import io.odysz.anson.AnsT4Enum.Port;
 import io.odysz.anson.x.AnsonException;
 
 class AnsonTest {
@@ -53,7 +56,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		cll.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTCollect, anss: null, ver: null, lst: [\"A\", \"B\"], seq: 0}", s);
+		assertEquals("{type: io.odysz.anson.AnsTList, anss: null, ver: null, lst: [\"A\", \"B\"], seq: 0}", s);
 
 		AnsTRs anrs = new AnsTRs();
 		bos = new ByteArrayOutputStream(); 
@@ -64,6 +67,44 @@ class AnsonTest {
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]],"
 				+ " seq: 0}, ver: null, seq: 0}", s);
+	}
+
+	@SuppressWarnings("unused")
+	@Test
+	void test2Json_PC() throws Exception {
+		AnsT3 parent = new AnsT3();
+		parent.seq = 1;
+		parent.ver = "v0.1";
+		
+		AnsT3Child c = new AnsT3Child(parent);
+		AnsT3son son = new AnsT3son(parent);
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		parent.toBlock(bos);
+		String s = bos.toString(StandardCharsets.UTF_8.name());
+		String expect = "{type: io.odysz.anson.AnsT3, ver: \"v0.1\", "
+						+ "m: [{type: io.odysz.anson.AnsT3Child, ver: null, seq: 0}, "
+							+ "{type: io.odysz.anson.AnsT3son, gendre: \"male\", ver: null, seq: 0}], seq: 1}";
+		assertEquals(expect, s);
+		
+		AnsT3 p = (AnsT3) Anson.fromJson(s);
+		assertEquals(((AnsT3son)p.m[1]).gendre, "male");
+	}
+	
+	@Test
+	void test2Json4Enum() throws AnsonException, IOException {
+		AnsT4Enum en = new AnsT4Enum();
+		en.p = Port.heartbeat;
+		en.c = MsgCode.ok;
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		en.toBlock(bos);
+		String s = bos.toString(StandardCharsets.UTF_8.name());
+		String expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", ver: null, c: \"ok\", seq: 0}";
+		assertEquals(expect, s);
+		
+		AnsT4Enum denum = (AnsT4Enum) Anson.fromJson(expect);
+		assertEquals(denum.c, MsgCode.ok);
+		assertEquals(denum.p, Port.heartbeat);
 	}
 
 	@Test
@@ -161,4 +202,5 @@ class AnsonTest {
 		rs.rs.beforeFirst().next();
 		assertEquals("0, 1", rs.rs.getString("1"));
 	}
+	
 }

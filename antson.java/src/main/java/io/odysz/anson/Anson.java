@@ -47,7 +47,7 @@ public class Anson implements IJsonable {
 	public Anson() {}
 
 	@Override
-	public Anson toBlock(OutputStream stream)
+	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
 		stream.write("{type: ".getBytes());
 		stream.write((getClass().getName() + ", ").getBytes());
@@ -59,7 +59,7 @@ public class Anson implements IJsonable {
 		for (Field f : fmap.values()) {
 			// is this ignored?
 			AnsonField af = f.getAnnotation(AnsonField.class);
-			if (af != null && af.ignoreTo())
+			if (af != null && (af.ignoreTo() || af.ref() > 0))
 				continue;
 			
 			f.setAccessible(true);
@@ -291,6 +291,8 @@ public class Anson implements IJsonable {
 		}
 		else if (v instanceof String)
 			stream.write(("\"" + v.toString() + "\"").getBytes());
+		else if (fdClz.isEnum())
+			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes());
 		else
 			try { stream.write(v.toString().getBytes()); }
 			catch (NotSerializableException e) {

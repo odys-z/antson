@@ -7,6 +7,6 @@ import io.odysz.anson.x.AnsonException;
 
 public interface IJsonable {
 
-	IJsonable toBlock(OutputStream stream) throws AnsonException, IOException;
+	IJsonable toBlock(OutputStream stream, JsonOpt... opts) throws AnsonException, IOException;
 	IJsonable toJson(StringBuffer buf) throws IOException, AnsonException;
 }

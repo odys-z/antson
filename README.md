@@ -73,7 +73,7 @@ It's also planned publishing it as an independent lib, at least as a jar and DLL
 
 # Known Issues
 
-## Array element's type must specified
+## 1. Array element's type must specified
 
 The json gramma is taken and modified from [Antlr4's Gramma Page](https://github.com/antlr/grammars-v4/blob/master/json/JSON.g4),
 which is kept consistency with [JSON Gramma](https://www.json.org/).
@@ -144,7 +144,7 @@ Note that all envelopes in java are instances of io.odysz.anson.Anson.
 
 See the test case [AnsonTest#testFromJson_asonArr()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
-## You need provide annotation if your type in List or Map is complicate
+## 2. You need provide annotation if your type in List or Map is complicate
 
 If the value's type in a list or map is more complicate than string, you must
 provide the information.
@@ -165,3 +165,30 @@ Here is the test case:
 For usable valType string, see [Class.forName() API](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName(java.lang.String).
 
 For test case, see [AnsonTest#testFromJson_rs()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
+
+## 3. Referencing loops
+
+Antson try to deep serializing Anson objects. If two or more objects referencing
+each other, the java serializing processing will endup with stack over flow error.
+
+To avoid this, one of the referencing field must specified with annotation to break
+the looping:
+
+~~~
+    @AnsonField(ignore='true')
+~~~
+
+This will successfully serialize java object into json. But the problem is it can
+not deserialize the reference correctly.
+
+To re-establish this relation is not implemented except the "parent" relationship.
+Use the "ref=AnsonField.enclosing" annotation to deserialize the relation automatically:
+
+~~~
+    @AnsonField(ref=AnsonField.enclosing)
+~~~
+
+This will make Antson deserialize an object with a guess - just set it to the enclosing
+object.
+
+See test case: [AnsonTest#test2Json_PC()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
