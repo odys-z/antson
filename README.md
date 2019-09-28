@@ -172,7 +172,7 @@ Antson try to deep serializing Anson objects. If two or more objects referencing
 each other, the java serializing processing will endup with stack over flow error.
 
 To avoid this, one of the referencing field must specified with annotation to break
-the looping:
+the endless serializing looping:
 
 ~~~
     @AnsonField(ignore='true')
@@ -191,4 +191,8 @@ Use the "ref=AnsonField.enclosing" annotation to deserialize the relation automa
 This will make Antson deserialize an object with a guess - just set it to the enclosing
 object.
 
-See test case: [AnsonTest#test2Json_PC()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
+The common tree structure is handled smoothly with this. For a demo, see junit
+test case:
+[AnsonTest#test2Json_PC()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
+
+More freature requirement is open to comments and discussion.
