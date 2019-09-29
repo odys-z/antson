@@ -525,7 +525,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
 						fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
 				String v = ctx.getChild(2).getText();
-				f.set(enclosing, v);
+
+				if (!LangExt.isblank(v, "null"))
+					f.set(enclosing, v);
 			}
 			else throw new AnsonException(0, "sholdn't happen");
 

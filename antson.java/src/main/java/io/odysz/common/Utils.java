@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.odysz.anson.Anson;
+
 public class Utils {
 	/**Used for print out all caller.
 	 * Calling logi() etc. is recommended add a static final boolean flag before calling:<br>
@@ -126,6 +128,23 @@ public class Utils {
 			StackTraceElement[] x = ex.getStackTrace();
 			System.err.println(String.format("logkeys(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
+		}
+	}
+	
+	public static void logAnson(Anson ans) {
+		try {
+			if (printCaller) {
+				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+								stElements[2].getClassName(), stElements[2].getMethodName(),
+								stElements[2].getFileName(), stElements[2].getLineNumber()));
+			}
+
+			if (ans != null)
+				System.out.println(ans.toString());
+		} catch (Exception ex) {
+			System.err.println("logAnson(): Can't print. Error:");
+			ex.printStackTrace();
 		}
 	}
 
