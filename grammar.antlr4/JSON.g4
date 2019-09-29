@@ -54,7 +54,7 @@ qualifiedName
     ;
 // section end
 
-// Ody: tolerate property without quote
+// Ody: tolerate property without quotes
 // pair
 //    : STRING ':' value
 //    ;
