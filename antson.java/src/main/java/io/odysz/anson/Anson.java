@@ -135,6 +135,8 @@ public class Anson implements IJsonable {
 				stream.write(o.toString().getBytes());
 				stream.write('"');
 			}
+			else if (o == null)
+				stream.write("null".getBytes());
 			else stream.write(o.toString().getBytes());
 		}
 		stream.write(']');

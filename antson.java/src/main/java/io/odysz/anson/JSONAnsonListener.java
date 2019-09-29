@@ -399,6 +399,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    if (!arrayType.isArray()) {
 	        throw new IllegalArgumentException(arrayType.toString());
 	    }
+	    if (list == null)
+	    	return null;
+
 	    Class<?> primitiveType = arrayType.getComponentType();
 
 	    P array = arrayType.cast(Array.newInstance(primitiveType, list.size()));
