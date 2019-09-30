@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import io.odysz.anson.Anson;
 
 /**
+ * @deprecated
  * @author javaBeCool @ https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
  *
  */

@@ -90,6 +90,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			return this;
 		}
 		
+		/**Get type annotation
+		 * @return {@link AnsonField#valType()} annotation
+		 */
 		public String valType() {
 			return this.valType;
 		}

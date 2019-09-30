@@ -106,6 +106,26 @@ class AnsonTest {
 		assertEquals(denum.c, MsgCode.ok);
 		assertEquals(denum.p, Port.heartbeat);
 	}
+	
+	@Test
+	void test2Json4StrsList() throws AnsonException, IOException {
+		AnsTStrsList lst = new AnsTStrsList();
+		lst.seq = 1;
+		lst.ver = "v0.1";
+		lst.add("0,0", "0,1", "0,2");
+		lst.add("1,0", "1,1", "1,2");
+	
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		lst.toBlock(bos);
+		String s = bos.toString(StandardCharsets.UTF_8.name());
+		String expect = "{type: io.odysz.anson.AnsTStrsList, ver: \"v0.1\", lst: "
+				+ "[[\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"]], seq: 1}";
+		assertEquals(expect, s);
+	
+		AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
+		assertEquals(l.elem(0, 0), "0,0");		
+		assertEquals(l.elem(1, 1), "1,1");		
+	}
 
 	@Test
 	void testFromJson() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
