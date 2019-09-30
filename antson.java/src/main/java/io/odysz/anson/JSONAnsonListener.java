@@ -93,9 +93,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		/**Get type annotation
 		 * @return {@link AnsonField#valType()} annotation
 		 */
-		public String valType() {
-			return this.valType;
-		}
+		public String valType() { return this.valType; }
 	}
 
 	/**Merge clazz's field meta up to the IJsonable ancestor.
@@ -446,7 +444,15 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					((List<Object>)arr).add(figureJsonVal(ctx));
 				}
 				else {
-					((List<Object>)arr).add(top.parsedVal);
+					// try figure out is element also an array if enclosing is an array
+					// e.g. convert List<String> to String[]
+					Class<?> ft = top.fmap.get("array-elem").getType();
+					if (ft != null && ft.isArray()) {
+						((List<Object>)arr).add(
+								toPrimitiveArray((List<?>)top.parsedVal, ft));
+					}
+					else
+						((List<Object>)arr).add(top.parsedVal);
 				}
 				top.parsedVal = null;
 			}
@@ -471,8 +477,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// String fn = getProp(ctx);
 			ParsingCtx top = top();
 			String fn = top.parsingProp;
-//			if (f == null)
-//				throw new AnsonException(0, "Field not found: %s", fn);
+
 			// map's pairs also exits here - map helper
 			if (top.isInMap()) {
 				((HashMap<String, Object>)top.enclosing).put(top.parsingProp, top.parsedVal);
@@ -481,7 +486,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				return;
 			}
 			// not map ...
-//			else
 
 			Object enclosing = top().enclosing;
 			Field f = top.fmap.get(fn);
@@ -543,6 +547,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			e.printStackTrace();
 		}
 	}
+	
 
 	private static void setPrimitive(IJsonable obj, Field f, String v)
 			throws RuntimeException, ReflectiveOperationException, AnsonException {
