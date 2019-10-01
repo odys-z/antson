@@ -112,8 +112,9 @@ class AnsonTest {
 		AnsTStrsList lst = new AnsTStrsList();
 		lst.seq = 1;
 		lst.ver = "v0.1";
-		lst.add("0,0", "0,1", "0,2");
-		lst.add("1,0", "1,1", "1,2");
+		lst.add("0,0", "0,1", "0,2")
+			.add("1,0", "1,1", "1,2")
+			.addNull();
 	
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		lst.toBlock(bos);

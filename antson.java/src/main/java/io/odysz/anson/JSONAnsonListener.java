@@ -1,5 +1,7 @@
 package io.odysz.anson;
 
+import static org.junit.jupiter.api.Assumptions.assumingThat;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -376,8 +378,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				Utils.warn("Trying convert array to annotated type failed.\ntype: %s\njson: %s\nerror: %s",
 						et, ctx.getText(), e.getMessage());
 			}
-		// if enclosed element of array is also an array, it can not been handled here
-		// because there is no clue for sub array's type if annotation is empty
+		// No annotation, for 2d list, parsed value is still a list.
+		// If enclosed element of array is also an array, it can not been handled here
+		// Because there is no clue for sub array's type if annotation is empty
 	}
 
 	/**
@@ -386,7 +389,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
 	 *
 	 * @param  list      the List to convert to a primitive array
-	 * @param  elemType the primitive array type to convert to
+	 * @param  arrType the primitive array type to convert to
 	 * @param  <P>       the primitive array type to convert to
 	 * @return an array of P with the elements of the specified List
 	 * @throws NullPointerException
@@ -398,16 +401,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 *         type, or if the elements of the specified List can not be
 	 *         stored in an array of type P
 	 */
-	private static <P> P toPrimitiveArray(List<?> list, Class<P> elemType) {
-	    if (!elemType.isArray()) {
-	        throw new IllegalArgumentException(elemType.toString());
+	private static <P> P toPrimitiveArray(List<?> list, Class<P> arrType) {
+	    if (!arrType.isArray()) {
+	        throw new IllegalArgumentException(arrType.toString());
 	    }
 	    if (list == null)
 	    	return null;
 
-	    Class<?> primitiveType = elemType.getComponentType();
+	    Class<?> eleType = arrType.getComponentType();
 
-	    P array = elemType.cast(Array.newInstance(primitiveType, list.size()));
+	    P array = arrType.cast(Array.newInstance(eleType, list.size()));
 
 	    for (int i = 0; i < list.size(); i++) {
 	        Array.set(array, i, list.get(i));
@@ -448,10 +451,23 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				else {
 					// try figure out is element also an array if enclosing is an array
 					// e.g. convert List<String> to String[]
-					Class<?> ft = top.fmap.get("array-elem").getType();
-					if (ft != null && ft.isArray()) {
-						((List<Object>)arr).add(
-								toPrimitiveArray((List<?>)top.parsedVal, ft));
+//					Class<?> ft = top.fmap.get("array-elem").getType();
+//					if (ft != null && ft.isArray()) {
+//						((List<Object>)arr).add(
+//								toPrimitiveArray((List<?>)top.parsedVal, ft));
+//					}
+//					else
+					Class<?> eleClzz = top.parsedVal.getClass();
+					if (LangExt.isblank(top.elemType()) && List.class.isAssignableFrom(eleClzz)) {
+						// change list to array
+						List<?> lst = (List<?>)top.parsedVal;
+						if (lst != null && lst.size() > 0) {
+							Class<? extends Object> eleClz = lst.get(0).getClass();
+							((List<Object>)arr).add(toPrimitiveArray((List<?>)top.parsedVal,
+									Array.newInstance(eleClz, 0).getClass()));
+						}
+						else
+							((List<Object>)arr).add(lst.toArray());
 					}
 					else
 						((List<Object>)arr).add(top.parsedVal);
