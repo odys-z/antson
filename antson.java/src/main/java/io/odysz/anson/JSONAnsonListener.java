@@ -85,7 +85,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		 * @param annotation
 		 * @return
 		 */
-		public ParsingCtx valType(String annotation) {
+		public ParsingCtx elemType(String annotation) {
 			this.valType = annotation;
 			return this;
 		}
@@ -93,7 +93,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		/**Get type annotation
 		 * @return {@link AnsonField#valType()} annotation
 		 */
-		public String valType() { return this.valType; }
+		public String elemType() { return this.valType; }
 	}
 
 	/**Merge clazz's field meta up to the IJsonable ancestor.
@@ -201,7 +201,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
 				String tn = a == null ? null : a.valType();
 				if (!LangExt.isblank(tn))
-					top().valType(tn);
+					top().elemType(tn);
 			}
 			else
 				// entering an envelope
@@ -366,16 +366,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		top.parsedVal = arr;
 
 		// figure the type if possible
-		String tn = top.valType();
-		if (!LangExt.isblank(tn))
+		String et = top.elemType();
+		if (!LangExt.isblank(et))
 			try {
-				Class<?> ft = Class.forName(tn);
-				if (ft.isArray())
-					top.parsedVal = toPrimitiveArray(arr, ft);	
+				Class<?> arrClzz = Class.forName(et);
+				if (arrClzz.isArray())
+					top.parsedVal = toPrimitiveArray(arr, arrClzz);	
 			} catch (IllegalArgumentException | ClassNotFoundException e) {
 				Utils.warn("Trying convert array to annotated type failed.\ntype: %s\njson: %s\nerror: %s",
-						tn, ctx.getText(), e.getMessage());
+						et, ctx.getText(), e.getMessage());
 			}
+		// if enclosed element of array is also an array, it can not been handled here
+		// because there is no clue for sub array's type if annotation is empty
 	}
 
 	/**
@@ -384,7 +386,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
 	 *
 	 * @param  list      the List to convert to a primitive array
-	 * @param  arrayType the primitive array type to convert to
+	 * @param  elemType the primitive array type to convert to
 	 * @param  <P>       the primitive array type to convert to
 	 * @return an array of P with the elements of the specified List
 	 * @throws NullPointerException
@@ -396,16 +398,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 *         type, or if the elements of the specified List can not be
 	 *         stored in an array of type P
 	 */
-	private static <P> P toPrimitiveArray(List<?> list, Class<P> arrayType) {
-	    if (!arrayType.isArray()) {
-	        throw new IllegalArgumentException(arrayType.toString());
+	private static <P> P toPrimitiveArray(List<?> list, Class<P> elemType) {
+	    if (!elemType.isArray()) {
+	        throw new IllegalArgumentException(elemType.toString());
 	    }
 	    if (list == null)
 	    	return null;
 
-	    Class<?> primitiveType = arrayType.getComponentType();
+	    Class<?> primitiveType = elemType.getComponentType();
 
-	    P array = arrayType.cast(Array.newInstance(primitiveType, list.size()));
+	    P array = elemType.cast(Array.newInstance(primitiveType, list.size()));
 
 	    for (int i = 0; i < list.size(); i++) {
 	        Array.set(array, i, list.get(i));
@@ -548,7 +550,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 	
-
 	private static void setPrimitive(IJsonable obj, Field f, String v)
 			throws RuntimeException, ReflectiveOperationException, AnsonException {
 		if (f.getType() == int.class || f.getType() == Integer.class)
