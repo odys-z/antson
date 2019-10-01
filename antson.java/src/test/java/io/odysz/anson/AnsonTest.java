@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import io.odysz.anson.AnsT4Enum.MsgCode;
 import io.odysz.anson.AnsT4Enum.Port;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.common.Utils;
 
 class AnsonTest {
 
@@ -112,20 +113,29 @@ class AnsonTest {
 		AnsTStrsList lst = new AnsTStrsList();
 		lst.seq = 1;
 		lst.ver = "v0.1";
-		lst.add("0,0", "0,1", "0,2")
+		lst.add0row()
+			.add("0,0", "0,1", "0,2")
 			.add("1,0", "1,1", "1,2")
-			.addNull();
+			.addnull()
+			.add0row();
 	
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		lst.toBlock(bos);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsTStrsList, ver: \"v0.1\", lst: "
-				+ "[[\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"]], seq: 1}";
+				+ "[[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []], seq: 1}";
 		assertEquals(expect, s);
 	
 		AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
-		assertEquals(l.elem(0, 0), "0,0");		
-		assertEquals(l.elem(1, 1), "1,1");		
+		try { assertEquals(0, l.row(0).length);
+		} catch (ClassCastException e) {
+			// issue
+			Utils.warn(e.getMessage());
+		}
+		assertEquals("0,0", l.cell(1, 0));		
+		assertEquals("1,1", l.cell(2, 1));
+		assertEquals(null, l.row(3));
+		assertEquals(0, l.row(4).length);
 	}
 
 	@Test

@@ -302,7 +302,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				return rawTxt;
 		}
 		 else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
-//		else return rawTxt == null ? null : rawTxt.trim();
 	}
 
 	/**
@@ -449,25 +448,48 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					((List<Object>)arr).add(figureJsonVal(ctx));
 				}
 				else {
-					// try figure out is element also an array if enclosing is an array
-					// e.g. convert List<String> to String[]
-//					Class<?> ft = top.fmap.get("array-elem").getType();
-//					if (ft != null && ft.isArray()) {
-//						((List<Object>)arr).add(
-//								toPrimitiveArray((List<?>)top.parsedVal, ft));
-//					}
-//					else
+					// try figure out is element also an array if enclosed is an array
+					// e.g. convert elements of List<String> to String[]
+					// FIXME issue: if the first element is 0 length, it will failed to convert the array
+					// TODO docs
 					Class<?> eleClzz = top.parsedVal.getClass();
-					if (LangExt.isblank(top.elemType()) && List.class.isAssignableFrom(eleClzz)) {
-						// change list to array
-						List<?> lst = (List<?>)top.parsedVal;
-						if (lst != null && lst.size() > 0) {
-							Class<? extends Object> eleClz = lst.get(0).getClass();
-							((List<Object>)arr).add(toPrimitiveArray((List<?>)top.parsedVal,
-									Array.newInstance(eleClz, 0).getClass()));
+					if (List.class.isAssignableFrom(eleClzz)) {
+						if (LangExt.isblank(top.elemType())) {
+							// change list to array
+							List<?> lst = (List<?>)top.parsedVal;
+							if (lst != null && lst.size() > 0) {
+								Class<? extends Object> eleClz = lst.get(0).getClass();
+								((List<Object>)arr).add(toPrimitiveArray(lst,
+										Array.newInstance(eleClz, 0).getClass()));
+
+								// remember elem type for later null element
+								top.elemType(eleClz.getName());
+							}
+							else
+								// FIXME this will broke when first element's length is 0.
+								((List<Object>)arr).add(lst.toArray());
 						}
-						else
-							((List<Object>)arr).add(lst.toArray());
+						// branch: with annotation or type name already figured out from 1st element 
+						else {
+							try {
+								List<?> lst = (List<?>)top.parsedVal;
+								String tn = top.elemType();
+								Class<?> tnClz;
+									tnClz = Class.forName(tn);
+								if (tnClz.isAssignableFrom(eleClzz)) {
+									// annotated element can be this branch
+									((List<Object>)arr).add(lst);
+								}
+								else {
+									// type is figured out from the previous element,
+									// needing conversion to array
+									((List<Object>)arr).add(toPrimitiveArray(lst,
+										Array.newInstance(tnClz, 0).getClass()));
+								}
+							} catch (ClassNotFoundException e) {
+								e.printStackTrace();
+							}
+						}
 					}
 					else
 						((List<Object>)arr).add(top.parsedVal);

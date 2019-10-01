@@ -184,12 +184,15 @@ public class Anson implements IJsonable {
 		stream.write('[');
 		boolean is1st = true;
 		for (Object e : list) {
-			if (e == null)
-				continue;
 			if (!is1st)
 				stream.write(new byte[] {',', ' '});
 			else 
 				is1st = false;
+
+			if (e == null) {
+				stream.write(new byte[] {'n', 'u', 'l', 'l'});
+				continue;
+			}
 
 //			if (IJsonable.class.isAssignableFrom(list.getClass()))
 //				((Anson)e).toBlock(stream);

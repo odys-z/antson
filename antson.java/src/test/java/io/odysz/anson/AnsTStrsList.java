@@ -16,12 +16,21 @@ public class AnsTStrsList extends Anson {
 		return this;
 	}
 
-	public AnsTStrsList addNull() { 
+	public AnsTStrsList addnull() { 
 		lst.add(null);
 		return this;
 	}
+
+	public AnsTStrsList add0row() { 
+		lst.add(new String[] {});
+		return this;
+	}
 	
-	public String elem(int x, int y) {
+	public String cell(int x, int y) {
 		return lst.get(x)[y];
+	}
+	
+	public String[] row(int r) {
+		return lst.get(r);
 	}
 }
