@@ -1,7 +1,5 @@
 package io.odysz.anson;
 
-import static org.junit.jupiter.api.Assumptions.assumingThat;
-
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -265,8 +263,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	public void enterPair(PairContext ctx) {
 		super.enterPair(ctx);
 		ParsingCtx top = top();
-			top.parsingProp = getProp(ctx);
-			top.parsedVal = null;
+		top.parsingProp = getProp(ctx);
+		top.parsedVal = null;
 	}
 	
 	/**Parse property name, tolerate enclosing quotes presenting or not. 
@@ -344,12 +342,23 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		try {
 			ParsingCtx top = top();
 
-			if (top.isInList() || top.isInMap())
+			// get list's annotation
+			Field f = top.fmap.get(top.parsingProp);
+			AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
+			String tn = a == null ? null : a.valType();
+
+			if (top.isInList() || top.isInMap()) {
 				push(ArrayList.class);
+			}
 			else {
 				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				push(ft);
 			}
+			
+			// now top is the enclosing list, it's component type is elem-type
+			if (!LangExt.isblank(tn))
+				top().elemType(tn);
+
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
 		}

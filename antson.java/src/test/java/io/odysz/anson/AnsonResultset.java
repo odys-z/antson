@@ -29,7 +29,11 @@ public class AnsonResultset extends Anson {
 	/**current row index, start at 1. */
 	private int rowIdx = -1;
 	private int rowCnt = 0;
+
+	// TODO docs
+	@AnsonField(valType="java.util.ArrayList")
 	private ArrayList<ArrayList<Object>> results;
+
 	/**col-index start at 1, map: [alais(upper-case), [col-index, db-col-name(in raw case)]<br>
 	 * case 1<pre>
 	String colName = rsMeta.getColumnLabel(i).toUpperCase();

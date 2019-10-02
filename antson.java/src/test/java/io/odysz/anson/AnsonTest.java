@@ -110,7 +110,7 @@ class AnsonTest {
 	
 	@Test
 	void test2Json4StrsList() throws AnsonException, IOException {
-		AnsTStrsList lst = new AnsTStrsList();
+		AnsTStrsList lst = new AnsTStrsList("0-0-0", "0-1-0");
 		lst.seq = 1;
 		lst.ver = "v0.1";
 		lst.add0row()
@@ -122,20 +122,26 @@ class AnsonTest {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		lst.toBlock(bos);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.AnsTStrsList, ver: \"v0.1\", lst: "
-				+ "[[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []], seq: 1}";
+		String expect = "{type: io.odysz.anson.AnsTStrsList, ver: \"v0.1\", "
+				+ "lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]]], "
+				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []], seq: 1}";
 		assertEquals(expect, s);
 	
 		AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
 		try { assertEquals(0, l.row(0).length);
 		} catch (ClassCastException e) {
 			// issue
+			// first element is null, can't figure out what's the component type
 			Utils.warn(e.getMessage());
 		}
 		assertEquals("0,0", l.cell(1, 0));		
 		assertEquals("1,1", l.cell(2, 1));
 		assertEquals(null, l.row(3));
 		assertEquals(0, l.row(4).length);
+		
+//		3d array won't work
+//		assertEquals("0-0-0", l.cell(0, 0, 0));
+//		assertEquals("0-0-1", l.cell(0, 0, 1));
 	}
 
 	@Test
