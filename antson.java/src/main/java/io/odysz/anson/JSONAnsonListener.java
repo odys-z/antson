@@ -483,6 +483,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 								else {
 									// type is figured out from the previous element,
 									// needing conversion to array
+									// TODO resultset doesn't work here
 									((List<Object>)arr).add(toPrimitiveArray(lst,
 										Array.newInstance(tnClz, 0).getClass()));
 								}
