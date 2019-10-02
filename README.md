@@ -168,7 +168,24 @@ For usable valType string, see [Class.forName() API](https://docs.oracle.com/jav
 
 For test case, see [AnsonTest#testFromJson_rs()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
-## 3. Referencing loops
+## 3. Only 2D array are supported
+
+Non primitive elements in array or list must specify type with annotation AnsonField#valType.
+
+If the elements are also arrays of array, the 3D array (list) won't be deserialized correctly. There would be error log like this:
+
+```
+- Trying convert array to annotated type failed.
+- type: [Ljava.util.ArrayList;
+- json: [["0-0-0",""],["0-1-0"]]
+- error: array element type mismatch
+```
+
+2D array is enough for sementic-*. So currently only 2D array are supported. 
+
+This feature is open for comments.
+
+## 4. Referencing loops
 
 Antson try to deep serializing Anson objects. If two or more objects referencing
 each other, the java serializing processing will endup with stack over flow error.
