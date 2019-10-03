@@ -240,4 +240,36 @@ class AnsonTest {
 		assertEquals("0, 1", rs.rs.getString("1"));
 	}
 	
+	@Test
+	void testFromJson_tree() throws AnsonException {
+		AnTreeNode tr = (AnTreeNode) Anson.fromJson("{type:io.odysz.anson.AnTreeNode,"
+				+ "node:{\"fullpath\":\"1 sys.1 domain\","
+					  + "\"id\":\"sys-domain\",\"text\":\"Domain Settings\","
+					  + "\"sort\":\"1\",\"parentId\":\"sys\",\"url\":\"views/sys/domain/domain.html\""
+					 + "},ver:null,seq:0},"
+			+ "{type:io.odysz.anson.AnTreeNode,"
+				+ "node:{\"fullpath\":\"1 sys.2 role\","
+					  + "\"id\":\"sys-role\",\"text\":\"Role Manage\","
+					  + "\"sort\":\"2\",\"parentId\":\"sys\",\"url\":\"views/sys/role/roles.html\""
+					 + "},ver:null,seq:0},"
+			+ "{type:io.odysz.anson.AnTreeNode,"
+				+ "node:{\"fullpath\":\"1 sys.3 org\","
+					  + "\"id\":\"sys-org\",\"text\":\"Orgnization Manage\","
+					  + "\"sort\":\"3\",\"parentId\":\"sys\",\"url\":\"views/sys/org/orgs.html\""
+					 + "},ver:null,seq:0},"
+			+ "{type:io.odysz.anson.AnTreeNode,"
+				+ "node:{\"fullpath\":\"1 sys.4 user\","
+					  + "\"id\":\"sys-uesr\",\"text\":\"Uesr Manage\","
+					  + "\"sort\":\"4\",\"parentId\":\"sys\",\"url\":\"views/sys/user/users.html\""
+					 + "},ver:null,seq:0},"
+			+ "{type:io.odysz.anson.AnTreeNode,"
+				+ "node:{\"fullpath\":\"1 sys.5 wf\","
+					  + "\"id\":\"sys-wf\",\"text\":\"Workflow Settings\","
+					  + "\"sort\":\"5\",\"parentId\":\"sys\",\"url\":\"views/sys/workflow/workflows.html\""
+					 + "},ver:null,seq:0}" 
+				);
+
+		// only last node here?
+		assertEquals(6, tr.node.size());
+	}
 }
