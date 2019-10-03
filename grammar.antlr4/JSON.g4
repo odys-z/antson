@@ -50,6 +50,8 @@ type_pair
 
 qualifiedName
 	// IDENTIFIER doesn't support '$', that means no enclosed classes are supported.
+	// Inner class can only be static.
+	// '[L' seams not used for element like string[] can't presented in type pair.
     : ('[' 'L')? IDENTIFIER (('.' | '$') IDENTIFIER)*
     ;
 // section end
