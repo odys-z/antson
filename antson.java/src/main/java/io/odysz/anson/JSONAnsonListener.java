@@ -25,7 +25,7 @@ import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
-	public static boolean verbose = true;
+	// public static boolean verbose = true;
 
 	/**Parsing AST node's context, for handling the node's value,
 	 * the element class of parsing stack.
@@ -151,7 +151,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				Constructor<?> ctor = null;
 				try { ctor = enclosingClazz.getConstructor();
 				} catch (NoSuchMethodException e) {
-					throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default constructor(0 parameter)", enclosingClazz.getName());
+					throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default constructor(0 parameter)\n"
+							+ "Also, inner class must be static.", enclosingClazz.getName());
 				}
 				if (IJsonable.class.isAssignableFrom(enclosingClazz)) {
 					fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
@@ -188,9 +189,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		try {
 			HashMap<String, Field> fmap = stack.size() > 0 ?
 					top.fmap : null;
-			if (fmap == null || !fmap.containsKey(top.parsingProp))
+			if (fmap == null || !fmap.containsKey(top.parsingProp)) {
+				// In a list, found object, if not type specified with annotation, must failed.
+				// But this is confusing to user. Set some report here.
+				if (top.isInList() || top.isInMap())
+					Utils.warn("Type in list or map is complicate, but no annotation for type info can be found. "
+							+ "field type: %s\njson: %s\n"
+							+ "Example: @AnsonField(valType=\"io.your.type\")\n"
+							+ "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
+							top.enclosing.getClass(), ctx.getText());;
 				throw new AnsonException(0, "Obj type not found. property: %s", top.parsingProp);
-			
+			}
 
 			Class<?> ft = fmap.get(top.parsingProp).getType();
 			if (Map.class.isAssignableFrom(ft)) {
@@ -249,7 +258,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// ignore this type specification, keep consist with java type
 			return;
 
-		envetype = ctx.getChild(2).getText();
+		// envetype = ctx.getChild(2).getText();
+		envetype = ctx.qualifiedName().getText();
 		
 		try {
 			Class<?> clazz = Class.forName(envetype);
@@ -483,8 +493,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 							try {
 								List<?> lst = (List<?>)top.parsedVal;
 								String tn = top.elemType();
-								Class<?> tnClz;
-									tnClz = Class.forName(tn);
+								Class<?> tnClz = Class.forName(tn);
 								if (tnClz.isAssignableFrom(eleClzz)) {
 									// annotated element can be this branch
 									((List<Object>)arr).add(lst);
@@ -539,11 +548,14 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 			Object enclosing = top().enclosing;
 			Field f = top.fmap.get(fn);
+			if (f == null)
+				throw new AnsonException(0, "Field ignored: field: %s, value: %s", fn, ctx.getText());
+
 			f.setAccessible(true);
 			AnsonField af = f.getAnnotation(AnsonField.class);
 			if (af != null && af.ignoreFrom()) {
-				if (verbose)
-					Utils.logi("%s ignored", fn);
+				if (AnsonFlags.parser)
+					Utils.logi("[AnsonFlags.parser] %s ignored", fn);
 				return;
 			}
 			else if (af != null && af.ref() == AnsonField.enclosing) {
@@ -593,9 +605,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 			// not necessary, top is dropped
 			top.parsedVal = null;
-		} catch (ReflectiveOperationException | RuntimeException | AnsonException e) {
+		} catch (ReflectiveOperationException | RuntimeException e) {
 			e.printStackTrace();
+		} catch (AnsonException e) {
+			Utils.warn(e.getMessage());
 		}
+
 	}
 	
 	private static void setPrimitive(IJsonable obj, Field f, String v)

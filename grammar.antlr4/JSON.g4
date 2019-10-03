@@ -49,8 +49,8 @@ type_pair
 	;
 
 qualifiedName
-	// IDENTIFIER doesn't support '$', that means not enclosed classes are supported.
-    : IDENTIFIER ('.' IDENTIFIER)*
+	// IDENTIFIER doesn't support '$', that means no enclosed classes are supported.
+    : ('[' 'L')? IDENTIFIER (('.' | '$') IDENTIFIER)*
     ;
 // section end
 

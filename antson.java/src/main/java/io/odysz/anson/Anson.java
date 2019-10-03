@@ -41,8 +41,8 @@ public class Anson implements IJsonable {
 
 	private static final int bufLength = 64;
 
-	protected String ver;
-	protected int seq;
+//	protected String ver;
+//	protected int seq;
 	
 	public Anson() {}
 
@@ -50,12 +50,11 @@ public class Anson implements IJsonable {
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
 		stream.write("{type: ".getBytes());
-		stream.write((getClass().getName() + ", ").getBytes());
+		stream.write(getClass().getName().getBytes());
 
 		HashMap<String, Field> fmap = new HashMap<String, Field>();
 		fmap = JSONAnsonListener.mergeFields(this.getClass(), fmap);
 
-		boolean moreFields = false;
 		for (Field f : fmap.values()) {
 			// is this ignored?
 			AnsonField af = f.getAnnotation(AnsonField.class);
@@ -64,10 +63,7 @@ public class Anson implements IJsonable {
 			
 			f.setAccessible(true);
 
-			if (moreFields)
-				stream.write(new byte[] {',', ' '});
-			else moreFields = true;
-
+			stream.write(new byte[] {',', ' '});
 			stream.write((f.getName() + ": ").getBytes());
 
 			try {
@@ -75,29 +71,6 @@ public class Anson implements IJsonable {
 					Object v = f.get(this);
 					Class<? extends Object> vclz = v == null ? null : v.getClass();
 					
-					/*
-					if (v == null)
-						stream.write(new byte[] {'n', 'u', 'l', 'l'});
-					else if (IJsonable.class.isAssignableFrom(vclz))
-						((IJsonable)v).toBlock(stream);
-					else if (List.class.isAssignableFrom(v.getClass()))
-						toListBlock(stream, (AbstractCollection<?>) v);
-					else if ( Map.class.isAssignableFrom(vclz))
-						toMapBlock(stream, (AbstractCollection<?>) v);
-					else if (AbstractCollection.class.isAssignableFrom(vclz))
-						toCollectionBlock(stream, (AbstractCollection<?>) v);
-					else if (f.getType().isArray()) {
-						toArrayBlock(stream, (Object[]) v);
-					}
-					else if (v instanceof String)
-						stream.write(("\"" + v.toString() + "\"").getBytes());
-					else
-						try { stream.write(v.toString().getBytes()); }
-						catch (NotSerializableException e) {
-							Utils.warn("Filed %s of %s can't been serialized.",
-									f.getName(), f.getClass().getName());
-						}
-					*/
 					writeNonPrimitive(stream, vclz, v);
 				}
 				else if (f.getType().isPrimitive())

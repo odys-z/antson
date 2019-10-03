@@ -168,7 +168,7 @@ For usable valType string, see [Class.forName() API](https://docs.oracle.com/jav
 
 For test case, see [AnsonTest#testFromJson_rs()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
-## 3. Only 2D array are supported
+## 3. Only 2D array are supported without annotation
 
 Non primitive elements in array or list must specify type with annotation AnsonField#valType.
 
@@ -215,3 +215,9 @@ test case:
 [AnsonTest#test2Json_PC()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
 More freature requirement is open to comments and discussion.
+
+## 5. Inner class (java) can only declared as static
+
+This is because it's not easy to figure out the parent object to create the inner class instance.
+
+For how to declare inner class, see test case[AnsonTest#test_innerClass()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).

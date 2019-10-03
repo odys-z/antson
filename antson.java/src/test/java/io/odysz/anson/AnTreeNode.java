@@ -1,8 +1,23 @@
 package io.odysz.anson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class AnTreeNode extends Anson {
+	public static class SubTree extends Anson {
+		// TODO let's test array without type-pair in json
+		ArrayList<AnTreeNode> children;
+		
+		public SubTree() {
+			children = new ArrayList<AnTreeNode>();
+		}
+		
+		public SubTree add(AnTreeNode child) {
+			children.add(child);
+			return this;
+		}
+	}
+
 	HashMap<String, Object> node;
 
 	public AnTreeNode() {
