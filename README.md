@@ -181,9 +181,27 @@ If the elements are also arrays of array, the 3D array (list) won't be deseriali
 - error: array element type mismatch
 ```
 
-2D array is enough for sementic-*. So currently only 2D array are supported. 
+For 3D and more dimension array, element type can be annotated like:
 
-This feature is open for comments.
+~~~
+    @AnsonField (valType="java.util.ArrayList/[Ljava.lang.Object;")
+	protected ArrayList<ArrayList<Object[]>> name_value_pairs;
+~~~
+
+This defined a 2D table of name-value pair, where if row is the main order, then
+the rows are element of type "ArrayList<Object[]>", where the cell is "Object[]".
+
+Row type and cell type are seperated with "/".
+
+Also, another error prone is the array of list:
+
+~~~
+    @AnsonField (valType="[Ljava.util.ArrayList;/java.util.ArrayList/[Ljava.lang.Object;")
+	protected ArrayList<Object[]>[] name_value_pairs;
+~~~
+
+The problem here is with the first section, "[Ljava.util.ArrayList;", only specified
+one dimension. Don't ignore the 2nd dimension "java.util.ArrayList".
 
 ## 4. Referencing loops
 
