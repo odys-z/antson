@@ -31,8 +31,16 @@ public @interface AnsonField {
 	boolean ignoreFrom() default false;
 
 	/**
-	 * Specifying array type information.<br>
-	 * Example: for Object[], use @ AnsonField(valType="[Ljava.lang.Object;")
+	 * <p>Specifying array's element type information.</p>
+	 * Example:<br>
+	 * for Object[], use<pre>
+	   @AnsonField(valType="[Ljava.lang.Object;")
+	   Object[][] f;
+	   </pre>
+	 * for ArrayList&lt;Object[]&gt;, use <pre>
+	   @AnsonField(valType="java.util.ArrayList;[Ljava.lang.Object;"
+	   ArrayList<ArrayList<Object[]>>
+	   </pre>
 	 */
 	String valType() default "";
 

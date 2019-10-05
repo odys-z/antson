@@ -4,6 +4,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +27,6 @@ import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
-	// public static boolean verbose = true;
-
 	/**Parsing AST node's context, for handling the node's value,
 	 * the element class of parsing stack.
 	 * @author odys-z@github.com
@@ -55,45 +55,60 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		private Object enclosing;
 		private HashMap<String, Field> fmap;
 
+		/** Annotation's main types */
 		private String valType;
+		/** Annotation's sub types */
+		private String subTypes;
 
-		public ParsingCtx(HashMap<String, Field> fmap, IJsonable enclosing) {
+		ParsingCtx(HashMap<String, Field> fmap, IJsonable enclosing) {
 			this.fmap = fmap;
 			this.enclosing = enclosing;
 		}
 
-		public ParsingCtx(HashMap<String, Field> fmap, HashMap<String, ?> enclosing) {
+		ParsingCtx(HashMap<String, Field> fmap, HashMap<String, ?> enclosing) {
 			this.fmap = fmap;
 			this.enclosing = enclosing;
 		}
 
-		public ParsingCtx(HashMap<String, Field> fmap, List<?> enclosing) {
+		ParsingCtx(HashMap<String, Field> fmap, List<?> enclosing) {
 			this.fmap = fmap;
 			this.enclosing = enclosing;
 		}
 
-		public boolean isInList() {
+		boolean isInList() {
 			return enclosing instanceof List || enclosing.getClass().isArray();
 		}
 
-		public boolean isInMap() {
+		boolean isInMap() {
 			return enclosing instanceof HashMap;
 		}
 
 		/**Set type annotation.<br>
 		 * annotation is value of {@link AnsonField#valType()}
-		 * @param annotation
+		 * @param tn
 		 * @return
 		 */
-		public ParsingCtx elemType(String annotation) {
-			this.valType = annotation;
+		ParsingCtx elemType(String[] tn) {
+			this.valType = tn == null || tn.length <= 0 ? null : tn[0];
+			this.subTypes = tn == null || tn.length <= 1 ? null : tn[1];
+			
+			if (!LangExt.isblank(valType)) {
+				// change / replace array type
+				// e.g. lang.String[] to [Llang.String;
+				if (valType.matches(".*\\[\\]$"))
+					valType = "[L" + valType.replaceAll("\\[\\]$", ";");
+			}
 			return this;
 		}
 		
 		/**Get type annotation
 		 * @return {@link AnsonField#valType()} annotation
 		 */
-		public String elemType() { return this.valType; }
+		String elemType() { return this.valType; }
+
+		String subTypes() {
+			return subTypes;
+		}
 	}
 
 	/**Merge clazz's field meta up to the IJsonable ancestor.
@@ -130,22 +145,26 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private ParsingCtx toparent() { return stack.size() > 1 ? stack.get(1) : null; }
 
-	/**Push parsing node (a envelope, map).
+	/**Push parsing node (a envelope, map, list).
 	 * @param enclosingClazz new parsing IJsonable object's class
+	 * @param elemType type annotation of enclosing list/array. 0: main type, 1: sub-types<br>
+	 * This parameter can't be null if is pushing a list node.
 	 * @throws ReflectiveOperationException
 	 * @throws SecurityException
-	 * @throws AnsonException 
+	 * @throws AnsonException
 	 */
-	private void push(Class<?> enclosingClazz) throws ReflectiveOperationException, SecurityException, AnsonException {
+	private void push(Class<?> enclosingClazz, String[] elemType)
+			throws ReflectiveOperationException, SecurityException, AnsonException {
 		if (enclosingClazz.isArray()) {
-			ParsingCtx top = new ParsingCtx(new HashMap<String, Field>(), new ArrayList<Object>());
-			stack.add(0, top);
+			HashMap<String, Field> fmap = new HashMap<String, Field>();
+			ParsingCtx newCtx = new ParsingCtx(fmap, new ArrayList<Object>());
+			stack.add(0, newCtx.elemType(elemType));
 		}
 		else {
 			HashMap<String, Field> fmap = new HashMap<String, Field>();
 			if (List.class.isAssignableFrom(enclosingClazz)) {
 				List<?> enclosing = new ArrayList<Object>();
-				stack.add(0, new ParsingCtx(fmap, enclosing));
+				stack.add(0, new ParsingCtx(fmap, enclosing).elemType(elemType));
 			}
 			else {
 				Constructor<?> ctor = null;
@@ -204,18 +223,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			Class<?> ft = fmap.get(top.parsingProp).getType();
 			if (Map.class.isAssignableFrom(ft)) {
 				// entering a map
-				push(ft);
+				push(ft, null);
 				// append annotation
 				Field f = top.fmap.get(top.parsingProp);
-				AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
-				String tn = a == null ? null : a.valType();
-				if (!LangExt.isblank(tn))
-					top().elemType(tn);
+//				AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
+//				String tn = a == null ? null : a.valType();
+				String[] tn = parseElemType(f);
+				top().elemType(tn);
 			}
 			else
 				// entering an envelope
 				// push(fmap.get(top.parsingProp).getType());
-				push(ft);
+				push(ft, null);
 		} catch (SecurityException | ReflectiveOperationException | AnsonException e) {
 			e.printStackTrace();
 		}
@@ -230,10 +249,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		if (stack == null) {
 			stack = new ArrayList<ParsingCtx>();
 		}
-//		else {
-//			// push and parse sub envelope
-//			// handled in enterType_pair
-//		}
 		envetype = null;
 	}
 	
@@ -258,12 +273,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// ignore this type specification, keep consist with java type
 			return;
 
-		// envetype = ctx.getChild(2).getText();
 		envetype = ctx.qualifiedName().getText();
 		
 		try {
 			Class<?> clazz = Class.forName(envetype);
-			push(clazz);
+			push(clazz, null);
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
 		}
@@ -277,6 +291,48 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		top.parsedVal = null;
 	}
 	
+	private static String[] parseElemType(String subTypes) {
+		if (LangExt.isblank(subTypes))
+			return null;
+		return subTypes.split("/", 2); 
+	}
+
+//	private static String[] parseElemType(Field f) {
+//		AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
+//		String tn = a == null ? null : a.valType();
+//		return parseElemType(tn);
+//		// f.getGenericType() = java.util.List<java.util.ArrayList<java.lang.Object[]>>
+//		// f.getGenericType().getTypeName() = java.util.List<java.util.ArrayList<java.lang.Object[]>>
+//		// f.signature: Ljava/util/List<Ljava/util/ArrayList<[Ljava/lang/Object;>;>;
+//	}
+
+	private static String[] parseElemType(Field f) throws AnsonException {
+		// for more information, see
+		// https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
+
+		Type type = f.getGenericType();
+	    if (type instanceof ParameterizedType) {
+	        ParameterizedType pType = (ParameterizedType)type;
+	    	Type[] ts = pType.getActualTypeArguments();
+//	    	if (ts.length != 1)
+//	    		throw new AnsonException(0, "Can only handle exactly one type parameter: %s", pType.getTypeName());
+
+	        String[] ptypess = pType.getActualTypeArguments()[0].getTypeName().split("<", 2);
+	        if (ptypess.length > 1) {
+				ptypess[1] = ptypess[1].replaceFirst(">$", "");
+				ptypess[1] = "[Ljava.lang.Object;";
+//				System.err.println(ptypess[0]);
+//				System.err.println(ptypess[1]);
+	        }
+	        return ptypess;
+	    } else {
+	    	// not a parameterized, try annotation
+			AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
+			String tn = a == null ? null : a.valType();
+			return parseElemType(tn);
+	    }
+	}
+
 	/**Parse property name, tolerate enclosing quotes presenting or not. 
 	 * @param ctx
 	 * @return
@@ -353,26 +409,27 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			ParsingCtx top = top();
 
 			// get list's annotation
-			Field f = top.fmap.get(top.parsingProp);
-			AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
-			String tn = a == null ? null : a.valType();
 
 			if (top.isInList() || top.isInMap()) {
-				push(ArrayList.class);
+				String[] tn = parseElemType(top.subTypes());
+				push(ArrayList.class, tn);
 			}
 			else {
 				Class<?> ft = top.fmap.get(top.parsingProp).getType();
-				push(ft);
+				Field f = top.fmap.get(top.parsingProp);
+				String[] tn = parseElemType(f);
+				push(ft, tn);
 			}
 			
 			// now top is the enclosing list, it's component type is elem-type
-			if (!LangExt.isblank(tn))
-				top().elemType(tn);
+//			if (!LangExt.isblank(tn))
+//				top().elemType(tn);
 
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
 		}
 	}
+
 
 	@Override
 	public void exitArray(ArrayContext ctx) {
@@ -380,13 +437,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			throw new NullPointerException("existing not from an eclosing list. txt:\n" + ctx.getText());
 
 		ParsingCtx top = pop();
+		String et = top.elemType();
 		List<?> arr = (List<?>) top.enclosing;
 
 		top = top();
 		top.parsedVal = arr;
 
 		// figure the type if possible
-		String et = top.elemType();
 		if (!LangExt.isblank(et))
 			try {
 				Class<?> arrClzz = Class.forName(et);
@@ -458,7 +515,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// if in a map, parsingProp is the map key,
 			// element type can only been handled with a guess,
 			// or according to annotation
-			String txt = ctx.getText();
+			// String txt = ctx.getText();
 			if (top.isInList()) {
 				List<?> arr = (List<?>) top.enclosing;
 				// for List, ft is not null
@@ -467,10 +524,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					((List<Object>)arr).add(figureJsonVal(ctx));
 				}
 				else {
-					// try figure out is element also an array if enclosed is an array
+					// try figure out is element also an array if enclosing object is an array
 					// e.g. convert elements of List<String> to String[]
 					// FIXME issue: if the first element is 0 length, it will failed to convert the array
-					// TODO docs
 					Class<?> eleClzz = top.parsedVal.getClass();
 					if (List.class.isAssignableFrom(eleClzz)) {
 						if (LangExt.isblank(top.elemType())) {
@@ -482,10 +538,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 										Array.newInstance(eleClz, 0).getClass()));
 
 								// remember elem type for later null element
-								top.elemType(eleClz.getName());
+								top.elemType(new String[] {eleClz.getName()});
 							}
 							else
-								// FIXME this will broke when first element's length is 0.
+								// FIXME this will be broken when first element's length is 0.
 								((List<Object>)arr).add(lst.toArray());
 						}
 						// branch: with annotation or type name already figured out from 1st element 
@@ -501,11 +557,15 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 								else {
 									// type is figured out from the previous element,
 									// needing conversion to array
-									// TODO resultset doesn't work here
+									// 
+									// Bug: object value can't been set into string array
+									// lst.getClass().getTypeName() = java.lang.ArrayList
+									// ["val",88.91669145042222]
 									((List<Object>)arr).add(toPrimitiveArray(lst,
 										Array.newInstance(tnClz, 0).getClass()));
 								}
-							} catch (ClassNotFoundException e) {
+							} catch (Exception e) {
+								Utils.warn(ctx.getText());
 								e.printStackTrace();
 							}
 						}
@@ -518,7 +578,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			else if (top.isInMap()) {
 				// parsed Value can already got when exit array
 				if (top.parsedVal == null)
-					top.parsedVal = getStringVal(ctx.STRING(), txt);
+					top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
 			}
 		}
 	}

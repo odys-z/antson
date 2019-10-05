@@ -1,12 +1,13 @@
 package io.odysz.anson;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,19 +43,6 @@ class AnsonTest {
 		// assertEquals("{type: io.odysz.anson.AnsT2, ver: null, s: 0, m: [\"e0\", \"e1\"], seq: 2}", s);
 		assertEquals("{type: io.odysz.anson.AnsT2, s: 0, m: [\"e0\", \"e1\"]}", s);
 		
-		Ans2dArr a2d = new Ans2dArr();
-		a2d.strs = new String[][] {
-			new String[] {"0.0", "0.1"},
-			new String[] {"1.0", "1.1", "1.2"},
-			new String[] {"2.0"},
-			new String[] {"3.0", "3.1"},
-			new String[] {} };
-		bos = new ByteArrayOutputStream(); 
-		a2d.toBlock(bos);
-		s = bos.toString(StandardCharsets.UTF_8.name());
-		// assertEquals("{type: io.odysz.anson.Ans2dArr, ver: null, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []], seq: 0}", s);
-		assertEquals("{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []]}", s);
-		
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
 		cll.lst.add("B");
@@ -73,6 +61,29 @@ class AnsonTest {
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
 				+ "}}", s);
+	}
+	
+	@Test
+	void test2dArr() throws AnsonException, IOException {
+		Ans2dArr a2d = new Ans2dArr();
+		a2d.strs = new String[][] {
+			new String[] {"0.0", "0.1"},
+			new String[] {"1.0", "1.1", "1.2"},
+			new String[] {"2.0"},
+			new String[] {"3.0", "3.1"},
+			new String[] {} };
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		a2d.toBlock(bos);
+		String s = bos.toString(StandardCharsets.UTF_8.name());
+		String expect = "{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []]}";
+		assertEquals(expect, s);
+		
+		a2d = (Ans2dArr) Anson.fromJson(expect);
+		assertEquals("0.0", a2d.strs[0][0]);
+		assertEquals("0.1", a2d.strs[0][1]);
+		assertEquals("1.1", a2d.strs[1][1]);
+		assertEquals("2.0", a2d.strs[2][0]);
+		assertEquals("3.1", a2d.strs[3][1]);
 	}
 
 	@SuppressWarnings("unused")
@@ -111,41 +122,56 @@ class AnsonTest {
 		assertEquals(denum.p, Port.heartbeat);
 	}
 	
+	@SuppressWarnings("serial")
 	@Test
 	void test2Json4StrsList() throws AnsonException, IOException {
 		AnsTStrsList lst = new AnsTStrsList("0-0-0", "0-1-0");
-//		lst.seq = 1;
-//		lst.ver = "v0.1";
 		lst.add0row()
 			.add("0,0", "0,1", "0,2")
 			.add("1,0", "1,1", "1,2")
 			.addnull()
-			.add0row();
+			.add0row()
+			.add3Drow(new ArrayList<Object[]>() {
+				{ add(new Object[] {"1-0-0", 1.5}); }
+				{ add(new Object[] {}); }
+			})
+			.set4dcell(0, 0, 0, 0, new AnsT2("0 0 0 0"))
+			.set4dcell(0, 0, 0, 1, new AnsT2("0 0 0 1"))
+			.set4dcell(1, 1, 1, 1, new AnsT2("1 1 1 1"));
 	
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		lst.toBlock(bos);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsTStrsList, "
-				+ "lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]]], "
+				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, s: 0, m: [\"0 0 0 0\"]}, "
+						  + "{type: io.odysz.anson.AnsT2, s: 0, m: [\"0 0 0 1\"]}], "
+						 + "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
+						 + "[null, {type: io.odysz.anson.AnsT2, s: 0, m: [\"1 1 1 1\"]}]]]], "
+				+ "lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
 				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}";
 		assertEquals(expect, s);
 	
 		AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
 		try { assertEquals(0, l.row(0).length);
 		} catch (ClassCastException e) {
-			// issue
-			// first element is null, can't figure out what's the component type
+			// issue:
+			// If first element is null, can't figure out what's the component type.
 			Utils.warn("Testing 0 length array as first sub-array, should get type conversion error message...");
 			Utils.warn(e.getMessage());
 		}
-		assertEquals("0,0", l.cell(1, 0));		
+		assertEquals("0,0", l.cell(1, 0));	
 		assertEquals("1,1", l.cell(2, 1));
 		assertEquals(null, l.row(3));
 		assertEquals(0, l.row(4).length);
-		
-//		3d array won't work
-//		assertEquals("0-0-0", l.cell(0, 0, 0));
-//		assertEquals("0-0-1", l.cell(0, 0, 1));
+
+		assertEquals("0-0-0", l.cell(0, 0, 0));
+		assertEquals("0-1-0", l.cell(0, 1, 0));
+		assertEquals("1-0-0", l.cell(1, 0, 0));
+		assertEquals(1.5f, l.cell(1, 0, 1));
+	
+		assertEquals("0 0 0 0", l.cell(0, 0, 0, 0));
+		assertEquals("0 0 0 1", l.cell(0, 0, 0, 0));
+		assertEquals("1 1 1 1", l.cell(1, 1, 1, 1));
 	}
 
 	@Test

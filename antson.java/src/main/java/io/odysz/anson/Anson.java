@@ -95,7 +95,9 @@ public class Anson implements IJsonable {
 			if (the1st) the1st = false;
 			else stream.write(new byte[] {',', ' '});
 
-			if (IJsonable.class.isAssignableFrom(elemtype))
+			if (o == null)
+				stream.write(new byte[] {'n', 'u', 'l', 'l'});
+			else if (IJsonable.class.isAssignableFrom(elemtype))
 				((IJsonable)o).toBlock(stream);
 			else if (elemtype.isArray())
 				toArrayBlock(stream, (Object[]) o);
@@ -108,8 +110,6 @@ public class Anson implements IJsonable {
 				stream.write(o.toString().getBytes());
 				stream.write('"');
 			}
-			else if (o == null)
-				stream.write("null".getBytes());
 			else stream.write(o.toString().getBytes());
 		}
 		stream.write(']');
