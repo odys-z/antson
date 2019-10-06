@@ -226,10 +226,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				push(ft, null);
 				// append annotation
 				Field f = top.fmap.get(top.parsingProp);
-//				AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
-//				String tn = a == null ? null : a.valType();
-				String[] tn = parseElemType(f);
-				top().elemType(tn);
+				AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
+				String anno = a == null ? null : a.valType();
+
+				if (anno != null) {
+					String[] tn = parseElemType(anno);
+					top().elemType(tn);
+				}
 			}
 			else
 				// entering an envelope
@@ -297,32 +300,28 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return subTypes.split("/", 2); 
 	}
 
-//	private static String[] parseElemType(Field f) {
-//		AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
-//		String tn = a == null ? null : a.valType();
-//		return parseElemType(tn);
-//		// f.getGenericType() = java.util.List<java.util.ArrayList<java.lang.Object[]>>
-//		// f.getGenericType().getTypeName() = java.util.List<java.util.ArrayList<java.lang.Object[]>>
-//		// f.signature: Ljava/util/List<Ljava/util/ArrayList<[Ljava/lang/Object;>;>;
-//	}
-
-	private static String[] parseElemType(Field f) throws AnsonException {
+	private static String[] parseListElemType(Field f) throws AnsonException {
 		// for more information, see
 		// https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
 
 		Type type = f.getGenericType();
 	    if (type instanceof ParameterizedType) {
 	        ParameterizedType pType = (ParameterizedType)type;
-	    	Type[] ts = pType.getActualTypeArguments();
-//	    	if (ts.length != 1)
-//	    		throw new AnsonException(0, "Can only handle exactly one type parameter: %s", pType.getTypeName());
 
 	        String[] ptypess = pType.getActualTypeArguments()[0].getTypeName().split("<", 2);
 	        if (ptypess.length > 1) {
-				ptypess[1] = ptypess[1].replaceFirst(">$", "");
-				ptypess[1] = "[Ljava.lang.Object;";
-//				System.err.println(ptypess[0]);
-//				System.err.println(ptypess[1]);
+				ptypess[1] = "[L" + ptypess[1].replaceFirst(">$", "");
+				ptypess[1] = ptypess[1].replaceFirst("^L", "");
+				ptypess[1] = "[L" + ptypess[1];
+	        }
+	        // figure out array element class 
+	        else {
+	        	@SuppressWarnings("unchecked")
+				Class<? extends Object> eleClzz =
+					((Class<? extends Object>) pType.getActualTypeArguments()[0]);
+				if (eleClzz.isArray()) {
+	        		ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
+	        	}
 	        }
 	        return ptypess;
 	    } else {
@@ -412,12 +411,19 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 			if (top.isInList() || top.isInMap()) {
 				String[] tn = parseElemType(top.subTypes());
-				push(ArrayList.class, tn);
+				// ctx: [{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}] // suptype: io.odysz.anson.Anson
+				// tn : [io.odysz.anson.Anson]
+				// [1]:
+				push(ArrayList.class, tn); // pushing ArrayList.class because entering array, isInMap() == true means needing to figure out value type
 			}
 			else {
 				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				Field f = top.fmap.get(top.parsingProp);
-				String[] tn = parseElemType(f);
+				// AnsT3 { ArrayList<Anson[]> ms; }
+				// ctx: [[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]]
+				// [0]: io.odysz.anson.Anson[], 
+				// [1]: io.odysz.anson.Anson
+				String[] tn = parseListElemType(f);
 				push(ft, tn);
 			}
 			
@@ -429,7 +435,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			e.printStackTrace();
 		}
 	}
-
 
 	@Override
 	public void exitArray(ArrayContext ctx) {
@@ -517,24 +522,24 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// or according to annotation
 			// String txt = ctx.getText();
 			if (top.isInList()) {
-				List<?> arr = (List<?>) top.enclosing;
+				List<?> enclosLst = (List<?>) top.enclosing;
 				// for List, ft is not null
 				if (top.parsedVal == null) {
 					// simple value like String or number
-					((List<Object>)arr).add(figureJsonVal(ctx));
+					((List<Object>)enclosLst).add(figureJsonVal(ctx));
 				}
 				else {
 					// try figure out is element also an array if enclosing object is an array
 					// e.g. convert elements of List<String> to String[]
 					// FIXME issue: if the first element is 0 length, it will failed to convert the array
-					Class<?> eleClzz = top.parsedVal.getClass();
-					if (List.class.isAssignableFrom(eleClzz)) {
+					Class<?> parsedClzz = top.parsedVal.getClass();
+					if (List.class.isAssignableFrom(parsedClzz)) {
 						if (LangExt.isblank(top.elemType())) {
 							// change list to array
 							List<?> lst = (List<?>)top.parsedVal;
 							if (lst != null && lst.size() > 0) {
 								Class<? extends Object> eleClz = lst.get(0).getClass();
-								((List<Object>)arr).add(toPrimitiveArray(lst,
+								((List<Object>)enclosLst).add(toPrimitiveArray(lst,
 										Array.newInstance(eleClz, 0).getClass()));
 
 								// remember elem type for later null element
@@ -542,17 +547,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 							}
 							else
 								// FIXME this will be broken when first element's length is 0.
-								((List<Object>)arr).add(lst.toArray());
+								((List<Object>)enclosLst).add(lst.toArray());
 						}
 						// branch: with annotation or type name already figured out from 1st element 
 						else {
 							try {
-								List<?> lst = (List<?>)top.parsedVal;
+								List<?> parsedLst = (List<?>)top.parsedVal;
 								String tn = top.elemType();
 								Class<?> tnClz = Class.forName(tn);
-								if (tnClz.isAssignableFrom(eleClzz)) {
+								if (tnClz.isAssignableFrom(parsedClzz)) {
 									// annotated element can be this branch
-									((List<Object>)arr).add(lst);
+									((List<Object>)enclosLst).add(parsedLst);
 								}
 								else {
 									// type is figured out from the previous element,
@@ -561,8 +566,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 									// Bug: object value can't been set into string array
 									// lst.getClass().getTypeName() = java.lang.ArrayList
 									// ["val",88.91669145042222]
-									((List<Object>)arr).add(toPrimitiveArray(lst,
-										Array.newInstance(tnClz, 0).getClass()));
+									
+									
+									// Test case:	AnsT3 { ArrayList<Anson[]> ms; }
+									// ctx: 		[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]
+									// parsedLst:	[{type: io.odysz.anson.AnsT2, s: 4, m: null}, {type: io.odysz.anson.AnsT1, ver: "x", m: null}]
+									// parsedClzz:	java.util.ArrayList
+									// tn:			[Lio.odysz.anson.Anson;
+									// tnClz:		class [Lio.odysz.anson.Anson;
+									// action - change parsedLst to array, add to enclosLst
+									((List<Object>)enclosLst).add(toPrimitiveArray(parsedLst,
+													Array.newInstance(tnClz, 0).getClass()));
 								}
 							} catch (Exception e) {
 								Utils.warn(ctx.getText());
@@ -571,7 +585,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 						}
 					}
 					else
-						((List<Object>)arr).add(top.parsedVal);
+						((List<Object>)enclosLst).add(top.parsedVal);
 				}
 				top.parsedVal = null;
 			}

@@ -9,7 +9,7 @@ public class AnsTStrsList extends Anson {
 	
 	List<ArrayList<Object[]>> lst3d;
 	
-	@AnsonField(valType="[Ljava.util.ArrayList;/java.util.ArrayList/java.util.ArrayList/[Lio.odysz.anson.Anson;")
+	@AnsonField(valType="java.util.ArrayList/java.util.ArrayList/[Lio.odysz.anson.Anson;")
 	ArrayList<ArrayList<Anson[]>>[] dim4;
 	
 	public AnsTStrsList() { }

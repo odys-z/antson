@@ -1,5 +1,7 @@
 package io.odysz.anson;
 
+import java.util.ArrayList;
+
 import io.odysz.anson.Anson;
 
 /**Class for testing Anson array field.
@@ -11,6 +13,10 @@ public class AnsT3 extends Anson {
 	/** Elements can be subclass*/
 	Anson[] m;
 	
+	// annotation is not used, which can be figured out from ParameterizedType
+	@AnsonField(valType="[Lio.odysz.Anson;/io.odysz.Anson")
+	ArrayList<Anson[]> ms;
+
 	public AnsT3() {}
 
 	public void expand(Anson child) {

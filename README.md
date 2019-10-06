@@ -71,7 +71,15 @@ try a test in the future.
 Antson will be used as the transport protocol layer for semantic-\*. see his
 [home page](https://odys-z.github.io) for details.
 
-It's also planned publishing it as an independent lib, at least as a jar and DLL.
+Before Antson, one of the important way to extend semantic-jserv logics, the servlet
+way, is limited for it's unconvenient of message (de)serializing - message's structure
+must been handled with Gson extension by user implementation. With Antson, users
+don't need to override handler for different structure anymore. Following some
+basic rules like extends io.odysz.Anson or break reference loop with annotation,
+json v.s java type translation will be automatically handled and being transparent
+to upper tiers.
+
+It's also planned to publish Antson as an independent lib, at least as a jar and DLL.
 
 # Known Issues
 
@@ -185,28 +193,30 @@ For 3D and more dimension array, element type can be annotated like:
 
 ~~~
     @AnsonField (valType="java.util.ArrayList/[Ljava.lang.Object;")
-	protected ArrayList<ArrayList<Object[]>> name_value_pairs;
+    protected ArrayList<ArrayList<Object[]>> name_value_pairs;
 ~~~
 
 This defined a 2D table of name-value pair, where if row is the main order, then
 the rows are element of type "ArrayList<Object[]>", where the cell is "Object[]".
 
-Row type and cell type are seperated with "/".
+Row type and cell type are separated with "/".
 
-Also, another error prone is the array of list:
+Also, another error prone annotation is the array of list:
 
 ~~~
-    @AnsonField (valType="[Ljava.util.ArrayList;/java.util.ArrayList/[Ljava.lang.Object;")
-	protected ArrayList<Object[]>[] name_value_pairs;
+    @AnsonField (valType="java.util.ArrayList/java.util.ArrayList/[Ljava.lang.Object;")
+    protected ArrayList<Object[]>[] name_value_pairs;
 ~~~
 
-The problem here is with the first section, "[Ljava.util.ArrayList;", only specified
-one dimension. Don't ignore the 2nd dimension "java.util.ArrayList".
+The problem here is with the first section, "[Ljava.util.ArrayList;", shouldn't been
+specified here for it's the type of field which is already declared as a java type.
+The component type of array is "java.util.ArrayList" (of "java.util.ArrayList/
+[Ljava.lang.Object;").
 
 ## 4. Referencing loops
 
 Antson try to deep serializing Anson objects. If two or more objects referencing
-each other, the java serializing processing will endup with stack over flow error.
+each other, the java serializing processing will end up with stack over flow error.
 
 To avoid this, one of the referencing field must specified with annotation to break
 the endless serializing looping:
@@ -234,8 +244,9 @@ test case:
 
 More freature requirement is open to comments and discussion.
 
-## 5. Inner class (java) can only declared as static
+## 5. Inner class (java) can only been declared as static
 
 This is because it's not easy to figure out the parent object to create the inner class instance.
 
-For how to declare inner class, see test case[AnsonTest#test_innerClass()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
+For how inner class examples, see test case
+[AnsonTest#test_innerClass()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -98,7 +97,7 @@ class AnsonTest {
 		parent.toBlock(bos);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsT3, "
-						+ "m: [{type: io.odysz.anson.AnsT3Child}, "
+						+ "ms: null, m: [{type: io.odysz.anson.AnsT3Child}, "
 							+ "{type: io.odysz.anson.AnsT3son, gendre: \"male\"}]}";
 		assertEquals(expect, s);
 		
@@ -195,12 +194,20 @@ class AnsonTest {
 	@Test
 	void testFromJson_asonArr() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
 		// AnsT3.m is typeof AnsT2
-		AnsT3 anson3 = (AnsT3) Anson.fromJson("{type: io.odysz.anson.AnsT3, seq: 3, ver: \"v0.1\", m: [" +
+		AnsT3 anson3 = (AnsT3) Anson.fromJson("{type: io.odysz.anson.AnsT3, m: [" +
 				"{type: io.odysz.anson.AnsT2, s: 4 }, " + 
 				"{type: io.odysz.anson.AnsT1, ver: \"x\" }]}");
 		assertEquals(2, anson3.m.length);
 		assertEquals(4, ((AnsT2)anson3.m[0]).s);
 		assertEquals("x", ((AnsT1)anson3.m[1]).ver);
+
+		AnsT3 anson4 = (AnsT3) Anson.fromJson("{type: io.odysz.anson.AnsT3, ms: [[" +
+				"{type: io.odysz.anson.AnsT2, s: 4 }, " + 
+				"{type: io.odysz.anson.AnsT1, ver: \"x\" }]]}");
+		assertEquals(1, anson4.ms.size());
+		assertEquals(2, anson4.ms.get(0).length);
+		assertEquals(4, ((AnsT2)anson4.ms.get(0)[0]).s);
+		assertEquals("x", ((AnsT1)anson4.ms.get(0)[1]).ver);
 	}
 		
 	@Test
