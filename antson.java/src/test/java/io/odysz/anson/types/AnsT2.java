@@ -1,11 +1,11 @@
-package io.odysz.anson;
+package io.odysz.anson.types;
 
 import io.odysz.anson.Anson;
 
 public class AnsT2 extends Anson {
-	int s;
+	public int s;
 
-	String[] m;
+	public String[] m;
 	
 	public AnsT2() {}
 	

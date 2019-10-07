@@ -1,4 +1,6 @@
-package io.odysz.anson;
+package io.odysz.anson.types;
+
+import io.odysz.anson.Anson;
 
 public class AnsT1 extends Anson {
 
@@ -8,14 +10,14 @@ public class AnsT1 extends Anson {
 	 * @author odys-z@github.com
 	 */
 	public static class AnsM1 extends Anson {
-		String name;
+		public String name;
 		
 		public AnsM1() {
 			name = "m1 : Anson";
 		}
 	}
 
-	protected String ver;
+	public String ver;
 	
 	public AnsM1 m;
 

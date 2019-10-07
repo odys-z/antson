@@ -1,5 +1,6 @@
-package io.odysz.anson;
+package io.odysz.anson.types;
 
+import io.odysz.anson.Anson;
 import io.odysz.anson.x.AnsonException;
 
 public class AnsT4Enum extends Anson {
@@ -29,8 +30,8 @@ public class AnsT4Enum extends Anson {
 		}
 	};
 
-	MsgCode c;
-	Port p;
+	public MsgCode c;
+	public Port p;
 
 	public AnsT4Enum() {
 	}

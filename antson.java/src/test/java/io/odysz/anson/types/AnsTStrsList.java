@@ -1,7 +1,10 @@
-package io.odysz.anson;
+package io.odysz.anson.types;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import io.odysz.anson.Anson;
+import io.odysz.anson.AnsonField;
 
 public class AnsTStrsList extends Anson {
 
