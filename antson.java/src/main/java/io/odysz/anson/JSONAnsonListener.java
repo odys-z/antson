@@ -314,7 +314,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        if (ptypess.length > 1) {
 				ptypess[1] = ptypess[1].replaceFirst(">$", "");
 				ptypess[1] = ptypess[1].replaceFirst("^L", "");
-				ptypess[1] = "[L" + ptypess[1];
+//				ptypess[1] = "[L" + ptypess[1];
 	        }
 	        // figure out array element class 
 	        else {
@@ -328,10 +328,23 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        return ptypess;
 	    }
 	    else if (f.getType().isArray()) {
-	    	return new String[] {f.getType().getComponentType().getTypeName()};
+	    	// complex array may also has annotation
+			AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
+			String tn = a == null ? null : a.valType();
+			String[] valss = parseElemType(tn);
+	    	
+	    	String eleType = f.getType().getComponentType().getTypeName();
+	    	if (valss != null && !eleType.equals(valss[0]))
+	    		Utils.warn("[JSONAnsonListener#parseListElemType()]: Field %s is not annotated correctly.\n"
+	    				+ "field parameter type: %s, annotated element type: %s, annotated sub-type: %s",
+	    				f.getName(), eleType, valss[0], valss[1]);
+
+	    	if (valss != null && valss.length > 1)
+	    		return new String[] {eleType, valss[1]};
+	    	else return new String[] {eleType};
 	    }
 	    else {
-	    	// not a parameterized, try annotation
+	    	// not a parameterized, not an array, try annotation
 			AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
 			String tn = a == null ? null : a.valType();
 			return parseElemType(tn);

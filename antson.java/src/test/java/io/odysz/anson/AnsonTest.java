@@ -168,9 +168,9 @@ class AnsonTest {
 		assertEquals("1-0-0", l.cell(1, 0, 0));
 		assertEquals(1.5f, l.cell(1, 0, 1));
 	
-		assertEquals("0 0 0 0", l.cell(0, 0, 0, 0));
-		assertEquals("0 0 0 1", l.cell(0, 0, 0, 0));
-		assertEquals("1 1 1 1", l.cell(1, 1, 1, 1));
+		assertEquals("0 0 0 0", ((AnsT2)l.cell(0, 0, 0, 0)).m[0]);
+		assertEquals("0 0 0 1", ((AnsT2)l.cell(0, 0, 0, 1)).m[0]);
+		assertEquals("1 1 1 1", ((AnsT2)l.cell(1, 1, 1, 1)).m[0]);
 	}
 
 	@Test
