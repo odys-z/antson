@@ -4,7 +4,7 @@ import io.odysz.anson.Anson;
 
 public class AnsTRs extends Anson {
 
-	public AnsonResultset rs;
+	AnsonResultset rs;
 	
 	public AnsTRs() {
 		rs = new AnsonResultset(3, 4);

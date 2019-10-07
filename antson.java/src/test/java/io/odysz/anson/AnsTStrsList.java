@@ -85,13 +85,6 @@ public class AnsTStrsList extends Anson {
 		return dim4[i].get(j).get(k)[h];
 	}
 	
-//	public AnsTStrsList addDim4(int rx, ArrayList<Anson[]> cell2d) {
-//		if (dim4[rx] == null)
-//			dim4[rx] = new ArrayList<ArrayList<Anson[]>>();
-//		dim4[rx].add(cell2d);
-//		return this;
-//	}
-	
 	public AnsTStrsList set4dcell(int x, int y, int z, int w, Anson c) {
 		dim4[x].get(y).get(z)[w] = c;
 		return this;

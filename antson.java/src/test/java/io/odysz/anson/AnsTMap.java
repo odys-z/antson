@@ -7,10 +7,10 @@ import io.odysz.anson.AnsonField;
 
 public class AnsTMap extends Anson {
 
-	public HashMap<String, String> map;
+	HashMap<String, String> map;
 	
 	@AnsonField(valType="[Ljava.lang.Object;")
-	public HashMap<String, Object[]> mapArr;
+	HashMap<String, Object[]> mapArr;
 
 	public AnsTMap() {
 		map = new HashMap<String, String>();

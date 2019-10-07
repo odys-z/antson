@@ -30,9 +30,8 @@ public class AnsT4Enum extends Anson {
 		}
 	};
 
-	public MsgCode c;
-	public Port p;
+	MsgCode c;
+	Port p;
 
-	public AnsT4Enum() {
-	}
+	public AnsT4Enum() { }
 }

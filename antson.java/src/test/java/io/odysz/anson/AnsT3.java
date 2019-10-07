@@ -12,11 +12,11 @@ import io.odysz.anson.AnsonField;
 public class AnsT3 extends Anson {
 
 	/** Elements can be subclass*/
-	public Anson[] m;
+	Anson[] m;
 	
 	// annotation is not used, which can be figured out from ParameterizedType
 	@AnsonField(valType="[Lio.odysz.Anson;/io.odysz.Anson")
-	public ArrayList<Anson[]> ms;
+	ArrayList<Anson[]> ms;
 
 	public AnsT3() {}
 

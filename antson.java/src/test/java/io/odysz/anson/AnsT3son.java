@@ -7,7 +7,7 @@ public class AnsT3son extends Anson {
 
 	@AnsonField(ref=AnsonField.enclosing)
 	AnsT3 parent;
-	public String gendre;
+	String gendre;
 	
 	public AnsT3son() { }
 

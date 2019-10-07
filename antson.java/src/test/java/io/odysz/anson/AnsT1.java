@@ -17,8 +17,8 @@ public class AnsT1 extends Anson {
 		}
 	}
 
-	public String ver;
+	String ver;
 	
-	public AnsM1 m;
+	AnsM1 m;
 
 }

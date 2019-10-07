@@ -7,9 +7,9 @@ import io.odysz.anson.Anson;
 
 public class AnsTList extends Anson {
 
-	public List<String> lst;
+	List<String> lst;
 	
-	public List<AnsT3> anss;
+	List<AnsT3> anss;
 	
 	public AnsTList() {
 		lst = new ArrayList<String>();

@@ -19,7 +19,7 @@ public class AnTreeNode extends Anson {
 		}
 	}
 
-	public HashMap<String, Object> node;
+	HashMap<String, Object> node;
 
 	public AnTreeNode() {
 		node = new HashMap<String, Object>();

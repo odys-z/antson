@@ -3,9 +3,9 @@ package io.odysz.anson;
 import io.odysz.anson.Anson;
 
 public class AnsT2 extends Anson {
-	public int s;
+	int s;
 
-	public String[] m;
+	String[] m;
 	
 	public AnsT2() {}
 	
