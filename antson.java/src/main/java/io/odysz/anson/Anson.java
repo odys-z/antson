@@ -39,11 +39,9 @@ public class Anson implements IJsonable {
 		}
 	}
 
+	/**@deprecated */
 	private static final int bufLength = 64;
 
-//	protected String ver;
-//	protected int seq;
-	
 	public Anson() {}
 
 	@Override

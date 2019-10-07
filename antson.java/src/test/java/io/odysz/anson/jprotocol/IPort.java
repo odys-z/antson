@@ -3,7 +3,7 @@ package io.odysz.anson.jprotocol;
 import io.odysz.anson.IJsonable;
 import io.odysz.anson.x.AnsonException;
 
-public interface IPort extends IJsonable {
+ public interface IPort extends IJsonable {
 
 		default public String url() { return "echo.jserv"; }
 

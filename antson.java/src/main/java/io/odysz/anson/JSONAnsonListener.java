@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -173,9 +174,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				try { ctor = enclosingClazz.getConstructor();
 				} catch (NoSuchMethodException e) {
 					throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default constructor(0 parameter)\n"
-							+ "Also, inner class must be static.", enclosingClazz.getName());
+							+ "Also, inner class must be static."
+							+ "getConstructor error: %s %s", 
+							enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
 				}
-				if (IJsonable.class.isAssignableFrom(enclosingClazz)) {
+				if (ctor != null && IJsonable.class.isAssignableFrom(enclosingClazz)) {
 					fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
 					IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
 					stack.add(0, new ParsingCtx(fmap, enclosing));
@@ -314,16 +317,23 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        if (ptypess.length > 1) {
 				ptypess[1] = ptypess[1].replaceFirst(">$", "");
 				ptypess[1] = ptypess[1].replaceFirst("^L", "");
-//				ptypess[1] = "[L" + ptypess[1];
 	        }
 	        // figure out array element class 
 	        else {
-	        	@SuppressWarnings("unchecked")
-				Class<? extends Object> eleClzz =
-					((Class<? extends Object>) pType.getActualTypeArguments()[0]);
-				if (eleClzz.isArray()) {
-	        		ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
+	        	if (!(pType.getActualTypeArguments()[0] instanceof TypeVariable)) {
+					@SuppressWarnings("unchecked")
+					Class<? extends Object> eleClzz =
+						((Class<? extends Object>) pType.getActualTypeArguments()[0]);
+					if (eleClzz.isArray()) {
+						ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
+					}
 	        	}
+	        	// else nothing can do here for a type parameter, e.g. "T"
+	        	else
+	        		Utils.warn("Element type %s for %s is a type parameter (%s) - ignored",
+	        				pType.getActualTypeArguments()[0].getTypeName(),
+	        				f.getName(),
+	        				pType.getActualTypeArguments()[0].getClass());
 	        }
 	        return ptypess;
 	    }
@@ -696,7 +706,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (IJsonable.class.isAssignableFrom(ft)) {
 				// pushed by enterObject()
-				f.set(enclosing, top.parsedVal);
+				// f.set(enclosing, top.parsedVal);
+				String v = ctx.getChild(2).getText();
+
+				if (!LangExt.isblank(v, "null")) {
+					IJsonable j = Anson.fromJson(v);
+					f.set(enclosing, j);
+				}
 			}
 			else if (Object.class.isAssignableFrom(ft)) {
 				Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
