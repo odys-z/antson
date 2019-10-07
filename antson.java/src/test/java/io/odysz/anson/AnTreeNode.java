@@ -1,4 +1,4 @@
-package io.odysz.anson.types;
+package io.odysz.anson;
 
 import java.util.ArrayList;
 import java.util.HashMap;

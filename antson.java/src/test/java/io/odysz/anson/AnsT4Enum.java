@@ -1,4 +1,4 @@
-package io.odysz.anson.types;
+package io.odysz.anson;
 
 import io.odysz.anson.Anson;
 import io.odysz.anson.x.AnsonException;
