@@ -23,7 +23,7 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 	 * NOTE: java code shouldn't use switch-case block on enum. That cause problem with generated class.
 	 * @author odys-z@github.com
 	 */
-	public enum Port implements IPort {  heartbeat("ping.serv11"), session("login.serv11"),
+	public enum Port implements IPort {  heartbeat("ping.serv11"), session("login-serv11"),
 						query("r.serv11"), update("u.serv11"),
 						insert("c.serv11"), delete("d.serv11"),
 						echo("echo.serv11"),
@@ -47,18 +47,18 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 		@Override
 		public IJsonable toBlock(OutputStream stream, JsonOpt... opts) throws AnsonException, IOException {
 			stream.write('\"');
-			stream.write(url.getBytes());
+			stream.write(name().getBytes());
 			stream.write('\"');
 			return this;
-		} // BACK SYNC 
+		}
 
 		@Override
 		public IJsonable toJson(StringBuffer buf) throws IOException, AnsonException {
 			buf.append('\"');
-			buf.append(url);
+			buf.append(name().getBytes());
 			buf.append('\"');
 			return this;
-		}	 // BACK SYNC 
+		}
 	};
 
 	public enum MsgCode {ok, exSession, exSemantic, exIo, exTransct, exDA, exGeneral, ext;
@@ -90,7 +90,7 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 	int seq;
 	public int seq() { return seq; }
 
-	IPort port;
+	Port port;
 	public IPort port() { return port; }
 
 	private MsgCode code;
@@ -99,9 +99,9 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 	public void port(String pport) throws AnsonException {
 		/// translate from string to enum
 		if (defaultPortImpl == null)
-			port = Port.echo.valof(pport);
+			port = (Port) Port.echo.valof(pport);
 		else
-			port = defaultPortImpl.valof(pport);
+			port = (Port) defaultPortImpl.valof(pport);
 
 		if (port == null)
 			throw new AnsonException(-1, "Port can not be null. Not initialized? To use JMassage understand ports, call understandPorts(IPort) first.");
@@ -111,7 +111,7 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 		seq = (int) (Math.random() * 1000);
 	}
 
-	public AnsonMsg(IPort port) {
+	public AnsonMsg(Port port) {
 		this.port = port;
 		seq = (int) (Math.random() * 1000);
 	}
@@ -120,7 +120,7 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 	 * @param p 
 	 * @param code
 	 */
-	public AnsonMsg(IPort p, MsgCode code) {
+	public AnsonMsg(Port p, MsgCode code) {
 		this.port = p;
 		this.code = code;
 	}
@@ -165,12 +165,12 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 		return this;
 	}
 
-	public static AnsonMsg<AnsonResp> ok(IPort p, String txt) {
+	public static AnsonMsg<AnsonResp> ok(Port p, String txt) {
 		AnsonResp bd = new AnsonResp(txt);
 		return new AnsonMsg<AnsonResp>(p, MsgCode.ok).body(bd);
 	}
 
-	public static AnsonMsg<AnsonResp> ok(IPort p, AnsonResp resp) {
+	public static AnsonMsg<AnsonResp> ok(Port p, AnsonResp resp) {
 		return new AnsonMsg<AnsonResp>(p, MsgCode.ok).body(resp);
 	}
 }

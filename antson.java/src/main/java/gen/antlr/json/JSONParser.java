@@ -1,4 +1,4 @@
-// Generated from JSON.g4 by ANTLR 4.7.1
+// Generated from JSON.g4 by ANTLR 4.7.2
 package gen.antlr.json;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class JSONParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.7.1", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -23,19 +23,28 @@ public class JSONParser extends Parser {
 	public static final int
 		RULE_json = 0, RULE_envelope = 1, RULE_obj = 2, RULE_type_pair = 3, RULE_qualifiedName = 4, 
 		RULE_pair = 5, RULE_propname = 6, RULE_array = 7, RULE_value = 8;
-	public static final String[] ruleNames = {
-		"json", "envelope", "obj", "type_pair", "qualifiedName", "pair", "propname", 
-		"array", "value"
-	};
+	private static String[] makeRuleNames() {
+		return new String[] {
+			"json", "envelope", "obj", "type_pair", "qualifiedName", "pair", "propname", 
+			"array", "value"
+		};
+	}
+	public static final String[] ruleNames = makeRuleNames();
 
-	private static final String[] _LITERAL_NAMES = {
-		null, "','", "'{'", "'}'", "':'", "'['", "'L'", "'.'", "'$'", "']'", "'true'", 
-		"'false'", "'null'"
-	};
-	private static final String[] _SYMBOLIC_NAMES = {
-		null, null, null, null, null, null, null, null, null, null, null, null, 
-		null, "STRING", "NUMBER", "TYPE", "IDENTIFIER", "WS"
-	};
+	private static String[] makeLiteralNames() {
+		return new String[] {
+			null, "','", "'{'", "'}'", "':'", "'['", "'L'", "'.'", "'$'", "']'", 
+			"'true'", "'false'", "'null'"
+		};
+	}
+	private static final String[] _LITERAL_NAMES = makeLiteralNames();
+	private static String[] makeSymbolicNames() {
+		return new String[] {
+			null, null, null, null, null, null, null, null, null, null, null, null, 
+			null, "STRING", "NUMBER", "TYPE", "IDENTIFIER", "WS"
+		};
+	}
+	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
 	/**
@@ -85,6 +94,7 @@ public class JSONParser extends Parser {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
+
 	public static class JsonContext extends ParserRuleContext {
 		public List<EnvelopeContext> envelope() {
 			return getRuleContexts(EnvelopeContext.class);

@@ -5,7 +5,7 @@ import io.odysz.anson.jprotocol.AnsonResp;
 
 public class AnSessionResp extends AnsonResp {
 
-	private SessionInf ssInf;
+	SessionInf ssInf;
 
 	public AnSessionResp(AnsonMsg<AnsonResp> parent, String ssid, String uid, String ... roleId) {
 		super(parent);

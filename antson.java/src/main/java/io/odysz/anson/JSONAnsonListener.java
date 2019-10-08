@@ -3,6 +3,7 @@ package io.odysz.anson;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -138,15 +139,30 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return fmap;
 	}
 
-	/**Parsing objects stack<br>
-	 * Element: [0]: field-map, [1]: enclosing {@link IJsonable} object<br>
+	/**<p>Parsing objects stack</p>
+	 * <p>Element: {@link ParsingCtx}</p>
 	 * Top = Current parsingVal object.<br>
 	 * Currently all object must be an IJsonable object. */
 	private ArrayList<ParsingCtx> stack;
 
 	private ParsingCtx top() { return stack.get(0); }
 
-	private ParsingCtx toparent() { return stack.size() > 1 ? stack.get(1) : null; }
+	private Object toparent(Class<?> type) {
+		// no enclosing, no parent
+		if (stack.size() <= 1 || LangExt.isblank(type, "null"))
+			return null;
+
+		// trace back, guess with type for children could be in array or map
+		ParsingCtx p = stack.get(1);
+		int i = 2;
+		while (p != null) {
+			if (type.equals(p.enclosing.getClass()))
+				return p.enclosing;
+			p = stack.get(i);
+			i++;
+		}
+		return null;
+	}
 
 	/**Push parsing node (a envelope, map, list).
 	 * @param enclosingClazz new parsing IJsonable object's class
@@ -180,8 +196,15 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				}
 				if (ctor != null && IJsonable.class.isAssignableFrom(enclosingClazz)) {
 					fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
-					IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
-					stack.add(0, new ParsingCtx(fmap, enclosing));
+					try {
+						IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
+						stack.add(0, new ParsingCtx(fmap, enclosing));
+					} catch (InvocationTargetException e) {
+						throw new AnsonException(0, "Failed to create instance of IJsonable with\nconstructor: %s\n"
+							+ "class: %s\nerror: %s\nmessage: %s\n"
+							+ "Make sure the object can be created with the constructor.", 
+							ctor, enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
+					}
 				}
 				else {
 					HashMap<String, Object> enclosing = new HashMap<String, Object>();
@@ -674,11 +697,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				return;
 			}
 			else if (af != null && af.ref() == AnsonField.enclosing) {
-				Object parent = toparent();
+				Object parent = toparent(f.getType());
 				if (parent == null)
 					Utils.warn("parent %s is ignored: reference is null", fn);
 
 				f.set(enclosing, parent);
+				return;
 			}
 
 			Class<?> ft = f.getType();
@@ -695,7 +719,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			else if (ft.isEnum()) {
 				String v = getStringVal(ctx);
 				if (!LangExt.isblank(v))
-					f.set(enclosing, Enum.valueOf((Class<Enum>) f.getType(), v));
+					f.set(enclosing, Enum.valueOf((Class<Enum>) ft, v));
 			}
 			else if (ft.isArray())
 				f.set(enclosing, toPrimitiveArray((List<?>)top.parsedVal, ft));
@@ -705,18 +729,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				f.set(enclosing, top.parsedVal);
 			}
 			else if (IJsonable.class.isAssignableFrom(ft)) {
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
-				// TODO to be continued: IPort AnsonMsg#port go this branch and can't been deserialized
 				// f.set(enclosing, top.parsedVal);
 				String v = ctx.getChild(2).getText();
 

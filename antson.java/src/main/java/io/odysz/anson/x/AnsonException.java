@@ -4,12 +4,22 @@ public class AnsonException extends Exception {
 	/** * */
 	private static final long serialVersionUID = 1L;
 
-	@SuppressWarnings("unused")
 	private int c;
-//	public String code() { return c; }
 
+	/**
+	 * @param code see {@link #code()}
+	 * @param template
+	 * @param param
+	 */
 	public AnsonException(int code, String template, Object... param) {
 		super(template != null ? String.format(template, param) : "");
 		this.c = code;
 	}
+
+	/**
+	 * @return code<br>
+	 *  0: general internal<br>
+	 *  1: serializing syntax check error<br>
+	 */
+	public int code() { return c; }
 }

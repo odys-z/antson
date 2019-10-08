@@ -39,9 +39,6 @@ public class Anson implements IJsonable {
 		}
 	}
 
-	/**@deprecated */
-	private static final int bufLength = 64;
-
 	public Anson() {}
 
 	@Override
@@ -56,13 +53,20 @@ public class Anson implements IJsonable {
 		for (Field f : fmap.values()) {
 			// is this ignored?
 			AnsonField af = f.getAnnotation(AnsonField.class);
-			if (af != null && (af.ignoreTo() || af.ref() > 0))
+			if (af != null && af.ignoreTo())
 				continue;
 			
 			f.setAccessible(true);
 
 			stream.write(new byte[] {',', ' '});
 			stream.write((f.getName() + ": ").getBytes());
+
+			if (af != null && af.ref() == AnsonField.enclosing) {
+				stream.write('\"');
+				stream.write(f.getType().getName().getBytes());
+				stream.write('\"');
+				continue;
+			}
 
 			try {
 				if (!f.getType().isPrimitive()) {
@@ -165,48 +169,11 @@ public class Anson implements IJsonable {
 				continue;
 			}
 
-//			if (IJsonable.class.isAssignableFrom(list.getClass()))
-//				((Anson)e).toBlock(stream);
-//			else if (e instanceof String) {
-//				stream.write('"');
-//				stream.write(e.toString().getBytes());
-//				stream.write('"');
-//			}
-//			else 
-//				stream.write(e.toString().getBytes());
-
-				if (!e.getClass().isPrimitive()) {
-//					Object v = f.get(this);
-//					Class<? extends Object> vclz = v == null ? null : v.getClass();
-					
-					/*
-					if (v == null)
-						stream.write(new byte[] {'n', 'u', 'l', 'l'});
-					else if (IJsonable.class.isAssignableFrom(vclz))
-						((IJsonable)v).toBlock(stream);
-					else if (List.class.isAssignableFrom(v.getClass()))
-						toListBlock(stream, (AbstractCollection<?>) v);
-					else if ( Map.class.isAssignableFrom(vclz))
-						toMapBlock(stream, (AbstractCollection<?>) v);
-					else if (AbstractCollection.class.isAssignableFrom(vclz))
-						toCollectionBlock(stream, (AbstractCollection<?>) v);
-					else if (f.getType().isArray()) {
-						toArrayBlock(stream, (Object[]) v);
-					}
-					else if (v instanceof String)
-						stream.write(("\"" + v.toString() + "\"").getBytes());
-					else
-						try { stream.write(v.toString().getBytes()); }
-						catch (NotSerializableException e) {
-							Utils.warn("Filed %s of %s can't been serialized.",
-									f.getName(), f.getClass().getName());
-						}
-					*/
-					writeNonPrimitive(stream, e.getClass(), e);
-				}
-				else // if (f.getType().isPrimitive())
-					// must be primitive?
-					stream.write(String.valueOf(e).getBytes());
+			if (!e.getClass().isPrimitive())
+				writeNonPrimitive(stream, e.getClass(), e);
+			else // if (f.getType().isPrimitive())
+				// must be primitive?
+				stream.write(String.valueOf(e).getBytes());
 
 		}
 		stream.write(']');
@@ -254,8 +221,13 @@ public class Anson implements IJsonable {
 		}
 
 		Class<? extends Object> vclz = v.getClass();
-		if (IJsonable.class.isAssignableFrom(vclz))
+		if (IJsonable.class.isAssignableFrom(vclz)) {
+			if (fdClz.isEnum())
+				throw new AnsonException(1, "Using enum implementing IJsonalbe is not allowed - can't deserialized.\n"
+						+ "field class: %s\nvalue class: %s\nvalue: %s\n"
+						+ "If a enum type is possible, declare it in java as enum.", fdClz, vclz, v);
 			((IJsonable)v).toBlock(stream);
+		}
 		else if (List.class.isAssignableFrom(v.getClass()))
 			toListBlock(stream, (AbstractCollection<?>) v);
 		else if ( Map.class.isAssignableFrom(vclz))
@@ -334,7 +306,7 @@ public class Anson implements IJsonable {
 	 * @throws IOException
 	 */
 	protected Anson fromBlock(InputStream stream) throws IOException {
-		byte[] buf = new byte[bufLength];
+		byte[] buf = new byte[2048];
 		int len = stream.read(buf);
 		while (len != -1) {
 			// kafka?

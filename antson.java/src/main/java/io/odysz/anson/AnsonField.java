@@ -23,7 +23,9 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface AnsonField {
+	// nothing happen
 	public int undefined = -1;
+	// must trigger reference resolving
 	public int enclosing = 1;
 
 	boolean ignoreTo() default false;

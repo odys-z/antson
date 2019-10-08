@@ -89,20 +89,48 @@ class AnsonTest {
 	@Test
 	void test2Json_PC() throws Exception {
 		AnsT3 parent = new AnsT3();
-		
+	
 		AnsT3Child c = new AnsT3Child(parent);
+		// should trigger parent: io.odysz.anson.AnsT3
 		AnsT3son son = new AnsT3son(parent);
-		
+	
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		parent.toBlock(bos);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.AnsT3, "
-						+ "ms: null, m: [{type: io.odysz.anson.AnsT3Child}, "
-							+ "{type: io.odysz.anson.AnsT3son, gendre: \"male\"}]}";
+		String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
+				+ "m: [{type: io.odysz.anson.AnsT3Child}, "
+					+ "{type: io.odysz.anson.AnsT3son, parent: \"io.odysz.anson.AnsT3\", gendre: \"male\"}]}";
 		assertEquals(expect, s);
-		
+	
+		// should resolve parent ref with a type guess
 		AnsT3 p = (AnsT3) Anson.fromJson(s);
 		assertEquals(((AnsT3son)p.m[1]).gendre, "male");
+		assertEquals(null, ((AnsT3Child)p.m[0]).parent);
+		assertEquals(p, ((AnsT3son)p.m[1]).parent);
+	}
+	
+	@Test
+	void test_generic_pc() throws AnsonException, IOException {
+		AnsT3 enclosing = new AnsT3();
+		
+		AnsT5Child_paramA c0 = new AnsT5Child_paramA(enclosing);
+		AnsT5Child_paramA c1 = new AnsT5Child_paramA(enclosing);
+		c1.name = "B";
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		enclosing.toBlock(bos);
+		String s = bos.toString(StandardCharsets.UTF_8.name());
+		String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
+				+ "m: [{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"param A\"}, "
+					+ "{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"B\"}]}";
+		assertEquals(expect, s);
+		
+		AnsT3 clone = (AnsT3) Anson.fromJson(s);
+		assertEquals(enclosing.m.length, clone.m.length);
+		assertEquals(c0.name, ((AnsT5Child_paramA)clone.m[0]).name);
+		assertEquals(((AnsT5Child_paramA)enclosing.m[1]).name, ((AnsT5Child_paramA)clone.m[1]).name);
+		assertEquals(clone, ((AnsT5Child_paramA)clone.m[0]).parent);
+		assertEquals(clone, ((AnsT5GeneriChild<?>)clone.m[1]).parent);
 	}
 	
 	@Test
