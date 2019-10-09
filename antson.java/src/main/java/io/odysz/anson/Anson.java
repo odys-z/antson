@@ -222,10 +222,10 @@ public class Anson implements IJsonable {
 
 		Class<? extends Object> vclz = v.getClass();
 		if (IJsonable.class.isAssignableFrom(vclz)) {
-			if (fdClz.isEnum())
-				throw new AnsonException(1, "Using enum implementing IJsonalbe is not allowed - can't deserialized.\n"
-						+ "field class: %s\nvalue class: %s\nvalue: %s\n"
-						+ "If a enum type is possible, declare it in java as enum.", fdClz, vclz, v);
+//			if (fdClz.isEnum())
+//				throw new AnsonException(1, "Using enum implementing IJsonalbe is not allowed - can't deserialized.\n"
+//						+ "field class: %s\nvalue class: %s\nvalue: %s\n"
+//						+ "If a enum type is possible, declare it in java as enum.", fdClz, vclz, v);
 			((IJsonable)v).toBlock(stream);
 		}
 		else if (List.class.isAssignableFrom(v.getClass()))
@@ -237,8 +237,11 @@ public class Anson implements IJsonable {
 		else if (fdClz.isArray()) {
 			toArrayBlock(stream, (Object[]) v);
 		}
-		else if (v instanceof String)
-			stream.write(("\"" + v.toString() + "\"").getBytes());
+		else if (v instanceof String) {
+			stream.write('\"');
+			stream.write(escape(v));
+			stream.write('\"');
+		}
 		else if (fdClz.isEnum())
 			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes());
 		else
@@ -249,6 +252,26 @@ public class Anson implements IJsonable {
 			}
 	}
 	
+	/**<pre>fragment ESC
+     : '\\' (["\\/bfnrt] | UNICODE) ;</pre>
+	 * @param v
+	 * @return
+	 */
+	private static byte[] escape(Object v) {
+		if (v == null)
+			return new byte[0];
+		String s = v.toString();
+		// What about Performance ?
+		return s.replace("\n", "\\n")
+				// .replace("\/", "\\/")
+				.replace("\r", "\\r")
+				.replace("\b", "\\b")
+				.replace("\\", "\\\\")
+				.replace("\f", "\\f")
+				.replace("\t", "\\t")
+				.getBytes();
+	}
+
 	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls)
 			throws IOException, AnsonException {
 		if (v instanceof IJsonable)

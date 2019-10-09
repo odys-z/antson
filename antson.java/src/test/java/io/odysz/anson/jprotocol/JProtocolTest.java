@@ -1,7 +1,6 @@
 package io.odysz.anson.jprotocol;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import io.odysz.anson.Anson;
 import io.odysz.anson.jprotocol.AnsonMsg;
 import io.odysz.anson.x.AnsonException;
-import io.odysz.common.Utils;
 import io.odysz.anson.jprotocol.AnsonResp;
 import io.odysz.anson.jprotocol.AnsonMsg.MsgCode;
 import io.odysz.anson.jprotocol.AnsonMsg.Port;
@@ -28,20 +26,20 @@ class JProtocolTest {
 	void setUp() throws Exception {
 	}
 
-	@Test
-	void test_ErrorAlart() throws AnsonException, IOException {
-		AnAlert4User<AnAlertBody> msg = AnAlertBody.formatMsg(uid, tk64, iv64);
-
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
-		try { msg.toBlock(bos);
-			fail("AnAlert4User#port's syntax error not found");
-		} catch (AnsonException ae) {
-			assertEquals(1, ae.code());
-			Utils.warn("Got expecting error:\n%s", ae.getMessage());
-		}
-		@SuppressWarnings("unused")
-		String json = bos.toString(StandardCharsets.UTF_8.name());
-	}
+//	@Test
+//	void test_ErrorAlart() throws AnsonException, IOException {
+//		AnAlert4User<AnAlertBody> msg = AnAlertBody.formatMsg(uid, tk64, iv64);
+//
+//		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+//		try { msg.toBlock(bos);
+//			fail("AnAlert4User#port's syntax error not found");
+//		} catch (AnsonException ae) {
+//			assertEquals(1, ae.code());
+//			Utils.warn("Got expecting error:\n%s", ae.getMessage());
+//		}
+//		@SuppressWarnings("unused")
+//		String json = bos.toString(StandardCharsets.UTF_8.name());
+//	}
 	
 	@Test
 	void test_SessionReq() throws AnsonException, IOException {

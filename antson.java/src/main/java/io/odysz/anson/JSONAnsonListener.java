@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import gen.antlr.json.JSONParser.ObjContext;
 import gen.antlr.json.JSONParser.PairContext;
 import gen.antlr.json.JSONParser.Type_pairContext;
 import gen.antlr.json.JSONParser.ValueContext;
+import io.odysz.anson.IJsonable.JsonableFactory;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
@@ -114,6 +116,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			return subTypes;
 		}
 	}
+
+	private static HashMap<Class<?>, JsonableFactory> factorys;
 
 	/**Merge clazz's field meta up to the IJsonable ancestor.
 	 * @param clazz
@@ -343,18 +347,19 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        }
 	        // figure out array element class 
 	        else {
-	        	if (!(pType.getActualTypeArguments()[0] instanceof TypeVariable)) {
+	        	Type argType = pType.getActualTypeArguments()[0];
+	        	if (!(argType instanceof TypeVariable) && !(argType instanceof WildcardType)) {
 					@SuppressWarnings("unchecked")
-					Class<? extends Object> eleClzz =
-						((Class<? extends Object>) pType.getActualTypeArguments()[0]);
+					Class<? extends Object> eleClzz = ((Class<? extends Object>) argType);
 					if (eleClzz.isArray()) {
 						ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
 					}
 	        	}
 	        	// else nothing can do here for a type parameter, e.g. "T"
 	        	else
-	        		Utils.warn("Element type %s for %s is a type parameter (%s) - ignored",
-	        				pType.getActualTypeArguments()[0].getTypeName(),
+	        		if (AnsonFlags.parser)
+	        			Utils.warn("[AnsonFlags.parser] Element type <%s> for %s is a type parameter (%s) - ignored",
+	        				pType.getActualTypeArguments()[0], //.getTypeName(),
 	        				f.getName(),
 	        				pType.getActualTypeArguments()[0].getClass());
 	        }
@@ -501,9 +506,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		top = top();
 		top.parsedVal = arr;
 
-		// figure the type if possible
+		// figure the type if possible - convert to array
 		String et = top.elemType();
-		if (!LangExt.isblank(et))
+		if (!LangExt.isblank(et, "\\?.*")) // TODO debug: where did this type comes from?
 			try {
 				Class<?> arrClzz = Class.forName(et);
 				if (arrClzz.isArray())
@@ -588,7 +593,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					// FIXME issue: if the first element is 0 length, it will failed to convert the array
 					Class<?> parsedClzz = top.parsedVal.getClass();
 					if (List.class.isAssignableFrom(parsedClzz)) {
-						if (LangExt.isblank(top.elemType())) {
+						if (LangExt.isblank(top.elemType(), "\\?.*")) {
 							// change list to array
 							List<?> lst = (List<?>)top.parsedVal;
 							if (lst != null && lst.size() > 0) {
@@ -729,12 +734,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				f.set(enclosing, top.parsedVal);
 			}
 			else if (IJsonable.class.isAssignableFrom(ft)) {
-				// f.set(enclosing, top.parsedVal);
-				String v = ctx.getChild(2).getText();
-
-				if (!LangExt.isblank(v, "null")) {
-					IJsonable j = Anson.fromJson(v);
-					f.set(enclosing, j);
+				if (Anson.class.isAssignableFrom(ft))
+					f.set(enclosing, top.parsedVal);
+				else {
+					// Subclass of IJsonable must registered
+					String v = getStringVal(ctx);
+					if (!LangExt.isblank(v, "null"))
+						f.set(enclosing, invokeFactory(f, v));
 				}
 			}
 			else if (Object.class.isAssignableFrom(ft)) {
@@ -754,9 +760,25 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		} catch (AnsonException e) {
 			Utils.warn(e.getMessage());
 		}
-
 	}
 	
+	private IJsonable invokeFactory(Field f, String v) throws AnsonException {
+		if (factorys == null || !factorys.containsKey(f.getType()))
+			throw new AnsonException(0,
+					"Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
+					+ "Or don't declare the field as %1$s, use a subclass of Anson",
+					f.getType());
+
+		JsonableFactory factory = factorys.get(f.getType());
+		try { return factory.fromJson(v);}
+		catch (Throwable t) {
+			throw new AnsonException(0,
+					"Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
+					+ "Or don't declare the field as %1$s, use a subclass of Anson",
+					f.getType());
+		}
+	}
+
 	private static void setPrimitive(IJsonable obj, Field f, String v)
 			throws RuntimeException, ReflectiveOperationException, AnsonException {
 		if (f.getType() == int.class || f.getType() == Integer.class)
@@ -775,5 +797,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// what's else?
 			throw new AnsonException(0, "Unsupported field type: %s (field %s)",
 					f.getType().getName(), f.getName());
+	}
+
+	public static void registFactory(Class<?> jsonable, JsonableFactory factory) {
+		if (factorys == null)
+			factorys = new HashMap<Class<?>, JsonableFactory>();
+		factorys.put(jsonable, factory);
 	}
 }

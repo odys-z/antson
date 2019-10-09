@@ -26,7 +26,6 @@ class AnsonTest {
 	@Test
 	void testToJson() throws Exception {
 		AnsT1 anson = new AnsT1();
-//		anson.seq = 1;
 		anson.ver = "v0.1";
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		anson.toBlock(bos);
@@ -34,13 +33,11 @@ class AnsonTest {
 		assertEquals("{type: io.odysz.anson.AnsT1, ver: \"v0.1\", m: null}", s);
 
 		AnsT2 a2 = new AnsT2();
-		a2.m = new String[] {"e0", "e1"};
-//		a2.seq = 2;
+		a2.m = new String[] {"e\n0", "e1"}; // ESC
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		// assertEquals("{type: io.odysz.anson.AnsT2, ver: null, s: 0, m: [\"e0\", \"e1\"], seq: 2}", s);
-		assertEquals("{type: io.odysz.anson.AnsT2, s: 0, m: [\"e0\", \"e1\"]}", s);
+		assertEquals("{type: io.odysz.anson.AnsT2, s: 0, m: [\"e\n0\", \"e1\"]}", s);
 		
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
@@ -48,8 +45,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		cll.toBlock(bos);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		// assertEquals("{type: io.odysz.anson.AnsTList, anss: null, ver: null, lst: [\"A\", \"B\"], seq: 0}", s);
-		assertEquals("{type: io.odysz.anson.AnsTList, anss: null, lst: [\"A\", \"B\"]}", s);
+		assertEquals("{type: io.odysz.anson.AnsTList, anss: null, ans2: null, lst: [\"A\", \"B\"]}", s);
 
 		AnsTRs anrs = new AnsTRs();
 		bos = new ByteArrayOutputStream(); 
@@ -141,12 +137,26 @@ class AnsonTest {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		en.toBlock(bos);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\"}";
+		bos.close();
+		String expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: null}";
 		assertEquals(expect, s);
 		
 		AnsT4Enum denum = (AnsT4Enum) Anson.fromJson(expect);
 		assertEquals(denum.c, MsgCode.ok);
 		assertEquals(denum.p, Port.heartbeat);
+		
+		en.problem = Port.dataset;
+		bos = new ByteArrayOutputStream(); 
+		en.toBlock(bos);
+		s = bos.toString(StandardCharsets.UTF_8.name());
+		bos.close();
+		expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: \"dataset\"}";
+		assertEquals(expect, s);
+
+		AnsT4Enum problem = (AnsT4Enum) Anson.fromJson(expect);
+		assertEquals(MsgCode.ok, problem.c);
+		assertEquals(Port.heartbeat, problem.p);
+		assertEquals(Port.dataset, problem.problem);
 	}
 	
 	@SuppressWarnings("serial")
@@ -203,20 +213,27 @@ class AnsonTest {
 
 	@Test
 	void testFromJson() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
-		AnsT1 anson = (AnsT1) Anson.fromJson("{type:io.odysz.anson.AnsT1, ver: \"v0.1\", m: {\"name\": \"x\"}}");
+		AnsT1 anson = (AnsT1) Anson.fromJson("{type:io.odysz.anson.AnsT1, ver: \"v0.1\", "
+				+ "m: {type:io.odysz.anson.AnsT1$AnsM1, \"name\": \"x\"}}");
 		assertEquals("x", anson.m.name);
 
 		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0.1\"}");
 		assertEquals("v0.1", anson.ver);
 		assertEquals(null, anson.m);
 
-		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0.1\", m: null}");
-		assertEquals("v0.1", anson.ver);
+		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\n1\", m: null}");
+		assertEquals("v0\\n.\\n1", anson.ver);
 		assertEquals(null, anson.m);
 
 		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: [\"e1\", \"e2\"]}");
 		assertEquals("e1", anson2.m[0]);
 		assertEquals("e2", anson2.m[1]);
+
+		anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: ["
+				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)\", "
+				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)\"]}");
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[0]);
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)", anson2.m[1]);
 	}
 	
 	@Test
@@ -261,12 +278,18 @@ class AnsonTest {
 		assertEquals(2, cll.anss.size());
 		assertEquals(4, ((AnsT2)cll.anss.get(0).m[0]).s);
 		assertEquals("x", ((AnsT1)cll.anss.get(0).m[1]).ver);
+
+		cll = (AnsTList) Anson.fromJson("{type: io.odysz.anson.AnsTList, ans2: ["
+				+ "{type: io.odysz.anson.AnsT2, s: 4 }, "
+				+ "{type: io.odysz.anson.AnsT1, ver: \"z\" }]}");
+		assertEquals(2, cll.ans2.size());
+		assertEquals(4, ((AnsT2)cll.ans2.get(0)).s);
+		assertEquals("z", ((AnsT1)cll.ans2.get(1)).ver);
 	}
 
 	@Test
 	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
 		AnsTMap m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
-//		assertEquals(null, m.ver);
 		assertEquals("B", m.map.get("A"));
 
 		m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, map: {\"A\": \"B\"}, mapArr: {a: [1, \"s\"]}}");
