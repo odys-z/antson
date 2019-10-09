@@ -130,7 +130,7 @@ TYPE
 	;
 
 IDENTIFIER
-	:         Letter LetterOrDigit*;
+	: Letter LetterOrDigit*;
 
 fragment LetterOrDigit
 	: Letter
