@@ -251,11 +251,11 @@ This is because it's not easy to figure out the parent object to create the inne
 For how inner class examples, see test case
 [AnsonTest#test_innerClass()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
-## 6. Java enum can't been constructed at runtime
+## 6. Java enum can't been constructed at runtime - needing register a factory
 
 This is what java spec defined.
 
-If a field is intend to be defined as a interface implemented with a java Enum,
+If a field is intend to be defined as an interface implemented with a java Enum,
 it can't been deserialized as expected.
 
 ~~~
@@ -268,10 +268,27 @@ it can't been deserialized as expected.
         IPort enPort;
         // use this instead
         en port;
-	}
+    }
 ~~~
 
-Field enPort can been parsed correctly because no way for java to create an IPort
-instance as an Enum then set the field at runtime.
+Field enPort can't be parsed correctly because no way in java to create an Enum
+instance then cast to IPort.
+
+Currently Antson need user register a call back to the parser (JSONAsonListener)
+for enum type "en" to create the instance, with call to JSONAnsonListener#registFactory().
+
+~~~
+    public enum Port implements IPort {
+        heartbeat("ping.serv11"), session("login.serv11"), dataset("ds.serv11");
+
+        static {
+            JSONAnsonListener.registFactory(IPort.class, (s) -> {
+                    return Port.valueOf(s);
+            });
+        }
+    }
+~~~
+
+See test case: [AnsonTest#test2Json4Enum](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java) and the testing type AnsT4Enum.Port.
 
 If you have any idea, please let the him know.

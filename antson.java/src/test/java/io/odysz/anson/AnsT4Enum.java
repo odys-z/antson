@@ -15,13 +15,6 @@ public class AnsT4Enum extends Anson {
 			/**Equivalent of enum.valueOf(), except for subclass returning instance of jserv.Port.
 			 * @throws SemanticException */
 			public IPort valof(String pname) throws AnsonException;
-
-//			@Override
-//			public default JsonableFactory factory() {
-//				return s -> {
-//					return Port.valueOf(s);
-//				};
-//			}
 	}
 
 	public enum Port implements IPort { 
@@ -53,13 +46,6 @@ public class AnsT4Enum extends Anson {
 			buf.append('\"');
 			return this;
 		}
-		
-//		@Override
-//		public JsonableFactory factory() {
-//			return s -> {
-//				return Port.valueOf(s);
-//			};
-//		}
 	};
 
 	public enum MsgCode {ok, exSession, exSemantic, exIo, exTransct, exDA, exGeneral, ext;
