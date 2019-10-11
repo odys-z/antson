@@ -151,6 +151,14 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private ParsingCtx top() { return stack.get(0); }
 
+	private String envelopName() {
+		if (stack != null)
+			for (int i = 0; i < stack.size(); i++)
+				if (stack.get(i).enclosing instanceof Anson)
+					return stack.get(i).enclosing.getClass().getName();
+		return null;
+	}
+
 	private Object toparent(Class<?> type) {
 		// no enclosing, no parent
 		if (stack.size() <= 1 || LangExt.isblank(type, "null"))
@@ -513,7 +521,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				Class<?> arrClzz = Class.forName(et);
 				if (arrClzz.isArray())
 					top.parsedVal = toPrimitiveArray(arr, arrClzz);	
-			} catch (IllegalArgumentException | ClassNotFoundException e) {
+			} catch (AnsonException | IllegalArgumentException | ClassNotFoundException e) {
 				Utils.warn("Trying convert array to annotated type failed.\ntype: %s\njson: %s\nerror: %s",
 						et, ctx.getText(), e.getMessage());
 			}
@@ -531,6 +539,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param  arrType the primitive array type to convert to
 	 * @param  <P>       the primitive array type to convert to
 	 * @return an array of P with the elements of the specified List
+	 * @throws AnsonException list element class doesn't equal array element type - not enough annotation?
 	 * @throws NullPointerException
 	 *         if either of the arguments are null, or if any of the elements
 	 *         of the List are null
@@ -540,7 +549,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 *         type, or if the elements of the specified List can not be
 	 *         stored in an array of type P
 	 */
-	private static <P> P toPrimitiveArray(List<?> list, Class<P> arrType) {
+	private static <P> P toPrimitiveArray(List<?> list, Class<P> arrType) throws AnsonException {
 	    if (!arrType.isArray()) {
 	        throw new IllegalArgumentException(arrType.toString());
 	    }
@@ -552,6 +561,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    P array = arrType.cast(Array.newInstance(eleType, list.size()));
 
 	    for (int i = 0; i < list.size(); i++) {
+	    	Object lstItem = list.get(i);
+	    	if (lstItem == null)
+	    		continue;
+
+	    	// this guess is error prone, let's tell user why. May be more annotation is needed
+	    	if (!eleType.isAssignableFrom(lstItem.getClass()))
+	    		throw new AnsonException(1, "Set element (v: %s, type %s) to array of type of \"%s[]\" failed.\n"
+	    				+ "Array element's type not annotated?",
+	    				lstItem, lstItem.getClass(), eleType);
+
 	        Array.set(array, i, list.get(i));
 	    }
 
@@ -606,8 +625,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 									eleClz = lst.get(ix).getClass();
 
 								if (eleClz != null) {
-									((List<Object>)enclosLst).add(toPrimitiveArray(lst,
-											Array.newInstance(eleClz, 0).getClass()));
+									try {
+										((List<Object>)enclosLst).add(toPrimitiveArray(lst,
+												Array.newInstance(eleClz, 0).getClass()));
+									} catch (AnsonException e) {
+										Utils.warn("Trying convert array to annotated type failed.\nenclosing: %s\njson: %s\nerror: %s",
+											top.enclosing, ctx.getText(), e.getMessage());
+									}
 
 									// remember elem type for later null element
 									top.elemType(new String[] {eleClz.getName()});
@@ -648,6 +672,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 													Array.newInstance(eleClz, 0).getClass()));
 								}
 							} catch (Exception e) {
+								Utils.warn(envelopName());
 								Utils.warn(ctx.getText());
 								e.printStackTrace();
 							}
