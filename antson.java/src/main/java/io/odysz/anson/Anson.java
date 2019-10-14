@@ -133,7 +133,7 @@ public class Anson implements IJsonable {
 		stream.write(']');
 	}
 
-	private static void toMapBlock(OutputStream stream, Map<?, ?> map)
+	public static void toMapBlock(OutputStream stream, Map<?, ?> map)
 			throws AnsonException, IOException {
 		if (map == null) return;
 

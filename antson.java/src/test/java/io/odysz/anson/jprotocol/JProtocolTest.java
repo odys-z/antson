@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,21 +27,6 @@ class JProtocolTest {
 	void setUp() throws Exception {
 	}
 
-//	@Test
-//	void test_ErrorAlart() throws AnsonException, IOException {
-//		AnAlert4User<AnAlertBody> msg = AnAlertBody.formatMsg(uid, tk64, iv64);
-//
-//		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
-//		try { msg.toBlock(bos);
-//			fail("AnAlert4User#port's syntax error not found");
-//		} catch (AnsonException ae) {
-//			assertEquals(1, ae.code());
-//			Utils.warn("Got expecting error:\n%s", ae.getMessage());
-//		}
-//		@SuppressWarnings("unused")
-//		String json = bos.toString(StandardCharsets.UTF_8.name());
-//	}
-	
 	@Test
 	void test_SessionReq() throws AnsonException, IOException {
 		// formatLogin: {a: "login", logid: logId, pswd: tokenB64, iv: ivB64};
@@ -105,6 +91,33 @@ class JProtocolTest {
 		assertEquals(msg, msg.body(0).parent);
 	}
 	
+	@Test
+	void test_insertResp() throws AnsonException, IOException {
+		
+		HashMap<String, Object> props = new HashMap<String, Object>(2);
+		props.put("resulved", new SemanticObjV11());
+		((SemanticObjV11) props.get("resulved")).add("recId", "000f");
+		((SemanticObjV11) props.get("resulved")).add("vec", "000x");
+		props.put("res", new int[] { 1, 20 });
+
+		AnsonMsg<AnsonResp> resp = new AnsonMsg<AnsonResp>(Port.insert, MsgCode.ok)
+				.body(new AnsonResp().data(props));
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		resp.toBlock(bos);
+		String json = bos.toString(StandardCharsets.UTF_8.name());
+
+		@SuppressWarnings("unchecked")
+		AnsonMsg<AnSessionResp> msg = (AnsonMsg<AnSessionResp>) Anson.fromJson(json);
+
+		assertEquals(MsgCode.ok, msg.code());
+		assertEquals(resp.port(), msg.port());
+		assertEquals("000f", ((SemanticObjV11) msg.body(0).data().get("resulved")).get("recId"));
+		assertEquals("000x", ((SemanticObjV11) msg.body(0).data().get("resulved")).get("vec"));
+		assertEquals(1, ((int[]) msg.body(0).data().get("res"))[0]);
+		assertEquals(20, ((int[]) msg.body(0).data().get("res"))[1]);
+	}
+
 	static <U extends AnsonResp> AnsonMsg<U> ok(Port p, U body) {
 		AnsonMsg<U> msg = new AnsonMsg<U>(p, MsgCode.ok);
 		msg.body(body);
