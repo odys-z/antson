@@ -10,9 +10,9 @@ import io.odysz.anson.AnsonResultset;
  */
 public class AnsonResp extends AnsonBody {
 
-	private String m;
-	private ArrayList<AnsonResultset> rs;
-	private HashMap<String, Object> map;
+	protected String m;
+	protected ArrayList<AnsonResultset> rs;
+	protected HashMap<String, Object> map;
 
 	public AnsonResp() {
 		super(null, null);
