@@ -49,10 +49,11 @@ type_pair
 	;
 
 qualifiedName
-	// IDENTIFIER doesn't support '$', that means no enclosed classes are supported.
 	// Inner class can only be static.
-	// '[L' seams not used for element like string[] can't presented in type pair.
+	// '[L' seems not used for element, like string[] can't presented in type pair.
     : ('[' 'L')? IDENTIFIER (('.' | '$') IDENTIFIER)*
+    // | '"' ('[' 'L')? IDENTIFIER (('.' | '$') IDENTIFIER)* '"'
+	| STRING
     ;
 // section end
 
@@ -80,6 +81,23 @@ value
 	| 'false'
 	| 'null'
 	;
+
+
+// section: type name extension
+// ody: for grammar, see
+// https://github.com/antlr/grammars-v4/blob/master/java/JavaLexer.g4
+TYPE
+	: 'TYPE'
+	| '"TYPE"'
+	| 'type'
+	| '"type"'
+	;
+
+// \- since - means "range" inside [...]
+
+IDENTIFIER
+	: Letter LetterOrDigit*;
+
 
 STRING
 	: '"' (ESC | SAFECODEPOINT)* '"'
@@ -118,19 +136,6 @@ fragment INT
 fragment EXP
 	: [Ee] [+\-]? INT
 	;
-
-// \- since - means "range" inside [...]
-
-
-// section: type name extension
-// ody: for grammar, see
-// https://github.com/antlr/grammars-v4/blob/master/java/JavaLexer.g4
-TYPE
-	: 'TYPE' | 'type'
-	;
-
-IDENTIFIER
-	: Letter LetterOrDigit*;
 
 fragment LetterOrDigit
 	: Letter
