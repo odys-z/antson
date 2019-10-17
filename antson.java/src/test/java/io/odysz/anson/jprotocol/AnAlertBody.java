@@ -1,8 +1,8 @@
 package io.odysz.anson.jprotocol;
 
 import io.odysz.anson.AnsonField;
-import io.odysz.anson.jprotocol.AnsonBody;
-import io.odysz.anson.jprotocol.AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.AnsonBody;
+import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
 
 /**<p>A mimic of AnSessionReq for testing error prone issue's alarm</p>
  * @author odys-z@github.com

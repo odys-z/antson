@@ -1,11 +1,11 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
 import io.odysz.anson.Anson;
 
 public class SessionInf extends Anson {
-	String ssid;
-	String uid;
-	String roleId; 
+	public String ssid;
+	public String uid;
+	public String roleId; 
 
 	public SessionInf () {
 	}

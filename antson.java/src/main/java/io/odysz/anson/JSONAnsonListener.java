@@ -316,7 +316,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// ignore this type specification, keep consist with java type
 			return;
 
-		envetype = ctx.qualifiedName().getText();
+		// envetype = ctx.qualifiedName().getText();
+		TerminalNode str = ctx.qualifiedName().STRING();
+		String txt = ctx.qualifiedName().getText();
+		envetype = getStringVal(str, txt);
 		
 		try {
 			Class<?> clazz = Class.forName(envetype);

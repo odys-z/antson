@@ -1,11 +1,11 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
-import io.odysz.anson.jprotocol.AnsonMsg;
-import io.odysz.anson.jprotocol.AnsonResp;
+import io.odysz.semantic.jprotocol.test.AnsonMsg;
+import io.odysz.semantic.jprotocol.test.AnsonResp;
 
 public class AnSessionResp extends AnsonResp {
 
-	SessionInf ssInf;
+	public SessionInf ssInf;
 
 	public AnSessionResp(AnsonMsg<AnsonResp> parent, String ssid, String uid, String ... roleId) {
 		super(parent);

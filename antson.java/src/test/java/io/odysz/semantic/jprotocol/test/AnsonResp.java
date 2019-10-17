@@ -1,4 +1,4 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
 import java.util.ArrayList;
 import java.util.HashMap;

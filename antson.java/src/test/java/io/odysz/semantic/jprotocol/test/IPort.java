@@ -1,4 +1,4 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
 import io.odysz.anson.IJsonable;
 import io.odysz.anson.x.AnsonException;

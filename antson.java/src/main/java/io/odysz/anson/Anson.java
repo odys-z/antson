@@ -44,8 +44,16 @@ public class Anson implements IJsonable {
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
-		stream.write("{type: ".getBytes());
-		stream.write(getClass().getName().getBytes());
+		boolean quotK = opts == null || opts.length == 0 || opts[0] == null || opts[0].quotKey();
+		if (quotK) {
+			stream.write("{\"type\": \"".getBytes());
+			stream.write(getClass().getName().getBytes());
+			stream.write('\"');
+		}
+		else {
+			stream.write("{type: ".getBytes());
+			stream.write(getClass().getName().getBytes());
+		}
 
 		HashMap<String, Field> fmap = new HashMap<String, Field>();
 		fmap = JSONAnsonListener.mergeFields(this.getClass(), fmap);
@@ -59,8 +67,14 @@ public class Anson implements IJsonable {
 			f.setAccessible(true);
 
 			stream.write(new byte[] {',', ' '});
-			stream.write((f.getName() + ": ").getBytes());
+			
+			// prop
+			if (quotK)
+				stream.write(("\"" + f.getName() + "\": ").getBytes());
+			else
+				stream.write((f.getName() + ": ").getBytes());
 
+			// value
 			if (af != null && af.ref() == AnsonField.enclosing) {
 				stream.write('\"');
 				stream.write(f.getType().getName().getBytes());
@@ -73,7 +87,7 @@ public class Anson implements IJsonable {
 					Object v = f.get(this);
 					Class<? extends Object> vclz = v == null ? null : v.getClass();
 					
-					writeNonPrimitive(stream, vclz, v);
+					writeNonPrimitive(stream, vclz, v, opts);
 				}
 				else if (f.getType().isPrimitive())
 					stream.write(String.valueOf(f.get(this)).getBytes());
@@ -86,7 +100,7 @@ public class Anson implements IJsonable {
 		return this;
 	}
 	
-	private static void toArrayBlock(OutputStream stream, Object[] v)
+	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
 			throws AnsonException, IOException {
 		if (v == null) return;
 
@@ -100,12 +114,12 @@ public class Anson implements IJsonable {
 			if (o == null)
 				stream.write(new byte[] {'n', 'u', 'l', 'l'});
 			else if (IJsonable.class.isAssignableFrom(elemtype))
-				((IJsonable)o).toBlock(stream);
+				((IJsonable)o).toBlock(stream, opt);
 			else if (elemtype.isArray())
-				toArrayBlock(stream, (Object[]) o);
+				toArrayBlock(stream, (Object[]) o, opt);
 
 			else if (AbstractCollection.class.isAssignableFrom(elemtype))
-				toCollectionBlock(stream, (AbstractCollection<?>) o);
+				toCollectionBlock(stream, (AbstractCollection<?>) o, opt);
 
 			else if (o instanceof String) {
 				stream.write('"');
@@ -117,7 +131,36 @@ public class Anson implements IJsonable {
 		stream.write(']');
 	}
 
-	private static void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect)
+	private static void toPrimArrayBlock(OutputStream stream, Object v) throws IOException {
+		if (v == null) {
+			stream.write(new byte[] {'n', 'u', 'l', 'l'});
+			return;
+		}
+
+		boolean the1st = true;
+		stream.write('[');
+		int length = Array.getLength(v);
+		for (int i = 0; i < length; i ++) {
+			Object o = Array.get(v, i);
+
+			if (the1st)
+				the1st = false;
+			else stream.write(new byte[] {',', ' '});
+
+			if (o == null)
+				stream.write(new byte[] {'n', 'u', 'l', 'l'});
+
+			else if (o instanceof String) {
+				stream.write('"');
+				stream.write(o.toString().getBytes());
+				stream.write('"');
+			}
+			else stream.write(o.toString().getBytes());
+		}
+		stream.write(']');
+	}
+
+	private static void toCollectionBlock(OutputStream stream, AbstractCollection<?> collect, JsonOpt opts)
 			throws AnsonException, IOException {
 		if (collect == null) return;
 
@@ -128,14 +171,16 @@ public class Anson implements IJsonable {
 			else stream.write(new byte[] {',', ' '});
 
 			Class<?> elemtype = o.getClass();
-			writeNonPrimitive(stream, elemtype, o);
+			writeNonPrimitive(stream, elemtype, o, opts);
 		}
 		stream.write(']');
 	}
 
-	public static void toMapBlock(OutputStream stream, Map<?, ?> map)
+	public static void toMapBlock(OutputStream stream, Map<?, ?> map, JsonOpt opts)
 			throws AnsonException, IOException {
 		if (map == null) return;
+		
+		boolean quote = opts == null || opts.quotKey();
 
 		boolean the1st = true;
 		stream.write('{');
@@ -143,9 +188,13 @@ public class Anson implements IJsonable {
 			if (the1st) the1st = false;
 			else stream.write(new byte[] {',', ' '});
 
-			stream.write('\"');
+			if (quote)
+				stream.write('\"');
 			stream.write(k.toString().getBytes());
-			stream.write(new byte[] {'\"', ':', ' '});
+			if (quote)
+				stream.write(new byte[] {'\"', ':', ' '});
+			else
+				stream.write(new byte[] {':', ' '});
 
 			Object v = map.get(k);
 			Class<?> elemtype = v.getClass();
@@ -154,7 +203,7 @@ public class Anson implements IJsonable {
 		stream.write('}');
 	}
 
-	private static void toListBlock(OutputStream stream, AbstractCollection<?> list)
+	private static void toListBlock(OutputStream stream, AbstractCollection<?> list, JsonOpt opt)
 			throws AnsonException, IOException {
 		stream.write('[');
 		boolean is1st = true;
@@ -170,7 +219,7 @@ public class Anson implements IJsonable {
 			}
 
 			if (!e.getClass().isPrimitive())
-				writeNonPrimitive(stream, e.getClass(), e);
+				writeNonPrimitive(stream, e.getClass(), e, opt);
 			else // if (f.getType().isPrimitive())
 				// must be primitive?
 				stream.write(String.valueOf(e).getBytes());
@@ -189,7 +238,7 @@ public class Anson implements IJsonable {
 			Field f = flist[i];
 			f.setAccessible(true);
 			try {
-				appendPair(sbuf, f.getName(), f.get(this), parentCls);
+				appendPair(sbuf, f.getName(), f.get(this), parentCls, null);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new AnsonException(0, e.getMessage());
 			}
@@ -213,7 +262,7 @@ public class Anson implements IJsonable {
 	 * @throws IOException
 	 */
 	private static void writeNonPrimitive(OutputStream stream,
-			Class<? extends Object> fdClz, Object v)
+			Class<? extends Object> fdClz, Object v, JsonOpt... opts)
 			throws AnsonException, IOException {
 		if (v == null) {
 			stream.write(new byte[] {'n', 'u', 'l', 'l'});
@@ -226,16 +275,20 @@ public class Anson implements IJsonable {
 //				throw new AnsonException(1, "Using enum implementing IJsonalbe is not allowed - can't deserialized.\n"
 //						+ "field class: %s\nvalue class: %s\nvalue: %s\n"
 //						+ "If a enum type is possible, declare it in java as enum.", fdClz, vclz, v);
-			((IJsonable)v).toBlock(stream);
+			((IJsonable)v).toBlock(stream, opts);
 		}
 		else if (List.class.isAssignableFrom(v.getClass()))
-			toListBlock(stream, (AbstractCollection<?>) v);
+			toListBlock(stream, (AbstractCollection<?>) v, opts == null || opts.length == 0 ? null : opts[0]);
 		else if ( Map.class.isAssignableFrom(vclz))
-			toMapBlock(stream, (Map<?, ?>) v);
+			toMapBlock(stream, (Map<?, ?>) v, opts == null || opts.length == 0 ? null : opts[0]);
 		else if (AbstractCollection.class.isAssignableFrom(vclz))
-			toCollectionBlock(stream, (AbstractCollection<?>) v);
+			toCollectionBlock(stream, (AbstractCollection<?>) v, opts == null || opts.length == 0 ? null : opts[0]);
 		else if (fdClz.isArray()) {
-			toArrayBlock(stream, (Object[]) v);
+			if (v != null && v.getClass().getComponentType() != null
+				&& v.getClass().getComponentType().isPrimitive() == true)
+				toPrimArrayBlock(stream, v);
+			else
+				toArrayBlock(stream, (Object[]) v, opts != null && opts.length > 0 ? opts[0] : null);
 		}
 		else if (v instanceof String) {
 			stream.write('\"');
@@ -251,7 +304,7 @@ public class Anson implements IJsonable {
 						vclz.getName(), e.getMessage());
 			}
 	}
-	
+
 	/**<pre>fragment ESC
      : '\\' (["\\/bfnrt] | UNICODE) ;</pre>
 	 * @param v
@@ -272,24 +325,27 @@ public class Anson implements IJsonable {
 				.getBytes();
 	}
 
-	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls)
+	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls, JsonOpt opt)
 			throws IOException, AnsonException {
+		boolean forceQuote = opt == null || opt.quotKey();
 		if (v instanceof IJsonable)
 			((Anson)v).toJson(sbuf);
 		else if (!v.getClass().isPrimitive() && (parentCls == null || !parentCls.equals(v.getClass())))
 			// what's this?
-			sbuf.append(n)
+			sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 				.append(": \"")
 				.append(v.toString())
 				.append("\"");
 		else if (v.getClass().isPrimitive())
-			sbuf.append(n)
+//			sbuf.append(n)
+			sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 				.append(": ")
 				.append(String.valueOf(v));
 		else if (v.getClass().isArray()) {
 			for (int e = 0; e < Array.getLength(v); e++) {
 				Object elem = Array.get(v, e);
-				sbuf.append(n)
+//				sbuf.append(n)
+				sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 					.append(": [");
 				appendArr(sbuf, elem);
 				if (e < Array.getLength(v) - 1)

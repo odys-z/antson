@@ -1,11 +1,11 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
 import java.util.HashMap;
 
 import io.odysz.common.LangExt;
-import io.odysz.anson.jprotocol.AnsonBody;
-import io.odysz.anson.jprotocol.AnsonMsg;
-import io.odysz.anson.jprotocol.AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.AnsonBody;
+import io.odysz.semantic.jprotocol.test.AnsonMsg;
+import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
 
 /**<p>Sessin Request<br>
  * a = "login" | "logout" | "heartbeat" ...</p>
@@ -23,11 +23,11 @@ public class AnSessionReq extends AnsonBody {
 		super(parent, null); // session's DB access is controlled by server
 	}
 
-	String uid;
+	public String uid;
 	String token;
-	String token() { return token; }
+	public String token() { return token; }
 	String iv;
-	String iv() { return iv; }
+	public String iv() { return iv; }
 
 	HashMap<String,Object> mds;
 	public String md(String k) { return mds == null ? null : (String) mds.get(k); }

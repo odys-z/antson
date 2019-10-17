@@ -1,4 +1,4 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
 import io.odysz.anson.Anson;
 import io.odysz.anson.AnsonField;
@@ -9,13 +9,13 @@ public abstract class AnsonBody extends Anson {
 	}
 
 	@AnsonField(ref=AnsonField.enclosing)
-	protected AnsonMsg<? extends AnsonBody> parent;
+	public AnsonMsg<? extends AnsonBody> parent;
 
 	protected String conn;
 	public String conn() { return conn; }
 
 	/** Action: login | C | R | U | D | any serv extension */
-	protected String a;
+	String a;
 	/** @return Action: login | C | R | U | D | any serv extension */
 	public String a() { return a; }
 

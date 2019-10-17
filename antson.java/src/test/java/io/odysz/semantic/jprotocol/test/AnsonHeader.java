@@ -1,4 +1,4 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

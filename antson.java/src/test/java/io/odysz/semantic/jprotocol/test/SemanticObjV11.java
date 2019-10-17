@@ -1,4 +1,4 @@
-package io.odysz.anson.jprotocol;
+package io.odysz.semantic.jprotocol.test;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -42,7 +42,7 @@ public class SemanticObjV11 implements IJsonable {
 		stream.write(new byte[] {',', ' '});
 		stream.write(("props: ").getBytes());
 		
-		Anson.toMapBlock(stream, props);
+		Anson.toMapBlock(stream, props, null);
 
 		stream.write("}".getBytes());
 		stream.flush();
