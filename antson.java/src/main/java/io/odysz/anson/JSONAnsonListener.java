@@ -283,7 +283,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 	
-	public IJsonable parsedEnvelope() {
+	public IJsonable parsedEnvelope() throws AnsonException {
+		if (stack == null || stack.size() == 0)
+			throw new AnsonException(0, "No evelope is avaliable.");
 		return (IJsonable) stack.get(0).enclosing;
 	}
 
