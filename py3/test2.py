@@ -1,3 +1,5 @@
+# Window - Preferences - PyDev - Interpreters - Python Interpreter - Forced builtins - new... - antlr4
+# https://stackoverflow.com/questions/2112715/how-do-i-fix-pydev-undefined-variable-from-import-errors
 from antlr4 import *
 from ansonpy.JSONLexer import JSONLexer
 from ansonpy.JSONListener import JSONListener
