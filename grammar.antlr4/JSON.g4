@@ -3,7 +3,12 @@
  *
  * Taken from "The Definitive ANTLR 4 Reference" by Terence Parr
  *
- * java -jar ~/antlr4/antlr-4.7.1-complete.jar JSON.g4 -package gen.antlr.json
+ * java -jar ~/antlr4/antlr-4.7.2-complete.jar JSON.g4 -package gen.antlr.json
+ *
+ * java -jar ~/antlr4/antlr-4.7.2-complete.jar JSON.g4 -Dlanguage=python3
+ *		- pip3 install antlr4-python3-runtime
+ *		- sudo python3 -m pip install typing
+ *		  sudo python3 -m pip install antlr4-python3-runtime
  */
 
 // Derived from http://json.org
