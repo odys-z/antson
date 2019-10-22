@@ -1,4 +1,4 @@
-from antlr4 import *
+from antlr4 import *  #@UnusedWildImport
 from HelloLexer import HelloLexer
 from HelloListener import HelloListener
 from HelloParser import HelloParser

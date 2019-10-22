@@ -1,8 +1,8 @@
-from antlr4 import *
+from antlr4 import *  #@UnusedWildImport
 from ansonpy.JSONLexer import JSONLexer
 from ansonpy.JSONListener import JSONListener
 from ansonpy.JSONParser import JSONParser
-import sys
+import sys #@UnusedImport
 
 class JSONPrintListener(JSONListener):
     def enterJson(self, ctx):
