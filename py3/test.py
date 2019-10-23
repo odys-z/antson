@@ -5,9 +5,11 @@ from antlr4 import *  #@UnusedWildImport
 from ansonpy.JSONLexer import JSONLexer
 from ansonpy.JSONListener import JSONListener
 from ansonpy.JSONParser import JSONParser
+
+from io import StringIO
 import sys #@UnusedImport
 
-from ansonpy.anson import Anson
+from ansonpy.anson import Anson, AnsonMsg
 import inspect
 
 
@@ -42,8 +44,5 @@ def get_env_vars(an):
     return env_dict
 
 if __name__ == '__main__':
-#     main()
-    an = Anson();
-    print(type(an));
-    print(get_env_vars(an));
-    print(dir(an));
+    main()
+
