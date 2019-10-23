@@ -10,32 +10,57 @@ from io import StringIO
 import sys #@UnusedImport
 
 from ansonpy.anson import Anson, AnsonMsg
+import inspect
 from unittest.case import TestCase
 
 
-class AnsonListener(JSONListener):
-    an = None
-
+class JSONPrintListener(JSONListener):
     def enterJson(self, ctx):
-        # print("Hello: %s" % ctx.envelope()[0].type_pair().TYPE())
-        self.an = Anson()
+        print("Hello: %s" % ctx.envelope()[0].type_pair().TYPE())
 
-def parse():
+def main():
     lexer = JSONLexer(StdinStream())
     stream = CommonTokenStream(lexer)
     parser = JSONParser(stream)
     tree = parser.json()
-    printer = AnsonListener()
+    printer = JSONPrintListener()
     walker = ParseTreeWalker()
     walker.walk(printer, tree)
-    return printer.an
+
+# def get_env_vars(an):
+#     env_dict = {}
+# #     for name in dir(an):
+# #         attr = getattr(an, name)
+# # 
+# # #         if isinstance(attr, str):
+# # #             env_dict[name] = attr
+# #         if inspect.ismemberdescriptor(attr):
+# #             env_dict[name] = "%s %s" % (attr, attr.__class__)
+# #     for (name, att) in inspect.getmembers(an, lambda attr: not callable(attr) and not attr.name.startswith("__")):
+#     for (name, att) in inspect.getmembers(an, lambda attr: not callable(attr) ):
+#         if (not name.startswith("__")):
+#             env_dict[name] = "%s %s = %s" % (name, att.__class__, att)
+#         
+# 
+#     return env_dict
 
 class test(TestCase):
 
-    def test2AnsonMsg(self):
-        # an = Anson();
+    def testFromAnsonMsg(self):
+        an = Anson();
+        print(type(an));
+        print(dir(an));
+        
+        s = StringIO()
+        an.toBlock(s, None)
+        # print("------- json -------\n", s.getvalue())
+        self.assertEqual("{\"type\": \"io.odysz.anson.Anson\", \"to_del\": \"some vale\", \"to_del_int\": 5}", 
+                         s.getvalue(), "deserializing AnsonMsg failed.")
 
-        s = "{\"type\": \"io.odysz.anson.Anson\", \"to_del\": \"some vale\", \"to_del_int\": 5}"
-        an = parse(s)
-        self.assertEqual("io.odysz.anson.Anson", an.type)
+        msg = AnsonMsg();
+        s = StringIO()
+        msg.toBlock(s, None)
+        # print("------- json -------\n", s.getvalue())
 
+        self.assertEqual("{\"type\": \"io.odysz.anson.AnsonMsg\", \"body\": [], \"port\": Port.session, \"to_del\": \"some vale\", \"to_del_int\": 5}", 
+                         s.getvalue(), "deserializing AnsonMsg failed.")
