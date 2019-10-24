@@ -1,6 +1,16 @@
 import inspect
 from enum import Enum
+from ansonpy import JSONListener
 
+################################# From Json ##############################
+class AnsonListener(JSONListener):
+    an = None
+
+    def enterJson(self, ctx):
+        # print("Hello: %s" % ctx.envelope()[0].type_pair().TYPE())
+        self.an = Anson()
+
+################################## To Json ###############################
 
 def writeVal(outstream, v):
     if (isinstance(v, str)):
