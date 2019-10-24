@@ -13,7 +13,7 @@ def parse(s):
     if (isinstance(s, FileStream)):
         ins = s
     else:
-        ins = FileStream(s)
+        ins = InputStream(s)
     lexer = JSONLexer(ins)
     stream = CommonTokenStream(lexer)
     parser = JSONParser(stream)

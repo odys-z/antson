@@ -31,26 +31,14 @@ import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
-	/**Parsing AST node's context, for handling the node's value,
-	 * the element class of parsing stack.
+	/**<p>Parsing AST node's context, for handling the node's value,
+	 * the element class of parsing stack.</p>
+	 * <p>Memo: The hard lesson learned from this is if you want parse a grammar,
+	 * you better follow the grammar structure.</p>
 	 * @author odys-z@github.com
 	 * @param <T>
 	 */
 	public class ParsingCtx {
-		/**The currently parsing map.
-		 * <p>1. A map field is constructed when enter an object, with type of Map;<br>
-		 * 2. element values are been put when exiting pair if parsingMap is not null;<br>
-		 * 3. let parsedVal = parsingMap, parsingMap = null when exit object if parsingMap is not null;<br>
-		 * 4. parsedVal (map value) is been set to field when exit pair if parsingMap is null</p> 
-		 * Map's key is always type of string because any json object's property key must be a string.
-		 * 
-		 * public Map<String, Object> parsingMap;
-		 * protected List<?> parsingArrs;
-		 *
-		 * The hard lesson learned from this is if you want parse a grammar,
-		 * you better follow the grammar structure.
-		 * */
-
 		/**The json prop (object key) */
 		protected String parsingProp;
 		/**The parsed native value */
