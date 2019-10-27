@@ -107,17 +107,18 @@ class AnsonListener(JSONListener):
 
     def toparent(self, type):
         # no enclosing, no parent
-        if (stack.size() <= 1 || LangExt.isblank(type, "null"))
+        if (stack.size() <= 1 or LangExt.isblank(type, "null")):
             return null;
 
         # trace back, guess with type for children could be in array or map
-        ParsingCtx p = stack.get(1);
-        int i = 2;
+        # ParsingCtx
+        p = stack.get(1);
+        i = 2;
         while (p != null):
-            if (type.equals(p.enclosing.getClass()))
+            if (type.equals(p.enclosing.getClass())):
                 return p.enclosing;
             p = stack.get(i);
-            i++;
+            i = i + 1;
         return null;
 
     def push(self, enclosingClazz, elemType):
@@ -145,38 +146,45 @@ class AnsonListener(JSONListener):
             newCtx = ParsingCtx(fmap, list());
             stack.add(0, newCtx.elemType(elemType));
         else:
-            HashMap<String, Field> fmap = new HashMap<String, Field>();
-            if (List.class.isAssignableFrom(enclosingClazz)):
-                List<?> enclosing = new ArrayList<Object>();
-                stack.add(0, new ParsingCtx(fmap, enclosing).elemType(elemType));
+            #  HashMap<String, Field> fmap = new HashMap<String, Field>();
+            fmap = {};
+            if (isinstance(enclosingClazz, list)):
+                enclosing = list();
+                stack.add(0, ParsingCtx(fmap, enclosing).elemType(elemType));
             else:
-                Constructor<?> ctor = null;
-                try:
-                    ctor = enclosingClazz.getConstructor();
-                except NoSuchMethodException as e:
-                    throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default constructor(0 parameter)\n"
-                            + "Also, inner class must be static."
-                            + "getConstructor error: %s %s", 
-                            enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
-                if (ctor != null && IJsonable.class.isAssignableFrom(enclosingClazz)):
-                    fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
+#                 Constructor<?> ctor = null;
+#                 try:
+#                     ctor = enclosingClazz.getConstructor();
+#                 except NoSuchMethodException as e:
+#                     throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default constructor(0 parameter)\n"
+#                             + "Also, inner class must be static."
+#                             + "getConstructor error: %s %s", 
+#                             enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
+#                 if (ctor != null && IJsonable.class.isAssignableFrom(enclosingClazz)):
+                if (isisnatnce(enclosingClazz, IJsonable)):
+                    fmap = mergeFields(enclosingClazz, fmap); # map merging is only needed by typed object
                     try:
-                        IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
-                        stack.add(0, new ParsingCtx(fmap, enclosing));
-                    except InvocationTargetException as e:
-                        throw new AnsonException(0, "Failed to create instance of IJsonable with\nconstructor: %s\n"
+                        # IJsonable
+                        enclosing = newInstance();
+                        stack.add(0, ParsingCtx(fmap, enclosing));
+                    except Exception as e:
+                        raise AnsonException(0, "Failed to create instance of IJsonable with\nconstructor: %s\n"
                             + "class: %s\nerror: %s\nmessage: %s\n"
                             + "Make sure the object can be created with the constructor.", 
                             ctor, enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
                 else:
-                    HashMap<String, Object> enclosing = new HashMap<String, Object>();
-                    ParsingCtx top = new ParsingCtx(fmap, enclosing);
+                    enclosing = {};
+                    # ParsingCtx 
+                    top = ParsingCtx(fmap, enclosing);
                     stack.add(0, top);
 
     def pop(self):
         """ private ParsingCtx pop() {
+        Returns
+        -------
+            ParsingCtx
         """
-        ParsingCtx top = stack.remove(0);
+        top = stack.remove(0);
         return top;
 
     # Envelope Type Name
@@ -191,29 +199,32 @@ class AnsonListener(JSONListener):
 
     ## override
     def enterObj(self, ctx):
-        ParsingCtx top = top();
+        # ParsingCtx
+        top = top();
         try:
-            HashMap<String, Field> fmap = stack.size() > 0 ?
-                    top.fmap : null;
-            if (fmap == null || !fmap.containsKey(top.parsingProp)):
+            fmap = top.fmap if top != None else None;
+            if (fmap == None or not fmap.containsKey(top.parsingProp)):
                 # In a list, found object, if not type specified with annotation, must failed.
                 # But this is confusing to user. Set some report here.
-                if (top.isInList() || top.isInMap())
+                if (top.isInList() or top.isInMap()):
                     Utils.warn("Type in list or map is complicate, but no annotation for type info can be found. "
                             + "field type: %s\njson: %s\n"
                             + "Example: @AnsonField(valType=\"io.your.type\")\n"
                             + "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
-                            top.enclosing.getClass(), ctx.getText());;
+                            top.enclosing.getClass(), ctx.getText());
                 raise AnsonException(0, "Obj type not found. property: %s", top.parsingProp);
 
             # Class<?>
             ft = fmap.get(top.parsingProp).getType();
-            if (Map.class.isAssignableFrom(ft)):
+            # if (Map.class.isAssignableFrom(ft)):
+            if (isinstance(fmap.get(top.parsingProp), dict)):
                 # entering a map
                 push(ft, null);
                 # append annotation
-                Field f = top.fmap.get(top.parsingProp);
-                AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
+                # Field 
+                f = top.fmap.get(top.parsingProp);
+                # AnsonField
+                a = None if f == None else f.getAnnotation(AnsonField.class);
                 String anno = a == null ? null : a.valType();
 
                 if (anno != null):
