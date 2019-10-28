@@ -8,7 +8,65 @@ import inspect
 from enum import Enum
 from ansonpy.JSONListener import JSONListener
 from abc import abstractmethod
-from odysz.common import LangExt
+from odysz.common import LangExt, Utils
+from ansonpy.x import AnsonException
+import abc
+import decimal
+
+################################# Anson ##################################
+class IJsonable(abc.ABC):
+    """
+    Java interface (protocol) can be deserailized into json.
+    For python protocol and ABC, see
+    http://masnun.rocks/2017/04/15/interfaces-in-python-protocols-and-abcs/
+    """
+    @abc.abstractmethod
+    def toBlock(self, outstream):
+        pass
+
+def writeVal(outstream, v):
+    if (isinstance(v, str)):
+        outstream.write("\"")
+        outstream.write(v)
+        outstream.write("\"")
+    else:
+        outstream.write(str(v))
+
+
+class Anson(IJsonable):
+    to_del = "some vale"
+    to_del_int = 5
+    
+    def toBlock(self, outstream, opts):
+        quotK = opts == None or opts.length == 0 or opts[0] == None or opts[0].quotKey();
+        if (quotK == True):
+            outstream.write("{\"type\": \"");
+            outstream.write(self.getClass());
+            outstream.write('\"');
+        else :
+            outstream.write("{type: ");
+            outstream.write(self.getClass());
+        
+        for (n, v) in self.getFields():
+            outstream.write(", ");
+            if (quotK == True):
+                outstream.write("\"%s\": " % n);
+            else :
+                outstream.write("%s: " % n);
+            writeVal(outstream, v);
+
+        outstream.write("}")
+        return "";
+    
+    def getClass(self):
+        return "io.odysz.anson.Anson"
+
+    def getFields(self):
+        env_dict = []
+        for (name, att) in inspect.getmembers(self, lambda attr: not callable(attr) ):
+            if (not name.startswith("__")):
+                env_dict.append((name, att))
+        return env_dict
 
 ################################# From Json ##############################
 class ParsingCtx():
@@ -93,6 +151,10 @@ class ParsingCtx():
         return self.subTypes;
 
 
+class AnsonFlags():
+    parser = True
+
+
 class AnsonListener(JSONListener):
     # static
     # an = None
@@ -100,6 +162,7 @@ class AnsonListener(JSONListener):
     # private static HashMap<Class<?>, JsonableFactory> factorys;
     # static
     factorys = None
+    stack = []
 
     def enterJson(self, ctx):
         # print("Hello: %s" % ctx.envelope()[0].type_pair().TYPE())
@@ -107,19 +170,19 @@ class AnsonListener(JSONListener):
 
     def toparent(self, type):
         # no enclosing, no parent
-        if (stack.size() <= 1 or LangExt.isblank(type, "null")):
-            return null;
+        if (self.stack.size() <= 1 or LangExt.isblank(type, "None")):
+            return None;
 
         # trace back, guess with type for children could be in array or map
         # ParsingCtx
-        p = stack.get(1);
+        p = self.stack.get(1);
         i = 2;
-        while (p != null):
+        while (p != None):
             if (type.equals(p.enclosing.getClass())):
                 return p.enclosing;
-            p = stack.get(i);
+            p = self.stack.get(i);
             i = i + 1;
-        return null;
+        return None;
 
     def push(self, enclosingClazz, elemType):
         """ Push parsing node (a envelope, map, list).
@@ -144,13 +207,13 @@ class AnsonListener(JSONListener):
             fmap = map();
             # ParsingCtx
             newCtx = ParsingCtx(fmap, list());
-            stack.add(0, newCtx.elemType(elemType));
+            self.stack.add(0, newCtx.elemType(elemType));
         else:
             #  HashMap<String, Field> fmap = new HashMap<String, Field>();
             fmap = {};
             if (isinstance(enclosingClazz, list)):
                 enclosing = list();
-                stack.add(0, ParsingCtx(fmap, enclosing).elemType(elemType));
+                self.stack.add(0, ParsingCtx(fmap, enclosing).elemType(elemType));
             else:
 #                 Constructor<?> ctor = null;
 #                 try:
@@ -161,22 +224,24 @@ class AnsonListener(JSONListener):
 #                             + "getConstructor error: %s %s", 
 #                             enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
 #                 if (ctor != null && IJsonable.class.isAssignableFrom(enclosingClazz)):
-                if (isisnatnce(enclosingClazz, IJsonable)):
-                    fmap = mergeFields(enclosingClazz, fmap); # map merging is only needed by typed object
+                if (isinstance(enclosingClazz, Anson)):
+                    # fmap = mergeFields(enclosingClazz, fmap); # map merging is only needed by typed object
+                    fmap = {}
                     try:
                         # IJsonable
-                        enclosing = newInstance();
-                        stack.add(0, ParsingCtx(fmap, enclosing));
+                        # enclosing = newInstance();
+                        enclosing = Anson();
+                        self.stack.add(0, ParsingCtx(fmap, enclosing));
                     except Exception as e:
                         raise AnsonException(0, "Failed to create instance of IJsonable with\nconstructor: %s\n"
                             + "class: %s\nerror: %s\nmessage: %s\n"
                             + "Make sure the object can be created with the constructor.", 
-                            ctor, enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
+                            enclosingClazz, enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
                 else:
                     enclosing = {};
                     # ParsingCtx 
                     top = ParsingCtx(fmap, enclosing);
-                    stack.add(0, top);
+                    self.stack.add(0, top);
 
     def pop(self):
         """ private ParsingCtx pop() {
@@ -184,7 +249,7 @@ class AnsonListener(JSONListener):
         -------
             ParsingCtx
         """
-        top = stack.remove(0);
+        top = self.stack.remove(0);
         return top;
 
     # Envelope Type Name
@@ -193,14 +258,14 @@ class AnsonListener(JSONListener):
     ## override
     def exitObj(self, ctx):
         # ParsingCtx
-        top = pop();
+        top = self.pop();
         top().parsedVal = top.enclosing;
-        top.enclosing = null;
+        top.enclosing = None;
 
     ## override
     def enterObj(self, ctx):
         # ParsingCtx
-        top = top();
+        top = self.top();
         try:
             fmap = top.fmap if top != None else None;
             if (fmap == None or not fmap.containsKey(top.parsingProp)):
@@ -219,48 +284,47 @@ class AnsonListener(JSONListener):
             # if (Map.class.isAssignableFrom(ft)):
             if (isinstance(fmap.get(top.parsingProp), dict)):
                 # entering a map
-                push(ft, null);
+                self.push(ft, None);
                 # append annotation
                 # Field 
                 f = top.fmap.get(top.parsingProp);
-                # AnsonField
-                a = None if f == None else f.getAnnotation(AnsonField.class);
-                String anno = a == null ? null : a.valType();
-
-                if (anno != null):
-                    String[] tn = parseElemType(anno);
-                    top().elemType(tn);
-            else
+#                 # AnsonField
+#                 a = None if f == None else f.getAnnotation(AnsonField.class);
+#                 String anno = a == null ? null : a.valType();
+# 
+#                 if (anno != null):
+#                     String[] tn = parseElemType(anno);
+#                     top().elemType(tn);
+                top().elemType("object")
+            else:
                 # entering an envelope
                 # push(fmap.get(top.parsingProp).getType());
-                push(ft, null);
-        except (SecurityException, ReflectiveOperationException, AnsonException) e:
+                self.push(ft, None);
+        except (AnsonException) as e:
             e.printStackTrace();
     
-#     public IJsonable parsedEnvelope() throws AnsonException {
-#         if (stack == null || stack.size() == 0)
-#             throw new AnsonException(0, "No evelope is avaliable.");
-#         return (IJsonable) stack.get(0).enclosing;
-#     }
-# 
+    def parsedEnvelope(self) -> IJsonable :
+        if (self.stack == None or self.stack.size() == 0):
+            raise AnsonException(0, "No evelope is avaliable.");
+        return self.stack.get(0).enclosing;
+ 
 #     @Override
 #     public void enterEnvelope(EnvelopeContext ctx) {
-#         if (stack == null) {
-#             stack = new ArrayList<ParsingCtx>();
-#         }
-#         envetype = null;
-#     }
-#     
+    def enterEnvelope(self, ctx) -> None:
+        if (self.stack == None):
+            self.stack = [];
+        self.envetype = None;
+
 #     @Override
 #     public void exitEnvelope(EnvelopeContext ctx) {
-#         super.exitEnvelope(ctx);
-#         if (stack.size() > 1) {
-#             ParsingCtx top = pop();
-#             top().parsedVal = top.enclosing;
-#         }
-#         // else keep last one (root) as return value
-#     }
-#     
+    def exitEnvelope(self, ctx) -> None:
+        super.exitEnvelope(ctx);
+        if (self.stack.size() > 1):
+            # ParsingCtx
+            top = self.pop();
+            top().parsedVal = top.enclosing;
+        # else keep last one (root) as return value
+     
 #     /**Semantics of entering a type pair is found and parsingVal an IJsonable object.<br>
 #      * This is always happening on entering an object.
 #      * The logic opposite is exit object.
@@ -268,129 +332,139 @@ class AnsonListener(JSONListener):
 #      */
 #     @Override
 #     public void enterType_pair(Type_pairContext ctx) {
-#         if (envetype != null)
-#             // ignore this type specification, keep consist with java type
-#             return;
-# 
-#         // envetype = ctx.qualifiedName().getText();
-#         TerminalNode str = ctx.qualifiedName().STRING();
-#         String txt = ctx.qualifiedName().getText();
-#         envetype = getStringVal(str, txt);
-#         
-#         try {
-#             Class<?> clazz = Class.forName(envetype);
-#             push(clazz, null);
-#         } catch (ReflectiveOperationException | SecurityException | AnsonException e) {
-#             e.printStackTrace();
-#         }
-#     }
-# 
+    def enterType_pair(self, ctx) -> None:
+        if (self.envetype != None):
+            # ignore this type specification, keep consist with java type
+            return;
+ 
+        # envetype = ctx.qualifiedName().getText();
+        # TerminalNode
+        stri = ctx.qualifiedName().STRING();
+        # String
+        txt = ctx.qualifiedName().getText();
+        envetype = JSONListener.getStringVal(stri, txt);
+         
+        try:
+            # Class<?> clazz = ClassforName(envetype);
+            clazz = envetype;
+            self.push(clazz, None);
+        except (AnsonException ) as e:
+            e.printStackTrace();
+ 
 #     @Override
 #     public void enterPair(PairContext ctx) {
-#         super.enterPair(ctx);
-#         ParsingCtx top = top();
-#         top.parsingProp = getProp(ctx);
-#         top.parsedVal = null;
-#     }
-#     
+    def enterPair(self, ctx) -> None:
+        super.enterPair(ctx);
+        # ParsingCtx
+        top = self.top();
+        top.parsingProp = self.getProp(ctx);
+        top.parsedVal = None;
+     
 #     private static String[] parseElemType(String subTypes) {
-#         if (LangExt.isblank(subTypes))
-#             return null;
-#         return subTypes.split("/", 2); 
-#     }
-# 
+    @staticmethod
+    def parseElemType(subTypes) -> list[str]:
+        if (LangExt.isblank(subTypes)):
+            return None;
+        return subTypes.split("/", 2); 
+ 
 #     private static String[] parseListElemType(Field f) throws AnsonException {
-#         // for more information, see
-#         // https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
-# 
-#         Type type = f.getGenericType();
-#         if (type instanceof ParameterizedType) {
-#             ParameterizedType pType = (ParameterizedType)type;
-# 
-#             String[] ptypess = pType.getActualTypeArguments()[0].getTypeName().split("<", 2);
-#             if (ptypess.length > 1) {
-#                 ptypess[1] = ptypess[1].replaceFirst(">$", "");
-#                 ptypess[1] = ptypess[1].replaceFirst("^L", "");
-#             }
-#             // figure out array element class 
-#             else {
-#                 Type argType = pType.getActualTypeArguments()[0];
-#                 if (!(argType instanceof TypeVariable) && !(argType instanceof WildcardType)) {
-#                     @SuppressWarnings("unchecked")
-#                     Class<? extends Object> eleClzz = ((Class<? extends Object>) argType);
-#                     if (eleClzz.isArray()) {
-#                         ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
-#                     }
-#                 }
-#                 // else nothing can do here for a type parameter, e.g. "T"
-#                 else
-#                     if (AnsonFlags.parser)
-#                         Utils.warn("[AnsonFlags.parser] Element type <%s> for %s is a type parameter (%s) - ignored",
-#                             pType.getActualTypeArguments()[0], //.getTypeName(),
-#                             f.getName(),
-#                             pType.getActualTypeArguments()[0].getClass());
-#             }
-#             return ptypess;
-#         }
-#         else if (f.getType().isArray()) {
-#             // complex array may also has annotation
-#             AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
-#             String tn = a == null ? null : a.valType();
-#             String[] valss = parseElemType(tn);
-#             
-#             String eleType = f.getType().getComponentType().getTypeName();
-#             if (valss != null && !eleType.equals(valss[0]))
-#                 Utils.warn("[JSONAnsonListener#parseListElemType()]: Field %s is not annotated correctly.\n"
-#                         + "field parameter type: %s, annotated element type: %s, annotated sub-type: %s",
-#                         f.getName(), eleType, valss[0], valss[1]);
-# 
-#             if (valss != null && valss.length > 1)
-#                 return new String[] {eleType, valss[1]};
-#             else return new String[] {eleType};
-#         }
-#         else {
-#             // not a parameterized, not an array, try annotation
-#             AnsonField a = f == null ? null : f.getAnnotation(AnsonField.class);
-#             String tn = a == null ? null : a.valType();
-#             return parseElemType(tn);
-#         }
-#     }
-# 
+    @staticmethod
+    def parseListElemType(f) -> list[str]:
+        # for more information, see
+        # https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
+ 
+        # Type
+        typ = f.getGenericType();
+        if (isinstance(typ, ParameterizedType)):
+            # ParameterizedType
+            pType = typ;
+ 
+            # String[]
+            ptypess = pType.getActualTypeArguments()[0].getTypeName().split("<", 2);
+            if (ptypess.length > 1):
+                ptypess[1] = ptypess[1].replaceFirst(">$", "");
+                ptypess[1] = ptypess[1].replaceFirst("^L", "");
+            # figure out array element class 
+            else :
+                # Type
+                argType = pType.getActualTypeArguments()[0];
+                if (not isinstance(argType, TypeVariable) and not isinstance(argType, WildcardType)):
+                    # Class<? extends Object>
+                    eleClzz = argType;
+                    if (eleClzz.isArray()):
+                        ptypess = list[ptypess[0], eleClzz.getComponentType().getName()];
+                # else nothing can do here for a type parameter, e.g. "T"
+                elif (AnsonFlags.parser):
+                        Utils.warn("[AnsonFlags.parser] Element type <%s> for %s is a type parameter (%s) - ignored",
+                            pType.getActualTypeArguments()[0],
+                            f.getName(),
+                            pType.getActualTypeArguments()[0].getClass());
+            return ptypess;
+        elif (f.getType().isArray()):
+            # complex array may also has annotation
+            # AnsonField
+            a = null if f == None else f.getAnnotation(AnsonField.class);
+            String tn = a == null ? null : a.valType();
+            String[] valss = parseElemType(tn);
+             
+            String eleType = f.getType().getComponentType().getTypeName();
+            if (valss != null && !eleType.equals(valss[0])):
+                Utils.warn("[JSONAnsonListener#parseListElemType()]: Field %s is not annotated correctly.\n"
+                        + "field parameter type: %s, annotated element type: %s, annotated sub-type: %s",
+                        f.getName(), eleType, valss[0], valss[1]);
+ 
+            if (valss != null && valss.length > 1):
+                return new String[] {eleType, valss[1]};
+            else return new String[] {eleType};
+        else :
+            # not a parameterized, not an array, try annotation
+            # AnsonField
+            a = f == null ? null : f.getAnnotation(AnsonField.class);
+            tn = a == null ? null : a.valType();
+            return parseElemType(tn);
+#
 #     /**Parse property name, tolerate enclosing quotes presenting or not. 
 #      * @param ctx
 #      * @return
 #      */
 #     private static String getProp(PairContext ctx) {
-#         TerminalNode p = ctx.propname().IDENTIFIER();
-#         return p == null
-#                 ? ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
-#                 : p.getText();
-#     }
-#     
+    @staticmethod
+    def getProp(ctx) -> str:
+        # TerminalNode
+        p = ctx.propname().IDENTIFIER();
+        return p == null
+                ? ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
+                : p.getText();
+
 #     /**Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
 #      * Can't handle NUMBER | obj | array.
 #      * @param ctx
 #      * @return value in string
 #      */
 #     private static String getStringVal(PairContext ctx) {
-#         TerminalNode str = ctx.value().STRING();
-#         String txt = ctx.value().getText();
-#         return getStringVal(str, txt);
-#     }
-# 
+    @staticmethod
+    def getStringVal(ctx) -> str:
+        # TerminalNode
+        stri = ctx.value().STRING();
+        # String
+        txt = ctx.value().getText();
+        return JSONListener.getStringValRaw(stri, txt);
+
 #     private static String getStringVal(TerminalNode str, String rawTxt) {
-#         if (str == null) {
-#                 try { 
-#                     if (LangExt.isblank(rawTxt))
-#                         return null;
-#                     else if ("null".equals(rawTxt))
-#                         return null;
-#                 } catch (Exception e) { }
-#                 return rawTxt;
-#         }
-#          else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
-#     }
-# 
+    @staticmethod
+    def getStringValRaw(stri, rawTxt) -> str:
+        if (stri == None):
+            try : 
+                if (LangExt.isblank(rawTxt)):
+                    return None;
+                else:
+                    if ("null".equals(rawTxt)):
+                        return None;
+            except Exception as e: { }
+            return rawTxt;
+        else:
+            return stri.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+ 
 #     /**
 #      * grammar:<pre>value
 #     : STRING
@@ -406,56 +480,65 @@ class AnsonListener(JSONListener):
 #      * @return simple value (STRING, NUMBER, 'true', 'false', null)
 #      */
 #     private static Object figureJsonVal(ValueContext ctx) {
-#         String txt = ctx.getText();
-#         if (txt == null)
-#             return null;
-#         else if (ctx.NUMBER() != null)
-#             try { return Integer.valueOf(txt); }
-#             catch (Exception e) {
-#                 try { return Float.valueOf(txt); }
-#                 catch (Exception e1) {
-#                     return Double.valueOf(txt);
-#                 }
-#             }
-#         else if (ctx.STRING() != null)
-#             return getStringVal(ctx.STRING(), txt);
-#         else if (txt != null && txt.toLowerCase().equals("true"))
-#             return new Boolean(true);
-#         else if (txt != null && txt.toLowerCase().equals("flase"))
-#             return new Boolean(false);
-#         return null;
-#     }
-# 
+    @staticmethod
+    def figureJsonVal(ctx) -> object:
+        txt = ctx.getText();
+        if (txt == None):
+            return None;
+        elif (ctx.NUMBER() != None):
+                try :
+                    return int(txt);
+                except Exception as e:
+                    try :
+                        return float(txt);
+                    except Exception as e1:
+                        return decimal(txt);
+        elif (ctx.STRING() != None):
+                return JSONListener.getStringVal(ctx.STRING(), txt);
+        elif (txt != None and txt.toLowerCase().equals("true")):
+            # return new Boolean(true);
+            return True;
+        elif (txt != None and txt.toLowerCase().equals("flase")):
+            # return new Boolean(false);
+            return False;
+        return None;
+ 
 #     @Override
 #     public void enterArray(ArrayContext ctx) {
-#         try:
-#             ParsingCtx top = top();
-# 
-#             # if in a list or a map, parse top's sub-type as the new node's value type
-#             if (top.isInList() || top.isInMap()):
-#                 # pushing ArrayList.class because entering array, isInMap() == true means needing to figure out value type
-#                 #
-#                 String[] tn = parseElemType(top.subTypes());
-#                 # ctx:        [{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]
-#                 # subtype:    io.odysz.anson.Anson
-#                 # tn :        [io.odysz.anson.Anson]
-#                 push(ArrayList.class, tn);
-#             # if field available, parse field's value type as the new node's value type
-#             else:
-#                 Class<?> ft = top.fmap.get(top.parsingProp).getType();
-#                 Field f = top.fmap.get(top.parsingProp);
-#                 // AnsT3 { ArrayList<Anson[]> ms; }
-#                 // ctx: [[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]]
-#                 // [0]: io.odysz.anson.Anson[], 
-#                 // [1]: io.odysz.anson.Anson
-#                 String[] tn = parseListElemType(f);
-#                 push(ft, tn);
-#             
-#             # now top is the enclosing list, it's component type is elem-type
-# 
-#         Except (ReflectiveOperationException, SecurityException, AnsonException) as e:
-#             e.printStackTrace();
-# 
+    def enterArray(self, ctx) -> None:
+        try:
+            # ParsingCtx 
+            top = self.top();
+ 
+            # if in a list or a map, parse top's sub-type as the new node's value type
+            if (top.isInList() or top.isInMap()):
+                # pushing ArrayList.class because entering array, isInMap() == true means needing to figure out value type
+                # String[]
+                tn = parseElemType(top.subTypes());
+                # ctx:        [{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]
+                # subtype:    io.odysz.anson.Anson
+                # tn :        [io.odysz.anson.Anson]
+                # push(ArrayList.class, tn);
+                self.push(list, tn);
+            # if field available, parse field's value type as the new node's value type
+            else:
+                # Class<?>
+                ft = top.fmap.get(top.parsingProp).getType();
+                # Field
+                f = top.fmap.get(top.parsingProp);
+                # AnsT3 { ArrayList<Anson[]> ms; }
+                # ctx: [[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]]
+                # [0]: io.odysz.anson.Anson[], 
+                # [1]: io.odysz.anson.Anson
+                # String[]
+                tn = parseListElemType(f);
+                self.push(ft, tn);
+             
+            # now top is the enclosing list, it's component type is elem-type
+ 
+        except (AnsonException) as e:
+            e.printStackTrace();
+ 
 #     @Override
 #     public void exitArray(ArrayContext ctx) {
 #         if (!top().isInList())
@@ -717,116 +800,63 @@ class AnsonListener(JSONListener):
 #             e.printStackTrace();
 #         except AnsonException e:
 #             Utils.warn(e.getMessage());
-    
-    def invokeFactory(f, v):
+
+    def invokeFactory(self, f, v):
         """ 
         private IJsonable invokeFactory(Field f, String v) throws AnsonException {
         """
-        if (factorys == null || !factorys.containsKey(f.getType()))
+        if (self.factorys == None or not self.factorys.containsKey(f.getType())):
             raise AnsonException(0,
                     "Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
                     + "Or don't declare the field as %1$s, use a subclass of Anson",
                     f.getType());
 
-        JsonableFactory factory = factorys.get(f.getType());
+        factory = self.factorys.get(f.getType());
         try:
-             return factory.fromJson(v);
-        except Throwable, t:
-            throw new AnsonException(0,
+            return factory.fromJson(v);
+        except Exception as t:
+            raise AnsonException(0,
                     "Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
                     + "Or don't declare the field as %1$s, use a subclass of Anson",
-                    f.getType());
+                    f.getType(), t.getMessage());
 
     @staticmethod
-    def setPrimitive(IJsonable obj, Field f, String v)
+    def setPrimitive(self, obj, f, v):
         """
         private static void setPrimitive(IJsonable obj, Field f, String v)
             throws RuntimeException, ReflectiveOperationException, AnsonException {
         """
-        if (f.getType() == int.class || f.getType() == Integer.class)
-            f.set(obj, Integer.valueOf(v));
-        else if (f.getType() == float.class || f.getType() == Float.class)
-            f.set(obj, Float.valueOf(v));
-        else if (f.getType() == double.class || f.getType() == Double.class)
-            f.set(obj, Double.valueOf(v));
-        else if (f.getType() == long.class || f.getType() == Long.class)
-            f.set(obj, Long.valueOf(v));
-        else if (f.getType() == short.class || f.getType() == Short.class)
-            f.set(obj, Short.valueOf(v));
-        else if (f.getType() == byte.class || f.getType() == Byte.class)
-            f.set(obj, Byte.valueOf(v));
-        else
-            # what's else?
-            raise AnsonException(0, "Unsupported field type: %s (field %s)",
-                    f.getType().getName(), f.getName());
-    }
+#         if (f.getType() == int.class || f.getType() == Integer.class)
+#             f.set(obj, Integer.valueOf(v));
+#         else if (f.getType() == float.class || f.getType() == Float.class)
+#             f.set(obj, Float.valueOf(v));
+#         else if (f.getType() == double.class || f.getType() == Double.class)
+#             f.set(obj, Double.valueOf(v));
+#         else if (f.getType() == long.class || f.getType() == Long.class)
+#             f.set(obj, Long.valueOf(v));
+#         else if (f.getType() == short.class || f.getType() == Short.class)
+#             f.set(obj, Short.valueOf(v));
+#         else if (f.getType() == byte.class || f.getType() == Byte.class)
+#             f.set(obj, Byte.valueOf(v));
+#         else
+#             # what's else?
+#             raise AnsonException(0, "Unsupported field type: %s (field %s)",
+#                     f.getType().getName(), f.getName());
 
     @staticmethod
-    def registFactory(Class<?> jsonable, JsonableFactory factory):
+    def registFactory(jsonable, factory):
         """
         Parameters
         ---------
         jsonable: Class<?>
         factory: JsonableFactory
         """
-        if (factorys == null)
-            factorys = new HashMap<Class<?>, JsonableFactory>();
+        if (AnsonListener.factorys == None):
+            # factorys = new HashMap<Class<?>, JsonableFactory>();
+            factorys = {}
         factorys.put(jsonable, factory);
 
 ################################## To Json ###############################
-class IJsonable(abc.ABC):
-    """
-    Java interface (protocol) can be deserailized into json.
-    For python protocol and ABC, see
-    http://masnun.rocks/2017/04/15/interfaces-in-python-protocols-and-abcs/
-    """
-    @abc.abstractmethod
-    def toBlock(self, outstream):
-        pass
-
-def writeVal(outstream, v):
-    if (isinstance(v, str)):
-        outstream.write("\"")
-        outstream.write(v)
-        outstream.write("\"")
-    else:
-        outstream.write(str(v))
-
-
-class Anson(IJsonable):
-    to_del = "some vale"
-    to_del_int = 5
-    
-    def toBlock(self, outstream, opts):
-        quotK = opts == None or opts.length == 0 or opts[0] == None or opts[0].quotKey();
-        if (quotK == True):
-            outstream.write("{\"type\": \"");
-            outstream.write(self.getClass());
-            outstream.write('\"');
-        else :
-            outstream.write("{type: ");
-            outstream.write(self.getClass());
-        
-        for (n, v) in self.getFields():
-            outstream.write(", ");
-            if (quotK == True):
-                outstream.write("\"%s\": " % n);
-            else :
-                outstream.write("%s: " % n);
-            writeVal(outstream, v);
-
-        outstream.write("}")
-        return "";
-    
-    def getClass(self):
-        return "io.odysz.anson.Anson"
-
-    def getFields(self):
-        env_dict = []
-        for (name, att) in inspect.getmembers(self, lambda attr: not callable(attr) ):
-            if (not name.startswith("__")):
-                env_dict.append((name, att))
-        return env_dict
 
 class MsgCode(Enum):
     ok = "ok"

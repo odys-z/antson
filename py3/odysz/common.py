@@ -27,6 +27,18 @@ class LangExt():
                return match(s, regex)
         return False
 
+class Utils():
+    def __init__(self, params):
+        '''
+        Constructor
+        '''
+
+    @staticmethod
+    def logi (self):
+        pass
     
+    @staticmethod
+    def warn (self, templt, args):
+        pass
     
         

@@ -10,7 +10,6 @@ from io import StringIO
 import sys #@UnusedImport
 
 from ansonpy.anson import Anson, AnsonMsg
-import inspect
 from unittest.case import TestCase
 
 
