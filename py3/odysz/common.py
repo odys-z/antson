@@ -24,7 +24,7 @@ class LangExt():
             if (regex == None or s == ""):
                 return True
             else:
-               return match(s, regex)
+                return match(s, regex)
         return False
 
 class Utils():

@@ -7,7 +7,7 @@ Created on 25 Oct 2019
 import inspect
 from enum import Enum
 from ansonpy.JSONListener import JSONListener
-from abc import abstractmethod
+# from abc import abstractmethod
 from odysz.common import LangExt, Utils
 from ansonpy.x import AnsonException
 import abc
@@ -369,63 +369,63 @@ class AnsonListener(JSONListener):
  
 #     private static String[] parseListElemType(Field f) throws AnsonException {
     @staticmethod
-    def parseListElemType(f) -> list[str]:
-        # for more information, see
-        # https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
- 
-        # Type
-        typ = f.getGenericType();
-        if (isinstance(typ, ParameterizedType)):
-            # ParameterizedType
-            pType = typ;
- 
-            # String[]
-            ptypess = pType.getActualTypeArguments()[0].getTypeName().split("<", 2);
-            if (ptypess.length > 1):
-                ptypess[1] = ptypess[1].replaceFirst(">$", "");
-                ptypess[1] = ptypess[1].replaceFirst("^L", "");
-            # figure out array element class 
-            else :
-                # Type
-                argType = pType.getActualTypeArguments()[0];
-                if (not isinstance(argType, TypeVariable) and not isinstance(argType, WildcardType)):
-                    # Class<? extends Object>
-                    eleClzz = argType;
-                    if (eleClzz.isArray()):
-                        ptypess = list[ptypess[0], eleClzz.getComponentType().getName()];
-                # else nothing can do here for a type parameter, e.g. "T"
-                elif (AnsonFlags.parser):
-                        Utils.warn("[AnsonFlags.parser] Element type <%s> for %s is a type parameter (%s) - ignored",
-                            pType.getActualTypeArguments()[0],
-                            f.getName(),
-                            pType.getActualTypeArguments()[0].getClass());
-            return ptypess;
-        elif (f.getType().isArray()):
-            # complex array may also has annotation
-            # AnsonField a = None if f == None else f.getAnnotation(AnsonField.class);
-            a = "object";
-            # String
-            tn = None if a == None else a.valType();
-            # String[]
-            valss = JSONListener.parseElemType(tn);
-             
-            eleType = f.getType().getComponentType().getTypeName();
-            if (valss != None and not eleType.equals(valss[0])):
-                Utils.warn("[JSONAnsonListener#parseListElemType()]: Field %s is not annotated correctly.\n"
-                        + "field parameter type: %s, annotated element type: %s, annotated sub-type: %s",
-                        f.getName(), eleType, valss[0], valss[1]);
- 
-            if (valss != None and valss.length > 1):
-                return list[eleType, valss[1]];
-            else:
-                 return list[eleType];
-        else :
-            # not a parameterized, not an array, try annotation
-            # AnsonField a = f == None ? None : f.getAnnotation(AnsonField.class);
-            a = "object"
-            tn = None if a == None else a.valType();
-            return JSONListener.parseElemType(tn);
-#
+#     def parseListElemType(f) -> list[str]:
+#         # for more information, see
+#         # https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
+#  
+#         # Type
+#         typ = f.getGenericType();
+#         if (isinstance(typ, ParameterizedType)):
+#             # ParameterizedType
+#             pType = typ;
+#  
+#             # String[]
+#             ptypess = pType.getActualTypeArguments()[0].getTypeName().split("<", 2);
+#             if (ptypess.length > 1):
+#                 ptypess[1] = ptypess[1].replaceFirst(">$", "");
+#                 ptypess[1] = ptypess[1].replaceFirst("^L", "");
+#             # figure out array element class 
+#             else :
+#                 # Type
+#                 argType = pType.getActualTypeArguments()[0];
+#                 if (not isinstance(argType, TypeVariable) and not isinstance(argType, WildcardType)):
+#                     # Class<? extends Object>
+#                     eleClzz = argType;
+#                     if (eleClzz.isArray()):
+#                         ptypess = list[ptypess[0], eleClzz.getComponentType().getName()];
+#                 # else nothing can do here for a type parameter, e.g. "T"
+#                 elif (AnsonFlags.parser):
+#                         Utils.warn("[AnsonFlags.parser] Element type <%s> for %s is a type parameter (%s) - ignored",
+#                             pType.getActualTypeArguments()[0],
+#                             f.getName(),
+#                             pType.getActualTypeArguments()[0].getClass());
+#             return ptypess;
+#         elif (f.getType().isArray()):
+#             # complex array may also has annotation
+#             # AnsonField a = None if f == None else f.getAnnotation(AnsonField.class);
+#             a = "object";
+#             # String
+#             tn = None if a == None else a.valType();
+#             # String[]
+#             valss = JSONListener.parseElemType(tn);
+#              
+#             eleType = f.getType().getComponentType().getTypeName();
+#             if (valss != None and not eleType.equals(valss[0])):
+#                 Utils.warn("[JSONAnsonListener#parseListElemType()]: Field %s is not annotated correctly.\n"
+#                         + "field parameter type: %s, annotated element type: %s, annotated sub-type: %s",
+#                         f.getName(), eleType, valss[0], valss[1]);
+#  
+#             if (valss != None and valss.length > 1):
+#                 return list[eleType, valss[1]];
+#             else:
+#                 return list[eleType];
+#         else :
+#             # not a parameterized, not an array, try annotation
+#             # AnsonField a = f == None ? None : f.getAnnotation(AnsonField.class);
+#             a = "object"
+#             tn = None if a == None else a.valType();
+#             return JSONListener.parseElemType(tn);
+
 #     /**Parse property name, tolerate enclosing quotes presenting or not. 
 #      * @param ctx
 #      * @return
@@ -515,12 +515,12 @@ class AnsonListener(JSONListener):
             if (top.isInList() or top.isInMap()):
                 # pushing ArrayList.class because entering array, isInMap() == true means needing to figure out value type
                 # String[]
-                tn = JSONListener.parseElemType(top.subTypes());
+                # tn = JSONListener.parseElemType(top.subTypes());
                 # ctx:        [{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]
                 # subtype:    io.odysz.anson.Anson
                 # tn :        [io.odysz.anson.Anson]
                 # push(ArrayList.class, tn);
-                self.push(list, tn);
+                self.push(list, 'object');
             # if field available, parse field's value type as the new node's value type
             else:
                 # Class<?>

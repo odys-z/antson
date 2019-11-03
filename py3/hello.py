@@ -20,5 +20,26 @@ def main():
     walker = ParseTreeWalker()
     walker.walk(printer, tree)
 
+def tryTypes():
+    s = list()
+    l = list()
+    l.append('s')
+    l.append('abc')
+    l.append(1)
+    s.append(l)
+
+    t = list()
+    t.append('t')
+    t.append('xyz')
+    t.append(t)
+    s.append(t)
+
+    print(s)
+    
+    m = {}
+    m[1] = "1"
+    print(m)
+
 if __name__ == '__main__':
     main()
+#     tryTypes()
