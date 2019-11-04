@@ -1,9 +1,9 @@
 # Generated from JSON.g4 by ANTLR 4.7.2
-from antlr4 import *
+from antlr4 import * # @UnusedWildImport
 if __name__ is not None and "." in __name__:
     from .JSONParser import JSONParser
-else:
-    from JSONParser import JSONParser
+# else:
+#     from JSONParser import JSONParser
 
 # This class defines a complete listener for a parse tree produced by JSONParser.
 class JSONListener(ParseTreeListener):
