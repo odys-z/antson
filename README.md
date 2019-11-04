@@ -172,7 +172,7 @@ Here is the test case:
     }
 ~~~
 
-For usable valType string, see [Class.forName\(\) API](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName(java.lang.String).
+For usable valType string, see [Class.forName() API](https://docs.oracle.com/javase/7/docs/api/java/lang/Class.html#forName(java.lang.String).
 
 For test case, see [AnsonTest#testFromJson_rs()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
