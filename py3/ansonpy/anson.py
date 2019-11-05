@@ -13,13 +13,16 @@ from ansonpy.x import AnsonException
 import abc
 import decimal
 
+class AnsonFlags():
+    parser = True
+
 ################################# Anson ##################################
 class IJsonable(abc.ABC):
-    """
+    '''
     Java interface (protocol) can be deserailized into json.
     For python protocol and ABC, see
     http://masnun.rocks/2017/04/15/interfaces-in-python-protocols-and-abcs/
-    """
+    '''
     @abc.abstractmethod
     def toBlock(self, outstream):
         pass
@@ -69,55 +72,68 @@ class Anson(IJsonable):
         return env_dict
 
 ################################# From Json ##############################
+# class AnInst:
+#     ''' Anson Type
+#         Equivolent of java Type
+#     '''
+#     def __init__(self, ftype):
+#         self.ftype = ftype
+# 
+#     def getClass(self):
+#         return self.antype
+    
 class ParsingCtx():
-    """ Parsing AST node's context, for handling the node's value,
+    ''' Parsing AST node's context, for handling the node's value,
         the element class of parsing stack.
 
-    Attributes
-    ---------
-    parsingProp: str
-        The json prop (object key)
-    protected String parsingProp;
-    /**The parsed native value */
-    protected Object parsedVal;
+        Attributes
+        ---------
+        parsingProp: str
+            The json prop (object key)
+            java: protected String parsingProp;
 
-    private Object enclosing;
-    private HashMap<String, Field> fmap;
+        parsedVal: object
+            The parsed native value
 
-    /** Annotation's main types */
-    private String valType;
-    /** Annotation's sub types */
-    private String subTypes;
-    """
+        valType: str
+            field value types
+
+        enclosing: object
+            enclosing instance currently parsing
+            
+        # private HashMap<String, Field> fmap;
+
+        subType: str;
+            Annotation's sub types
+    '''
 
     def __init__(self, fmap, enclosing): 
-        """
+        '''
         Parameters
         ----------
         fmap: map
             fields map
             
-        enclosing: IJsonable
+        enclosing: object
             enclosing object
-        """
+        '''
         self.fmap = fmap;
         self.enclosing = enclosing;
 
     def isInList(self):
-        """
+        '''
         Returns
         -------
         boolean
             is in a list
-        """
+        '''
         return isinstance(self.enclosing, list)
 
     def isInMap(self):
         return isinstance(self.enclosing, dict);
 
     def elemType(self, tn):
-        """ Set type annotation.<br>
-            annotation is value of {@link AnsonField#valType()}
+        ''' Set list element's type
             
             Parameters
             ----------
@@ -125,52 +141,48 @@ class ParsingCtx():
                     type name list
             Returns
             -------
-            ParsingCtx
-                this
-        """
+                ParsingCtx: this
+        '''
         self.valType = None if tn == None or tn.length <= 0 else tn[0];
         self.subTypes = None if tn == None or tn.length <= 1 else tn[1];
         
-        if (not LangExt.isblank(self.valType)):
-            # change / replace array type
-            # e.g. lang.String[] to [Llang.String;
-            if (self.valType.matches(".*\\[\\]$")):
-                self.valType = "[L" + self.valType.replaceAll("\\[\\]$", ";");
-                self.valType = self.valType.replaceFirst("^\\[L\\[", "[[");
+#         if (not LangExt.isblank(self.valType)):
+#             # change / replace array type
+#             # e.g. lang.String[] to [Llang.String;
+#             if (self.valType.matches(".*\\[\\]$")):
+#                 self.valType = "[L" + self.valType.replaceAll("\\[\\]$", ";");
+#                 self.valType = self.valType.replaceFirst("^\\[L\\[", "[[");
         return self;
     
 #     def elemType(self):
-#         """ Get type annotation
+#         ''' Get type annotation
 #             Returns
 #             -------
 #                 value type, {@link AnsonField#valType()} annotation if possible
-#         """
+#         '''
 #         return self.valType;
 
     def subTypes(self):
         return self.subTypes;
 
 
-class AnsonFlags():
-    parser = True
-
 
 class AnsonListener(JSONListener):
-    # static
-    # an = None
 
-    # private static HashMap<Class<?>, JsonableFactory> factorys;
-    # static
     factorys = None
+    ''' static
+        private static HashMap<Class<?>, JsonableFactory> factorys;
+    '''
+    
+    # envetype = None;
+    ''' Envelope Type Name '''
+    
     stack = []
+    ''' Parsing Node Stack '''
 
-    def enterJson(self, ctx):
-        # print("Hello: %s" % ctx.envelope()[0].type_pair().TYPE())
-        self.an = Anson()
-
-    def toparent(self, type):
-        # no enclosing, no parent
-        if (self.stack.size() <= 1 or LangExt.isblank(type, "None")):
+    def toparent(self, anInst):
+        if (self.stack.size() <= 1 or LangExt.isblank(anInst, "None")):
+            # no enclosing, no parent
             return None;
 
         # trace back, guess with type for children could be in array or map
@@ -178,14 +190,14 @@ class AnsonListener(JSONListener):
         p = self.stack.get(1);
         i = 2;
         while (p != None):
-            if (type.equals(p.enclosing.getClass())):
+            if (anInst == p.enclosing.getClass()):
                 return p.enclosing;
             p = self.stack.get(i);
             i = i + 1;
         return None;
 
     def push(self, enclosingClazz, elemType):
-        """ Push parsing node (a envelope, map, list).
+        ''' Push parsing node (a envelope, map, list).
             private void push(Class<?> enclosingClazz, String[] elemType)
         Parameters
         ----------
@@ -201,7 +213,7 @@ class AnsonListener(JSONListener):
         ReflectiveOperationException
         SecurityException
         AnsonException
-        """
+        '''
         if (enclosingClazz.isArray()):
             # HashMap<String, Field>
             fmap = map();
@@ -244,27 +256,25 @@ class AnsonListener(JSONListener):
                     self.stack.add(0, top);
 
     def pop(self):
-        """ private ParsingCtx pop() {
+        ''' private ParsingCtx pop() {
         Returns
         -------
             ParsingCtx
-        """
+        '''
         top = self.stack.remove(0);
         return top;
 
-    # Envelope Type Name
-    # protected String envetype;
 
-    ## override
-    def exitObj(self, ctx):
-        # ParsingCtx
+#     def enterJson(self, ctx):
+#         # print("Hello: %s" % ctx.envelope()[0].type_pair().TYPE())
+#         self.an = Anson()
+
+    def exitObj(self):
         top = self.pop();
         top().parsedVal = top.enclosing;
         top.enclosing = None;
 
-    ## override
     def enterObj(self, ctx):
-        # ParsingCtx
         top = self.top();
         try:
             fmap = top.fmap if top != None else None;
@@ -568,7 +578,7 @@ class AnsonListener(JSONListener):
 #     }
 # 
 #     def toPrimitiveArray(list, arrType):
-#         """
+#         '''
 #         private static <P> P toPrimitiveArray(List<?> list, Class<P> arrType) throws AnsonException {
 #          * Unboxes a List in to a primitive array.
 #          * reference:
@@ -587,7 +597,7 @@ class AnsonListener(JSONListener):
 #          *         the component type of the specified Class is not a primitive
 #          *         type, or if the elements of the specified List can not be
 #          *         stored in an array of type P
-#         """
+#         '''
 #         if (!arrType.isArray()):
 #             throw new IllegalArgumentException(arrType.toString());
 # 
@@ -614,7 +624,7 @@ class AnsonListener(JSONListener):
 #         return array;
 #     
 #     public void exitValue(ValueContext ctx) {
-#         """
+#         '''
 #         grammar:<pre>value
 #         : STRING
 #         | NUMBER
@@ -626,7 +636,7 @@ class AnsonListener(JSONListener):
 #         | 'None'
 #         ;</pre>
 #          * @see gen.antlr.json.JSONBaseListener#exitValue(gen.antlr.json.JSONParser.ValueContext)
-#         """
+#         '''
 #         ParsingCtx top = top();
 #         if (top.isInList() || top.isInMap()) {
 #             # if in a map, parsingProp is the map key,
@@ -803,9 +813,9 @@ class AnsonListener(JSONListener):
 #             Utils.warn(e.getMessage());
 
     def invokeFactory(self, f, v):
-        """ 
+        ''' 
         private IJsonable invokeFactory(Field f, String v) throws AnsonException {
-        """
+        '''
         if (self.factorys == None or not self.factorys.containsKey(f.getType())):
             raise AnsonException(0,
                     "Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
@@ -823,10 +833,10 @@ class AnsonListener(JSONListener):
 
     @staticmethod
     def setPrimitive(self, obj, f, v):
-        """
+        '''
         private static void setPrimitive(IJsonable obj, Field f, String v)
             throws RuntimeException, ReflectiveOperationException, AnsonException {
-        """
+        '''
 #         if (f.getType() == int.class || f.getType() == Integer.class)
 #             f.set(obj, Integer.valueOf(v));
 #         else if (f.getType() == float.class || f.getType() == Float.class)
@@ -846,12 +856,12 @@ class AnsonListener(JSONListener):
 
     @staticmethod
     def registFactory(jsonable, factory):
-        """
+        '''
         Parameters
         ---------
         jsonable: Class<?>
         factory: JsonableFactory
-        """
+        '''
         if (AnsonListener.factorys == None):
             # factorys = new HashMap<Class<?>, JsonableFactory>();
             factorys = {}

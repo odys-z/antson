@@ -42,4 +42,5 @@ def tryTypes():
 
 if __name__ == '__main__':
     main()
-#     tryTypes()
+else:
+    tryTypes()
