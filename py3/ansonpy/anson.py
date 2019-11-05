@@ -352,7 +352,7 @@ class AnsonListener(JSONListener):
         stri = ctx.qualifiedName().STRING();
         # String
         txt = ctx.qualifiedName().getText();
-        envetype = JSONListener.getStringVal(stri, txt);
+        envetype = AnsonListener.getStringVal(stri, txt);
          
         try:
             # Class<?> clazz = ClassforName(envetype);
@@ -459,7 +459,7 @@ class AnsonListener(JSONListener):
         stri = ctx.value().STRING();
         # String
         txt = ctx.value().getText();
-        return JSONListener.getStringValRaw(stri, txt);
+        return AnsonListener.getStringValRaw(stri, txt);
 
 #     private static String getStringVal(TerminalNode str, String rawTxt) {
     @staticmethod
@@ -505,7 +505,7 @@ class AnsonListener(JSONListener):
                     except Exception as e1:
                         return decimal(txt);
         elif (ctx.STRING() != None):
-                return JSONListener.getStringVal(ctx.STRING(), txt);
+                return AnsonListener.getStringVal(ctx.STRING(), txt);
         elif (txt != None and txt.toLowerCase().equals("true")):
             # return new Boolean(true);
             return True;
@@ -542,7 +542,7 @@ class AnsonListener(JSONListener):
                 # [0]: io.odysz.anson.Anson[], 
                 # [1]: io.odysz.anson.Anson
                 # String[]
-                tn = JSONListener.parseListElemType(f);
+                tn = AnsonListener.parseListElemType(f);
                 self.push(ft, tn);
              
             # now top is the enclosing list, it's component type is elem-type
