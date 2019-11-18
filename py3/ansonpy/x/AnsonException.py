@@ -1,5 +1,5 @@
 
-class AnsonException(object):
+class AnsonException(BaseException):
     type = "io.odysz.anson.x.AnsonException"
     excode = 0
     err = ""

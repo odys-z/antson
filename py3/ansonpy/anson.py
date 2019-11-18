@@ -12,6 +12,8 @@ from odysz.common import LangExt, Utils
 from ansonpy.x import AnsonException
 import abc
 import decimal
+from typing import List
+import re
 
 class AnsonFlags():
     parser = True
@@ -72,6 +74,32 @@ class Anson(IJsonable):
         return env_dict
 
 ################################# From Json ##############################
+class Reflectn(object):
+    ''' Reflection helper
+    '''
+    @staticmethod
+    def isArray(typename):
+        return re.match(typename, 'list')
+
+    @staticmethod
+    def parseElemType(subTypes: str) -> List[str]:
+        ''' Java equivalent:
+            private static String[] parseElemType(String subTypes)
+        '''
+        if (LangExt.isblank(subTypes)):
+            return None;
+        return subTypes.split("/", 2); 
+    
+    @staticmethod
+    def isAnson(classname) -> bool:
+        ''' Is the class declared as a subclass of Anson?
+            This verification also prevent injection attack?
+            see discussion about eval():
+            https://stackoverflow.com/questions/3451779/how-to-dynamically-create-an-instance-of-a-class-in-python
+        ''' 
+        pass
+ 
+
 # class AnInst:
 #     ''' Anson Type
 #         Equivolent of java Type
@@ -166,8 +194,9 @@ class ParsingCtx():
         return self.subTypes;
 
 
-
 class AnsonListener(JSONListener):
+    def __init__(self):
+        self.stack = []
 
     factorys = None
     ''' static
@@ -175,10 +204,10 @@ class AnsonListener(JSONListener):
     '''
     
     # envetype = None;
-    ''' Envelope Type Name '''
+    # ''' Envelope Type Name '''
     
-    stack = []
-    ''' Parsing Node Stack '''
+    # stack = []
+    # ''' Parsing Node Stack '''
 
     def toparent(self, anInst):
         if (self.stack.size() <= 1 or LangExt.isblank(anInst, "None")):
@@ -196,15 +225,15 @@ class AnsonListener(JSONListener):
             i = i + 1;
         return None;
 
-    def push(self, enclosingClazz, elemType):
+    def push(self, enclosingClazz, elemType = None):
         ''' Push parsing node (a envelope, map, list).
             private void push(Class<?> enclosingClazz, String[] elemType)
         Parameters
         ----------
-        enclosingClazz : object
+        enclosingClazz : str
             new parsing IJsonable object's class
 
-        elemType : [type]
+        elemType : [type] Not used in python?
             annotation of enclosing list/array. 0: main type, 1: sub-types
             This parameter can't be None if is pushing a list node.
 
@@ -214,18 +243,18 @@ class AnsonListener(JSONListener):
         SecurityException
         AnsonException
         '''
-        if (enclosingClazz.isArray()):
+        if (Reflectn.isArray(enclosingClazz)):
             # HashMap<String, Field>
             fmap = map();
             # ParsingCtx
             newCtx = ParsingCtx(fmap, list());
-            self.stack.add(0, newCtx.elemType(elemType));
+            self.stack.insert(0, newCtx.elemType(elemType));
         else:
-            #  HashMap<String, Field> fmap = new HashMap<String, Field>();
-            fmap = {};
-            if (isinstance(enclosingClazz, list)):
+            fmap = {}; # HashMap<String, Field>
+
+            if (JSONListener.isArray(enclosingClazz)):
                 enclosing = list();
-                self.stack.add(0, ParsingCtx(fmap, enclosing).elemType(elemType));
+                self.stack.insert(0, ParsingCtx(fmap, enclosing).elemType(elemType));
             else:
 #                 Constructor<?> ctor = None;
 #                 try:
@@ -236,14 +265,14 @@ class AnsonListener(JSONListener):
 #                             + "getConstructor error: %s %s", 
 #                             enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
 #                 if (ctor != None && IJsonable.class.isAssignableFrom(enclosingClazz)):
-                if (isinstance(enclosingClazz, Anson)):
+                if (Reflectn.isAnson(enclosingClazz)):
                     # fmap = mergeFields(enclosingClazz, fmap); # map merging is only needed by typed object
                     fmap = {}
                     try:
                         # IJsonable
                         # enclosing = newInstance();
                         enclosing = Anson();
-                        self.stack.add(0, ParsingCtx(fmap, enclosing));
+                        self.stack.insert(0, ParsingCtx(fmap, enclosing));
                     except Exception as e:
                         raise AnsonException(0, "Failed to create instance of IJsonable with\nconstructor: %s\n"
                             + "class: %s\nerror: %s\nmessage: %s\n"
@@ -253,7 +282,7 @@ class AnsonListener(JSONListener):
                     enclosing = {};
                     # ParsingCtx 
                     top = ParsingCtx(fmap, enclosing);
-                    self.stack.add(0, top);
+                    self.stack.insert(0, top);
 
     def pop(self):
         ''' private ParsingCtx pop() {
@@ -261,7 +290,7 @@ class AnsonListener(JSONListener):
         -------
             ParsingCtx
         '''
-        top = self.stack.remove(0);
+        top = self.stack.popleft();
         return top;
 
 
@@ -314,71 +343,64 @@ class AnsonListener(JSONListener):
             e.printStackTrace();
     
     def parsedEnvelope(self) -> IJsonable :
-        if (self.stack == None or self.stack.size() == 0):
+        if self.stack:
+            return self.stack[0].enclosing;
+        else:
             raise AnsonException(0, "No evelope is avaliable.");
-        return self.stack.get(0).enclosing;
  
-#     @Override
-#     public void enterEnvelope(EnvelopeContext ctx) {
     def enterEnvelope(self, ctx) -> None:
+        ''' Java equivalent:
+            public void enterEnvelope(EnvelopeContext)
+        '''
         if (self.stack == None):
             self.stack = [];
         self.envetype = None;
 
-#     @Override
-#     public void exitEnvelope(EnvelopeContext ctx) {
     def exitEnvelope(self, ctx) -> None:
-        super.exitEnvelope(ctx);
-        if (self.stack.size() > 1):
-            # ParsingCtx
-            top = self.pop();
+        ''' Java equivalent:
+            public void exitEnvelope(EnvelopeContext)
+        '''
+        super().exitEnvelope(ctx);
+        if (len(self.stack) > 1):
+            top = self.pop(); # ParsingCtx
             top().parsedVal = top.enclosing;
         # else keep last one (root) as return value
      
-#     /**Semantics of entering a type pair is found and parsingVal an IJsonable object.<br>
-#      * This is always happening on entering an object.
-#      * The logic opposite is exit object.
-#      * @see gen.antlr.json.JSONBaseListener#enterType_pair(gen.antlr.json.JSONParser.Type_pairContext)
-#      */
-#     @Override
-#     public void enterType_pair(Type_pairContext ctx) {
     def enterType_pair(self, ctx) -> None:
+        ''' Semantics of entering a type pair is found and parsingVal an IJsonable object.<br>
+            This is always happening on entering an object.
+            The logic opposite to this is exit object.
+
+            Java equivalent:
+            public void enterType_pair(Type_pairContext)
+            @see gen.antlr.json.JSONBaseListener#enterType_pair(gen.antlr.json.JSONParser.Type_pairContext)
+        '''
         if (self.envetype != None):
             # ignore this type specification, keep consist with java type
             return;
  
-        # envetype = ctx.qualifiedName().getText();
-        # TerminalNode
-        stri = ctx.qualifiedName().STRING();
-        # String
-        txt = ctx.qualifiedName().getText();
-        envetype = AnsonListener.getStringVal(stri, txt);
+        strType = ctx.qualifiedName().STRING(); # TerminalNode
+        txt = ctx.qualifiedName().getText(); # String
+        envetype = AnsonListener.getStringValRaw(
+            strType if isinstance(strType, str) else strType.getText(),
+            txt);
          
         try:
-            # Class<?> clazz = ClassforName(envetype);
-            clazz = envetype;
-            self.push(clazz, None);
+            self.push(envetype);
         except (AnsonException ) as e:
             e.printStackTrace();
  
-#     @Override
-#     public void enterPair(PairContext ctx) {
     def enterPair(self, ctx) -> None:
+        ''' Java equivalent:
+            public void enterPair(PairContext ctx)
+        '''
         super.enterPair(ctx);
-        # ParsingCtx
-        top = self.top();
+        top = self.top(); # ParsingCtx
         top.parsingProp = self.getProp(ctx);
         top.parsedVal = None;
-     
-#     private static String[] parseElemType(String subTypes) {
-    @staticmethod
-    def parseElemType(subTypes) -> list[str]:
-        if (LangExt.isblank(subTypes)):
-            return None;
-        return subTypes.split("/", 2); 
- 
+
 #     private static String[] parseListElemType(Field f) throws AnsonException {
-    @staticmethod
+#     @staticmethod
 #     def parseListElemType(f) -> list[str]:
 #         # for more information, see
 #         # https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
@@ -447,23 +469,36 @@ class AnsonListener(JSONListener):
         p = ctx.propname().IDENTIFIER();
         return ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "") if p == None else p.getText();
 
-#     /**Convert json value : STRING | NUMBER | 'true' | 'false' | 'None' to java.lang.String.<br>
-#      * Can't handle NUMBER | obj | array.
-#      * @param ctx
-#      * @return value in string
-#      */
-#     private static String getStringVal(PairContext ctx) {
     @staticmethod
     def getStringVal(ctx) -> str:
+        ''' Java equivalent:
+            private static String getStringVal(PairContext ctx)
+
+            Convert json value : STRING | NUMBER | 'true' | 'false' | 'None' to java.lang.String.<br>
+            java: Can't handle NUMBER | obj | array.
+
+            parameters:
+            -----------
+                ctx: PairContext
+                    antlr parsing context
+            returns:
+            -----------
+                value in string
+        '''
+
         # TerminalNode
         stri = ctx.value().STRING();
         # String
         txt = ctx.value().getText();
         return AnsonListener.getStringValRaw(stri, txt);
 
-#     private static String getStringVal(TerminalNode str, String rawTxt) {
     @staticmethod
     def getStringValRaw(stri, rawTxt) -> str:
+        ''' Get string value.
+            If stri is null, use rawTxt.
+            Java equivalent:
+            private static String getStringVal(TerminalNode str, String rawTxt) {
+        '''
         if (stri == None):
             try : 
                 if (LangExt.isblank(rawTxt)):
@@ -471,46 +506,50 @@ class AnsonListener(JSONListener):
                 else:
                     if ("None".equals(rawTxt)):
                         return None;
-            except Exception as e: { }
+            except Exception as e: { }  # @UnusedVariable
             return rawTxt;
         else:
-            return stri.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+            # stri.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "")
+            return re.sub(r'(^\s*")|("\s*$)', '', stri) 
  
-#     /**
-#      * grammar:<pre>value
-#     : STRING
-#     | NUMBER
-#     | obj        // all array's obj value can't parsed as Anson, taken as HashMap - TODO doc: known issue
-#     | envelope
-#     | array
-#     | 'true'
-#     | 'false'
-#     | 'None'
-#     ;</pre>
-#      * @param ctx
-#      * @return simple value (STRING, NUMBER, 'true', 'false', None)
-#      */
-#     private static Object figureJsonVal(ValueContext ctx) {
     @staticmethod
     def figureJsonVal(ctx) -> object:
+        '''grammar:<pre>value
+        : STRING
+        | NUMBER
+        | obj        // all array's obj value can't parsed as Anson, taken as HashMap
+        | envelope
+        | array
+        | 'true'
+        | 'false'
+        | 'None'
+        ;</pre>
+        Parameters:
+        -----------
+            ctx: ValueContext
+        Returns
+        -------
+            java simple value (STRING, NUMBER, 'true', 'false', None)
+
+        java equivalent:
+        private static Object figureJsonVal(ValueContext ctx
+        '''
         txt = ctx.getText();
         if (txt == None):
             return None;
         elif (ctx.NUMBER() != None):
+            try :
+                return int(txt);
+            except Exception as e:  # @UnusedVariable
                 try :
-                    return int(txt);
-                except Exception as e:
-                    try :
-                        return float(txt);
-                    except Exception as e1:
-                        return decimal(txt);
+                    return float(txt);
+                except Exception as e1:  # @UnusedVariable
+                    return decimal(txt);
         elif (ctx.STRING() != None):
                 return AnsonListener.getStringVal(ctx.STRING(), txt);
         elif (txt != None and txt.toLowerCase().equals("true")):
-            # return new Boolean(true);
             return True;
         elif (txt != None and txt.toLowerCase().equals("flase")):
-            # return new Boolean(false);
             return False;
         return None;
  

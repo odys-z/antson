@@ -21,7 +21,7 @@ def parse(s):
     printer = AnsonListener()
     walker = ParseTreeWalker()
     walker.walk(printer, tree)
-    return printer.an
+    return printer.parsedEnvelope()
 
 class test(TestCase):
 
