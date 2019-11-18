@@ -14,6 +14,7 @@ import abc
 import decimal
 from typing import List
 import re
+from importlib import import_module
 
 class AnsonFlags():
     parser = True
@@ -75,6 +76,8 @@ class Anson(IJsonable):
 
 ################################# From Json ##############################
 class Reflectn(object):
+    moduclss = dict()
+    
     ''' Reflection helper
     '''
     @staticmethod
@@ -91,13 +94,45 @@ class Reflectn(object):
         return subTypes.split("/", 2); 
     
     @staticmethod
-    def isAnson(classname) -> bool:
+    def isAnson(modclss) -> bool:
         ''' Is the class declared as a subclass of Anson?
             This verification also prevent injection attack?
             see discussion about eval():
             https://stackoverflow.com/questions/3451779/how-to-dynamically-create-an-instance-of-a-class-in-python
-        ''' 
-        pass
+            
+            This class will also automatically verifyClss user's module.class
+        
+            Also DP verify module class name.
+            Parameters:
+            -----------
+            modclss: str
+                name of module.path.ClassName
+        '''
+        modu, clss = modclss.rsplit('.', 1)
+        if modclss not in Reflectn.moduclss:
+            Reflectn.moduclss.update({modclss: modu})
+            return clss, modclss
+        else:
+            return None, None
+    
+    @staticmethod
+    def creatByName(class_str: str = 'tutorial.foo.foo.Class1'):
+        try:
+            module_path, class_name = class_str.rsplit('.', 1)
+            module = import_module(module_path)
+            return getattr(module, class_name), eval(class_str)()
+        except (ImportError, AttributeError) as e: # @UnusedVariable
+            raise ImportError(class_str)
+
+    @staticmethod
+    def allSubcls(cls):
+        allSubs = []
+
+        for sub in cls.__subclasses__():
+            allSubs.append(sub.__name__)
+            allSubs.extend(Reflectn.allSubcls(sub))
+
+        return allSubs
  
 
 # class AnInst:
