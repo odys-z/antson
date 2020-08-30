@@ -19,11 +19,11 @@ the package. Server needing to know how the request been parsed, even for findin
 the parser - like finding the correct mothod for a
 [SOAP Envelope](https://en.wikipedia.org/wiki/SOAP#Example_message_(encapsulated_in_HTTP)).
 
-If all envelopes can not parsed before dispatched, the dispatcher must atleast
+If all envelopes can not parsed before dispatched, the dispatcher must at least
 first try to docode "port" name, then let the reciever handle the rest of the
 content - because it's not understandable by dispatcher.
 
-On way to do this is use semantics defined by structure, like this:
+One way to do this is use semantics defined by structure, like this:
 
 ~~~
     {port: p-name, data : {method-requesting-type-data}}
