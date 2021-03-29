@@ -360,7 +360,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        	// else nothing can do here for a type parameter, e.g. "T"
 	        	else
 	        		if (AnsonFlags.parser)
-	        			Utils.warn("[AnsonFlags.parser] Element type <%s> for %s is a type parameter (%s) - ignored",
+	        			Utils.warn("[AnsonFlags.parser] warn Element type <%s> for %s is a type parameter (%s) - ignored",
 	        				pType.getActualTypeArguments()[0], //.getTypeName(),
 	        				f.getName(),
 	        				pType.getActualTypeArguments()[0].getClass());

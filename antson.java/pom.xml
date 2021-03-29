@@ -58,7 +58,7 @@
   <scm>
   	<connection>scm:git:git://github.com/odys-z/antson.git</connection>
   	<developerConnection>scm:git:odys-z@github.com:odys-z/antson.git</developerConnection>
-  	<url>https://github.com/odys-z/antson</url>
+  	<url>https://github.com/odys-zgpg-plugin/antson</url>
   	<tag>HEAD</tag>
   </scm>
 
@@ -159,7 +159,6 @@
 	      </executions>
 	  </plugin>
 
-	<!--
 	  <plugin>
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-gpg-plugin</artifactId>
@@ -174,7 +173,9 @@
 			</execution>
 		</executions>
 	  </plugin>
+	<!--
 	 -->
      </plugins>
    </build>
+  <description>Java, c#, python data type to json (de)serializer</description>
 </project>
