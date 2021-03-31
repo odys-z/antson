@@ -66,7 +66,8 @@ public class Anson implements IJsonable {
 			
 			f.setAccessible(true);
 
-			stream.write(new byte[] {',', ' '});
+			// stream.write(new byte[] {',', ' '});
+			stream.write(", ".getBytes());
 			
 			// prop
 			if (quotK)
@@ -109,10 +110,12 @@ public class Anson implements IJsonable {
 		Class<?> elemtype = v.getClass().getComponentType();
 		for (Object o : v) {
 			if (the1st) the1st = false;
-			else stream.write(new byte[] {',', ' '});
+			else // stream.write(new byte[] {',', ' '});
+				stream.write(", ".getBytes());
 
 			if (o == null)
-				stream.write(new byte[] {'n', 'u', 'l', 'l'});
+				// stream.write(new byte[] {'n', 'u', 'l', 'l'});
+				stream.write("null".getBytes());
 			else if (IJsonable.class.isAssignableFrom(elemtype))
 				((IJsonable)o).toBlock(stream, opt);
 			else if (elemtype.isArray())
@@ -123,7 +126,7 @@ public class Anson implements IJsonable {
 
 			else if (o instanceof String) {
 				stream.write('"');
-				stream.write(o.toString().getBytes());
+				stream.write(escape(o.toString()));
 				stream.write('"');
 			}
 			else stream.write(o.toString().getBytes());
@@ -133,7 +136,8 @@ public class Anson implements IJsonable {
 
 	private static void toPrimArrayBlock(OutputStream stream, Object v) throws IOException {
 		if (v == null) {
-			stream.write(new byte[] {'n', 'u', 'l', 'l'});
+			// stream.write(new byte[] {'n', 'u', 'l', 'l'});
+			stream.write("null".getBytes());
 			return;
 		}
 
@@ -148,11 +152,12 @@ public class Anson implements IJsonable {
 			else stream.write(new byte[] {',', ' '});
 
 			if (o == null)
-				stream.write(new byte[] {'n', 'u', 'l', 'l'});
+				// stream.write(new byte[] {'n', 'u', 'l', 'l'});
+				stream.write("null".getBytes());
 
 			else if (o instanceof String) {
 				stream.write('"');
-				stream.write(o.toString().getBytes());
+				stream.write(escape(o.toString()));
 				stream.write('"');
 			}
 			else stream.write(o.toString().getBytes());
@@ -168,7 +173,8 @@ public class Anson implements IJsonable {
 		stream.write('[');
 		for (Object o : collect) {
 			if (the1st) the1st = false;
-			else stream.write(new byte[] {',', ' '});
+			else // stream.write(new byte[] {',', ' '});
+				stream.write(", ".getBytes());
 
 			Class<?> elemtype = o.getClass();
 			writeNonPrimitive(stream, elemtype, o, opts);
@@ -271,10 +277,6 @@ public class Anson implements IJsonable {
 
 		Class<? extends Object> vclz = v.getClass();
 		if (IJsonable.class.isAssignableFrom(vclz)) {
-//			if (fdClz.isEnum())
-//				throw new AnsonException(1, "Using enum implementing IJsonalbe is not allowed - can't deserialized.\n"
-//						+ "field class: %s\nvalue class: %s\nvalue: %s\n"
-//						+ "If a enum type is possible, declare it in java as enum.", fdClz, vclz, v);
 			((IJsonable)v).toBlock(stream, opts);
 		}
 		else if (List.class.isAssignableFrom(v.getClass()))
@@ -331,20 +333,17 @@ public class Anson implements IJsonable {
 		if (v instanceof IJsonable)
 			((Anson)v).toJson(sbuf);
 		else if (!v.getClass().isPrimitive() && (parentCls == null || !parentCls.equals(v.getClass())))
-			// what's this?
 			sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 				.append(": \"")
 				.append(v.toString())
 				.append("\"");
 		else if (v.getClass().isPrimitive())
-//			sbuf.append(n)
 			sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 				.append(": ")
 				.append(String.valueOf(v));
 		else if (v.getClass().isArray()) {
 			for (int e = 0; e < Array.getLength(v); e++) {
 				Object elem = Array.get(v, e);
-//				sbuf.append(n)
 				sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 					.append(": [");
 				appendArr(sbuf, elem);
@@ -362,7 +361,7 @@ public class Anson implements IJsonable {
 			sbuf.append(String.valueOf(e));
 		else if (e instanceof String)
 			sbuf.append("\"")
-				.append((String)e)
+				.append(escape((String)e))
 				.append("\"");
 		else // java.lang.Object
 			appendObjStr(sbuf, e);
