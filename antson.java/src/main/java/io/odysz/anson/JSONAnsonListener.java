@@ -487,11 +487,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				String[] tn = parseListElemType(f);
 				push(ft, tn);
 			}
-
-			// now top is the enclosing list, it's component type is elem-type
-//			if (!LangExt.isblank(tn))
-//				top().elemType(tn);
-
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
 		}

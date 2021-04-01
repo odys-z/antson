@@ -30,7 +30,7 @@ public class Anson implements IJsonable {
 	@Override
 	public String toString() {
 		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			toBlock(bos);
 			return bos.toString(StandardCharsets.UTF_8.name());
 		} catch (AnsonException | IOException e) {
@@ -63,12 +63,11 @@ public class Anson implements IJsonable {
 			AnsonField af = f.getAnnotation(AnsonField.class);
 			if (af != null && af.ignoreTo())
 				continue;
-			
+
 			f.setAccessible(true);
 
-			// stream.write(new byte[] {',', ' '});
 			stream.write(", ".getBytes());
-			
+
 			// prop
 			if (quotK)
 				stream.write(("\"" + f.getName() + "\": ").getBytes());
@@ -87,7 +86,7 @@ public class Anson implements IJsonable {
 				if (!f.getType().isPrimitive()) {
 					Object v = f.get(this);
 					Class<? extends Object> vclz = v == null ? null : v.getClass();
-					
+
 					writeNonPrimitive(stream, vclz, v, opts);
 				}
 				else if (f.getType().isPrimitive())
@@ -100,7 +99,7 @@ public class Anson implements IJsonable {
 		stream.flush();
 		return this;
 	}
-	
+
 	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
 			throws AnsonException, IOException {
 		if (v == null) return;
@@ -110,11 +109,9 @@ public class Anson implements IJsonable {
 		Class<?> elemtype = v.getClass().getComponentType();
 		for (Object o : v) {
 			if (the1st) the1st = false;
-			else // stream.write(new byte[] {',', ' '});
-				stream.write(", ".getBytes());
+			else stream.write(", ".getBytes());
 
 			if (o == null)
-				// stream.write(new byte[] {'n', 'u', 'l', 'l'});
 				stream.write("null".getBytes());
 			else if (IJsonable.class.isAssignableFrom(elemtype))
 				((IJsonable)o).toBlock(stream, opt);
@@ -136,7 +133,6 @@ public class Anson implements IJsonable {
 
 	private static void toPrimArrayBlock(OutputStream stream, Object v) throws IOException {
 		if (v == null) {
-			// stream.write(new byte[] {'n', 'u', 'l', 'l'});
 			stream.write("null".getBytes());
 			return;
 		}
@@ -152,7 +148,6 @@ public class Anson implements IJsonable {
 			else stream.write(new byte[] {',', ' '});
 
 			if (o == null)
-				// stream.write(new byte[] {'n', 'u', 'l', 'l'});
 				stream.write("null".getBytes());
 
 			else if (o instanceof String) {
@@ -173,7 +168,7 @@ public class Anson implements IJsonable {
 		stream.write('[');
 		for (Object o : collect) {
 			if (the1st) the1st = false;
-			else // stream.write(new byte[] {',', ' '});
+			else
 				stream.write(", ".getBytes());
 
 			Class<?> elemtype = o.getClass();
@@ -185,7 +180,7 @@ public class Anson implements IJsonable {
 	public static void toMapBlock(OutputStream stream, Map<?, ?> map, JsonOpt opts)
 			throws AnsonException, IOException {
 		if (map == null) return;
-		
+
 		boolean quote = opts == null || opts.quotKey();
 
 		boolean the1st = true;
@@ -216,11 +211,11 @@ public class Anson implements IJsonable {
 		for (Object e : list) {
 			if (!is1st)
 				stream.write(new byte[] {',', ' '});
-			else 
+			else
 				is1st = false;
 
 			if (e == null) {
-				stream.write(new byte[] {'n', 'u', 'l', 'l'});
+				stream.write("null".getBytes());
 				continue;
 			}
 
@@ -252,7 +247,7 @@ public class Anson implements IJsonable {
 			if (i < flist.length - 1)
 				sbuf.append(",");
 		}
-		
+
 		sbuf.append("}");
 		return this;
 	}
@@ -271,7 +266,7 @@ public class Anson implements IJsonable {
 			Class<? extends Object> fdClz, Object v, JsonOpt... opts)
 			throws AnsonException, IOException {
 		if (v == null) {
-			stream.write(new byte[] {'n', 'u', 'l', 'l'});
+			stream.write("null".getBytes());
 			return;
 		}
 
@@ -353,7 +348,7 @@ public class Anson implements IJsonable {
 		}
 	}
 
-	private static void appendArr(StringBuffer sbuf, Object e) 
+	private static void appendArr(StringBuffer sbuf, Object e)
 			throws AnsonException, IOException {
 		if (e instanceof Anson)
 			((IJsonable)e).toJson(sbuf);
@@ -406,7 +401,7 @@ public class Anson implements IJsonable {
 			throws AnsonException {
 		return parse(CharStreams.fromString(json));
 	}
-	
+
 	public static IJsonable fromJson(InputStream is)
 			throws IOException, AnsonException {
 		return parse(CharStreams.fromStream(is));
