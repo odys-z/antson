@@ -312,7 +312,8 @@ public class Anson implements IJsonable {
 			return new byte[0];
 		String s = v.toString();
 		// What about Performance ?
-		return s.replace("\n", "\\n")
+		return s
+				// .replace("\n", "\\n")
 				// .replace("\/", "\\/")
 				.replace("\r", "\\r")
 				.replace("\b", "\\b")
