@@ -11,7 +11,7 @@
  *		  sudo python3 -m pip install antlr4-python3-runtime
  *
  * see https://github.com/antlr/antlr4/tree/master/runtime/CSharp/src#readme
- * java -jar ~/antlr4/antlr-4.9.2-complete.jar JSON.g4 -Dlanguage=CSharp
+ * java -jar ~/progs/antlr4/antlr-4.9.2-complete.jar JSON.g4 -Dlanguage=CSharp
  */
 
 // Derived from http://json.org
