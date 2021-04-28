@@ -36,17 +36,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * <p>Memo: The hard lesson learned from this is if you want parse a grammar,
 	 * you better follow the grammar structure.</p>
 	 * @author odys-z@github.com
-	 * @param <T>
 	 */
 	public class ParsingCtx {
 		/**The json prop (object key) */
 		protected String parsingProp;
 		/**The parsed native value */
 		protected Object parsedVal;
-
+		/**e.g. parent object reference */
 		private Object enclosing;
+		/**Fields' map. C# has an extra properties' map */
 		private HashMap<String, Field> fmap;
-
 		/** Annotation's main types */
 		private String valType;
 		/** Annotation's sub types */
@@ -140,31 +139,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private ParsingCtx top() { return stack.get(0); }
 
-	private String envelopName() {
-		if (stack != null)
-			for (int i = 0; i < stack.size(); i++)
-				if (stack.get(i).enclosing instanceof Anson)
-					return stack.get(i).enclosing.getClass().getName();
-		return null;
-	}
-
-	private Object toparent(Class<?> type) {
-		// no enclosing, no parent
-		if (stack.size() <= 1 || LangExt.isblank(type, "null"))
-			return null;
-
-		// trace back, guess with type for children could be in array or map
-		ParsingCtx p = stack.get(1);
-		int i = 2;
-		while (p != null) {
-			if (type.equals(p.enclosing.getClass()))
-				return p.enclosing;
-			p = stack.get(i);
-			i++;
-		}
-		return null;
-	}
-
 	/**Push parsing node (a envelope, map, list) into this' {@link #stack}.
 	 * @param enclosingClazz new parsing IJsonable object's class
 	 * @param elemType type annotation of enclosing list/array. 0: main type, 1: sub-types<br>
@@ -223,6 +197,31 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	/**Envelope Type Name */
  	protected String envetype;
+
+	private String envelopName() {
+		if (stack != null)
+			for (int i = 0; i < stack.size(); i++)
+				if (stack.get(i).enclosing instanceof Anson)
+					return stack.get(i).enclosing.getClass().getName();
+		return null;
+	}
+
+	private Object toparent(Class<?> type) {
+		// no enclosing, no parent
+		if (stack.size() <= 1 || LangExt.isblank(type, "null"))
+			return null;
+
+		// trace back, guess with type for children could be in array or map
+		ParsingCtx p = stack.get(1);
+		int i = 2;
+		while (p != null) {
+			if (type.equals(p.enclosing.getClass()))
+				return p.enclosing;
+			p = stack.get(i);
+			i++;
+		}
+		return null;
+	}
 
 	@Override
 	public void exitObj(ObjContext ctx) {

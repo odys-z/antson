@@ -50,8 +50,12 @@
     <Compile Include="src\gen\antlr\JSONLexer.cs" />
     <Compile Include="src\gen\antlr\JSONListener.cs" />
     <Compile Include="src\gen\antlr\JSONParser.cs" />
+    <Compile Include="src\io.odysz\AnsonException.cs" />
+    <Compile Include="src\io.odysz\AnsonField.cs" />
+    <Compile Include="src\io.odysz\IJsonable.cs" />
     <Compile Include="src\io.odysz\JSONAnsonListener.cs" />
     <Compile Include="src\io.odysz\JsonOpt.cs" />
+    <Compile Include="src\io.odysz\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

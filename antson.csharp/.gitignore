@@ -1,0 +1,6 @@
+/target/
+.vs/
+bin
+packages
+TestResults
+obj

@@ -8,5 +8,6 @@ namespace io.odysz.anson
 {
     public class JsonOpt
     {
+        public bool quotKey { get; internal set; }
     }
 }
