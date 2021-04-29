@@ -36,24 +36,28 @@ namespace io.odysz.anson
 			internal ParsingCtx(Hashtable fmap, Hashtable pmap, IJsonable enclosing)
 			{
 				this.fmap = fmap;
+				this.pmap = pmap;
 				this.enclosing = enclosing;
 			}
 
 			internal ParsingCtx(Hashtable fmap, Hashtable pmap, Hashtable enclosing)
 			{
 				this.fmap = fmap;
+				this.pmap = pmap;
 				this.enclosing = enclosing;
 			}
 
 			internal ParsingCtx(Hashtable fmap, Hashtable pmap, IEnumerable enclosing)
 			{
 				this.fmap = fmap;
+				this.pmap = pmap;
 				this.enclosing = enclosing;
 			}
 
 			internal bool IsInList()
 			{	// return enclosing instanceof List || enclosing.getClass().isArray();
-				return typeof(IEnumerable).IsAssignableFrom(enclosing.GetType());
+				return ! typeof(Hashtable).IsAssignableFrom(enclosing.GetType())
+                      && typeof(IEnumerable).IsAssignableFrom(enclosing.GetType());
 			}
 
 			internal bool IsInMap()
@@ -77,14 +81,39 @@ namespace io.odysz.anson
 					// e.g. lang.String[] to [Llang.String;
 					if (Regex.Match(valType, @".*\[\]$").Success)
 					{
-						// valType = "[L" + valType.replaceAll("\\[\\]$", ";");
+                        /* keep string[] in java style
+						 * valType = "[L" + valType.replaceAll("\\[\\]$", ";");
+						 * valType = valType.replaceFirst(" ^\\[L\\[", "[[");
+                         */
 						valType = "[L" + Regex.Replace(valType, @"\[\]$", ";");
-						// valType = valType.replaceFirst(" ^\\[L\\[", "[[");
-						valType = Regex.Replace(valType, @" ^\[L\[", "[[");
+						valType = Regex.Replace(valType, @"^\[L\[", "[[");
 					}
 				}
 				return this;
 			}
+
+            /// <summary>
+            /// create c# type, "$" -> "+"
+            /// </summary>
+            /// <param name="tname"></param>
+            /// <returns></returns>
+            internal static Type CSType(string tname)
+            {
+                if (!string.IsNullOrEmpty(tname))
+                {
+                    tname = Regex.Replace(tname, @"\$", "+");
+
+					if (Regex.Match(tname, @"^\[L").Success)
+                    {
+                        // keep string[] in java style
+                        tname = Regex.Replace(tname, @"^\[\[", "[L[");
+                        tname = Regex.Replace(tname, @";$", "[]");
+                        tname = Regex.Replace(tname, @"\[L", "");
+                    }
+                    return Type.GetType(tname);
+                }
+                return null;
+            }
 
 			/**Get type annotation
 			 * @return {@link AnsonField#valType()} annotation
@@ -96,19 +125,19 @@ namespace io.odysz.anson
 
 		internal static void MergeFields(Type type, Hashtable fmap, Hashtable pmap)
         {
-            FieldInfo[] flist = type.GetFields();
+            FieldInfo[] flist = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (FieldInfo f in flist)
 			{
-                if (
-                    f.IsInitOnly || f.IsLiteral || f.IsStatic)
+                if (f.IsInitOnly || f.IsLiteral || f.IsStatic)
                     continue;
+
                 // Overriden
                 if (fmap.ContainsKey(f.Name))
                     continue;
                 fmap[f.Name] = f;
             }
 
-            PropertyInfo[] plist = type.GetProperties();
+            PropertyInfo[] plist = type.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (PropertyInfo p in plist)
 			{
                 if (pmap.ContainsKey(p.Name))
@@ -204,13 +233,13 @@ namespace io.odysz.anson
                     throw new AnsonException(0, "Obj type not found. property: {0}", top.parsingProp);
                 }
 
-                Type ft = fmap[top.parsingProp].GetType();
+                FieldInfo f = (FieldInfo)top.fmap[top.parsingProp];
+                Type ft = f.FieldType;
                 if (typeof(Hashtable).IsAssignableFrom(ft)) {
                     // entering a map
                     Push(ft, null);
                     // append annotation
-                    FieldInfo f = (FieldInfo)top.fmap[top.parsingProp];
-                    AnsonField a = (AnsonField)(f?.GetCustomAttribute(typeof(AnsonField)));
+                    AnsonField a = (AnsonField)((MemberInfo)f)?.GetCustomAttribute(typeof(AnsonField));
                     string anno = a?.valType;
 
                     if (anno != null) {
@@ -306,7 +335,7 @@ namespace io.odysz.anson
 
             try
             {
-                Type clazz = Type.GetType(envetype);
+                Type clazz = ParsingCtx.CSType(envetype);
                 Push(clazz, null);
             }
             catch (AnsonException e) {
@@ -335,16 +364,18 @@ namespace io.odysz.anson
             return subTypes.Split('/');
         }
 
-		private static string[] ParseListElemType(FieldInfo f)
-		{
+        /// <summary>
+        /// Parse list/array field's element type.
+        /// </summary>
+        /// <param name="f"></param>
+        /// <returns>Type name and type parameters</returns>
+		private static string[] ParseListElemType(FieldInfo f) {
 			// for more information, see
 			// https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
 
-			Type type = f.GetType();
-			if (type.IsGenericType) {
-				Type pType = type;
-
-				string[] ptypess = pType.GetGenericArguments()[0].FullName.Split('<');
+			Type ft = f.FieldType;
+			if (ft.IsGenericType) {
+				string[] ptypess = ft.GetGenericArguments()[0].FullName.Split('<');
                 if (ptypess.Length > 1) {
                     // ptypess[1] = ptypess[1].replaceFirst(">$", "");
                     // ptypess[1] = ptypess[1].replaceFirst("^L", "");
@@ -353,7 +384,7 @@ namespace io.odysz.anson
                 }
 				// figure out array element class
                 else {
-                    Type argType = pType.GetGenericArguments()[0];
+                    Type argType = ft.GetGenericArguments()[0];
                     if (!argType.IsGenericParameter) {
                         if (argType.IsArray) {
                             ptypess = new string[] {ptypess[0], argType.GetElementType().Name};
@@ -364,20 +395,20 @@ namespace io.odysz.anson
                         if (AnsonFlags.parser)
 							Console.WriteLine(string.Format(
 								"[AnsonFlags.parser] warn Element type <{0}> for {1} is a type parameter ({2}) - ignored",
-                                pType.GetGenericArguments()[0],
+                                ft.GetGenericArguments()[0],
                                 f.Name,
-                                pType.GetGenericArguments()[0].GetType()));
+                                ft.GetGenericArguments()[0].GetType()));
                 }
                 return ptypess;
             }
-            else if (f.GetType().IsArray)
+            else if (ft.IsArray)
             {
                 // complex array may also has annotation
-                AnsonField a = (AnsonField)f?.GetCustomAttributes(typeof(AnsonField));
-                string tn = a == null ? null : a.valType;
+                AnsonField a = (AnsonField)((MemberInfo)f)?.GetCustomAttribute(typeof(AnsonField));
+                string tn = a?.valType;
                 string[] valss = ParseElemType(tn);
 
-                string eleType = f.GetType().GetElementType().Name;
+                string eleType = f.FieldType.GetElementType().FullName;
                 if (valss != null && !eleType.Equals(valss[0]))
                     Console.Error.WriteLine(string.Format(
 							"[JSONAnsonListener#parseListElemType()]: Field {0} is not annotated correctly.\n"
@@ -391,7 +422,7 @@ namespace io.odysz.anson
             else
             {
                 // not a parameterized, not an array, try annotation
-                AnsonField a = (AnsonField)f?.GetCustomAttribute(typeof(AnsonField));
+                AnsonField a = (AnsonField)((MemberInfo)f)?.GetCustomAttribute(typeof(AnsonField));
                 string tn = a?.valType;
                 return ParseElemType(tn);
             }
@@ -496,8 +527,8 @@ namespace io.odysz.anson
                 // if field available, parse field's value type as the new node's value type
                 else
                 {
-                    Type ft = top.fmap[top.parsingProp].GetType();
                     FieldInfo f = (FieldInfo)top.fmap[top.parsingProp];
+                    Type ft = f.FieldType;
                     // AnsT3 { ArrayList<Anson[]> ms; }
                     // ctx: [[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]]
                     // [0]: io.odysz.anson.Anson[],
@@ -529,7 +560,7 @@ namespace io.odysz.anson
 			if (!string.IsNullOrEmpty(et)) // TODO debug: where did this type comes from?
 				try
 				{
-					Type arrClzz = Type.GetType(et);
+					Type arrClzz = ParsingCtx.CSType(et);
 					if (arrClzz.IsArray)
 						top.parsedVal = ToPrimitiveArray(arr, arrClzz);
 				}
@@ -635,7 +666,7 @@ namespace io.odysz.anson
                         // e.g. convert elements of List<String> to String[]
                         // FIXME issue: if the first element is 0 length, it will failed to convert the array
                         Type parsedClzz = top.parsedVal.GetType();
-                        if (typeof(IList).IsAssignableFrom(parsedClzz)) {
+                        if (typeof(List<object>).IsAssignableFrom(parsedClzz)) {
                             if (string.IsNullOrEmpty(top.ElemType())) // (LangExt.isblank(top.elemType(), "\\?.*"))
                             {
                                 // change list to array
@@ -680,7 +711,7 @@ namespace io.odysz.anson
                                 {
                                     List <object> parsedLst = (List <object>)top.parsedVal;
                                     string eleType = top.ElemType();
-                                    Type eleClz = Type.GetType(eleType);
+                                    Type eleClz = ParsingCtx.CSType(eleType);
                                     if (eleClz.IsAssignableFrom(parsedClzz))
                                     {
                                         // annotated element can be this branch
@@ -755,11 +786,15 @@ namespace io.odysz.anson
 
                 object enclosing = Top().enclosing;
                 FieldInfo f = (FieldInfo)top.fmap[fn];
-                if (f == null)
-                    throw new AnsonException(0, "Field ignored: field: {0}, value: {1}", fn, ctx.GetText());
+                PropertyInfo p = (PropertyInfo)(top.pmap?[fn]);
+                if (f == null && p == null)
+                    throw new AnsonException(0, "Field/property ignored: field: {0}, value: {1}", fn, ctx.GetText());
 
                 // f.setAccessible(true);
-                AnsonField af = (AnsonField)f.GetCustomAttribute(typeof(AnsonField));
+                AnsonField af = (AnsonField) (f == null ?
+                                                ((MemberInfo)p)?.GetCustomAttribute(typeof(AnsonField))
+                                              :((MemberInfo)f).GetCustomAttribute(typeof(AnsonField)));
+                Type fptype = f == null ? p.PropertyType : f.FieldType;
                 if (af != null && af.ignoreFrom)
                 {
                     if (AnsonFlags.parser)
@@ -767,42 +802,47 @@ namespace io.odysz.anson
                     return;
                 }
                 else if (af != null && af.refer == AnsonField.enclosing) {
-                    object parent = Toparent(f.GetType());
+                    object parent = Toparent(fptype);
                     if (parent == null)
                         Console.Error.WriteLine(string.Format("parent {0} is ignored: reference is null", fn));
 
-                    f.SetValue(enclosing, parent);
+                    SetFPValue(enclosing, f, p, parent);
                     return;
                 }
 
-                Type ft = f.GetType();
+                // Type ft = f.GetType();
 
-                if (ft == typeof(String) || ft == typeof(string)) {
+                if (fptype == typeof(String) || fptype == typeof(string)) {
                     string v = GetStringVal(ctx);
-                    f.SetValue(enclosing, v);
+                    // f.SetValue(enclosing, v);
+                    SetFPValue(enclosing, f, p, v);
                 }
-                else if (ft.IsPrimitive)
+                else if (fptype.IsPrimitive)
                 {
                     // construct primitive value
                     string v = ctx.GetChild(2).GetText();
-                    SetPrimitive((IJsonable)enclosing, f, v);
+                    SetPrimitive((IJsonable)enclosing, f, p, v);
                 }
-                else if (ft.IsEnum)
+                else if (fptype.IsEnum)
                 {
                     string v = GetStringVal(ctx);
                     if (!string.IsNullOrEmpty(v))
-                        f.SetValue(enclosing, Enum.Parse(ft, v));
+                        // f.SetValue(enclosing, Enum.Parse(fptype, v));
+                        SetFPValue(enclosing, f, p, v);
                 }
-                else if (ft.IsArray)
-                    f.SetValue(enclosing, ToPrimitiveArray((List <object>)top.parsedVal, ft));
-                else if (typeof(IList).IsAssignableFrom(ft)
+                else if (fptype.IsArray)
+                    // f.SetValue(enclosing, ToPrimitiveArray((List <object>)top.parsedVal, fptype));
+                    SetFPValue(enclosing, f, p, ToPrimitiveArray((List <object>)top.parsedVal, fptype));
+                else if (typeof(IList).IsAssignableFrom(fptype)
                         // || AbstractCollection.class.isAssignableFrom(ft)
-                        || typeof(Hashtable).IsAssignableFrom(ft)) {
-                    f.SetValue(enclosing, top.parsedVal);
+                        || typeof(Hashtable).IsAssignableFrom(fptype)) {
+                    // f.SetValue(enclosing, top.parsedVal);
+                    SetFPValue(enclosing, f, p, top.parsedVal);
                 }
-                else if (typeof(IJsonable).IsAssignableFrom(ft)) {
-                    if (typeof(Anson).IsAssignableFrom(ft))
-                        f.SetValue(enclosing, top.parsedVal);
+                else if (typeof(IJsonable).IsAssignableFrom(fptype)) {
+                    if (typeof(Anson).IsAssignableFrom(fptype))
+                        // f.SetValue(enclosing, top.parsedVal);
+                        SetFPValue(enclosing, f, p, top.parsedVal);
                     else
                     {
                         // Subclass of IJsonable must registered
@@ -812,14 +852,15 @@ namespace io.odysz.anson
                         throw new AnsonException("Shouldn't reach here in C#.");
                     }
                 }
-                else if (typeof(object).IsAssignableFrom(ft)) {
+                else if (typeof(object).IsAssignableFrom(fptype)) {
                     Console.Out.WriteLine(string.Format(
                             "\nDeserializing unsupported type, field: {0}, type: {1}, enclosing type: {1}",
-                            fn, ft.Name, enclosing?.GetType().Name));
+                            fn, fptype.Name, enclosing?.GetType().Name));
                     string v = ctx.GetChild(2).GetText();
 
                     if (!string.IsNullOrEmpty(v)) // !LangExt.isblank(v, "null")
-                        f.SetValue(enclosing, v);
+                        // f.SetValue(enclosing, v);
+                        SetFPValue(enclosing, f, p, v);
                 }
 			    else throw new AnsonException(0, "sholdn't happen");
 
@@ -851,28 +892,58 @@ namespace io.odysz.anson
         //    }
         //}
 
-        private static void SetPrimitive(IJsonable obj, FieldInfo f, string v)
+        internal static void SetPrimitive(IJsonable obj, FieldInfo f, PropertyInfo p, string v)
         {
             /* c# type reference: 
              * https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/floating-point-numeric-types
              * https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/integral-numeric-types
              */
-            if (f.GetType() == typeof(int) || f.GetType() == typeof(Int32))
-                f.SetValue(obj, int.Parse(v));
-            else if (f.GetType() == typeof(float) || f.GetType() == typeof(Single))
-                f.SetValue(obj, float.Parse(v));
-            else if (f.GetType() == typeof(double) || f.GetType() == typeof(Double))
-                f.SetValue(obj, double.Parse(v));
-            else if (f.GetType() == typeof(long) || f.GetType() == typeof(Int64))
-                f.SetValue(obj, long.Parse(v));
-            else if (f.GetType() == typeof(short) || f.GetType() == typeof(Int16))
-                f.SetValue(obj, short.Parse(v));
-            else if (f.GetType() == typeof(byte) || f.GetType() == typeof(Byte))
-                f.SetValue(obj, byte.Parse(v));
+            Type ft = f == null ? p?.PropertyType : f.FieldType;
+            if (ft == typeof(int) || ft == typeof(Int32))
+                // f.SetValue(obj, int.Parse(v));
+                SetFPValue(obj, f, p, int.Parse(v));
+            else if (ft == typeof(float) || ft == typeof(Single))
+                // f.SetValue(obj, float.Parse(v));
+                SetFPValue(obj, f, p, float.Parse(v));
+            else if (ft == typeof(double) || ft == typeof(Double))
+                // f.SetValue(obj, double.Parse(v));
+                SetFPValue(obj, f, p, double.Parse(v));
+            else if (ft == typeof(long) || ft == typeof(Int64))
+                // f.SetValue(obj, long.Parse(v));
+                SetFPValue(obj, f, p, long.Parse(v));
+            else if (ft == typeof(short) || ft == typeof(Int16))
+                // f.SetValue(obj, short.Parse(v));
+                SetFPValue(obj, f, p, short.Parse(v));
+            else if (ft == typeof(byte) || ft == typeof(Byte))
+                // f.SetValue(obj, byte.Parse(v));
+                SetFPValue(obj, f, p, byte.Parse(v));
             else
                 // what's else?
-                throw new AnsonException(0, "Unsupported field type: {0} (field {1})",
+                if (f != null)
+                    throw new AnsonException(0, "Unsupported field type: {0} (field {1})",
                         f.GetType().Name, f.Name);
+                else if (p != null)
+                    throw new AnsonException(0, "Unsupported field type: {0} (field {1})",
+                        p.GetType().Name, p?.Name);
+        }
+
+        /// <summary>
+        /// Set value to field first. If it's null, try to property.
+        /// </summary>
+        /// <param name="enclosing"></param>
+        /// <param name="f"></param>
+        /// <param name="p"></param>
+        /// <param name="v"></param>
+        internal static void SetFPValue(object enclosing, FieldInfo f, PropertyInfo p, object v)
+        {
+            if (f != null)
+                f.SetValue(enclosing, v);
+            else if (p != null)
+                p.SetValue(enclosing, v);
+            else
+                Console.Error.WriteLine(string.Format(
+                    "Failed to set field/property value. obj: {0}, parent: {1}",
+                    enclosing.ToString(), v.ToString()));
         }
     }
 }

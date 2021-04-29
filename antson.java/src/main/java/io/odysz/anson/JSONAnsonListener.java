@@ -295,9 +295,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		// else keep last one (root) as return value
 	}
 
-	/**Semantics of entering a type pair is found and parsingVal an IJsonable object.<br>
+	/**Semantics of entering a type pair, when type is found and enclosing is an IJsonable object.<br>
 	 * This is always happening on entering an object.
-	 * The logic opposite is exit object.
+	 * The logic opposite is exit object. (exit pair?)
 	 * @see gen.antlr.json.JSONBaseListener#enterType_pair(gen.antlr.json.JSONParser.Type_pairContext)
 	 */
 	@Override

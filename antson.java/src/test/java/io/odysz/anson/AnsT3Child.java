@@ -1,8 +1,5 @@
 package io.odysz.anson;
 
-import io.odysz.anson.Anson;
-import io.odysz.anson.AnsonField;
-
 public class AnsT3Child extends Anson {
 
 	@AnsonField(ignoreTo=true)

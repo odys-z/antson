@@ -4,7 +4,6 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using static JSONParser;
 
 namespace io.odysz.anson
@@ -33,16 +32,17 @@ namespace io.odysz.anson
 
 			foreach (FieldInfo f in fmap.Values)
 			{
-                AnsonField af = (AnsonField)Attribute.GetCustomAttribute(f.FieldType, typeof(AnsonField));
+                if (f.Name.EndsWith("BackingField")) continue; // properties backing field
+                AnsonField af = (AnsonField)Attribute.GetCustomAttribute(f, typeof(AnsonField));
                 object v = f.GetValue(this);
-                WritePair(stream, af, f.GetType(), f.Name, v, opt);
+                WritePair(stream, af, f.GetType(), f.FieldType, f.Name, v, opt);
             }
 
 			foreach (PropertyInfo p in pmap.Values)
 			{
-                AnsonField af = (AnsonField)Attribute.GetCustomAttribute(p.PropertyType, typeof(AnsonField));
+                AnsonField af = (AnsonField)Attribute.GetCustomAttribute(p, typeof(AnsonField));
                 object v = p.GetValue(this);
-                WritePair(stream, af, p.GetType(), p.Name, v, opt);
+                WritePair(stream, af, p.GetType(), p.PropertyType, p.Name, v, opt);
             }
 
             Utils.WriteByt(stream, '}');
@@ -50,7 +50,7 @@ namespace io.odysz.anson
             return this;
         }
 
-        internal static void WritePair(Stream s, AnsonField af, Type ftype, string n, object v, JsonOpt opt = null)
+        internal static void WritePair(Stream s, AnsonField af, Type ftype, Type vtype, string n, object v, JsonOpt opt = null)
         {
             // is this ignored?
             if (af != null && af.ignoreTo)
@@ -65,7 +65,7 @@ namespace io.odysz.anson
             // value
             if (af != null && af.refer == AnsonField.enclosing)
             {
-                Utils.WriteStr(s, ftype.FullName, true);
+                Utils.WriteStr(s, vtype.FullName, true);
                 return;
             }
 
@@ -73,7 +73,7 @@ namespace io.odysz.anson
             {
                 if (!ftype.IsPrimitive)
                 {
-                    Type vclz = v == null ? null : v.GetType();
+                    Type vclz = v?.GetType();
                     WriteNonPrimitive(s, vclz, v, opt);
                 }
                 else if (ftype.IsPrimitive)
@@ -110,7 +110,7 @@ namespace io.odysz.anson
                 Utils.WriteStr(stream, Escape(v), true);
             else if (fdClz.IsEnum)
                 Utils.WriteStr(stream, ((Enum)v).ToString(), true);
-			else if (typeof(IEnumerable).IsAssignableFrom(v.GetType()))
+			else if (typeof(IEnumerable).IsAssignableFrom(vclz))
 				ToListBlock(stream, (IEnumerable) v, opts);
 			else if (typeof(Hashtable).IsAssignableFrom(vclz))
 				ToMapBlock(stream, (Hashtable) v, opts);

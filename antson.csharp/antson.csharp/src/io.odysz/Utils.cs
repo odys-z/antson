@@ -30,8 +30,9 @@ namespace io.odysz.anson
             return stream;
         }
 
-        public static string ToString(MemoryStream stream)
+        public static string ToString(MemoryStream stream, bool begin = true)
         {
+            if (begin) stream.Seek(0, SeekOrigin.Begin);
             StreamReader r = new StreamReader(stream);
             return r.ReadToEnd();
         }
