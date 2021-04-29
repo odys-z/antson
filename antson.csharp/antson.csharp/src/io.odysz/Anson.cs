@@ -11,10 +11,10 @@ namespace io.odysz.anson
 {
     public class Anson : IJsonable
     {
-        public string version { get; protected set; }
+        public string ver { get; protected set; }
 
         public Anson() {
-            version = "0.9.1";
+            ver = "0.9.1";
         }
 
         public Anson ToBlock(Stream stream, JsonOpt opt = null)
@@ -238,4 +238,9 @@ namespace io.odysz.anson
             return lstner.ParsedEnvelope();
         }
     }
+
+    //public class AnsT1 : Anson
+    //{
+    //    public AnsT1() { }
+    //}
 }

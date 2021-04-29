@@ -454,9 +454,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		else if (ctx.STRING() != null)
 			return getStringVal(ctx.STRING(), txt);
 		else if (txt != null && txt.toLowerCase().equals("true"))
-			return new Boolean(true);
+			return Boolean.valueOf(true);
 		else if (txt != null && txt.toLowerCase().equals("flase"))
-			return new Boolean(false);
+			return Boolean.valueOf(false);
 		return null;
 	}
 
