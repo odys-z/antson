@@ -40,11 +40,11 @@ public class AnsonResultset extends Anson {
 	 * case 1<pre>
 	String colName = rsMeta.getColumnLabel(i).toUpperCase();
 	colnames.put(colName, new Object[] {i, rsMeta.getColumnLabel(i)});
-		</pre>
-		case 2<pre>
-for (String coln : colnames.keySet()) 
-	colnames.put(coln.toUpperCase(), new Object[] {colnames.get(coln), coln});
-		</pre>
+	</pre>
+	* case 2<pre>
+	for (String coln : colnames.keySet()) 
+		colnames.put(coln.toUpperCase(), new Object[] {colnames.get(coln), coln});
+	</pre>
 	 * */
 	@AnsonField(valType="[Ljava.lang.Object;")
 	private HashMap<String, Object[]> colnames;

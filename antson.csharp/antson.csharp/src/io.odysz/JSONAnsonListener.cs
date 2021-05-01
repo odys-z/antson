@@ -109,6 +109,8 @@ namespace io.odysz.anson
                         tname = Regex.Replace(tname, @"^\[\[", "[L[");
                         tname = Regex.Replace(tname, @";$", "[]");
                         tname = Regex.Replace(tname, @"\[L", "");
+
+                        tname = Regex.Replace(tname, @"java\.lang", "System");
                     }
                     return Type.GetType(tname);
                 }
@@ -175,12 +177,14 @@ namespace io.odysz.anson
             else {
                 Hashtable fmap = new Hashtable();
                 Hashtable pmap = new Hashtable();
-                if (typeof(IEnumerable).IsAssignableFrom(enclosingClazz)) {
+                if ( ! typeof(Hashtable).IsAssignableFrom(enclosingClazz)
+                    && typeof(IEnumerable).IsAssignableFrom(enclosingClazz))
+                {   // branch: List, Array
                     IList enclosing = new List<object>();
 					stack.Insert(0, new ParsingCtx(fmap, pmap, enclosing).ElemType(elemType));
                 }
                 else
-                {
+                {   // branch: Map, Anston
                     ConstructorInfo ctor = enclosingClazz.GetConstructor(Type.EmptyTypes);
                     if (ctor != null && typeof(IJsonable).IsAssignableFrom(enclosingClazz)) {
 						MergeFields(enclosingClazz, fmap, pmap); // map merging is only needed by typed object
@@ -557,7 +561,7 @@ namespace io.odysz.anson
 			// figure the type if possible - convert to array
 			string et = top.ElemType();
 			// ?? if (!Isblank(et, "\\?.*")) // TODO debug: where did this type comes from?
-			if (!string.IsNullOrEmpty(et)) // TODO debug: where did this type comes from?
+			if (!string.IsNullOrEmpty(et)) 
 				try
 				{
 					Type arrClzz = ParsingCtx.CSType(et);
@@ -812,7 +816,8 @@ namespace io.odysz.anson
 
                 // Type ft = f.GetType();
 
-                if (fptype == typeof(String) || fptype == typeof(string)) {
+                if (fptype == typeof(String) || fptype == typeof(string))
+                {
                     string v = GetStringVal(ctx);
                     // f.SetValue(enclosing, v);
                     SetFPValue(enclosing, f, p, v);
@@ -832,17 +837,23 @@ namespace io.odysz.anson
                 }
                 else if (fptype.IsArray)
                     // f.SetValue(enclosing, ToPrimitiveArray((List <object>)top.parsedVal, fptype));
-                    SetFPValue(enclosing, f, p, ToPrimitiveArray((List <object>)top.parsedVal, fptype));
-                else if (typeof(IList).IsAssignableFrom(fptype)
-                        // || AbstractCollection.class.isAssignableFrom(ft)
-                        || typeof(Hashtable).IsAssignableFrom(fptype)) {
-                    // f.SetValue(enclosing, top.parsedVal);
-                    SetFPValue(enclosing, f, p, top.parsedVal);
+                    SetFPValue(enclosing, f, p, ToPrimitiveArray((List<object>)top.parsedVal, fptype));
+                else if (typeof(Hashtable).IsAssignableFrom(fptype))
+                {
+                    SetFPValue(enclosing, f, p, (Hashtable)top.parsedVal);
                 }
-                else if (typeof(IJsonable).IsAssignableFrom(fptype)) {
+                else if (typeof(IList).IsAssignableFrom(fptype))
+                        // || AbstractCollection.class.isAssignableFrom(ft)
+                {
+                    // f.SetValue(enclosing, top.parsedVal);
+                    // TODO: object casting to List[List[object]] casting failed 
+                    SetFPValue(enclosing, f, p, (IList)top.parsedVal);
+                }
+                else if (typeof(IJsonable).IsAssignableFrom(fptype))
+                {
                     if (typeof(Anson).IsAssignableFrom(fptype))
                         // f.SetValue(enclosing, top.parsedVal);
-                        SetFPValue(enclosing, f, p, top.parsedVal);
+                        SetFPValue(enclosing, f, p, (Anson)top.parsedVal);
                     else
                     {
                         // Subclass of IJsonable must registered
@@ -852,7 +863,8 @@ namespace io.odysz.anson
                         throw new AnsonException("Shouldn't reach here in C#.");
                     }
                 }
-                else if (typeof(object).IsAssignableFrom(fptype)) {
+                else if (typeof(object).IsAssignableFrom(fptype))
+                {
                     Console.Out.WriteLine(string.Format(
                             "\nDeserializing unsupported type, field: {0}, type: {1}, enclosing type: {1}",
                             fn, fptype.Name, enclosing?.GetType().Name));
@@ -862,7 +874,7 @@ namespace io.odysz.anson
                         // f.SetValue(enclosing, v);
                         SetFPValue(enclosing, f, p, v);
                 }
-			    else throw new AnsonException(0, "sholdn't happen");
+                else throw new AnsonException(0, "sholdn't happen");
 
                 // not necessary, top is dropped
                 top.parsedVal = null;

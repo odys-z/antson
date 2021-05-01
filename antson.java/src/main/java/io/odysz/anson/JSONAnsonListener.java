@@ -741,6 +741,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (ft.isArray())
 				f.set(enclosing, toPrimitiveArray((List<?>)top.parsedVal, ft));
+			// Design notes: this is broken into 2 branches if c#.
 			else if (List.class.isAssignableFrom(ft)
 					|| AbstractCollection.class.isAssignableFrom(ft)
 					|| Map.class.isAssignableFrom(ft)) {

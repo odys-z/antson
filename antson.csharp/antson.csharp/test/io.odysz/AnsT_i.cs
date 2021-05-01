@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace io.odysz.anson
@@ -112,6 +113,29 @@ namespace io.odysz.anson
             gendre = "male";
             // expand parent
             parent.Expand(this);
+        }
+    }
+
+    public class AnsTMap : Anson
+    {
+        public Hashtable map;
+
+        [AnsonField(valType="[Ljava.lang.Object;")]
+        public Hashtable mapArr;
+
+        public AnsTMap()
+        {
+            map = new Hashtable();
+        }
+    }
+
+    public class AnsTRs : Anson
+    {
+        public AnsonResultset rs;
+
+        public AnsTRs()
+        {
+            rs = new AnsonResultset(3, 4);
         }
     }
 

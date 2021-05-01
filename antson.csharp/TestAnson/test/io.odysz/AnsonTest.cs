@@ -19,7 +19,8 @@ namespace io.odysz.anson
         }
 
         [TestMethod]
-		public void TestFromJson() {
+        public void TestFromJson()
+        {
             Anson ans = (Anson)Anson.FromJson("{type:io.odysz.anson.Anson, ver: \"v0.1\"}");
             Assert.AreEqual("v0.1", ans.ver);
 
@@ -28,11 +29,11 @@ namespace io.odysz.anson
                     + "m: {type:io.odysz.anson.AnsT1$AnsM1, \"name\": \"x\"}}");
             Assert.AreEqual("x", anson.m.name);
 
-            anson = (AnsT1) Anson.FromJson("{type: io.odysz.anson.AnsT1, ver: \"v0.1\"}");
+            anson = (AnsT1)Anson.FromJson("{type: io.odysz.anson.AnsT1, ver: \"v0.1\"}");
             Assert.AreEqual("v0.1", anson.ver);
             Assert.AreEqual(null, anson.m);
 
-            anson = (AnsT1) Anson.FromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\n1\", m: null}");
+            anson = (AnsT1)Anson.FromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\n1\", m: null}");
             Assert.AreEqual("v0\\n.\\n1", anson.ver);
             Assert.AreEqual(null, anson.m);
 
@@ -40,7 +41,7 @@ namespace io.odysz.anson
             Assert.AreEqual("e1", anson2.m[0]);
             Assert.AreEqual("e2", anson2.m[1]);
 
-            anson2 = (AnsT2) Anson.FromJson("{type:io.odysz.anson.AnsT2, m: ["
+            anson2 = (AnsT2)Anson.FromJson("{type:io.odysz.anson.AnsT2, m: ["
                     + "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)\", "
                     + "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)\"]}");
             Assert.AreEqual("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[0]);
@@ -90,13 +91,49 @@ namespace io.odysz.anson
 
             // should resolve parent ref with a type guess
             AnsT3 p = (AnsT3)Anson.FromJson(s);
-            Assert.AreEqual(((AnsT3son) p.m[1]).gendre, "male");
-            Assert.AreEqual(null, ((AnsT3Child) p.m[0]).parent);
-            Assert.AreEqual(p, ((AnsT3son) p.m[1]).parent);
+            Assert.AreEqual(((AnsT3son)p.m[1]).gendre, "male");
+            Assert.AreEqual(null, ((AnsT3Child)p.m[0]).parent);
+            Assert.AreEqual(p, ((AnsT3son)p.m[1]).parent);
 
             AnsT3 p0 = (AnsT3)Anson.FromJson(expect);
-            Assert.AreEqual(((AnsT3son) p0.m[1]).gendre, ((AnsT3son)p.m[1]).gendre);
+            Assert.AreEqual(((AnsT3son)p0.m[1]).gendre, ((AnsT3son)p.m[1]).gendre);
             Assert.AreEqual(p0.ver, p.ver);
         }
-    }
+
+        [TestMethod]
+        public void TestFromJson_map()
+        {
+            AnsTMap m = (AnsTMap)Anson.FromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
+            Assert.AreEqual("B", m.map["A"]);
+
+            m = (AnsTMap)Anson.FromJson("{type: io.odysz.anson.AnsTMap, map: {\"A\": \"B\"}, mapArr: {a: [1, \"s\"]}}");
+            Assert.AreEqual("B", m.map["A"]);
+            Assert.AreEqual(2, ((object[])m.mapArr["a"]).Length);
+            Assert.AreEqual(1, ((object[])m.mapArr["a"])[0]);
+            Assert.AreEqual("s", ((object[])m.mapArr["a"])[1]);
+        }
+
+        [TestMethod]
+        public void testFromJson_rs() {
+            AnsTRs rs = (AnsTRs)Anson.FromJson("{type: io.odysz.anson.AnsTRs, rs: "
+                    + "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+                    + " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
+                    + " rowIdx: 0, results: [[\"0 1\", \"0 2\", \"0 3\", \"0 4\"], [\"1 1\", \"1 2\", \"1 3\", \"1 4\"], [\"2 1\", \"2 2\", \"2 3\", \"2 4\"]]"
+                    + "}}");
+
+            int a = rs.rs.GetRowCount();
+            Assert.AreEqual(3, rs.rs.GetRowCount());
+            Assert.AreEqual("0 1", rs.rs.rs.Rows[0]["1"]);
+
+            rs = (AnsTRs) Anson.FromJson("{type: io.odysz.anson.AnsTRs, rs: "
+                    + "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+                    + " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
+                    + " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
+                    + "}}");
+
+            Assert.AreEqual(3, rs.rs.GetRowCount());
+            Assert.AreEqual("0, 1", rs.rs.GetString(0, "1"));
+        }
+
+}
 }
