@@ -54,11 +54,4 @@ public class AnsonHeader extends Anson {
 					Arrays.stream(usrAct).collect(Collectors.joining(", ", "[", "]")));
 	}
 
-//	public static String[] usrAct(String funcId, String cmd, String cate, String remarks) {
-//	}
-	
-//	public static AnsonMsg<? extends AnsonBody> userReq(String t, IPort p, String[] act, DatasetReq req) {
-//		return new String[] {funcId, cate, cmd, remarks};
-//	}
-	
 }

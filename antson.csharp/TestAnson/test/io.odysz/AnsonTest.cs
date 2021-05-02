@@ -123,7 +123,7 @@ namespace io.odysz.anson
 
             int a = rs.rs.GetRowCount();
             Assert.AreEqual(3, rs.rs.GetRowCount());
-            Assert.AreEqual("0 1", rs.rs.rs.Rows[0]["1"]);
+            Assert.AreEqual("0 1", rs.rs.results[0][0]);
 
             rs = (AnsTRs) Anson.FromJson("{type: io.odysz.anson.AnsTRs, rs: "
                     + "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
@@ -132,7 +132,8 @@ namespace io.odysz.anson
                     + "}}");
 
             Assert.AreEqual(3, rs.rs.GetRowCount());
-            Assert.AreEqual("0, 1", rs.rs.GetString(0, "1"));
+            Assert.AreEqual("0, 2", rs.rs.GetString(0, "1"));
+            Assert.AreEqual("0, 3", rs.rs.GetString(0, "2"));
         }
 
 }

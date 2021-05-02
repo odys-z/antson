@@ -2,6 +2,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using static JSONParser;
@@ -21,9 +23,9 @@ namespace io.odysz.anson
 			/**The json prop (object key) */
 			internal string parsingProp;
 			/**The parsed native value */
-			internal object parsedVal;
+			internal dynamic parsedVal;
 			/**Parent AST node */
-			internal object enclosing;
+			internal dynamic enclosing;
 			/**Fields' map<string, FieldInfo>. C# has an extra properties' map */
 			internal Hashtable fmap;
 			/**Properties' map<string, PropertyInfo>. Java doesn't has this map */
@@ -92,35 +94,10 @@ namespace io.odysz.anson
 				return this;
 			}
 
-            /// <summary>
-            /// create c# type, "$" -> "+"
-            /// </summary>
-            /// <param name="tname"></param>
-            /// <returns></returns>
-            internal static Type CSType(string tname)
-            {
-                if (!string.IsNullOrEmpty(tname))
-                {
-                    tname = Regex.Replace(tname, @"\$", "+");
-
-					if (Regex.Match(tname, @"^\[L").Success)
-                    {
-                        // keep string[] in java style
-                        tname = Regex.Replace(tname, @"^\[\[", "[L[");
-                        tname = Regex.Replace(tname, @";$", "[]");
-                        tname = Regex.Replace(tname, @"\[L", "");
-
-                        tname = Regex.Replace(tname, @"java\.lang", "System");
-                    }
-                    return Type.GetType(tname);
-                }
-                return null;
-            }
-
-			/**Get type annotation
+            /**Get type annotation
 			 * @return {@link AnsonField#valType()} annotation
 			 */
-			internal string ElemType() { return valType; }
+            internal string ElemType() { return valType; }
 
 			internal string SubTypes() { return subTypes; }
 		}
@@ -190,12 +167,12 @@ namespace io.odysz.anson
 						MergeFields(enclosingClazz, fmap, pmap); // map merging is only needed by typed object
 
                         IJsonable enclosing = (IJsonable)Activator.CreateInstance(enclosingClazz);
-                        stack.Insert(0, new ParsingCtx(fmap, pmap, enclosing));
+                        stack.Insert(0, new ParsingCtx(fmap, pmap, enclosing).ElemType(elemType));
                     }
                     else
                     {
                         Hashtable enclosing = new Hashtable();
-                        ParsingCtx top = new ParsingCtx(fmap, pmap, enclosing);
+                        ParsingCtx top = new ParsingCtx(fmap, pmap, enclosing).ElemType(elemType);
                         stack.Insert(0, top);
                     }
                 }
@@ -228,7 +205,7 @@ namespace io.odysz.anson
                     // In a list, found object, if not type specified with annotation, must failed.
                     // But this is confusing to user. Set some report here.
                     if (top.IsInList() || top.IsInMap())
-                        Console.Error.WriteLine(string.Format(
+                        Debug.WriteLine(string.Format(
                             "Type of elements in list or map is complicate, but no annotation for type info can be found.\n"
                             + "field type: {0}\njson: {1}\n"
                             + "E.g. Java field example: @AnsonField(valType=\"io.your.type\")\n"
@@ -256,9 +233,9 @@ namespace io.odysz.anson
                     // push(fmap.get(top.parsingProp).getType());
                     Push(ft, null);
             } catch (AnsonException e) {
-                Console.WriteLine(e.StackTrace);
+                Debug.WriteLine(e.StackTrace);
             } catch (Exception e) {
-                Console.WriteLine(e.StackTrace);
+                Debug.WriteLine(e.StackTrace);
             }
         }
 
@@ -339,17 +316,17 @@ namespace io.odysz.anson
 
             try
             {
-                Type clazz = ParsingCtx.CSType(envetype);
+                Type clazz = CSType(envetype);
                 Push(clazz, null);
             }
             catch (AnsonException e) {
-                Console.Error.WriteLine(e.StackTrace);
+                Debug.WriteLine(e.StackTrace);
             }
             catch (TypeLoadException e) {
-                Console.Error.WriteLine(e.StackTrace);
+                Debug.WriteLine(e.StackTrace);
             }
             catch (Exception e) {
-                Console.Error.WriteLine(e.StackTrace);
+                Debug.WriteLine(e.StackTrace);
             }
         }
 
@@ -378,27 +355,39 @@ namespace io.odysz.anson
 			// https://stackoverflow.com/questions/1868333/how-can-i-determine-the-type-of-a-generic-field-in-java
 
 			Type ft = f.FieldType;
-			if (ft.IsGenericType) {
-				string[] ptypess = ft.GetGenericArguments()[0].FullName.Split('<');
-                if (ptypess.Length > 1) {
+            AnsonField a = (AnsonField)((MemberInfo)f)?.GetCustomAttribute(typeof(AnsonField));
+            string tn = a?.valType;
+            if (tn != null)
+            {
+                // try annotation first - override default types
+                return ParseElemType(tn);
+            }
+            else if (ft.IsGenericType)
+            {
+                string[] ptypess = ft.GetGenericArguments()[0].FullName.Split('<');
+                if (ptypess.Length > 1)
+                {
                     // ptypess[1] = ptypess[1].replaceFirst(">$", "");
                     // ptypess[1] = ptypess[1].replaceFirst("^L", "");
                     ptypess[1] = Regex.Replace(ptypess[1], ">$", "");
                     ptypess[1] = Regex.Replace(ptypess[1], "^L", "");
                 }
-				// figure out array element class
-                else {
+                // figure out array element class
+                else
+                {
                     Type argType = ft.GetGenericArguments()[0];
-                    if (!argType.IsGenericParameter) {
-                        if (argType.IsArray) {
-                            ptypess = new string[] {ptypess[0], argType.GetElementType().Name};
+                    if (!argType.IsGenericParameter)
+                    {
+                        if (argType.IsArray)
+                        {
+                            ptypess = new string[] { ptypess[0], argType.GetElementType().Name };
                         }
                     }
                     // else nothing can do here for a type parameter, e.g. "T"
                     else
                         if (AnsonFlags.parser)
-							Console.WriteLine(string.Format(
-								"[AnsonFlags.parser] warn Element type <{0}> for {1} is a type parameter ({2}) - ignored",
+                        Debug.WriteLine(string.Format(
+                                "[AnsonFlags.parser] warn Element type <{0}> for {1} is a type parameter ({2}) - ignored",
                                 ft.GetGenericArguments()[0],
                                 f.Name,
                                 ft.GetGenericArguments()[0].GetType()));
@@ -408,14 +397,12 @@ namespace io.odysz.anson
             else if (ft.IsArray)
             {
                 // complex array may also has annotation
-                AnsonField a = (AnsonField)((MemberInfo)f)?.GetCustomAttribute(typeof(AnsonField));
-                string tn = a?.valType;
                 string[] valss = ParseElemType(tn);
 
                 string eleType = f.FieldType.GetElementType().FullName;
                 if (valss != null && !eleType.Equals(valss[0]))
-                    Console.Error.WriteLine(string.Format(
-							"[JSONAnsonListener#parseListElemType()]: Field {0} is not annotated correctly.\n"
+                    Debug.WriteLine(string.Format(
+                            "[JSONAnsonListener#parseListElemType()]: Field {0} is not annotated correctly.\n"
                             + "field parameter type: {1}, annotated element type: {2}, annotated sub-type: {3}",
                             f.Name, eleType, valss[0], valss[1]));
 
@@ -423,13 +410,7 @@ namespace io.odysz.anson
                     return new string[] { eleType, valss[1] };
                 else return new string[] { eleType };
             }
-            else
-            {
-                // not a parameterized, not an array, try annotation
-                AnsonField a = (AnsonField)((MemberInfo)f)?.GetCustomAttribute(typeof(AnsonField));
-                string tn = a?.valType;
-                return ParseElemType(tn);
-            }
+            else return null;
         }
 
         /**Parse property name, tolerate enclosing quotes presenting or not.
@@ -541,9 +522,9 @@ namespace io.odysz.anson
                     Push(ft, tn);
                 }
             } catch (AnsonException e) {
-				Console.Error.WriteLine(e.StackTrace);
+                Debug.WriteLine(e.StackTrace);
             } catch (Exception e) {
-				Console.Error.WriteLine(e.StackTrace);
+                Debug.WriteLine(e.StackTrace);
             }
         }
 
@@ -553,7 +534,25 @@ namespace io.odysz.anson
                 throw new NullReferenceException("existing not from an eclosing list. txt:\n" + ctx.GetText());
 
             ParsingCtx top = Pop();
-            List<object> arr = (List<object>) top.enclosing;
+            // IList arr = (IList) top.enclosing;
+
+            dynamic arr;
+            if (top.valType != null)
+            {
+                // arr = Convert.ChangeType(top.enclosing, lstType);
+                Type lstType = typeof(List<>).MakeGenericType(new Type[] { CSType(top.valType) });
+                arr = (IList)Activator.CreateInstance(lstType);
+
+                // arr = CastList(lstType, top.enclosing);
+                foreach (dynamic e in top.enclosing) {
+                    dynamic arrEle = CastList(CSType(top.valType), e);
+                    arr.Add(arrEle);
+                }
+            }
+            else
+            {
+                arr = (IList)top.enclosing;
+            }
 
             top = Top();
             top.parsedVal = arr;
@@ -564,20 +563,20 @@ namespace io.odysz.anson
 			if (!string.IsNullOrEmpty(et)) 
 				try
 				{
-					Type arrClzz = ParsingCtx.CSType(et);
+					Type arrClzz = CSType(et);
 					if (arrClzz.IsArray)
 						top.parsedVal = ToPrimitiveArray(arr, arrClzz);
 				}
 				catch (AnsonException e)
 				{
-					Console.Error.WriteLine(string.Format(
-							"Trying convert array to annotated type failed.\ntype: {0}\njson: {1}\nerror: {2}",
+                    Debug.WriteLine(string.Format(
+							"Error: Trying convert array to annotated type failed.\ntype: {0}\njson: {1}\nerror: {2}",
 							et, ctx.GetText(), e.Message));
 				}
 				catch (Exception e)
 				{
-					Console.Error.WriteLine(string.Format(
-							"Trying convert array to annotated type failed.\ntype: {0}\njson: {1}\nerror: {2}",
+                    Debug.WriteLine(string.Format(
+							"Error: Trying convert array to annotated type failed.\ntype: {0}\njson: {1}\nerror: {2}",
 							et, ctx.GetText(), e.Message));
 				}
             // No annotation, for 2d list, parsed value is still a list.
@@ -585,11 +584,8 @@ namespace io.odysz.anson
             // Because there is no clue for sub array's type if annotation is empty
         }
 
+        /// 
         /**
-         * Unboxes a List in to a primitive array.
-         * reference:
-         * https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
-         *
          * @param  list      the List to convert to a primitive array
          * @param  arrType the primitive array type to convert to
          * @param  <P>       the primitive array type to convert to
@@ -604,7 +600,12 @@ namespace io.odysz.anson
          *         type, or if the elements of the specified List can not be
          *         stored in an array of type P
          */
-        private static Array ToPrimitiveArray<P> (List<P> list, Type arrType)
+        /// <summary>
+        /// Unboxes a List in to a primitive array.
+        /// reference:
+        /// https://stackoverflow.com/questions/25149412/how-to-convert-listt-to-array-t-for-primitive-types-using-generic-method
+        /// </summary>
+        private static Array ToPrimitiveArray (IList list, Type arrType)
         {
             if (!arrType.IsArray) {
                 throw new AnsonException("Illegal type argument: " + arrType.ToString());
@@ -657,12 +658,12 @@ namespace io.odysz.anson
                 // String txt = ctx.getText();
                 if (top.IsInList())
                 {
-                    List<object> enclosLst = (List <object>) top.enclosing;
+                    IList enclosLst = (IList) top.enclosing;
                     // for List, ft is not null
                     if (top.parsedVal == null)
                     {
                         // simple value like String or number
-                        ((List<object>)enclosLst).Add(FigureJsonVal(ctx));
+                        enclosLst.Add(FigureJsonVal(ctx));
                     }
                     else
                     {
@@ -670,11 +671,11 @@ namespace io.odysz.anson
                         // e.g. convert elements of List<String> to String[]
                         // FIXME issue: if the first element is 0 length, it will failed to convert the array
                         Type parsedClzz = top.parsedVal.GetType();
-                        if (typeof(List<object>).IsAssignableFrom(parsedClzz)) {
+                        if (typeof(IList).IsAssignableFrom(parsedClzz)) {
                             if (string.IsNullOrEmpty(top.ElemType())) // (LangExt.isblank(top.elemType(), "\\?.*"))
                             {
                                 // change list to array
-                                List <object> lst = (List <object>)top.parsedVal;
+                                IList lst = (IList)top.parsedVal;
                                 if (lst != null && lst.Count > 0)
                                 {
                                     // search first non-null element's type
@@ -689,12 +690,12 @@ namespace io.odysz.anson
                                     {
                                         try
                                         {
-                                            ((List<object>)enclosLst).Add(ToPrimitiveArray(lst,
-                                                    Array.CreateInstance(eleClz, 0).GetType()));
+                                            enclosLst.Add(ToPrimitiveArray(lst,
+                                                Array.CreateInstance(eleClz, 0).GetType()));
                                         }
                                         catch (AnsonException e)
                                         {
-                                            Console.Error.WriteLine(string.Format(
+                                            Debug.WriteLine(string.Format(
                                                 "Trying convert array to annotated type failed.\nenclosing: {0}\njson: {1}\nerror: {2}",
                                                 top.enclosing, ctx.GetText(), e.Message));
                                         }
@@ -705,21 +706,20 @@ namespace io.odysz.anson
                                     // all elements are null, ignore the list is the only way
                                 }
                                 else
-                                    // FIXME this will broken when first element's length is 0.
-                                    ((List<object>)enclosLst).Add(lst.ToArray());
+                                    enclosLst.Add(lst);
                             }
                             // branch: with annotation or type name already figured out from 1st element
                             else
                             {
                                 try
                                 {
-                                    List <object> parsedLst = (List <object>)top.parsedVal;
+                                    IList parsedLst = (IList)top.parsedVal;
                                     string eleType = top.ElemType();
-                                    Type eleClz = ParsingCtx.CSType(eleType);
+                                    Type eleClz = CSType(eleType);
                                     if (eleClz.IsAssignableFrom(parsedClzz))
                                     {
                                         // annotated element can be this branch
-                                        ((List<object>)enclosLst).Add(parsedLst);
+                                        enclosLst.Add(parsedLst);
                                     }
                                     else
                                     {
@@ -730,7 +730,6 @@ namespace io.odysz.anson
                                         // lst.getClass().getTypeName() = java.lang.ArrayList
                                         // ["val",88.91669145042222]
 
-
                                         // Test case:	AnsT3 { ArrayList<Anson[]> ms; }
                                         // ctx: 		[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]
                                         // parsedLst:	[{type: io.odysz.anson.AnsT2, s: 4, m: null}, {type: io.odysz.anson.AnsT1, ver: "x", m: null}]
@@ -738,19 +737,19 @@ namespace io.odysz.anson
                                         // eleType:		[Lio.odysz.anson.Anson;
                                         // eleClz:		class [Lio.odysz.anson.Anson;
                                         // action - change parsedLst to array, add to enclosLst
-                                        ((List<object>)enclosLst).Add(ToPrimitiveArray(parsedLst,
-                                                        Array.CreateInstance(eleClz, 0).GetType()));
+                                        enclosLst.Add(ToPrimitiveArray(parsedLst,
+                                                      Array.CreateInstance(eleClz, 0).GetType()));
                                     }
                                 }
                                 catch (Exception e)
                                 {
-                                    Console.Error.WriteLine(EnvelopName());
-                                    Console.Error.WriteLine(ctx.GetText());
-                                    Console.Error.WriteLine(e.StackTrace);
+                                    Debug.WriteLine(EnvelopName());
+                                    Debug.WriteLine(ctx.GetText());
+                                    Debug.WriteLine(e.StackTrace);
                                 }
                             }
                         }
-                        else ((List<object>)enclosLst).Add(top.parsedVal);
+                        else enclosLst.Add(top.parsedVal);
                     }
                     top.parsedVal = null;
                 }
@@ -768,8 +767,8 @@ namespace io.odysz.anson
             base.ExitPair(ctx);
             if (AnsonFlags.parser)
             {
-                Console.Out.WriteLine(string.Format("[AnsonFlags.parser] Property-name: {0}", ctx.GetChild(0).GetText()));
-                Console.Out.WriteLine(string.Format("[AnsonFlags.parser] Property-value: {0}", ctx.GetChild(2).GetText()));
+                Debug.WriteLine(string.Format("[AnsonFlags.parser] Property-name: {0}", ctx.GetChild(0).GetText()));
+                Debug.WriteLine(string.Format("[AnsonFlags.parser] Property-value: {0}", ctx.GetChild(2).GetText()));
             }
 
             try
@@ -796,25 +795,23 @@ namespace io.odysz.anson
 
                 // f.setAccessible(true);
                 AnsonField af = (AnsonField) (f == null ?
-                                                ((MemberInfo)p)?.GetCustomAttribute(typeof(AnsonField))
+                                               ((MemberInfo)p)?.GetCustomAttribute(typeof(AnsonField))
                                               :((MemberInfo)f).GetCustomAttribute(typeof(AnsonField)));
                 Type fptype = f == null ? p.PropertyType : f.FieldType;
                 if (af != null && af.ignoreFrom)
                 {
                     if (AnsonFlags.parser)
-                        Console.Out.WriteLine(string.Format("[AnsonFlags.parser] {0} ignored", fn));
+                        Debug.WriteLine(string.Format("[AnsonFlags.parser] {0} ignored", fn));
                     return;
                 }
                 else if (af != null && af.refer == AnsonField.enclosing) {
                     object parent = Toparent(fptype);
                     if (parent == null)
-                        Console.Error.WriteLine(string.Format("parent {0} is ignored: reference is null", fn));
+                        Debug.WriteLine(string.Format("parent {0} is ignored: reference is null", fn));
 
                     SetFPValue(enclosing, f, p, parent);
                     return;
                 }
-
-                // Type ft = f.GetType();
 
                 if (fptype == typeof(String) || fptype == typeof(string))
                 {
@@ -836,17 +833,14 @@ namespace io.odysz.anson
                         SetFPValue(enclosing, f, p, v);
                 }
                 else if (fptype.IsArray)
-                    // f.SetValue(enclosing, ToPrimitiveArray((List <object>)top.parsedVal, fptype));
-                    SetFPValue(enclosing, f, p, ToPrimitiveArray((List<object>)top.parsedVal, fptype));
+                    SetFPValue(enclosing, f, p, ToPrimitiveArray((IList)top.parsedVal, fptype));
                 else if (typeof(Hashtable).IsAssignableFrom(fptype))
                 {
                     SetFPValue(enclosing, f, p, (Hashtable)top.parsedVal);
                 }
                 else if (typeof(IList).IsAssignableFrom(fptype))
-                        // || AbstractCollection.class.isAssignableFrom(ft)
                 {
-                    // f.SetValue(enclosing, top.parsedVal);
-                    // TODO: object casting to List[List[object]] casting failed 
+                    // SetFPValue(enclosing, f, p, (IList)top.parsedVal);
                     SetFPValue(enclosing, f, p, (IList)top.parsedVal);
                 }
                 else if (typeof(IJsonable).IsAssignableFrom(fptype))
@@ -860,18 +854,17 @@ namespace io.odysz.anson
                         //string v = GetStringVal(ctx);
                         //if (!string.IsNullOrEmpty(v))
                         //    f.SetValue(enclosing, invokeFactory(f, v));
-                        throw new AnsonException("Shouldn't reach here in C#.");
+                        throw new AnsonException("Shouldn't reaching here in C#.");
                     }
                 }
                 else if (typeof(object).IsAssignableFrom(fptype))
                 {
-                    Console.Out.WriteLine(string.Format(
+                    Debug.WriteLine(string.Format(
                             "\nDeserializing unsupported type, field: {0}, type: {1}, enclosing type: {1}",
                             fn, fptype.Name, enclosing?.GetType().Name));
                     string v = ctx.GetChild(2).GetText();
 
-                    if (!string.IsNullOrEmpty(v)) // !LangExt.isblank(v, "null")
-                        // f.SetValue(enclosing, v);
+                    if (!string.IsNullOrEmpty(v))
                         SetFPValue(enclosing, f, p, v);
                 }
                 else throw new AnsonException(0, "sholdn't happen");
@@ -879,9 +872,9 @@ namespace io.odysz.anson
                 // not necessary, top is dropped
                 top.parsedVal = null;
             } catch (AnsonException e) {
-                Console.Error.WriteLine(string.Format(e.Message));
+                Debug.WriteLine("Error: Error '" + e.Message + "'");
             } catch (Exception e) {
-                Console.Error.WriteLine(string.Format(e.Message));
+                Debug.WriteLine("Error: Error '" + e.Message + "'");
             }
         }
 
@@ -939,6 +932,8 @@ namespace io.odysz.anson
                         p.GetType().Name, p?.Name);
         }
 
+        /////////////////////// C# Specific //////////////////////////////////////////////////////
+
         /// <summary>
         /// Set value to field first. If it's null, try to property.
         /// </summary>
@@ -949,13 +944,79 @@ namespace io.odysz.anson
         internal static void SetFPValue(object enclosing, FieldInfo f, PropertyInfo p, object v)
         {
             if (f != null)
+                // f.SetValue(enclosing, Convert.ChangeType(v, f.FieldType));
                 f.SetValue(enclosing, v);
             else if (p != null)
                 p.SetValue(enclosing, v);
             else
-                Console.Error.WriteLine(string.Format(
+                Debug.WriteLine(string.Format(
                     "Failed to set field/property value. obj: {0}, parent: {1}",
                     enclosing.ToString(), v.ToString()));
         }
+
+        internal static void SetFPValue(object enclosing, FieldInfo f, PropertyInfo p, IList v)
+        {
+            if (f != null)
+                f.SetValue(enclosing, CastList(f.FieldType, v));
+                // f.SetValue(enclosing, v);
+            else if (p != null)
+                p.SetValue(enclosing, v);
+            else
+                Debug.WriteLine(string.Format(
+                    "Failed to set field/property value. obj: {0}, parent: {1}",
+                    enclosing.ToString(), v.ToString()));
+        }
+
+        /// <summary>Handling type conversion in c# which doesn't allow setting List[object] to nested List type.
+        /// Reference:
+        /// https://stackoverflow.com/a/27584212/7362888
+        /// </summary>
+        /// <param name="Type"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        internal static object CastList(Type type, object data)
+        {
+            var DataParam = Expression.Parameter(typeof(object), "data");
+            var Body = Expression.Block(Expression.Convert(Expression.Convert(DataParam, data.GetType()), type));
+
+            var Run = Expression.Lambda(Body, DataParam).Compile();
+            var ret = Run.DynamicInvoke(data);
+            return ret;
+        }
+
+        /// <summary>
+        /// create c# type, "$" -> "+"
+        /// </summary>
+        /// <param name="tname"></param>
+        /// <returns></returns>
+        internal static Type CSType(string tname)
+        {
+            if (!string.IsNullOrEmpty(tname))
+            {
+                tname = Regex.Replace(tname, @"\$", "+");
+
+                if (Regex.Match(tname, @"^\[L").Success)
+                {
+                    // keep string[] in java style
+                    tname = Regex.Replace(tname, @"^\[\[", "[L[");
+                    tname = Regex.Replace(tname, @";$", "[]");
+                    tname = Regex.Replace(tname, @"\[L", "");
+
+                    tname = Regex.Replace(tname, @"java\.lang", "System");
+                }
+
+                return Type.GetType(Java2cs(tname));
+            }
+            return null;
+        }
+
+
+        public static string Java2cs(string tname)
+        {
+            if ("java.util.ArrayList" == tname)
+                return "System.Collections.Generic.List`1[[System.Object]]";
+            else return tname;
+        }
+
     }
 }

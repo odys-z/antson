@@ -3,8 +3,6 @@ package io.odysz.semantic.jprotocol.test;
 import java.util.HashMap;
 
 import io.odysz.common.LangExt;
-import io.odysz.semantic.jprotocol.test.AnsonBody;
-import io.odysz.semantic.jprotocol.test.AnsonMsg;
 import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
 
 /**<p>Sessin Request<br>
