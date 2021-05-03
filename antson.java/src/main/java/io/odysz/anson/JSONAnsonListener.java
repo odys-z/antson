@@ -162,14 +162,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else {
 				Constructor<?> ctor = null;
-				try { ctor = enclosingClazz.getConstructor();
+				try { ctor = enclosingClazz.getConstructor(new Class<?>[] {});
 				} catch (NoSuchMethodException e) {
 					throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default public constructor(0 parameter)\n"
 							+ "Also, inner class must be static.\n"
 							+ "Class.getConstructor() error on getting: %s %s",
 							enclosingClazz.getName(), e.getMessage(), e.getClass().getName());
 				}
-				if (ctor != null && IJsonable.class.isAssignableFrom(enclosingClazz)) {
+
+				if (IJsonable.class.isAssignableFrom(enclosingClazz)) {
+					if (ctor == null)
+						throw new AnsonException(0, "To make json can be parsed to %0$s, the class must has a default public constructor(0 parameter)\n",
+										enclosingClazz.getName());
 					fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
 					try {
 						IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
@@ -671,11 +675,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				}
 				top.parsedVal = null;
 			}
-			else if (top.isInMap()) {
+			else //if (top.isInMap()) {
 				// parsed Value can already got when exit array
 				if (top.parsedVal == null)
 					top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
-			}
+			// }
 		}
 	}
 
@@ -748,7 +752,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				f.set(enclosing, top.parsedVal);
 			}
 			else if (IJsonable.class.isAssignableFrom(ft)) {
-				if (Anson.class.isAssignableFrom(ft))
+                // By pass for serializing and deserializing a string value by user, e.g. Port() & Port#ToBlock()
+                if (top.parsedVal != null && top.parsedVal.getClass() == String.class)
+                {
+                	Constructor ctor = ft.getConstructor(new Class<?>[] {String.class});
+                    if (ctor == null)
+                        throw new AnsonException(0, "To deserialize json to {0}, the class must has a constructor(1 string parameter)\n"
+                                        + "string value: {1}",
+                                        ft.getTypeName(), top.parsedVal);
+                    f.set(enclosing, ctor.newInstance(top.parsedVal));
+                }
+                else if (Anson.class.isAssignableFrom(ft))
 					f.set(enclosing, top.parsedVal);
 				else {
 					// Subclass of IJsonable must registered
@@ -765,7 +779,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				if (!LangExt.isblank(v, "null"))
 					f.set(enclosing, v);
 			}
-			else throw new AnsonException(0, "sholdn't happen");
+			else if (top.parsedVal != null)
+				new AnsonException(0, "sholdn't happen");
 
 			// not necessary, top is dropped
 			top.parsedVal = null;

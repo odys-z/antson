@@ -376,4 +376,19 @@ class AnsonTest {
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals(tst, s);
 	}
+
+	@Test
+	void testBypass() throws AnsonException, IOException {
+		AnsT6Bypass t6 = new AnsT6Bypass();
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		t6.toBlock(bos, opt);
+		String s = bos.toString(StandardCharsets.UTF_8.name());
+		
+		assertEquals("{type: io.odysz.anson.AnsT6Bypass, p: \"session\"}", s);
+		
+		AnsT6Bypass bypass = (AnsT6Bypass) Anson.fromJson(s);
+		
+		assertEquals(AnsT6Bypass.Port.session, t6.p.port());
+		assertEquals(bypass.p.port(), t6.p.port());
+	}
 }

@@ -1,10 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace io.odysz.anson
 {
     public interface IJsonable
     {
-        Anson ToBlock(Stream stream, JsonOpt opts = null);
+        IJsonable ToBlock(Stream stream, JsonOpt opts = null);
     }
 }

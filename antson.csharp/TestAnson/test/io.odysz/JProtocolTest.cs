@@ -35,6 +35,7 @@ namespace io.odysz.anson.jprotocol
 			AnsonMsg msg = (AnsonMsg)Anson.FromJson(json);
 
 			Assert.AreEqual(reqv11.Code(), msg.Code());
+			Assert.AreEqual(reqv11.port.Name(), msg.port.Name());
 			Assert.AreEqual(((AnSessionReq)reqv11.Body(0)).Iv(), ((AnSessionReq)msg.Body(0)).Iv());
 			Assert.AreEqual(((AnSessionReq)reqv11.Body(0)).Token(), ((AnSessionReq)msg.Body(0)).Token());
 			Assert.AreEqual(msg, msg.Body(0).Msg());

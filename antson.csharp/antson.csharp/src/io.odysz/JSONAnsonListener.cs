@@ -163,8 +163,12 @@ namespace io.odysz.anson
                 else
                 {   // branch: Map, Anston
                     ConstructorInfo ctor = enclosingClazz.GetConstructor(Type.EmptyTypes);
-                    if (ctor != null && typeof(IJsonable).IsAssignableFrom(enclosingClazz)) {
-						MergeFields(enclosingClazz, fmap, pmap); // map merging is only needed by typed object
+                    if (typeof(IJsonable).IsAssignableFrom(enclosingClazz)) {
+                        if (ctor == null)
+                            throw new AnsonException(0, "To make json can be parsed to {0}, the class must has a default public constructor(0 parameter)\n",
+                                            enclosingClazz.FullName);
+
+                        MergeFields(enclosingClazz, fmap, pmap); // map merging is only needed by typed object
 
                         IJsonable enclosing = (IJsonable)Activator.CreateInstance(enclosingClazz);
                         stack.Insert(0, new ParsingCtx(fmap, pmap, enclosing).ElemType(elemType));
@@ -314,20 +318,20 @@ namespace io.odysz.anson
             string txt = ctx.qualifiedName().GetText();
             envetype = GetStringVal(str, txt);
 
-            try
-            {
+            //try
+            //{
                 Type clazz = CSType(envetype);
                 Push(clazz, null);
-            }
-            catch (AnsonException e) {
-                Debug.WriteLine(e.StackTrace);
-            }
-            catch (TypeLoadException e) {
-                Debug.WriteLine(e.StackTrace);
-            }
-            catch (Exception e) {
-                Debug.WriteLine(e.StackTrace);
-            }
+            //}
+            //catch (AnsonException e) {
+            //    Debug.WriteLine(e.StackTrace);
+            //}
+            //catch (TypeLoadException e) {
+            //    Debug.WriteLine(e.StackTrace);
+            //}
+            //catch (Exception e) {
+            //    Debug.WriteLine(e.StackTrace);
+            //}
         }
 
         public override void EnterPair(PairContext ctx)
@@ -658,7 +662,7 @@ namespace io.odysz.anson
                 // String txt = ctx.getText();
                 if (top.IsInList())
                 {
-                    IList enclosLst = (IList) top.enclosing;
+                    IList enclosLst = (IList)top.enclosing;
                     // for List, ft is not null
                     if (top.parsedVal == null)
                     {
@@ -671,7 +675,8 @@ namespace io.odysz.anson
                         // e.g. convert elements of List<String> to String[]
                         // FIXME issue: if the first element is 0 length, it will failed to convert the array
                         Type parsedClzz = top.parsedVal.GetType();
-                        if (typeof(IList).IsAssignableFrom(parsedClzz)) {
+                        if (typeof(IList).IsAssignableFrom(parsedClzz))
+                        {
                             if (string.IsNullOrEmpty(top.ElemType())) // (LangExt.isblank(top.elemType(), "\\?.*"))
                             {
                                 // change list to array
@@ -760,6 +765,8 @@ namespace io.odysz.anson
                         top.parsedVal = GetStringVal(ctx.STRING(), ctx.GetText());
                 }
             }
+            else if (top.parsedVal == null)
+                top.parsedVal = GetStringVal(ctx.STRING(), ctx.GetText());
         }
 
         public override void ExitPair(PairContext ctx)
@@ -771,8 +778,8 @@ namespace io.odysz.anson
                 Debug.WriteLine(string.Format("[AnsonFlags.parser] Property-value: {0}", ctx.GetChild(2).GetText()));
             }
 
-            try
-            {
+            //try
+            //{
                 // String fn = getProp(ctx);
                 ParsingCtx top = Top();
                 string fn = top.parsingProp;
@@ -793,10 +800,9 @@ namespace io.odysz.anson
                 if (f == null && p == null)
                     throw new AnsonException(0, "Field/property ignored: field: {0}, value: {1}", fn, ctx.GetText());
 
-                // f.setAccessible(true);
                 AnsonField af = (AnsonField) (f == null ?
-                                               ((MemberInfo)p)?.GetCustomAttribute(typeof(AnsonField))
-                                              :((MemberInfo)f).GetCustomAttribute(typeof(AnsonField)));
+                                   ((MemberInfo)p)?.GetCustomAttribute(typeof(AnsonField))
+                                  :((MemberInfo)f).GetCustomAttribute(typeof(AnsonField)));
                 Type fptype = f == null ? p.PropertyType : f.FieldType;
                 if (af != null && af.ignoreFrom)
                 {
@@ -816,7 +822,6 @@ namespace io.odysz.anson
                 if (fptype == typeof(String) || fptype == typeof(string))
                 {
                     string v = GetStringVal(ctx);
-                    // f.SetValue(enclosing, v);
                     SetFPValue(enclosing, f, p, v);
                 }
                 else if (fptype.IsPrimitive)
@@ -845,16 +850,27 @@ namespace io.odysz.anson
                 }
                 else if (typeof(IJsonable).IsAssignableFrom(fptype))
                 {
-                    if (typeof(Anson).IsAssignableFrom(fptype))
+                    // By pass for serializing and deserializing a string value by user, e.g. Port() & Port#ToBlock()
+                    if (top.parsedVal != null && top.parsedVal.GetType() == typeof(string))
+                    {
+                        ConstructorInfo ctor = fptype.GetConstructor(new Type[] { typeof(string) });
+                        if (ctor == null)
+                            throw new AnsonException(0, "To deserialize json to {0}, the class must has a constructor(1 string parameter)\n"
+                                            + "string value: {1}",
+                                            fptype.FullName, top.parsedVal);
+                        SetFPValue(enclosing, f, p, ctor.Invoke(new string[] { top.parsedVal }));
+                    }
+                    else if (typeof(Anson).IsAssignableFrom(fptype))
                         // f.SetValue(enclosing, top.parsedVal);
                         SetFPValue(enclosing, f, p, (Anson)top.parsedVal);
-                    else
+                    // ignore null value
+                    else if (top.parsedVal != null)
                     {
                         // Subclass of IJsonable must registered
                         //string v = GetStringVal(ctx);
                         //if (!string.IsNullOrEmpty(v))
                         //    f.SetValue(enclosing, invokeFactory(f, v));
-                        throw new AnsonException("Shouldn't reaching here in C#.");
+                        throw new AnsonException("Shouldn't reach here in C#.");
                     }
                 }
                 else if (typeof(object).IsAssignableFrom(fptype))
@@ -862,20 +878,20 @@ namespace io.odysz.anson
                     Debug.WriteLine(string.Format(
                             "\nDeserializing unsupported type, field: {0}, type: {1}, enclosing type: {1}",
                             fn, fptype.Name, enclosing?.GetType().Name));
-                    string v = ctx.GetChild(2).GetText();
+                    string v = ctx.GetChild(2).GetText(); // null -> "null"
 
-                    if (!string.IsNullOrEmpty(v))
+                    if (!string.IsNullOrEmpty(v) && "null" != v.Trim())
                         SetFPValue(enclosing, f, p, v);
                 }
                 else throw new AnsonException(0, "sholdn't happen");
 
                 // not necessary, top is dropped
                 top.parsedVal = null;
-            } catch (AnsonException e) {
-                Debug.WriteLine("Error: Error '" + e.Message + "'");
-            } catch (Exception e) {
-                Debug.WriteLine("Error: Error '" + e.Message + "'");
-            }
+            //} catch (AnsonException e) {
+            //    Debug.WriteLine("Error: Error '" + e.Message + "'");
+            //} catch (Exception e) {
+            //    Debug.WriteLine("Error: Error '" + e.Message + "'");
+            //}
         }
 
         //private IJsonable invokeFactory(FieldInfo f, string v)
@@ -956,6 +972,9 @@ namespace io.odysz.anson
 
         internal static void SetFPValue(object enclosing, FieldInfo f, PropertyInfo p, IList v)
         {
+            if (v == null)
+                return;
+
             if (f != null)
                 f.SetValue(enclosing, CastList(f.FieldType, v));
                 // f.SetValue(enclosing, v);

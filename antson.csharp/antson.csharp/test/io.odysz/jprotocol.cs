@@ -2,11 +2,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using static io.odysz.anson.jprotocol.AnsonMsg;
 
 namespace io.odysz.anson.jprotocol
 {
-    public interface IPort 
+    public interface IPort : IJsonable 
     {
         string Url();// { return "echo.jserv"; }
 
@@ -59,7 +60,6 @@ namespace io.odysz.anson.jprotocol
 
     }
 
-
     public interface IAnsonBody {
         AnsonMsg Msg(); // { get; set; }
         IAnsonBody Msg(AnsonMsg p); // { get; set; }
@@ -67,38 +67,58 @@ namespace io.odysz.anson.jprotocol
         string a { get; set; }
 
         IAnsonBody A(string act);
-
-
     }
 
 
     public class AnsonMsg : Anson
 	{
-        /**Port is the conceptual equivalent to the SOAP port, the service methods' group.<br>
-         * NOTE: java code shouldn't use switch-case block on enum. That cause problem with generated class.
-         * @author odys-z@github.com
-         */
+        /// <summary> Port is the conceptual equivalent to the SOAP port, the service methods' group.
+        /// In java, this is a enum type.
+        /// In C#, this is IJsonable and the reverse of #ToBlock() is the construction Port(string).
+        /// </summary>
         public class Port : IPort
         {
             public const int heartbeat = 1; // ("ping.serv11"),
             public const int session = 2; // ("login-serv11"),
             public const int query = 3; // ("r.serv11");
            
-            private string url;
+            private readonly string url;
             public string Url() { return url; }
-            Port(string url) { this.url = url; }
+
+            int port;
+            public Port(string url) {
+                this.url = url;
+                port = url == "session" ? session
+                     : url == "query" ? query
+                     : heartbeat;
+            }
+
+            public Port(int p)
+            {
+                port = p;
+                url = Name();
+            }
 
             public string Name()
             {
-                return ";";
+                return port == session ? "session"
+                    : port == query ? "query"
+                    : "heartbeat";
             }
 
             public IPort Valof(string pname)
             {
                 return new Port("ping.serv11");
             }
+
+            public IJsonable ToBlock(Stream stream, JsonOpt opts = null)
+            {
+                Utils.WriteStr(stream, string.Format("\"{0}\"", Name()));
+                return this;
+            }
+
         }
-        public class MsgCode
+        public class MsgCode : IJsonable
         {
             public const int ok = 0, exSession = 1, exSemantic = 2, exIo = 3,
                              exTransct = 4, exDA = 5, exGeneral = 6, ext = 7;
@@ -109,6 +129,10 @@ namespace io.odysz.anson.jprotocol
             {
                 this.code = code;
             }
+            public MsgCode(string name)
+            {
+                this.code = ValueOf(name);
+            }
 
             public bool eq(string code)
             {
@@ -117,7 +141,13 @@ namespace io.odysz.anson.jprotocol
                 return this.code == c;
             }
 
-            private static int ValueOf(string code)
+            public IJsonable ToBlock(Stream s, JsonOpt opt)
+            {
+                Utils.WriteStr(s, code.ToString());
+                return this;
+            }
+
+            public static int ValueOf(string code)
             {
                 if (string.IsNullOrEmpty(code)) return -1;
                 else if ("ok" == code) return ok;
@@ -129,6 +159,19 @@ namespace io.odysz.anson.jprotocol
                 else if ("exGeneral" == code) return exGeneral;
                 else return ext;
             }
+            public static string NameOf(int code)
+            {
+                if (code < 0) return "NA";
+                else if (ok == code) return "ok";
+                else if (exSession == code) return "exSession";
+                else if (exSemantic == code) return "exSemantic";
+                else if (exIo == code) return "exIo";
+                else if (exTransct == code) return "exTransct";
+                else if (exDA == code) return "exDA";
+                else if (exGeneral == code) return "exGeneral";
+                else return "ext";
+            }
+
         }
         static IPort defaultPortImpl;
 
@@ -139,7 +182,7 @@ namespace io.odysz.anson.jprotocol
 
         public int seq { get; private set; }
 
-        Port port;
+        public Port port;
         // public IPort Port() { return port; }
 
         private MsgCode code;
@@ -150,6 +193,8 @@ namespace io.odysz.anson.jprotocol
             throw new AnsonException(-1,
                 "Port can not be null. Not initialized? To use JMassage understand ports, call understandPorts(IPort) first.");
         }
+
+        public AnsonMsg() { }
 
         public AnsonMsg(int code)
         {
@@ -223,6 +268,9 @@ namespace io.odysz.anson.jprotocol
     {
         [AnsonField(refer=AnsonField.enclosing)]
         public AnsonMsg parent;
+        public AnSessionReq()
+        {
+        }
         public AnSessionReq(AnsonMsg parent) { 
             this.parent = parent;
         }
@@ -253,7 +301,7 @@ namespace io.odysz.anson.jprotocol
 
         public static AnsonMsg FormatLogin(string uid, string tk64, string iv64)
         {
-            AnsonMsg jmsg = new AnsonMsg(Port.session);
+            AnsonMsg jmsg = new AnsonMsg(new Port(Port.session));
 
             AnSessionReq itm = new AnSessionReq(parent: jmsg);
             itm.uid = uid;

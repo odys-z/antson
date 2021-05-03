@@ -36,5 +36,15 @@ namespace io.odysz.anson
             StreamReader r = new StreamReader(stream);
             return r.ReadToEnd();
         }
+
+        internal static Stream WriteByt(Stream stream, params int[] nums)
+        {
+            if (nums != null)
+            {
+                foreach (int c in nums)
+                    stream.WriteByte((byte)c);
+            }
+           return stream;
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace io.odysz.anson
             ver = "0.9.1";
         }
 
-        public Anson ToBlock(Stream stream, JsonOpt opt = null)
+        public IJsonable ToBlock(Stream stream, JsonOpt opt = null)
         {
             bool quotK = opt == null || opt.quotKey;
 			Type type = GetType();
