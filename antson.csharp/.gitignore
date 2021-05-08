@@ -6,4 +6,5 @@ TestResults
 obj
 *.exe
 *.nupkg
-antson.csharp/lib/net40/**
+antson.csharp/lib/net40/*
+!antson.csharp/lib/net40/README.md
