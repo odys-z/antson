@@ -6,3 +6,4 @@ TestResults
 obj
 *.exe
 *.nupkg
+antson.csharp/lib/net40/**

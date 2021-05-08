@@ -8,6 +8,9 @@ using static JSONParser;
 
 namespace io.odysz.anson
 {
+    /// <summary>
+    /// Base class for all IJsonable data object.
+    /// </summary>
     public class Anson : IJsonable
     {
         public string ver { get; protected set; }
