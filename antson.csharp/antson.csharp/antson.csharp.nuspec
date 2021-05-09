@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Antson.CSharp</id>
-    <version>0.9.10</version>
+    <version>0.9.14</version>
     <title>Antson.C#</title>
     <authors>odys-z.github.io</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -17,4 +17,8 @@
       <dependency id="Antlr4.Runtime.Standard" version="4.9.2" />
     </dependencies>
   </metadata>
+  <files>
+    <file src="src\**" target="src" />
+    <file src="bin\Debug\antson.*" target="lib\net40" />
+  </files>
 </package>

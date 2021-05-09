@@ -1024,7 +1024,10 @@ namespace io.odysz.anson
                     tname = Regex.Replace(tname, @"java\.lang", "System");
                 }
 
-                return Type.GetType(Java2cs(tname));
+                // CS problem: https://stackoverflow.com/a/3512351/7362888
+                Type t = Type.GetType(Java2cs(tname) + ", " + assmName);
+                return t == null ?
+                    Type.GetType(Java2cs(tname)) : t;
             }
             return null;
         }
