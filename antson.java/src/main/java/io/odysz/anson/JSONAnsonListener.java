@@ -397,9 +397,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 */
 	private static String getProp(PairContext ctx) {
 		TerminalNode p = ctx.propname().IDENTIFIER();
+		/*
 		return p == null
 				? ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
 				: p.getText();
+		*/
+
+		String prop = p == null ?
+				ctx.propname().STRING() != null ?
+					ctx.propname().STRING().getText() :
+					ctx.propname().getText() : p.getText();
+		return prop.replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "");
 	}
 
 	/**Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
