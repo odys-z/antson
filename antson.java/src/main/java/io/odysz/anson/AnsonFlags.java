@@ -1,6 +1,7 @@
 package io.odysz.anson;
 
 public class AnsonFlags {
-	public static final boolean parser = false;
+	/** parser verbose level, changeable */
+	public static boolean parser = false;
 
 }

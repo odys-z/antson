@@ -1,7 +1,5 @@
 package io.odysz.anson;
 
-import io.odysz.anson.Anson;
-
 public class AnsT1 extends Anson {
 
 	/**Inner class must be static.

@@ -93,7 +93,7 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 	Port port;
 	public IPort port() { return port; }
 
-	private MsgCode code;
+	MsgCode code;
 	public MsgCode code() { return code; }
 
 	public void port(String pport) throws AnsonException {

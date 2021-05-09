@@ -36,17 +36,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * <p>Memo: The hard lesson learned from this is if you want parse a grammar,
 	 * you better follow the grammar structure.</p>
 	 * @author odys-z@github.com
-	 * @param <T>
 	 */
 	public class ParsingCtx {
 		/**The json prop (object key) */
 		protected String parsingProp;
 		/**The parsed native value */
 		protected Object parsedVal;
-
+		/**e.g. parent object reference */
 		private Object enclosing;
+		/**Fields' map. C# has an extra properties' map */
 		private HashMap<String, Field> fmap;
-
 		/** Annotation's main types */
 		private String valType;
 		/** Annotation's sub types */
@@ -140,31 +139,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private ParsingCtx top() { return stack.get(0); }
 
-	private String envelopName() {
-		if (stack != null)
-			for (int i = 0; i < stack.size(); i++)
-				if (stack.get(i).enclosing instanceof Anson)
-					return stack.get(i).enclosing.getClass().getName();
-		return null;
-	}
-
-	private Object toparent(Class<?> type) {
-		// no enclosing, no parent
-		if (stack.size() <= 1 || LangExt.isblank(type, "null"))
-			return null;
-
-		// trace back, guess with type for children could be in array or map
-		ParsingCtx p = stack.get(1);
-		int i = 2;
-		while (p != null) {
-			if (type.equals(p.enclosing.getClass()))
-				return p.enclosing;
-			p = stack.get(i);
-			i++;
-		}
-		return null;
-	}
-
 	/**Push parsing node (a envelope, map, list) into this' {@link #stack}.
 	 * @param enclosingClazz new parsing IJsonable object's class
 	 * @param elemType type annotation of enclosing list/array. 0: main type, 1: sub-types<br>
@@ -188,14 +162,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else {
 				Constructor<?> ctor = null;
-				try { ctor = enclosingClazz.getConstructor();
+				try { ctor = enclosingClazz.getConstructor(new Class<?>[] {});
 				} catch (NoSuchMethodException e) {
 					throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default public constructor(0 parameter)\n"
 							+ "Also, inner class must be static.\n"
 							+ "Class.getConstructor() error on getting: %s %s",
 							enclosingClazz.getName(), e.getMessage(), e.getClass().getName());
 				}
-				if (ctor != null && IJsonable.class.isAssignableFrom(enclosingClazz)) {
+
+				if (IJsonable.class.isAssignableFrom(enclosingClazz)) {
+					if (ctor == null)
+						throw new AnsonException(0, "To make json can be parsed to %0$s, the class must has a default public constructor(0 parameter)\n",
+										enclosingClazz.getName());
 					fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
 					try {
 						IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
@@ -223,6 +201,31 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	/**Envelope Type Name */
  	protected String envetype;
+
+	private String envelopName() {
+		if (stack != null)
+			for (int i = 0; i < stack.size(); i++)
+				if (stack.get(i).enclosing instanceof Anson)
+					return stack.get(i).enclosing.getClass().getName();
+		return null;
+	}
+
+	private Object toparent(Class<?> type) {
+		// no enclosing, no parent
+		if (stack.size() <= 1 || LangExt.isblank(type, "null"))
+			return null;
+
+		// trace back, guess with type for children could be in array or map
+		ParsingCtx p = stack.get(1);
+		int i = 2;
+		while (p != null) {
+			if (type.equals(p.enclosing.getClass()))
+				return p.enclosing;
+			p = stack.get(i);
+			i++;
+		}
+		return null;
+	}
 
 	@Override
 	public void exitObj(ObjContext ctx) {
@@ -296,9 +299,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		// else keep last one (root) as return value
 	}
 
-	/**Semantics of entering a type pair is found and parsingVal an IJsonable object.<br>
+	/**Semantics of entering a type pair, when type is found and enclosing is an IJsonable object.<br>
 	 * This is always happening on entering an object.
-	 * The logic opposite is exit object.
+	 * The logic opposite is exit object. (exit pair?)
 	 * @see gen.antlr.json.JSONBaseListener#enterType_pair(gen.antlr.json.JSONParser.Type_pairContext)
 	 */
 	@Override
@@ -463,9 +466,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		else if (ctx.STRING() != null)
 			return getStringVal(ctx.STRING(), txt);
 		else if (txt != null && txt.toLowerCase().equals("true"))
-			return new Boolean(true);
+			return Boolean.valueOf(true);
 		else if (txt != null && txt.toLowerCase().equals("flase"))
-			return new Boolean(false);
+			return Boolean.valueOf(false);
 		return null;
 	}
 
@@ -680,11 +683,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				}
 				top.parsedVal = null;
 			}
-			else if (top.isInMap()) {
+			else //if (top.isInMap()) {
 				// parsed Value can already got when exit array
 				if (top.parsedVal == null)
 					top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
-			}
+			// }
 		}
 	}
 
@@ -750,13 +753,24 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (ft.isArray())
 				f.set(enclosing, toPrimitiveArray((List<?>)top.parsedVal, ft));
+			// Design notes: this is broken into 2 branches if c#.
 			else if (List.class.isAssignableFrom(ft)
 					|| AbstractCollection.class.isAssignableFrom(ft)
 					|| Map.class.isAssignableFrom(ft)) {
 				f.set(enclosing, top.parsedVal);
 			}
 			else if (IJsonable.class.isAssignableFrom(ft)) {
-				if (Anson.class.isAssignableFrom(ft))
+                // By pass for serializing and deserializing a string value by user, e.g. Port() & Port#ToBlock()
+                if (top.parsedVal != null && top.parsedVal.getClass() == String.class)
+                {
+                	Constructor ctor = ft.getConstructor(new Class<?>[] {String.class});
+                    if (ctor == null)
+                        throw new AnsonException(0, "To deserialize json to {0}, the class must has a constructor(1 string parameter)\n"
+                                        + "string value: {1}",
+                                        ft.getTypeName(), top.parsedVal);
+                    f.set(enclosing, ctor.newInstance(top.parsedVal));
+                }
+                else if (Anson.class.isAssignableFrom(ft))
 					f.set(enclosing, top.parsedVal);
 				else {
 					// Subclass of IJsonable must registered
@@ -773,7 +787,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				if (!LangExt.isblank(v, "null"))
 					f.set(enclosing, v);
 			}
-			else throw new AnsonException(0, "sholdn't happen");
+			else if (top.parsedVal != null)
+				new AnsonException(0, "sholdn't happen");
 
 			// not necessary, top is dropped
 			top.parsedVal = null;

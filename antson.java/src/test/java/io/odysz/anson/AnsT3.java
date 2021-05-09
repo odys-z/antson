@@ -2,9 +2,6 @@ package io.odysz.anson;
 
 import java.util.ArrayList;
 
-import io.odysz.anson.Anson;
-import io.odysz.anson.AnsonField;
-
 /**Class for testing Anson array field.
  * @author odys-z@github.com
  *

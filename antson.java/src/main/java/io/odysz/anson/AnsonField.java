@@ -24,9 +24,9 @@ import java.lang.annotation.*;
 @Target(ElementType.FIELD)
 public @interface AnsonField {
 	// nothing happen
-	public int undefined = -1;
+	public static final int undefined = -1;
 	// must trigger reference resolving
-	public int enclosing = 1;
+	public static final int enclosing = 1;
 
 	boolean ignoreTo() default false;
 

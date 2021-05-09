@@ -315,11 +315,15 @@ public class Anson implements IJsonable {
 		return s
 				// .replace("\n", "\\n")
 				// .replace("\/", "\\/")
+
+				// TODO TEST
+				// .replace("\t", "\\t")
+				// TODO TEST
+
 				.replace("\r", "\\r")
 				.replace("\b", "\\b")
 				.replace("\\", "\\\\")
 				.replace("\f", "\\f")
-				.replace("\t", "\\t")
 				.getBytes();
 	}
 
