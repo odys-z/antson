@@ -10,7 +10,7 @@ using static JSONParser;
 
 namespace io.odysz.anson
 {
-    class JSONAnsonListener : JSONBaseListener, IParseTreeListener
+    public class JSONAnsonListener : JSONBaseListener, IParseTreeListener
 	{
 		/**<p>Parsing AST node's context, for handling the node's value,
          * the element class of parsing stack.</p>
@@ -130,19 +130,25 @@ namespace io.odysz.anson
         }
 
 		/// ///////////////////////////////////////////////////////////////////////////
+        /// <summary>Assembly name that additional types provided, e.g. for AnsonMsg</summary>
+        private static string assmName;
+        public static void setAssembly(string assName)
+        {
+            assmName = assName;
+        }
 
 		private List<ParsingCtx> stack;
 
 		private ParsingCtx Top() { return stack[0]; }
 
-		/**Push parsing node (a envelope, map, list) into this' {@link #stack}.
-         * @param enclosingClazz new parsing IJsonable object's class
-         * @param elemType type annotation of enclosing list/array. 0: main type, 1: sub-types<br>
-         * This parameter can't be null if is pushing a list node.
-         * @throws ReflectiveOperationException
-         * @throws SecurityException
-         * @throws AnsonException
-         */
+		/// <summary>Push parsing node (a envelope, map, list) into this' {@link #stack}.
+        /// </summary> 
+        /// @param enclosingClazz new parsing IJsonable object's class
+        /// @param elemType type annotation of enclosing list/array. 0: main type, 1: sub-types<br>
+        /// This parameter can't be null if is pushing a list node.
+        /// @throws ReflectiveOperationException
+        /// @throws SecurityException
+        /// @throws AnsonException
 		private void Push(Type enclosingClazz, string[] elemType)
 		{
             if (enclosingClazz.IsArray) {
@@ -676,6 +682,7 @@ namespace io.odysz.anson
                         // FIXME issue: if the first element is 0 length, it will failed to convert the array
                         Type parsedClzz = top.parsedVal.GetType();
                         if (typeof(IList).IsAssignableFrom(parsedClzz))
+                        // if (parsedClzz.Name == "IList`1" ||parsedClzz.GetInterface("IList`1") != null)
                         {
                             if (string.IsNullOrEmpty(top.ElemType())) // (LangExt.isblank(top.elemType(), "\\?.*"))
                             {
@@ -843,7 +850,8 @@ namespace io.odysz.anson
                 {
                     SetFPValue(enclosing, f, p, (Hashtable)top.parsedVal);
                 }
-                else if (typeof(IList).IsAssignableFrom(fptype))
+                // else if (typeof(IList).IsAssignableFrom(fptype))
+                else if (fptype.Name == "IList`1" || fptype.GetInterface("IList`1") != null)
                 {
                     // SetFPValue(enclosing, f, p, (IList)top.parsedVal);
                     SetFPValue(enclosing, f, p, (IList)top.parsedVal);
@@ -959,6 +967,9 @@ namespace io.odysz.anson
         /// <param name="v"></param>
         internal static void SetFPValue(object enclosing, FieldInfo f, PropertyInfo p, object v)
         {
+            if (v == null)
+                return;
+
             if (f != null)
                 // f.SetValue(enclosing, Convert.ChangeType(v, f.FieldType));
                 f.SetValue(enclosing, v);
@@ -1008,7 +1019,7 @@ namespace io.odysz.anson
         /// </summary>
         /// <param name="tname"></param>
         /// <returns></returns>
-        internal static Type CSType(string tname)
+        internal Type CSType(string tname)
         {
             if (!string.IsNullOrEmpty(tname))
             {

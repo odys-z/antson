@@ -13,7 +13,7 @@ namespace io.odysz.anson
 
             MemoryStream stream = new MemoryStream();
             an.ToBlock(stream);
-            string expect = "{\"type\": \"io.odysz.anson.Anson\", \"ver\": \"0.9.1\"}";
+            string expect = "{\"type\": \"io.odysz.anson.Anson\", \"ver\": \"0.9.xx\"}";
 
             Assert.AreEqual(expect, Utils.ToString(stream));
         }
@@ -60,7 +60,7 @@ namespace io.odysz.anson
             MemoryStream stream = new MemoryStream();
             a2d.ToBlock(stream);
             string s = Utils.ToString(stream);
-            string expect = "{\"type\": \"io.odysz.anson.Ans2dArr\", \"strs\": [[\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], []], \"ver\": \"0.9.1\"}";
+            string expect = "{\"type\": \"io.odysz.anson.Ans2dArr\", \"strs\": [[\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], []], \"ver\": \"0.9.xx\"}";
             Assert.AreEqual(expect, s);
 
             a2d = (Ans2dArr)Anson.FromJson(expect);
@@ -83,8 +83,8 @@ namespace io.odysz.anson
             parent.ToBlock(stream);
             string s = Utils.ToString(stream);
             string expect = "{\"type\": \"io.odysz.anson.AnsT3\", \"ms\": null, "
-                            + "\"m\": [{\"type\": \"io.odysz.anson.AnsT3Child\", \"ver\": \"0.9.1\"}, "
-                            + "{\"type\": \"io.odysz.anson.AnsT3son\", \"gendre\": \"male\", \"parent\": \"io.odysz.anson.AnsT3\", \"ver\": \"0.9.1\"}], \"ver\": \"0.9.1\"}";
+                            + "\"m\": [{\"type\": \"io.odysz.anson.AnsT3Child\", \"ver\": \"0.9.xx\"}, "
+                            + "{\"type\": \"io.odysz.anson.AnsT3son\", \"gendre\": \"male\", \"parent\": \"io.odysz.anson.AnsT3\", \"ver\": \"0.9.xx\"}], \"ver\": \"0.9.xx\"}";
 
             // in .net framwork 4.72, fields and properties are not always the same order
             Assert.AreEqual(expect.Length, s.Length);

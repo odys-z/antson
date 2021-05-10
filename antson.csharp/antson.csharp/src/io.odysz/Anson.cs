@@ -16,7 +16,7 @@ namespace io.odysz.anson
         public string ver { get; protected set; }
 
         public Anson() {
-            ver = "0.9.1";
+            ver = "0.9.xx";
         }
 
         public IJsonable ToBlock(Stream stream, JsonOpt opt = null)
