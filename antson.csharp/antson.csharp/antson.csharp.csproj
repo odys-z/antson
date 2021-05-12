@@ -60,25 +60,6 @@
     <Compile Include="src\io.odysz\JSONAnsonListener.cs" />
     <Compile Include="src\io.odysz\JsonOpt.cs" />
     <Compile Include="src\io.odysz\Utils.cs" />
-    <Compile Include="test\io.odysz\jprotocol\AnQueryReq.cs" />
-    <Compile Include="test\io.odysz\jprotocol\AnsonBody.cs" />
-    <Compile Include="test\io.odysz\jprotocol\AnsonHeader.cs" />
-    <Compile Include="test\io.odysz\jprotocol\AnsonMsg.cs" />
-    <Compile Include="test\io.odysz\jprotocol\AnsonResp.cs" />
-    <Compile Include="test\io.odysz\AnsT_i.cs" />
-    <Compile Include="test\io.odysz\jprotocol\EchoReq.cs" />
-    <Compile Include="test\io.odysz\jprotocol\FileReq.cs" />
-    <Compile Include="test\io.odysz\jprotocol\IPort.cs" />
-    <Compile Include="test\io.odysz\jprotocol\jprotocol.cs" />
-    <Compile Include="test\io.odysz\jsession\AnSessionReq.cs" />
-    <Compile Include="test\io.odysz\jsession\AnSessionResp.cs" />
-    <Compile Include="test\io.odysz\jsession\JRobot.cs" />
-    <Compile Include="test\io.odysz\jsession\SessionInf.cs" />
-    <Compile Include="test\io.odysz\jprotocol\JsonOpt.cs" />
-    <Compile Include="test\io.odysz\x\SemanticException.cs" />
-    <Compile Include="test\io.odysz\x\TransException.cs" />
-    <Compile Include="test\module\AnResultset.cs" />
-    <Compile Include="test\module\SemanticObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -8,10 +8,10 @@ namespace io.odysz.anson
     public class AnsT1 : Anson
     {
 		/**Inner class must be static.
-         * The parser uses reflection create instances. (TODO: docs)
-         * 
-         * @author odys-z@github.com
-         */
+     * The parser uses reflection create instances. (TODO: docs)
+     *
+     * @author odys-z@github.com
+     */
 		public class AnsM1 : Anson
 		{
             public string name;
