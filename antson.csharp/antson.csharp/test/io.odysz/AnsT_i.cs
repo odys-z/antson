@@ -1,4 +1,5 @@
-﻿using System;
+﻿using io.odysz.module.rs;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -131,11 +132,11 @@ namespace io.odysz.anson
 
     public class AnsTRs : Anson
     {
-        public AnsonResultset rs;
+        public AnResultset rs;
 
         public AnsTRs()
         {
-            rs = new AnsonResultset(3, 4);
+            rs = new AnResultset(3, 4);
         }
     }
 
