@@ -79,7 +79,14 @@ basic rules like extends io.odysz.Anson or break reference loop with annotation,
 json v.s java type translation will be automatically handled and being transparent
 to upper tiers.
 
-It's also planned to publish Antson as an independent lib, at least as a jar and DLL.
+Currently there are only two different language runtime lib, c# & java. There is
+a js client, but it's not a neccessary, only a helper lib for keep json protocol
+packages keep consists with server side. User can parse the json data by themselves.
+
+The runtimes are antson.java & antson.csharp sub folder. The c# version also provided
+an example Visual Studio solution, in exmaple.cs, of witch the gl-export is a
+[Revit](https://en.wikipedia.org/wiki/Autodesk_Revit) plugin. The test barely working,
+but no plan to extend it at the license is expensive.
 
 # Known Issues
 
