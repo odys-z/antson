@@ -60,12 +60,10 @@
     <Compile Include="src\io.odysz\JSONAnsonListener.cs" />
     <Compile Include="src\io.odysz\JsonOpt.cs" />
     <Compile Include="src\io.odysz\Utils.cs" />
-    <Compile Include="test\io.odysz\AnsonResultset.cs" />
-    <Compile Include="test\io.odysz\AnsT_i.cs" />
-    <Compile Include="test\io.odysz\jprotocol.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

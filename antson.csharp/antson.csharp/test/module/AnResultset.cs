@@ -1,12 +1,12 @@
-﻿using System;
+﻿using io.odysz.anson;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
-namespace io.odysz.anson
+namespace io.odysz.module.rs
 {
-    public class AnsonResultset : Anson
+    public class AnResultset : Anson
     {
 		private const bool debug = true;
 
@@ -15,8 +15,13 @@ namespace io.odysz.anson
         protected int rowIdx = -1;
         protected int rowCnt = 0;
 
-        [AnsonField(valType= "java.util.ArrayList")]
-        public List<List<object>> results;
+        /// <summary>
+        /// Design Notes: 
+        /// C# requires explicit list/array convertion, with element type checked. This is time consuming.
+        /// In Antson.cs 1.0, multi-dimensional list/array deserialization is bypassed this way, an IList with valType. 
+        /// </summary>
+        [AnsonField(valType = "java.util.ArrayList")]
+        public IList results;
 
         /**col-index start at 1, map: [alais(upper-case), [col-index, db-col-name(in raw case)]<br>
          * case 1<pre>
@@ -28,9 +33,11 @@ namespace io.odysz.anson
              colnames.put(coln.toUpperCase(), new Object[] {colnames.get(coln), coln});
          </pre>
          * */
-        [AnsonField(valType= "[Ljava.lang.Object;")]
+        [AnsonField(valType = "[Ljava.lang.Object;")]
         protected Hashtable colnames;
 
+        /// <summary>Ignored when serializing, and no such data from java
+        /// - it's type of Resultset</summary>
         [AnsonField(ignoreTo = true)]
         public DataTable rs { get; private set; }
 
@@ -46,9 +53,9 @@ namespace io.odysz.anson
 		protected Hashtable stringFormats;
 
 		/** for deserializing */
-		public AnsonResultset() { }
+		public AnResultset() { }
 
-		public AnsonResultset(int rows, int cols, string colPrefix = "")
+		public AnResultset(int rows, int cols, string colPrefix = "")
         {
             if (rows <= 0 || cols <= 0)
                 return;
@@ -84,7 +91,7 @@ namespace io.odysz.anson
         public string GetString(int rix, string colname)
         {
             int cix = (int)((object[])colnames[colname?.ToUpper()])[0];
-            return (string)results[rix][cix];
+            return (string)((IList)results[rix])[cix];
         }
     }
 }

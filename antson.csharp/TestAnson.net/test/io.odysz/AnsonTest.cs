@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections;
 using System.IO;
 
 namespace io.odysz.anson
@@ -13,7 +14,7 @@ namespace io.odysz.anson
 
             MemoryStream stream = new MemoryStream();
             an.ToBlock(stream);
-            string expect = "{\"type\": \"io.odysz.anson.Anson\", \"ver\": \"0.9.1\"}";
+            string expect = "{\"type\": \"io.odysz.anson.Anson\", \"ver\": \"0.9.xx\"}";
 
             Assert.AreEqual(expect, Utils.ToString(stream));
         }
@@ -60,7 +61,7 @@ namespace io.odysz.anson
             MemoryStream stream = new MemoryStream();
             a2d.ToBlock(stream);
             string s = Utils.ToString(stream);
-            string expect = "{\"type\": \"io.odysz.anson.Ans2dArr\", \"strs\": [[\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], []], \"ver\": \"0.9.1\"}";
+            string expect = "{\"type\": \"io.odysz.anson.Ans2dArr\", \"strs\": [[\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], []], \"ver\": \"0.9.xx\"}";
             Assert.AreEqual(expect, s);
 
             a2d = (Ans2dArr)Anson.FromJson(expect);
@@ -83,8 +84,8 @@ namespace io.odysz.anson
             parent.ToBlock(stream);
             string s = Utils.ToString(stream);
             string expect = "{\"type\": \"io.odysz.anson.AnsT3\", \"ms\": null, "
-                            + "\"m\": [{\"type\": \"io.odysz.anson.AnsT3Child\", \"ver\": \"0.9.1\"}, "
-                            + "{\"type\": \"io.odysz.anson.AnsT3son\", \"gendre\": \"male\", \"parent\": \"io.odysz.anson.AnsT3\", \"ver\": \"0.9.1\"}], \"ver\": \"0.9.1\"}";
+                            + "\"m\": [{\"type\": \"io.odysz.anson.AnsT3Child\", \"ver\": \"0.9.xx\"}, "
+                            + "{\"type\": \"io.odysz.anson.AnsT3son\", \"gendre\": \"male\", \"parent\": \"io.odysz.anson.AnsT3\", \"ver\": \"0.9.xx\"}], \"ver\": \"0.9.xx\"}";
 
             // in .net framwork 4.72, fields and properties are not always the same order
             Assert.AreEqual(expect.Length, s.Length);
@@ -116,17 +117,17 @@ namespace io.odysz.anson
         [TestMethod]
         public void testFromJson_rs() {
             AnsTRs rs = (AnsTRs)Anson.FromJson("{type: io.odysz.anson.AnsTRs, rs: "
-                    + "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+                    + "{type: io.odysz.module.rs.AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
                     + " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
                     + " rowIdx: 0, results: [[\"0 1\", \"0 2\", \"0 3\", \"0 4\"], [\"1 1\", \"1 2\", \"1 3\", \"1 4\"], [\"2 1\", \"2 2\", \"2 3\", \"2 4\"]]"
                     + "}}");
 
             int a = rs.rs.GetRowCount();
             Assert.AreEqual(3, rs.rs.GetRowCount());
-            Assert.AreEqual("0 1", rs.rs.results[0][0]);
+            Assert.AreEqual("0 1", ((IList)rs.rs.results[0])[0]);
 
             rs = (AnsTRs) Anson.FromJson("{type: io.odysz.anson.AnsTRs, rs: "
-                    + "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+                    + "{type: io.odysz.module.rs.AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
                     + " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
                     + " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
                     + "}}");

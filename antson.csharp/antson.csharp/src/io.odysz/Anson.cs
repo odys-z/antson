@@ -16,7 +16,7 @@ namespace io.odysz.anson
         public string ver { get; protected set; }
 
         public Anson() {
-            ver = "0.9.1";
+            ver = "0.9.xx";
         }
 
         public IJsonable ToBlock(Stream stream, JsonOpt opt = null)
@@ -117,16 +117,7 @@ namespace io.odysz.anson
 				ToListBlock(stream, (IEnumerable) v, opts);
 			else if (typeof(Hashtable).IsAssignableFrom(vclz))
 				ToMapBlock(stream, (Hashtable) v, opts);
-			//else if (AbstractCollection.class.isAssignableFrom(vclz))
-			//	toCollectionBlock(stream, (AbstractCollection <?>) v, opts == null || opts.length == 0 ? null : opts[0]);
-			//else if (fdClz.IsArray)
-            // {
-            //     if (v != null && v.GetType()..GetComponentType() != null
-            //         && v.getClass().getComponentType().isPrimitive() == true)
-            //         toPrimArrayBlock(stream, v);
-            //     else
-            //         toArrayBlock(stream, (Object[])v, opts != null && opts.length > 0 ? opts[0] : null);
-            // }
+            // ignored java case: Collection, Array
             else
                 Utils.WriteStr(stream, v.ToString());
         }
@@ -152,7 +143,6 @@ namespace io.odysz.anson
                     WriteNonPrimitive(stream, e.GetType(), e, opt);
                 else // if (f.getType().isPrimitive())
                      // must be primitive?
-                     // stream.write(String.valueOf(e).getBytes());
                     Utils.WriteStr(stream, e.ToString());
 
             }
@@ -241,9 +231,4 @@ namespace io.odysz.anson
             return lstner.ParsedEnvelope();
         }
     }
-
-    //public class AnsT1 : Anson
-    //{
-    //    public AnsT1() { }
-    //}
 }
