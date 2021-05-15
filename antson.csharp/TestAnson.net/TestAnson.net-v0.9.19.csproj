@@ -50,8 +50,31 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="semantics\io.odysz\AnsT_i.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\AnInsertReq.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\AnQueryReq.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\AnsonBody.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\AnsonHeader.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\AnsonMsg.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\AnsonResp.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\AnUpdateReq.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\EchoReq.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\FileReq.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\IPort.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\jprotocol.cs" />
+    <Compile Include="semantics\io.odysz\jprotocol\JsonOpt.cs" />
+    <Compile Include="semantics\io.odysz\transact\Query.cs" />
+    <Compile Include="semantics\io.odysz\jsession\AnSessionReq.cs" />
+    <Compile Include="semantics\io.odysz\jsession\AnSessionResp.cs" />
+    <Compile Include="semantics\io.odysz\jsession\JRobot.cs" />
+    <Compile Include="semantics\io.odysz\jsession\SessionInf.cs" />
+    <Compile Include="semantics\io.odysz\x\SemanticException.cs" />
+    <Compile Include="semantics\io.odysz\x\TransException.cs" />
+    <Compile Include="semantics\module\AnResultset.cs" />
+    <Compile Include="semantics\module\SemanticObject.cs" />
     <Compile Include="test\io.odysz\AnsonTest.cs" />
     <Compile Include="test\io.odysz\JProtocolTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
