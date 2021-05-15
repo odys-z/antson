@@ -1,12 +1,18 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections;
 using System.IO;
+using System.Reflection;
 
 namespace io.odysz.anson
 {
     [TestClass]
     public class AnsonTest
     {
+        static AnsonTest()
+        {
+            JSONAnsonListener.setAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+        } 
+
         [TestMethod]
         public void Test2Block()
         {
@@ -137,5 +143,5 @@ namespace io.odysz.anson
             Assert.AreEqual("0, 3", rs.rs.GetString(0, "2"));
         }
 
-}
+    }
 }

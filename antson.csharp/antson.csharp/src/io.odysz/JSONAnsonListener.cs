@@ -144,7 +144,7 @@ namespace io.odysz.anson
 
 		/// ///////////////////////////////////////////////////////////////////////////
         /// <summary>Assembly name that additional types provided, e.g. for AnsonMsg</summary>
-        private static string assmName;
+        private static string assmName = "";
         public static void setAssembly(string assName)
         {
             assmName = assName;
