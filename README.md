@@ -83,10 +83,8 @@ Currently there are only two different language runtime lib, c# & java. There is
 a js client, but it's not a neccessary, only a helper lib for keeping json protocol
 packages keep consists with server side. Users can parse the json data by themselves.
 
-The runtimes are antson.java & antson.csharp sub folder. The c# version also provided
-an example of Visual Studio solution, in exmaple.cs folder, of witch the gl-export
-is a [Revit](https://en.wikipedia.org/wiki/Autodesk_Revit) plugin. The test is
-barely working, but no plan to extend it at the license is expensive.
+The runtimes are antson.java & antson.csharp sub folder. The c# version come with
+an example in [Anclient/example.cs](https://github.com/odys-z/Anclient#repository-structure).
 
 # Known Issues
 
