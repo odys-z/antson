@@ -514,8 +514,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				if (arrClzz.isArray())
 					top.parsedVal = toPrimitiveArray(arr, arrClzz);
 			} catch (AnsonException | IllegalArgumentException | ClassNotFoundException e) {
-				Utils.warn("Trying convert array to annotated type failed.\ntype: %s\njson: %s\nerror: %s",
-						et, ctx.getText(), e.getMessage());
+				Utils.warn("Trying convert array to annotated type failed.\ntype: %s\njson: %s\nerror: %s\n%s",
+							et, ctx.getText(), e.getMessage(),
+							"If the client is js, check does every elements are the same type?");
 			}
 		// No annotation, for 2d list, parsed value is still a list.
 		// If enclosed element of array is also an array, it can not been handled here
@@ -621,8 +622,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 										((List<Object>)enclosLst).add(toPrimitiveArray(lst,
 												Array.newInstance(eleClz, 0).getClass()));
 									} catch (AnsonException e) {
-										Utils.warn("Trying convert array to annotated type failed.\nenclosing: %s\njson: %s\nerror: %s",
-											top.enclosing, ctx.getText(), e.getMessage());
+										Utils.warn("Trying convert array to annotated type failed.\nenclosing: %s\njson: %s\nerror: %s\n%s",
+											top.enclosing, ctx.getText(), e.getMessage(),
+											"If the client is js, check does every elements are the same type?");
 									}
 
 									// remember elem type for later null element
