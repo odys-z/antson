@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31129.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "antson.csharp", "antson.csharp\antson.csharp.csproj", "{B80300AC-A84A-4478-9C67-C1DE59833F03}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAnson", "TestAnson\TestAnson.csproj", "{49DA3D30-02B4-4A45-AB16-1A6BF97E95D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestAnson.net-v0.9.19", "TestAnson.net\TestAnson.net-v0.9.19.csproj", "{8EB158BA-EB26-45DE-A469-82B9C0065EBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{B80300AC-A84A-4478-9C67-C1DE59833F03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B80300AC-A84A-4478-9C67-C1DE59833F03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B80300AC-A84A-4478-9C67-C1DE59833F03}.Release|Any CPU.Build.0 = Release|Any CPU
-		{49DA3D30-02B4-4A45-AB16-1A6BF97E95D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{49DA3D30-02B4-4A45-AB16-1A6BF97E95D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{49DA3D30-02B4-4A45-AB16-1A6BF97E95D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{49DA3D30-02B4-4A45-AB16-1A6BF97E95D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EB158BA-EB26-45DE-A469-82B9C0065EBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EB158BA-EB26-45DE-A469-82B9C0065EBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EB158BA-EB26-45DE-A469-82B9C0065EBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EB158BA-EB26-45DE-A469-82B9C0065EBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

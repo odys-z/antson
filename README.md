@@ -79,7 +79,12 @@ basic rules like extends io.odysz.Anson or break reference loop with annotation,
 json v.s java type translation will be automatically handled and being transparent
 to upper tiers.
 
-It's also planned to publish Antson as an independent lib, at least as a jar and DLL.
+Currently there are only two different language runtime lib, c# & java. There is
+a js client, but it's not a neccessary, only a helper lib for keeping json protocol
+packages keep consists with server side. Users can parse the json data by themselves.
+
+The runtimes are antson.java & antson.csharp sub folder. The c# version come with
+an example in [Anclient/example.cs](https://github.com/odys-z/Anclient#repository-structure).
 
 # Known Issues
 

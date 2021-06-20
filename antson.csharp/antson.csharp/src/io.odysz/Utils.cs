@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 
 namespace io.odysz.anson
@@ -12,7 +11,7 @@ namespace io.odysz.anson
         /// <param name="stream"></param>
         /// <param name="s"></param>
         /// <param name="withQuote"></param>
-        internal static void WriteStr(Stream stream, string s, bool withQuote = false)
+        public static void WriteStr(Stream stream, string s, bool withQuote = false)
         {
             if (withQuote) stream.WriteByte((byte)'\"');
             byte[] b = Encoding.ASCII.GetBytes(s);
@@ -20,7 +19,7 @@ namespace io.odysz.anson
             if (withQuote) stream.WriteByte((byte)'\"');
         }
 
-        internal static Stream WriteByt(Stream stream, params char[] chrs)
+        public static Stream WriteByt(Stream stream, params char[] chrs)
         {
             if (chrs != null)
             {
@@ -37,7 +36,7 @@ namespace io.odysz.anson
             return r.ReadToEnd();
         }
 
-        internal static Stream WriteByt(Stream stream, params int[] nums)
+        public static Stream WriteByt(Stream stream, params int[] nums)
         {
             if (nums != null)
             {

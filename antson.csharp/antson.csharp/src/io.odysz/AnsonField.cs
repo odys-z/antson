@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace io.odysz.anson
 {
-    class AnsonField : Attribute
+    /// <summary>
+    /// member attribution, java annotation.
+    /// </summary>
+    public class AnsonField : Attribute
     {
         // nothing happen
         public const int undefined = -1;

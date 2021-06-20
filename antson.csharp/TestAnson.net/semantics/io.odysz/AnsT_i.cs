@@ -1,4 +1,5 @@
-﻿using System;
+﻿using io.odysz.module.rs;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -7,10 +8,10 @@ namespace io.odysz.anson
     public class AnsT1 : Anson
     {
 		/**Inner class must be static.
-         * The parser uses reflection create instances. (TODO: docs)
-         * 
-         * @author odys-z@github.com
-         */
+     * The parser uses reflection create instances. (TODO: docs)
+     *
+     * @author odys-z@github.com
+     */
 		public class AnsM1 : Anson
 		{
             public string name;
@@ -131,11 +132,11 @@ namespace io.odysz.anson
 
     public class AnsTRs : Anson
     {
-        public AnsonResultset rs;
+        public AnResultset rs;
 
         public AnsTRs()
         {
-            rs = new AnsonResultset(3, 4);
+            rs = new AnResultset(3, 4);
         }
     }
 
