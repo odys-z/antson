@@ -198,8 +198,12 @@ public class Anson implements IJsonable {
 				stream.write(new byte[] {':', ' '});
 
 			Object v = map.get(k);
-			Class<?> elemtype = v.getClass();
-			writeNonPrimitive(stream, elemtype, v);
+			if (v != null) {
+				Class<?> elemtype = v.getClass();
+				writeNonPrimitive(stream, elemtype, v);
+			}
+			else 
+				stream.write("null".getBytes());
 		}
 		stream.write('}');
 	}
