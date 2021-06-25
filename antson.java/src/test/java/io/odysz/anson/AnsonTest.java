@@ -290,7 +290,7 @@ class AnsonTest {
 	}
 
 	@Test
-	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException, AnsonException {
+	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException, AnsonException, IOException {
 		AnsTMap m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
 		assertEquals("B", m.map.get("A"));
 
@@ -299,6 +299,20 @@ class AnsonTest {
 		assertEquals(2, m.mapArr.get("a").length);
 		assertEquals(1, m.mapArr.get("a")[0]);
 		assertEquals("s", m.mapArr.get("a")[1]);
+		
+		m.map.put("v-null", null);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		opt.quotKey(true);
+		m.toBlock(bos, opt);
+		String s = bos.toString(StandardCharsets.UTF_8.name());
+		assertEquals("{\"type\": \"io.odysz.anson.AnsTMap\", \"map\": {\"A\": \"B\", \"v-null\": null}, \"mapArr\": {\"a\": [1, \"s\"]}}", s);
+		bos.close();
+
+		bos = new ByteArrayOutputStream(); 
+		opt.quotKey(false);
+		m.toBlock(bos, opt);
+		s = bos.toString(StandardCharsets.UTF_8.name());
+		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}", s);
 	}
 		
 	@Test
