@@ -314,6 +314,10 @@ class AnsonTest {
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}", s);
 	}
+	
+	void testEscape() throws AnsonException {
+		
+	}
 		
 	@Test
 	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException, SQLException, AnsonException {

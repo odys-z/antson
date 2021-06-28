@@ -317,17 +317,14 @@ public class Anson implements IJsonable {
 		String s = v.toString();
 		// What about Performance ?
 		return s
-				// .replace("\n", "\\n")
-				// .replace("\/", "\\/")
-
-				// TODO TEST
-				// .replace("\t", "\\t")
-				// TODO TEST
-
-				.replace("\r", "\\r")
-				.replace("\b", "\\b")
-				.replace("\\", "\\\\")
-				.replace("\f", "\\f")
+//				// .replace("\n", "\\n")
+//				// .replace("\/", "\\/")
+//				// .replace("\t", "\\t")
+//
+//				.replace("\r", "\\r")
+//				.replace("\b", "\\b")
+//				.replace("\\", "\\\\")
+//				.replace("\f", "\\f")
 				.getBytes();
 	}
 
