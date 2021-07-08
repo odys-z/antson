@@ -1,11 +1,11 @@
 # What's Antson
 
-Antson is ANother Tool for JSON (de)serialize java object to / from json.
+Antson is ANother Tool for JSON (de)serializing java/c# object to / from json.
 
 # Why Antson?
 
 For short, there is no such tool / lib that can convert javascript object to or
-from java or other programming language like C#.
+from java or other programming language like C#, on the fly.
 
 Why? Because js object has no structure types with support of compiler. You can
 not define a "io.app.User" type in js. All js objects are only a HashMap for Java.
@@ -53,6 +53,9 @@ the application business data defined in strictly typed language like java or c#
 then send json packages back and forth with the help of Antson API, consuming the
 data objects like normal structured objects, and only take care of it's business
 processing.
+
+(Since 0.9.4, Antson also implemented a c# version, and we are still comparing it
+with [https://www.newtonsoft.com/json](Newtonsoft Json.NET). )
 
 # Why no input stream mode?
 
