@@ -1,6 +1,6 @@
 package io.odysz.anson.jprotocol;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,6 +33,7 @@ class JProtocolTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void test_SessionReq() throws AnsonException, IOException {
 		// formatLogin: {a: "login", logid: logId, pswd: tokenB64, iv: ivB64};
 		AnsonMsg<AnSessionReq> reqv11 = AnSessionReq.formatLogin(uid, tk64, iv64);
@@ -52,13 +53,13 @@ class JProtocolTest {
 		//          a: "login", conn: null,
 		//          iv: "iv: I'm base64", mds: null,
 		//          token: "tk: I'm base64"}], seq: 909}
-		@SuppressWarnings("unchecked")
 		AnsonMsg<AnSessionReq> msg = (AnsonMsg<AnSessionReq>) Anson.fromJson(json);
 
 		assertEquals(reqv11.code(), msg.code());
 		assertEquals(reqv11.port(), msg.port());
 		assertEquals(reqv11.body(0).a(), msg.body(0).a());
 		assertEquals("login", msg.body(0).a());
+		assertTrue(msg.body(0) instanceof AnSessionReq);
 		assertEquals(reqv11.body(0).iv(), msg.body(0).iv());
 		assertEquals(reqv11.body(0).token(), msg.body(0).token());
 		assertEquals(msg, msg.body(0).parent);
@@ -164,7 +165,28 @@ class JProtocolTest {
 		assertEquals("admin", msg.body(0).uid);
 		assertEquals(24, msg.body(0).iv().length());
 		assertEquals(24, msg.body(0).token().length());
-	
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void test_js_logout() throws AnsonException {
+		// A real case debugging
+		// json = "{\"type\":\"io.odysz.semantic.jprotocol.AnsonMsg\",\"version\":\"0.9\",\"seq\":256,\"port\":\"session\",\"opts\":{},\"header\":{\"type\":\"io.odysz.semantic.jprotocol.AnsonHeader\",\"ssid\":\"0014eKTs\",\"uid\":\"admin\"},\"body\":[{\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
+		String json = "{\"type\":\"io.odysz.semantic.jprotocol.test.AnsonMsg\","
+			+   "\"version\":\"0.9\",\"seq\":256,\"port\":\"session\",\"opts\":{},"
+			+   "\"header\":{\"type\":\"io.odysz.semantic.jprotocol.test.AnsonHeader\",\"ssid\":\"0014eKTs\",\"uid\":\"admin\"},"
+		//bug:  "\"body\":[{\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
+			+   "\"body\":[{\"type\":io.odysz.semantic.jprotocol.test.AnSessionReq,"
+			+              "\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
+			
+		AnsonMsg<AnSessionReq> msg = (AnsonMsg<AnSessionReq>) AnsonMsg.fromJson(json);
+		assertEquals(null, msg.code());
+		assertEquals(Port.session, msg.port());
+		assertEquals("0014eKTs", msg.header().ssid());
+		assertEquals("admin", msg.header().logid());
+		assertTrue(msg.body(0) instanceof AnSessionReq);
+		assertEquals("logout", msg.body(0).a());
+		assertEquals(msg, msg.body(0).parent);
 	}
 
 	static <U extends AnsonResp> AnsonMsg<U> ok(Port p, U body) {
