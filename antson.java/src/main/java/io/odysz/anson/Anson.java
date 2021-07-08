@@ -381,7 +381,7 @@ public class Anson implements IJsonable {
 	 * kafka.Apache.org</a>, thinking may be it's better let this been handlered
 	 * by Kafka, in any style as users liked.
 	 * @param stream
-	 * @return
+	 * @return this
 	 * @throws IOException
 	 */
 	protected Anson fromBlock(InputStream stream) throws IOException {
@@ -399,7 +399,7 @@ public class Anson implements IJsonable {
 	 * As LL(*) parsing like Antlr won't work in stream mode,
 	 * this method won't have a input stream version.</p>
 	 * @param json
-	 * @return
+	 * @return new instance
 	 * @throws IllegalArgumentException
 	 * @throws ReflectiveOperationException
 	 */

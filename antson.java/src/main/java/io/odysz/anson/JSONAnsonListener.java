@@ -838,6 +838,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					f.getType().getName(), f.getName());
 	}
 
+	/**Register a factory of IJsonable implementation.
+	 * @param jsonable
+	 * @param factory
+	 */
 	public static void registFactory(Class<?> jsonable, JsonableFactory factory) {
 		if (factorys == null)
 			factorys = new HashMap<Class<?>, JsonableFactory>();
