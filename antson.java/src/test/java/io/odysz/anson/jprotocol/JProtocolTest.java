@@ -17,8 +17,9 @@ import io.odysz.semantic.jprotocol.test.AnSessionReq;
 import io.odysz.semantic.jprotocol.test.AnSessionResp;
 import io.odysz.semantic.jprotocol.test.AnsonMsg;
 import io.odysz.semantic.jprotocol.test.AnsonResp;
-import io.odysz.semantic.jprotocol.test.SemanticObjV11;
+import io.odysz.semantic.jprotocol.test.SemanticObject;
 import io.odysz.semantic.jprotocol.test.SessionInf;
+import io.odysz.semantic.jprotocol.test.TransException;
 import io.odysz.semantic.jprotocol.test.AnsonMsg.MsgCode;
 import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
 
@@ -98,12 +99,12 @@ class JProtocolTest {
 	}
 	
 	@Test
-	void test_insertResp() throws AnsonException, IOException {
+	void test_insertResp() throws AnsonException, IOException, TransException {
 		
 		HashMap<String, Object> props = new HashMap<String, Object>(2);
-		props.put("resulved", new SemanticObjV11());
-		((SemanticObjV11) props.get("resulved")).add("recId", "000f");
-		((SemanticObjV11) props.get("resulved")).add("vec", "000x");
+		props.put("resulved", new SemanticObject());
+		((SemanticObject) props.get("resulved")).add("recId", "000f");
+		((SemanticObject) props.get("resulved")).add("vec", "000x");
 		props.put("res", new int[] { 1, 20 });
 
 		AnsonMsg<AnsonResp> resp = new AnsonMsg<AnsonResp>(Port.insert, MsgCode.ok)
@@ -119,7 +120,7 @@ class JProtocolTest {
 		assertEquals(MsgCode.ok, msg.code());
 		assertEquals(resp.port(), msg.port());
 		HashMap<String, Object> props2 = msg.body(0).data();
-		SemanticObjV11 resulved = (SemanticObjV11) props2.get("resulved");
+		SemanticObject resulved = (SemanticObject) props2.get("resulved");
 		assertEquals("000f", ((ArrayList<?>)resulved.get("recId")).get(0));
 		assertEquals("000x", ((ArrayList<?>)resulved.get("vec")).get(0));
 		
