@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -12,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.odysz.anson.Anson;
+import io.odysz.anson.AnsonResultset;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.semantic.ext.test.AnDatasetResp;
 import io.odysz.semantic.jprotocol.test.AnSessionReq;
 import io.odysz.semantic.jprotocol.test.AnSessionResp;
 import io.odysz.semantic.jprotocol.test.AnsonMsg;
@@ -129,6 +132,33 @@ class JProtocolTest {
 		assertEquals(20, ((ArrayList<?>)props2.get("res")).get(1));
 	}
 
+	@Test
+	void test_datasetResp() throws AnsonException, IOException, SQLException {
+		AnsonResultset rs = new AnsonResultset(2, 2);
+		AnDatasetResp dr = (AnDatasetResp) new AnDatasetResp().rs(rs);
+		AnsonMsg<AnDatasetResp> resp = ok(Port.dataset, dr);
+
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		resp.toBlock(bos);
+		String json = bos.toString(StandardCharsets.UTF_8.name());
+
+		// {"type": "io.odysz.semantic.jprotocol.test.AnsonMsg", "code": "ok", "opts": null, "port": "dataset", "header": null, "vestion": "1.0", "body": [{"type": "io.odysz.semantic.ext.test.AnDatasetResp", "rs": [{"type": "io.odysz.anson.AnsonResultset", "stringFormats": null, "total": 0, "rowCnt": 2, "colCnt": 2, "colnames": {"1": [1, "1"], "2": [2, "2"]}, "rowIdx": 0, "results": [["0, 1", "0, 2"], ["1, 1", "1, 2"]]}], "parent": "io.odysz.semantic.jprotocol.test.AnsonMsg", "a": null, "forest": null, "conn": null, "m": "", "map": null}], "seq": 0}
+
+		@SuppressWarnings("unchecked")
+		AnsonMsg<AnDatasetResp> msg = (AnsonMsg<AnDatasetResp>) Anson.fromJson(json);
+
+		assertEquals(MsgCode.ok, msg.code());
+		assertEquals(resp.port(), msg.port());
+		assertEquals(msg, msg.body(0).parent);
+		rs = msg.body(0).rs(0);
+		rs.beforeFirst().next();
+		assertEquals("0, 1", rs.getString("1"));
+		assertEquals("0, 2", rs.getString("2"));
+		rs.next();
+		assertEquals("1, 1", rs.getString("1"));
+		assertEquals("1, 2", rs.getString("2"));
+	}
+
 	@SuppressWarnings("unchecked")
 	@Test
 	void test_js_login() throws AnsonException {
@@ -140,14 +170,6 @@ class JProtocolTest {
 					+ "\"uid\":\"admin\",\"token\":\"ZfSigOt9vrtWFWHg4c6v0A==\","
 					+ "\"iv\":\"KikpUxk0GREELlU7KGJUJw==\","
 					+ "\"a\":\"login\"}]}";
-//		String req = "{type:io.odysz.semantic.jprotocol.test.AnsonMsg,"
-//				+ "version:\"1.1\",\"seq\":421,"
-//				+ "opts:{noNull:true,noBoolean:false,doubleFormat:\".2f\"},"
-//				+ "port:\"session\",header:{},"
-//				+ "body:[{type:io.odysz.semantic.jprotocol.test.AnSessionReq,"
-//					+ "uid:\"admin\",token:\"ZfSigOt9vrtWFWHg4c6v0A==\","
-//					+ "iv:\"KikpUxk0GREELlU7KGJUJw==\","
-//					+ "a:\"login\"}]}";
 	
 		AnsonMsg<AnSessionReq> msg = (AnsonMsg<AnSessionReq>) Anson.fromJson(req);
 
@@ -171,12 +193,12 @@ class JProtocolTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	void test_js_logout() throws AnsonException {
+		// NOTES: an envelope must has a type property
 		// A real case debugging
 		// json = "{\"type\":\"io.odysz.semantic.jprotocol.AnsonMsg\",\"version\":\"0.9\",\"seq\":256,\"port\":\"session\",\"opts\":{},\"header\":{\"type\":\"io.odysz.semantic.jprotocol.AnsonHeader\",\"ssid\":\"0014eKTs\",\"uid\":\"admin\"},\"body\":[{\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
 		String json = "{\"type\":\"io.odysz.semantic.jprotocol.test.AnsonMsg\","
 			+   "\"version\":\"0.9\",\"seq\":256,\"port\":\"session\",\"opts\":{},"
 			+   "\"header\":{\"type\":\"io.odysz.semantic.jprotocol.test.AnsonHeader\",\"ssid\":\"0014eKTs\",\"uid\":\"admin\"},"
-		//bug:  "\"body\":[{\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
 			+   "\"body\":[{\"type\":io.odysz.semantic.jprotocol.test.AnSessionReq,"
 			+              "\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
 			
