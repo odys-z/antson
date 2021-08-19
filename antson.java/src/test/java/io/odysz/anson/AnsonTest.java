@@ -33,14 +33,16 @@ class AnsonTest {
 		anson.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsT1, ver: \"v0.1\", m: null}", s);
-
+ 
+		// ESC
 		AnsT2 a2 = new AnsT2();
-		a2.m = new String[] {"e\n0", "e1"}; // ESC
+		a2.m = new String[] {"e\n0", "e1", "{\"msg\": \"george\"}"};
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, s: 0, m: [\"e\n0\", \"e1\"]}", s);
+		assertEquals("{type: io.odysz.anson.AnsT2, s: 0, m: [\"e\\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}", s);
 		
+
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
 		cll.lst.add("B");
@@ -58,6 +60,7 @@ class AnsonTest {
 				+ " colnames: {1: [1, \"1\"], 2: [2, \"2\"], 3: [3, \"3\"], 4: [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
 				+ "}}", s);
+		
 	}
 	
 	@Test

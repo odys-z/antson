@@ -325,6 +325,16 @@ public class Anson implements IJsonable {
 //				.replace("\b", "\\b")
 //				.replace("\\", "\\\\")
 //				.replace("\f", "\\f")
+				
+				// v1.3.0 NOTE 19 Aug 2021
+				// - why escape is disabled?
+				// What's needed currently:
+				// A DB varchar field is stored with value "{\"msg\": \"hello\"}",
+				// which is a field in an Anson object. 
+
+				.replace("\n", "\\\n")
+				.replace("\t", "\\\t")
+				.replace("\"", "\\\"")
 				.getBytes();
 	}
 
