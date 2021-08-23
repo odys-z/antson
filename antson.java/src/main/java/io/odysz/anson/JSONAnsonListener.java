@@ -566,13 +566,20 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    	if (lstItem == null)
 	    		continue;
 
-	    	// this guess is error prone, let's tell user why. May be more annotation is needed
-	    	if (!eleType.isAssignableFrom(lstItem.getClass()))
+	    	/* this guess is error prone, let's tell user why. May be more annotation is needed
+	    	 * Note: jserv v1.3.0
+	    	 * Sometimes the eleType is figured out (only a guess) from the first element, let's try tolerate type mismatch here.
+	    	 * This is correct in java, but it's ok in js for elements with different type. Just try convert it into string.
+	    	 */
+	    	if (eleType == String.class && !eleType.isAssignableFrom(lstItem.getClass()))
+	    		lstItem = lstItem.toString();
+	    	else if (!eleType.isAssignableFrom(lstItem.getClass()))
 	    		throw new AnsonException(1, "Set element (v: %s, type %s) to array of type of \"%s[]\" failed.\n"
-	    				+ "Array element's type not annotated?",
+	    				+ "Array element's type not annotated?\n"
+	    				+ "Please also note that all values in string are tolerated. (which is typical in js for array of elements in different types.)",
 	    				lstItem, lstItem.getClass(), eleType);
 
-	        Array.set(array, i, list.get(i));
+	        Array.set(array, i, lstItem);
 	    }
 
 	    return array;
@@ -636,7 +643,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 									}
 
 									// remember elem type for later null element
-									top.elemType(new String[] {eleClz.getName()});
+									// v1.3.0 This remembering wrong type. Nested array type doesn't figured out correctly - all test passed without this.
+									// top.elemType(new String[] {eleClz.getName()});
 								}
 								// all elements are null, ignore the list is the only way
 							}

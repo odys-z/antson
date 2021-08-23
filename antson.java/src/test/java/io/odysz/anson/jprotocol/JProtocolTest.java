@@ -23,6 +23,7 @@ import io.odysz.semantic.jprotocol.test.AnsonResp;
 import io.odysz.semantic.jprotocol.test.SemanticObject;
 import io.odysz.semantic.jprotocol.test.SessionInf;
 import io.odysz.semantic.jprotocol.test.TransException;
+import io.odysz.semantic.jprotocol.test.UserReq;
 import io.odysz.semantic.jprotocol.test.AnsonMsg.MsgCode;
 import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
 
@@ -190,7 +191,6 @@ class JProtocolTest {
 		assertEquals(24, msg.body(0).token().length());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	void test_js_logout() throws AnsonException {
 		// NOTES: an envelope must has a type property
@@ -202,6 +202,7 @@ class JProtocolTest {
 			+   "\"body\":[{\"type\":io.odysz.semantic.jprotocol.test.AnSessionReq,"
 			+              "\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
 			
+		@SuppressWarnings("unchecked")
 		AnsonMsg<AnSessionReq> msg = (AnsonMsg<AnSessionReq>) AnsonMsg.fromJson(json);
 		assertEquals(null, msg.code());
 		assertEquals(Port.session, msg.port());
@@ -210,6 +211,84 @@ class JProtocolTest {
 		assertTrue(msg.body(0) instanceof AnSessionReq);
 		assertEquals("logout", msg.body(0).a());
 		assertEquals(msg, msg.body(0).parent);
+	}
+	
+    String userReqJsonReduced =  
+		"{ \"type\": \"io.odysz.semantic.jprotocol.test.AnsonMsg\", \"version\": \"0.9\", \"seq\": 238, \"port\": \"quiz\", \"opts\": {}," + 
+          "\"header\": { \"type\": \"io.odysz.semantic.jprotocol.test.AnsonHeader\", \"ssid\": \"001ETPAo\", \"uid\": \"becky\" }," + 
+          "\"body\": [" + 
+            "{ \"type\": \"io.odysz.semantic.jprotocol.test.UserReq\", \"a\": \"update\"," + 
+              "\"parent\": \"io.odysz.semantic.jprotocol.test.AnsonMsg\"," + 
+              "\"uri\": \"/n/quizzes\", \"tabl\": \"quizzes\"," + 
+              "\"data\": {" + 
+                "\"props\": {" + 
+                  "\"quizId\": \"000003\", \"qtitle\": \"Emotion Poll (Type A)\", \"quizinfo\": null," + 
+                  "\"questions\": [" + 
+                    "[ [ \"question\", \"Test 1\" ]], " + 
+                    "[ [ \"question\", \"学习压力\" ]], " + 
+                    "[ [ \"question\", \"父母关系\" ]]" + 
+                  "]" + 
+                "}" + 
+              "}" + 
+            "}" + 
+          "]" + 
+        "}";	
+ 
+    String userReqJson =  
+		"{ \"type\": \"io.odysz.semantic.jprotocol.test.AnsonMsg\", \"version\": \"0.9\", \"seq\": 238, \"port\": \"quiz\", \"opts\": {}," + 
+          "\"header\": { \"type\": \"io.odysz.semantic.jprotocol.test.AnsonHeader\", \"ssid\": \"001ETPAo\", \"uid\": \"becky\" }," + 
+          "\"body\": [" + 
+            "{ \"type\": \"io.odysz.semantic.jprotocol.test.UserReq\", \"a\": \"update\"," + 
+              "\"parent\": \"io.odysz.semantic.jprotocol.test.AnsonMsg\"," + 
+              "\"uri\": \"/n/quizzes\", \"tabl\": \"quizzes\"," + 
+              "\"data\": {" + 
+                "\"props\": {" + 
+                  "\"quizId\": \"000003\", \"qtitle\": \"Emotion Poll (Type A)\", \"quizinfo\": null," + 
+                  "\"questions\": [" + 
+                    "[ [ \"question\", \"Test 1\" ], [ \"answers\", \"\" ], [ \"qtype\", \"\" ], [ \"answer\", null ], [ \"quizId\", null ], [ \"qorder\", 0 ], [ \"shortDesc\", \"Test 1\" ], [ \"hints\", null ], [ \"extra\", null ]], " + 
+                    "[ [ \"question\", \"学习压力\" ], [ \"answers\", \"\" ], [ \"qtype\", \"s\" ], [ \"answer\", null ], [ \"quizId\", null ], [ \"qorder\", 1 ], [ \"shortDesc\", \"学习压力\" ], [ \"hints\", null ], [ \"extra\", null ]], " + 
+                    "[ [ \"question\", \"父母/家庭关系父母/家庭关系父母/家庭关系父母/家庭关系\" ], [ \"answers\", \"vv\" ], [ \"qtype\", \"1\" ], [ \"answer\", \"\" ], [ \"quizId\", null ], [ \"qorder\", 1 ], [ \"shortDesc\", \"父母/家庭关系\" ], [ \"hints\", null ], [ \"extra\", null ] ]" + 
+                  "]" + 
+                "}" + 
+              "}" + 
+            "}" + 
+          "]" + 
+        "}";	
+    /**TODO TODO TODO TODO TODO the c# version could also need this test case.
+     * @throws AnsonException
+     */
+    @Test
+	void test_js_userReq() throws AnsonException {
+		@SuppressWarnings("unchecked")
+		AnsonMsg<UserReq> reduced = (AnsonMsg<UserReq>) AnsonMsg.fromJson(userReqJsonReduced);
+		assertEquals(null, reduced.code());
+
+		ArrayList<?> rques = (ArrayList<?>) reduced.body(0).data("questions");
+		assertEquals(3, rques.size());
+		Object r0 = rques.get(0);
+		assertEquals("question", ((String[][]) r0)[0][0].toString());
+		assertEquals("Test 1", ((String[][]) r0)[0][1].toString());
+		Object r1 = rques.get(1);
+		assertEquals("question", ((String[][]) r1)[0][0].toString());
+		assertEquals("学习压力", ((String[][]) r1)[0][1].toString());
+
+		@SuppressWarnings("unchecked")
+		AnsonMsg<UserReq> msg = (AnsonMsg<UserReq>) AnsonMsg.fromJson(userReqJson);
+		assertEquals(null, msg.code());
+		assertEquals("Emotion Poll (Type A)", msg.body(0).data("qtitle"));
+		
+		ArrayList<?> ques = (ArrayList<?>) msg.body(0).data("questions");
+		assertEquals(3, ques.size());
+
+		// [[question, Test 1], [answers, ], [qtype, ], [answer, null], [quizId, null], [qorder, 0], [shortDesc, Test 1], [hints, null], [extra, null]]
+		Object q0 = ques.get(0);
+		assertEquals("question", ((String[][]) q0)[0][0].toString());
+		assertEquals("Test 1", ((String[][]) q0)[0][1].toString());
+
+		// [[question, Test 1], [answers, ], [qtype, ], [answer, null], [quizId, null], [qorder, 0], [shortDesc, Test 1], [hints, null], [extra, null]]
+		Object q1 = ques.get(1);
+		assertEquals("question", ((String[][]) q1)[0][0].toString());
+		assertEquals("学习压力", ((String[][]) q1)[0][1].toString());
 	}
 
 	static <U extends AnsonResp> AnsonMsg<U> ok(Port p, U body) {
