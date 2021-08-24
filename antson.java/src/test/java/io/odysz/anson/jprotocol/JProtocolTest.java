@@ -254,12 +254,27 @@ class JProtocolTest {
             "}" + 
           "]" + 
         "}";	
+    
+    String jsonPollsUsers = "{ \"type\": \"io.odysz.semantic.jprotocol.AnsonMsg\"," +
+    	    "\"version\": \"0.9\", \"seq\": 14, \"port\": \"quiz\", \"opts\": {}," +
+    	    "\"header\": { \"type\": \"io.odysz.semantic.jprotocol.AnsonHeader\", \"ssid\": \"001AzjA9\", \"uid\": \"becky\" }," +
+    	    "\"body\": [ {" +
+    	            "\"type\": \"io.odysz.semantic.jserv.user.UserReq\"," +
+    	            "\"a\": \"polls-users\"," +
+    	            "\"parent\": \"io.odysz.semantic.jprotocol.AnsonMsg\"," +
+    	            "\"data\": { \"props\": {} }" +
+    	        "}" +
+    	    "]" +
+    	"}";
     /**TODO TODO TODO TODO TODO the c# version could also need this test case.
      * @throws AnsonException
      */
+	@SuppressWarnings("unchecked")
     @Test
 	void test_js_userReq() throws AnsonException {
-		@SuppressWarnings("unchecked")
+    	AnsonMsg<UserReq> pollsUsers = (AnsonMsg<UserReq>) AnsonMsg.fromJson(jsonPollsUsers);
+		assertEquals("polls-users", pollsUsers.body(0).a());
+
 		AnsonMsg<UserReq> reduced = (AnsonMsg<UserReq>) AnsonMsg.fromJson(userReqJsonReduced);
 		assertEquals(null, reduced.code());
 
