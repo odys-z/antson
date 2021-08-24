@@ -11,8 +11,8 @@ public abstract class AnsonBody extends Anson {
 	@AnsonField(ref=AnsonField.enclosing)
 	public AnsonMsg<? extends AnsonBody> parent;
 
-	protected String conn;
-	public String conn() { return conn; }
+	protected String uri;
+	public String uri() { return uri; }
 
 	/** Action: login | C | R | U | D | any serv extension */
 	String a;
@@ -24,8 +24,8 @@ public abstract class AnsonBody extends Anson {
 		return this;
 	}
 
-	protected AnsonBody(AnsonMsg<? extends AnsonBody> parent, String conn) {
+	protected AnsonBody(AnsonMsg<? extends AnsonBody> parent, String uri) {
 		this.parent = parent;
-		this.conn = conn;
+		this.uri = uri;
 	}
 }

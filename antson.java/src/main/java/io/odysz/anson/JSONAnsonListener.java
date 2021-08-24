@@ -649,7 +649,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 								// all elements are null, ignore the list is the only way
 							}
 							else
-								// FIXME this will broken when first element's length is 0.
+								// FIXME this will be broken when first element's length is 0.
 								((List<Object>)enclosLst).add(lst.toArray());
 						}
 						// branch: with annotation or type name already figured out from 1st element

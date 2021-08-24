@@ -255,13 +255,13 @@ class JProtocolTest {
           "]" + 
         "}";	
     
-    String jsonPollsUsers = "{ \"type\": \"io.odysz.semantic.jprotocol.AnsonMsg\"," +
+    String jsonPollsUsers = "{ \"type\": \"io.odysz.semantic.jprotocol.test.AnsonMsg\"," +
     	    "\"version\": \"0.9\", \"seq\": 14, \"port\": \"quiz\", \"opts\": {}," +
-    	    "\"header\": { \"type\": \"io.odysz.semantic.jprotocol.AnsonHeader\", \"ssid\": \"001AzjA9\", \"uid\": \"becky\" }," +
+    	    "\"header\": { \"type\": \"io.odysz.semantic.jprotocol.test.AnsonHeader\", \"ssid\": \"001AzjA9\", \"uid\": \"becky\" }," +
     	    "\"body\": [ {" +
-    	            "\"type\": \"io.odysz.semantic.jserv.user.UserReq\"," +
+    	            "\"type\": \"io.odysz.semantic.jprotocol.test.UserReq\"," +
     	            "\"a\": \"polls-users\"," +
-    	            "\"parent\": \"io.odysz.semantic.jprotocol.AnsonMsg\"," +
+    	            "\"parent\": \"io.odysz.semantic.jprotocol.test.AnsonMsg\"," +
     	            "\"data\": { \"props\": {} }" +
     	        "}" +
     	    "]" +
@@ -287,7 +287,6 @@ class JProtocolTest {
 		assertEquals("question", ((String[][]) r1)[0][0].toString());
 		assertEquals("学习压力", ((String[][]) r1)[0][1].toString());
 
-		@SuppressWarnings("unchecked")
 		AnsonMsg<UserReq> msg = (AnsonMsg<UserReq>) AnsonMsg.fromJson(userReqJson);
 		assertEquals(null, msg.code());
 		assertEquals("Emotion Poll (Type A)", msg.body(0).data("qtitle"));
