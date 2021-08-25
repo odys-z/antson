@@ -355,7 +355,8 @@ public class Anson implements IJsonable {
 	 * @return
 	 */
 	public static String unescape(String v) {
-		return v.replace("\\\n", "\n")
+		return v == null ? null
+			 : v.replace("\\\n", "\n")
 				.replace("\\\t", "\t")
 				.replace("\\\"", "\"");
 	}
