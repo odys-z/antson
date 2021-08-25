@@ -696,7 +696,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			else //if (top.isInMap()) {
 				// parsed Value can already got when exit array
 				if (top.parsedVal == null)
-					top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
+					/** NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
+					 *  When client upload json, it's automatically escaped.
+					 *  This makes DB (or server stored data) are mixed with escaped and un-escaped strings.
+					 *  When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
+					 *  The following is experimental to keep server side data be consists with raw data.
+					 *  
+					 *  befor change:
+					 *  top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
+					 */
+					top.parsedVal = Anson.unescape(getStringVal(ctx.STRING(), ctx.getText()));
 			// }
 		}
 	}
