@@ -1,7 +1,9 @@
 package io.odysz.anson;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 import io.odysz.anson.x.AnsonException;
 
@@ -37,6 +39,12 @@ public interface IJsonable {
 	 * @throws IOException
 	 */
 	IJsonable toBlock(OutputStream stream, JsonOpt... opts) throws AnsonException, IOException;
+
+	public default String toBlock(JsonOpt opt) throws AnsonException, IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
+		toBlock(bos, opt);
+		return bos.toString(StandardCharsets.UTF_8.name());
+	}
 
 	/**
 	 * @param buf
