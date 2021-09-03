@@ -77,7 +77,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		/**Set type annotation.<br>
 		 * annotation is value of {@link AnsonField#valType()}
 		 * @param tn
-		 * @return
+		 * @return this
 		 */
 		ParsingCtx elemType(String[] tn) {
 			this.valType = tn == null || tn.length <= 0 ? null : tn[0];
@@ -109,7 +109,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	/**Merge clazz's field meta up to the IJsonable ancestor.
 	 * @param clazz
 	 * @param fmap
-	 * @return
+	 * @return fmap
 	 */
 	static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
 		Field flist[] = clazz.getDeclaredFields();
@@ -396,7 +396,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	/**Parse property name, tolerate enclosing quotes presenting or not.
 	 * @param ctx
-	 * @return
+	 * @return the prop value in string
 	 */
 	private static String getProp(PairContext ctx) {
 		TerminalNode p = ctx.propname().IDENTIFIER();

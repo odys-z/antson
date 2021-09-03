@@ -749,25 +749,6 @@ public class AnsonResultset extends Anson {
 		System.out.println(String.format("\nrow count: %d", results == null ? 0 : results.size()));
 	}
 
-	/**get {rowCount, colCount, headers: {@link #colnames}, rows: {@link #results}}
-	 * @param includeColHeader
-	 * @return
-	 * @throws UnsupportedEncodingException 
-	 */
-//	public SemanticObject convert2Jarr(boolean includeColHeader) throws UnsupportedEncodingException {
-//		// JsonObjectBuilder b = Json.createObjectBuilder();
-//		SemanticObject b = new SemanticObject();
-////		b.add("rowCount", results == null ? 0 : results.size());
-////		b.add("colCount", colnames == null ? 0 : colnames.size());
-////		if (gson == null) gson = new Gson();
-////		b.add("headers", gson.toJson(colnames));
-////
-////		Type rt = new TypeToken<ArrayList<ArrayList<String>>>(){}.getType();
-////		b.add("rows", gson.toJson(results, rt ));
-//
-//		return b;
-//	}
-
 	/**Collect fields value that can be used in "IN" condition, e.g. 'v1', 'v2', ...
 	 * @param rs
 	 * @param fields

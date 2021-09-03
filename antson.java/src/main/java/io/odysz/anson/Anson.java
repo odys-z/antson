@@ -313,7 +313,7 @@ public class Anson implements IJsonable {
 	/**<pre>fragment ESC
      : '\\' (["\\/bfnrt] | UNICODE) ;</pre>
 	 * @param v
-	 * @return
+	 * @return escaped bytes
 	 */
 	private static byte[] escape(Object v) {
 		if (v == null)
@@ -352,7 +352,7 @@ public class Anson implements IJsonable {
 	 *  befor change:
 	 *  top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
 	 * @param v
-	 * @return
+	 * @return unescaped string
 	 */
 	public static String unescape(String v) {
 		return v == null ? null
