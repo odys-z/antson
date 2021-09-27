@@ -2,6 +2,10 @@ package io.odysz.anson;
 
 public class AnsT2 extends Anson {
 	int s;
+	
+	boolean b;
+	
+	char c;
 
 	String[] m;
 	

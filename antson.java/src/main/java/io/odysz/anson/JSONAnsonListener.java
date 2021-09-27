@@ -835,6 +835,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
+	/**Set primary type values.
+	 * <p>byte short int long float double boolean char</p>
+	 * See <a href='https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html'>
+	 * Oracle Java Documentation</a>
+	 * @param obj
+	 * @param f
+	 * @param v
+	 * @throws RuntimeException
+	 * @throws ReflectiveOperationException
+	 * @throws AnsonException
+	 */
 	private static void setPrimitive(IJsonable obj, Field f, String v)
 			throws RuntimeException, ReflectiveOperationException, AnsonException {
 		if (f.getType() == int.class || f.getType() == Integer.class)
@@ -849,6 +860,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			f.set(obj, Short.valueOf(v));
 		else if (f.getType() == byte.class || f.getType() == Byte.class)
 			f.set(obj, Byte.valueOf(v));
+		else if (f.getType() == boolean.class || f.getType() == Boolean.class)
+			f.set(obj, Boolean.valueOf(v));
+		else if (f.getType() == char.class) {
+			char c = v != null && v.length() > 0 ? v.charAt(1) : '0';
+			Utils.warn("Guessing json string (%s) as a char: %s", v, c);
+			f.set(obj, c);
+		}
 		else
 			// what's else?
 			throw new AnsonException(0, "Unsupported field type: %s (field %s)",

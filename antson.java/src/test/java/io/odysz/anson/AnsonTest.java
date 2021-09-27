@@ -40,8 +40,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, s: 0, m: [\"e\\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}", s);
-		
+		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}", s);
 
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
@@ -185,10 +184,10 @@ class AnsonTest {
 		lst.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsTStrsList, "
-				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, s: 0, m: [\"0 0 0 0\"]}, "
-						  + "{type: io.odysz.anson.AnsT2, s: 0, m: [\"0 0 0 1\"]}], "
+				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 0\"]}, "
+						  + "{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 1\"]}], "
 						 + "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
-						 + "[null, {type: io.odysz.anson.AnsT2, s: 0, m: [\"1 1 1 1\"]}]]]], "
+						 + "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"1 1 1 1\"]}]]]], "
 				+ "lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
 				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}";
 		assertEquals(expect, s);
@@ -230,7 +229,9 @@ class AnsonTest {
 		assertEquals("v0\\n.\\n1", anson.ver);
 		assertEquals(null, anson.m);
 
-		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: [\"e1\", \"e2\"]}");
+		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\", \"e2\"]}");
+		assertEquals(true, anson2.b);
+		assertEquals('c', anson2.c);
 		assertEquals("e1", anson2.m[0]);
 		assertEquals("e2", anson2.m[1]);
 

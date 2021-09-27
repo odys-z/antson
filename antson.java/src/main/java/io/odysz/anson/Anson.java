@@ -93,6 +93,10 @@ public class Anson implements IJsonable {
 
 					writeNonPrimitive(stream, vclz, v, opts);
 				}
+				if (f.getType() == char.class) {
+					char c = f.getChar(this);
+					stream.write(c == 0 ? '0' : c);
+				}
 				else if (f.getType().isPrimitive())
 					stream.write(String.valueOf(f.get(this)).getBytes());
 			} catch (IllegalArgumentException | IllegalAccessException e1) {
