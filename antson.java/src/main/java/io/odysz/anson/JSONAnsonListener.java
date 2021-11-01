@@ -489,8 +489,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			// if field available, parse field's value type as the new node's value type
 			else {
-				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				Field f = top.fmap.get(top.parsingProp);
+				if (f == null)
+					throw new AnsonException(0, "Field not parsable: field: %s, value: %s", top.parsingProp, ctx.getText());
+				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				// AnsT3 { ArrayList<Anson[]> ms; }
 				// ctx: [[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]]
 				// [0]: io.odysz.anson.Anson[],
