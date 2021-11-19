@@ -865,7 +865,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		else if (f.getType() == boolean.class || f.getType() == Boolean.class)
 			f.set(obj, Boolean.valueOf(v));
 		else if (f.getType() == char.class) {
-			char c = v != null && v.length() > 0 ? v.charAt(1) : '0';
+			char c = v != null && v.length() > 0 ? v.charAt(0) == '"' ? v.charAt(1) : v.charAt(0) : '0';
 			Utils.warn("Guessing json string (%s) as a char: %s", v, c);
 			f.set(obj, c);
 		}
