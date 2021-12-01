@@ -45,6 +45,14 @@ public class Anson implements IJsonable {
 
 	public Anson() {}
 
+	/**Serialize Anson object.
+	 * 
+	 * <p>Debug Note, 1 Dec. 2021:</p>
+	 * javadoc of byte[] java.lang.String.getBytes():<br>
+	 * Encodes this String into a sequence of bytes using theplatform's default charset,
+	 * storing the result into a new byte array.<br>
+	 * So windows change UTF8 to whatever it likes.
+	 */
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
@@ -56,7 +64,7 @@ public class Anson implements IJsonable {
 		}
 		else {
 			stream.write("{type: ".getBytes());
-			stream.write(getClass().getName().getBytes());
+			stream.write(getClass().getName().getBytes(StandardCharsets.UTF_8));
 		}
 
 		HashMap<String, Field> fmap = new HashMap<String, Field>();
@@ -74,9 +82,9 @@ public class Anson implements IJsonable {
 
 			// prop
 			if (quotK)
-				stream.write(("\"" + f.getName() + "\": ").getBytes());
+				stream.write(("\"" + f.getName() + "\": ").getBytes(StandardCharsets.UTF_8));
 			else
-				stream.write((f.getName() + ": ").getBytes());
+				stream.write((f.getName() + ": ").getBytes(StandardCharsets.UTF_8));
 
 			// value
 			if (af != null && af.ref() == AnsonField.enclosing) {
@@ -98,7 +106,7 @@ public class Anson implements IJsonable {
 					stream.write(c == 0 ? '0' : c);
 				}
 				else if (f.getType().isPrimitive())
-					stream.write(String.valueOf(f.get(this)).getBytes());
+					stream.write(String.valueOf(f.get(this)).getBytes(StandardCharsets.UTF_8));
 			} catch (IllegalArgumentException | IllegalAccessException e1) {
 				throw new AnsonException(0, e1.getMessage());
 			}
@@ -134,7 +142,7 @@ public class Anson implements IJsonable {
 				stream.write(escape(o.toString()));
 				stream.write('"');
 			}
-			else stream.write(o.toString().getBytes());
+			else stream.write(o.toString().getBytes(StandardCharsets.UTF_8));
 		}
 		stream.write(']');
 	}
@@ -163,7 +171,7 @@ public class Anson implements IJsonable {
 				stream.write(escape(o.toString()));
 				stream.write('"');
 			}
-			else stream.write(o.toString().getBytes());
+			else stream.write(o.toString().getBytes(StandardCharsets.UTF_8));
 		}
 		stream.write(']');
 	}
@@ -199,7 +207,7 @@ public class Anson implements IJsonable {
 
 			if (quote)
 				stream.write('\"');
-			stream.write(k.toString().getBytes());
+			stream.write(k.toString().getBytes(StandardCharsets.UTF_8));
 			if (quote)
 				stream.write(new byte[] {'\"', ':', ' '});
 			else
@@ -235,7 +243,7 @@ public class Anson implements IJsonable {
 				writeNonPrimitive(stream, e.getClass(), e, opt);
 			else // if (f.getType().isPrimitive())
 				// must be primitive?
-				stream.write(String.valueOf(e).getBytes());
+				stream.write(String.valueOf(e).getBytes(StandardCharsets.UTF_8));
 
 		}
 		stream.write(']');
@@ -307,7 +315,7 @@ public class Anson implements IJsonable {
 		else if (fdClz.isEnum())
 			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes());
 		else
-			try { stream.write(v.toString().getBytes()); }
+			try { stream.write(v.toString().getBytes(StandardCharsets.UTF_8)); }
 			catch (NotSerializableException e) {
 				throw new AnsonException(0, "A filed of type %s can't been serialized: %s",
 						vclz.getName(), e.getMessage());
@@ -344,7 +352,7 @@ public class Anson implements IJsonable {
 				.replace("\n", "\\\n")
 				.replace("\t", "\\\t")
 				.replace("\"", "\\\"")
-				.getBytes();
+				.getBytes(StandardCharsets.UTF_8);
 	}
 	
 	/** NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
