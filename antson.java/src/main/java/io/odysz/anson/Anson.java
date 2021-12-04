@@ -48,7 +48,7 @@ public class Anson implements IJsonable {
 	/**Serialize Anson object.
 	 * 
 	 * <p>Debug Note, 1 Dec. 2021:</p>
-	 * javadoc of byte[] java.lang.String.getBytes():<br>
+	 * javadoc of byte[] java.lang.String.getBytes(StandardCharsets.UTF_8)():<br>
 	 * Encodes this String into a sequence of bytes using theplatform's default charset,
 	 * storing the result into a new byte array.<br>
 	 * So windows change UTF8 to whatever it likes.
@@ -58,12 +58,12 @@ public class Anson implements IJsonable {
 			throws AnsonException, IOException {
 		boolean quotK = opts == null || opts.length == 0 || opts[0] == null || opts[0].quotKey();
 		if (quotK) {
-			stream.write("{\"type\": \"".getBytes());
-			stream.write(getClass().getName().getBytes());
+			stream.write("{\"type\": \"".getBytes(StandardCharsets.UTF_8));
+			stream.write(getClass().getName().getBytes(StandardCharsets.UTF_8));
 			stream.write('\"');
 		}
 		else {
-			stream.write("{type: ".getBytes());
+			stream.write("{type: ".getBytes(StandardCharsets.UTF_8));
 			stream.write(getClass().getName().getBytes(StandardCharsets.UTF_8));
 		}
 
@@ -78,7 +78,7 @@ public class Anson implements IJsonable {
 
 			f.setAccessible(true);
 
-			stream.write(", ".getBytes());
+			stream.write(", ".getBytes(StandardCharsets.UTF_8));
 
 			// prop
 			if (quotK)
@@ -89,7 +89,7 @@ public class Anson implements IJsonable {
 			// value
 			if (af != null && af.ref() == AnsonField.enclosing) {
 				stream.write('\"');
-				stream.write(f.getType().getName().getBytes());
+				stream.write(f.getType().getName().getBytes(StandardCharsets.UTF_8));
 				stream.write('\"');
 				continue;
 			}
@@ -111,7 +111,7 @@ public class Anson implements IJsonable {
 				throw new AnsonException(0, e1.getMessage());
 			}
 		}
-		stream.write("}".getBytes());
+		stream.write("}".getBytes(StandardCharsets.UTF_8));
 		stream.flush();
 		return this;
 	}
@@ -125,10 +125,10 @@ public class Anson implements IJsonable {
 		Class<?> elemtype = v.getClass().getComponentType();
 		for (Object o : v) {
 			if (the1st) the1st = false;
-			else stream.write(", ".getBytes());
+			else stream.write(", ".getBytes(StandardCharsets.UTF_8));
 
 			if (o == null)
-				stream.write("null".getBytes());
+				stream.write("null".getBytes(StandardCharsets.UTF_8));
 			else if (IJsonable.class.isAssignableFrom(elemtype))
 				((IJsonable)o).toBlock(stream, opt);
 			else if (elemtype.isArray())
@@ -149,7 +149,7 @@ public class Anson implements IJsonable {
 
 	private static void toPrimArrayBlock(OutputStream stream, Object v) throws IOException {
 		if (v == null) {
-			stream.write("null".getBytes());
+			stream.write("null".getBytes(StandardCharsets.UTF_8));
 			return;
 		}
 
@@ -164,7 +164,7 @@ public class Anson implements IJsonable {
 			else stream.write(new byte[] {',', ' '});
 
 			if (o == null)
-				stream.write("null".getBytes());
+				stream.write("null".getBytes(StandardCharsets.UTF_8));
 
 			else if (o instanceof String) {
 				stream.write('"');
@@ -185,7 +185,7 @@ public class Anson implements IJsonable {
 		for (Object o : collect) {
 			if (the1st) the1st = false;
 			else
-				stream.write(", ".getBytes());
+				stream.write(", ".getBytes(StandardCharsets.UTF_8));
 
 			Class<?> elemtype = o.getClass();
 			writeNonPrimitive(stream, elemtype, o, opts);
@@ -235,7 +235,7 @@ public class Anson implements IJsonable {
 				is1st = false;
 
 			if (e == null) {
-				stream.write("null".getBytes());
+				stream.write("null".getBytes(StandardCharsets.UTF_8));
 				continue;
 			}
 
@@ -286,7 +286,7 @@ public class Anson implements IJsonable {
 			Class<? extends Object> fdClz, Object v, JsonOpt... opts)
 			throws AnsonException, IOException {
 		if (v == null) {
-			stream.write("null".getBytes());
+			stream.write("null".getBytes(StandardCharsets.UTF_8));
 			return;
 		}
 
@@ -313,7 +313,7 @@ public class Anson implements IJsonable {
 			stream.write('\"');
 		}
 		else if (fdClz.isEnum())
-			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes());
+			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes(StandardCharsets.UTF_8));
 		else
 			try { stream.write(v.toString().getBytes(StandardCharsets.UTF_8)); }
 			catch (NotSerializableException e) {
