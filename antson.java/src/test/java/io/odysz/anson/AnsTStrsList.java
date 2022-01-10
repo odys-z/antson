@@ -3,9 +3,6 @@ package io.odysz.anson;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.odysz.anson.Anson;
-import io.odysz.anson.AnsonField;
-
 public class AnsTStrsList extends Anson {
 
 	List<String[]> lst;

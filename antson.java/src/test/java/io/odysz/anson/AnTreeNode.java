@@ -3,8 +3,6 @@ package io.odysz.anson;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import io.odysz.anson.Anson;
-
 public class AnTreeNode extends Anson {
 	public static class SubTree extends Anson {
 		public ArrayList<AnTreeNode> children;

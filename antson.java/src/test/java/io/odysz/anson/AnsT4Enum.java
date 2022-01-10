@@ -3,7 +3,6 @@ package io.odysz.anson;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import io.odysz.anson.Anson;
 import io.odysz.anson.x.AnsonException;
 
 public class AnsT4Enum extends Anson {
