@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.11-SNAPSHOT</version>
+  <version>0.9.11</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
@@ -32,14 +32,12 @@
 	<maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
-  <!--
   <repositories>
   	<repository>
   		<id>sonatype-snapshots</id>
   		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
   	</repository>
   </repositories>
-   -->
 
   <dependencies>
     <dependency>
@@ -169,6 +167,10 @@
 	          </goals>
 	        </execution>
 	      </executions>
+	      <configuration>
+	      	<failOnError>false</failOnError>
+	      	<additionalJOption>-Xdoclint:none</additionalJOption>
+	      </configuration>
 	  </plugin>
 
 	  <plugin>
