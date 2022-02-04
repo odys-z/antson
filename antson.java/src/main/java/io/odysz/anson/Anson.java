@@ -22,12 +22,16 @@ import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.common.Utils;
 
 /**
  * @author odys-z@github.com
  *
  */
 public class Anson implements IJsonable {
+	protected static boolean verbose;
+	public static void verbose(boolean v) { verbose = v; }
+	
 	/**For debug, print, etc. The string can not been used for json data.
 	 * @see java.lang.Object#toString()
 	 */
@@ -315,11 +319,15 @@ public class Anson implements IJsonable {
 		else if (fdClz.isEnum())
 			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes(StandardCharsets.UTF_8));
 		else
+		{
+			if (verbose)
+				Utils.warn("Don't know how to serialize object.\n\ttype: %s\n\tvalue: %s", vclz.getName(), v.toString());
 			try { stream.write(v.toString().getBytes(StandardCharsets.UTF_8)); }
 			catch (NotSerializableException e) {
 				throw new AnsonException(0, "A filed of type %s can't been serialized: %s",
 						vclz.getName(), e.getMessage());
 			}
+		}
 	}
 
 	/**<pre>fragment ESC
@@ -468,6 +476,7 @@ public class Anson implements IJsonable {
 		JsonContext ctx = parser.json();
 		ParseTreeWalker walker = new ParseTreeWalker();
 		JSONAnsonListener lstner = new JSONAnsonListener();
+		if (verbose) Utils.logi(ctx.getText());
 		walker.walk(lstner, ctx);
 		return lstner.parsedEnvelope();
 	}
