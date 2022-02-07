@@ -318,6 +318,8 @@ public class Anson implements IJsonable {
 		}
 		else if (fdClz.isEnum())
 			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes(StandardCharsets.UTF_8));
+		else if (v instanceof Number)
+			stream.write(v.toString().getBytes());
 		else
 		{
 			if (verbose)
@@ -478,6 +480,6 @@ public class Anson implements IJsonable {
 		JSONAnsonListener lstner = new JSONAnsonListener();
 		if (verbose) Utils.logi(ctx.getText());
 		walker.walk(lstner, ctx);
-		return lstner.parsedEnvelope();
+		return lstner.parsedEnvelope(verbose);
 	}
 }

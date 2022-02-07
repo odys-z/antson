@@ -31,6 +31,8 @@ import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
+	public static boolean verbose;
+
 	/**<p>Parsing AST node's context, for handling the node's value,
 	 * the element class of parsing stack.</p>
 	 * <p>Memo: The hard lesson learned from this is if you want parse a grammar,
@@ -275,7 +277,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 	}
 
-	public IJsonable parsedEnvelope() throws AnsonException {
+	@SuppressWarnings("static-access")
+	public IJsonable parsedEnvelope(boolean verbose) throws AnsonException {
+		this.verbose = verbose;
 		if (stack == null || stack.size() == 0)
 			throw new AnsonException(0, "No envelope is avaliable.");
 		return (IJsonable) stack.get(0).enclosing;
@@ -749,7 +753,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (af != null && af.ref() == AnsonField.enclosing) {
 				Object parent = toparent(f.getType());
-				if (parent == null)
+				if (parent == null && verbose)
 					Utils.warn("parent %s is ignored: reference is null", fn);
 
 				f.set(enclosing, parent);
@@ -866,7 +870,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			f.set(obj, Boolean.valueOf(v));
 		else if (f.getType() == char.class) {
 			char c = v != null && v.length() > 0 ? v.charAt(0) == '"' ? v.charAt(1) : v.charAt(0) : '0';
-			Utils.warn("Guessing json string (%s) as a char: %s", v, c);
+			if (verbose)
+				Utils.warn("Guessing json string (%s) as a char: %s", v, c);
 			f.set(obj, c);
 		}
 		else

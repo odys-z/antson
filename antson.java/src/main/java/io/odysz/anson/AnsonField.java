@@ -36,11 +36,11 @@ public @interface AnsonField {
 	 * <p>Specifying array's element type information.</p>
 	 * Example:<br>
 	 * for Object[], use<pre>
-	   @AnsonField(valType="[Ljava.lang.Object;")
+	   {@literal @}AnsonField(valType="[Ljava.lang.Object;")
 	   Object[][] f;
 	   </pre>
 	 * for ArrayList&lt;Object[]&gt;, use <pre>
-	   @AnsonField(valType="java.util.ArrayList;[Ljava.lang.Object;"
+	   {@literal @}AnsonField(valType="java.util.ArrayList;[Ljava.lang.Object;"
 	   ArrayList<ArrayList<Object[]>>
 	   </pre>
 	 */
