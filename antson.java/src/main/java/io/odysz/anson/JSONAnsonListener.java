@@ -356,8 +356,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        }
 	        // figure out array element class
 	        else {
-	        	Type argType = pType.getActualTypeArguments()[0];
+	        	Type argType = pType.getActualTypeArguments()[0]; // jdk: class [Lio.odysz.anson.Photo;  
+	        	// for List<Photo[]> photos,
+	        	// In JDK 1.8: Class<T>(io.odysz.anson.Photo[])
+	        	// In Andoid: GeneralArrayImpl(io.oz.album.tier.Photo[])
 	        	if (!(argType instanceof TypeVariable) && !(argType instanceof WildcardType)) {
+	        				
 					@SuppressWarnings("unchecked")
 					Class<? extends Object> eleClzz = ((Class<? extends Object>) argType);
 					if (eleClzz.isArray()) {
@@ -368,9 +372,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        	else
 	        		if (AnsonFlags.parser)
 	        			Utils.warn("[AnsonFlags.parser] warn Element type <%s> for %s is a type parameter (%s) - ignored",
-	        				pType.getActualTypeArguments()[0], //.getTypeName(),
-	        				f.getName(),
-	        				pType.getActualTypeArguments()[0].getClass());
+	        				argType.getTypeName(), f.getName(), argType.getClass());
 	        }
 	        return ptypess;
 	    }
@@ -506,6 +508,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
+			throw new NullPointerException(e.getMessage() + "\n" + ctx.getText());
 		}
 	}
 

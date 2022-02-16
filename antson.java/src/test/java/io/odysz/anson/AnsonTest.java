@@ -292,6 +292,21 @@ class AnsonTest {
 		assertEquals(4, ((AnsT2)cll.ans2.get(0)).s);
 		assertEquals("z", ((AnsT1)cll.ans2.get(1)).ver);
 	}
+	
+	@Test
+	void testFromJson_list2d() throws AnsonException {
+		AnsTListPhoto cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [["
+				+ "{type: io.odysz.anson.Photo, pid: \"1\" },"
+				+ "{type: io.odysz.anson.Photo, pid: \"2\" } ]]}");
+		assertEquals(1, cll.ansp.size());
+		assertEquals(2, cll.ansp.get(0).length);
+		assertEquals("2", cll.ansp.get(0)[1].pid);
+		
+		cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [[]]");
+		assertEquals(1, cll.ansp.size());
+		assertEquals(0, cll.ansp.get(0).length);
+
+	}
 
 	@Test
 	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException, AnsonException, IOException {
