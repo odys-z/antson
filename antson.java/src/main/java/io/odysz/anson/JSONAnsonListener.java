@@ -357,16 +357,24 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        // figure out array element class
 	        else {
 	        	Type argType = pType.getActualTypeArguments()[0]; // jdk: class [Lio.odysz.anson.Photo;  
-	        	// for List<Photo[]> photos,
-	        	// In JDK 1.8: Class<T>(io.odysz.anson.Photo[])
-	        	// In Andoid: GeneralArrayImpl(io.oz.album.tier.Photo[])
 	        	if (!(argType instanceof TypeVariable) && !(argType instanceof WildcardType)) {
 	        				
+	        		/* change for Andriod compatibility
+	        		 * for field : List<Photo[]> photos,
+	        		 * on JDK 1.8: Class<T>(io.odysz.anson.Photo[])
+	        		 * on Andoid : GeneralArrayTypeImpl(io.oz.album.tier.Photo[])
+	        		 * 
 					@SuppressWarnings("unchecked")
 					Class<? extends Object> eleClzz = ((Class<? extends Object>) argType);
 					if (eleClzz.isArray()) {
 						ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
 					}
+					*/
+	        		String lstName = argType.getTypeName();
+	        		if (lstName.matches(".*\\[\\]$")) {
+						ptypess = new String[] {ptypess[0], "[L" + lstName.replaceAll("\\[\\]$", ";")};
+	        		}
+
 	        	}
 	        	// else nothing can do here for a type parameter, e.g. "T"
 	        	else
