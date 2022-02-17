@@ -845,11 +845,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		JsonableFactory factory = factorys.get(f.getType());
 		try { return factory.fromJson(v);}
 		catch (Throwable t) {
+			Throwable cause = t.getCause();
 			throw new AnsonException(0,
 					"Invoking registered factory failed for value: %s\n" +
 					"Field Type: %s\n,Cause: %s\nMessage: %s\n" +
 					"And make sure factories for both server and java client side are registered.",
-					v, f.getType().getName(), t.getCause().getClass().getName(), t.getCause().getCause().getMessage());
+					v, f.getType().getName(),
+					cause == null ? "null" : cause.getClass().getName(), cause == null ? "null" : cause.getMessage());
 		}
 	}
 
