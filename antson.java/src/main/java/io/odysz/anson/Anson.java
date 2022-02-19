@@ -38,7 +38,7 @@ public class Anson implements IJsonable {
 	public String toString() {
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			toBlock(bos);
+			toBlock(bos, new JsonOpt().shortenOnAnnoteRequired(true));
 			return bos.toString(StandardCharsets.UTF_8.name());
 		} catch (AnsonException | IOException e) {
 			e.printStackTrace();
@@ -98,18 +98,24 @@ public class Anson implements IJsonable {
 			}
 
 			try {
-				if (!f.getType().isPrimitive()) {
-					Object v = f.get(this);
-					Class<? extends Object> vclz = v == null ? null : v.getClass();
+				Object v = f.get(this);
+				AnsonField anno = f.getAnnotation(AnsonField.class);
+				if (v != null && anno != null && anno.shortoString()
+					&& opts != null && opts.length > 0 && opts[0] != null && opts[0].shortenOnAnnotation())
+					stream.write(("\"... \"").getBytes(StandardCharsets.UTF_8));
+				else {
+					if (!f.getType().isPrimitive()) {
+						Class<? extends Object> vclz = v == null ? null : v.getClass();
 
-					writeNonPrimitive(stream, vclz, v, opts);
+						writeNonPrimitive(stream, vclz, v, opts);
+					}
+					if (f.getType() == char.class) {
+						char c = f.getChar(this);
+						stream.write(c == 0 ? '0' : c);
+					}
+					else if (f.getType().isPrimitive())
+						stream.write(String.valueOf(f.get(this)).getBytes(StandardCharsets.UTF_8));
 				}
-				if (f.getType() == char.class) {
-					char c = f.getChar(this);
-					stream.write(c == 0 ? '0' : c);
-				}
-				else if (f.getType().isPrimitive())
-					stream.write(String.valueOf(f.get(this)).getBytes(StandardCharsets.UTF_8));
 			} catch (IllegalArgumentException | IllegalAccessException e1) {
 				throw new AnsonException(0, e1.getMessage());
 			}
