@@ -29,8 +29,7 @@ import io.odysz.common.Utils;
  *
  */
 public class Anson implements IJsonable {
-	protected static boolean verbose;
-	public static void verbose(boolean v) { verbose = v; }
+	public static boolean verbose;
 	
 	/**For debug, print, etc. The string can not been used for json data.
 	 * @see java.lang.Object#toString()
