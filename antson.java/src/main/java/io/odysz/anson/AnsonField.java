@@ -45,6 +45,14 @@ public @interface AnsonField {
 	   </pre>
 	 */
 	String valType() default "";
+	
+	/**
+	 * If a sting field, e.g. base64 string come with this, Anson.toString() will ignore the content.
+	 * - long string printed only for debugging.
+	 * 
+	 * @return short use shorten string when possible
+	 */
+	boolean shortoString() default false;
 
 	int ref() default undefined;
 }

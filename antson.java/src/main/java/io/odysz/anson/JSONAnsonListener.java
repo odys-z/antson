@@ -356,21 +356,31 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        }
 	        // figure out array element class
 	        else {
-	        	Type argType = pType.getActualTypeArguments()[0];
+	        	Type argType = pType.getActualTypeArguments()[0]; // jdk: class [Lio.odysz.anson.Photo;  
 	        	if (!(argType instanceof TypeVariable) && !(argType instanceof WildcardType)) {
+	        				
+	        		/* change for Andriod compatibility
+	        		 * for field : List<Photo[]> photos,
+	        		 * on JDK 1.8: Class<T>(io.odysz.anson.Photo[])
+	        		 * on Andoid : GeneralArrayTypeImpl(io.oz.album.tier.Photo[])
+	        		 * 
 					@SuppressWarnings("unchecked")
 					Class<? extends Object> eleClzz = ((Class<? extends Object>) argType);
 					if (eleClzz.isArray()) {
 						ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
 					}
+					*/
+	        		String lstName = argType.getTypeName();
+	        		if (lstName.matches(".*\\[\\]$")) {
+						ptypess = new String[] {ptypess[0], "[L" + lstName.replaceAll("\\[\\]$", ";")};
+	        		}
+
 	        	}
 	        	// else nothing can do here for a type parameter, e.g. "T"
 	        	else
 	        		if (AnsonFlags.parser)
 	        			Utils.warn("[AnsonFlags.parser] warn Element type <%s> for %s is a type parameter (%s) - ignored",
-	        				pType.getActualTypeArguments()[0], //.getTypeName(),
-	        				f.getName(),
-	        				pType.getActualTypeArguments()[0].getClass());
+	        				argType.getTypeName(), f.getName(), argType.getClass());
 	        }
 	        return ptypess;
 	    }
@@ -506,6 +516,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
+			throw new NullPointerException(e.getMessage() + "\n" + ctx.getText());
 		}
 	}
 
@@ -778,7 +789,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (ft.isArray())
 				f.set(enclosing, toPrimitiveArray((List<?>)top.parsedVal, ft));
-			// Design notes: this is broken into 2 branches if c#.
+			// Design notes: this is broken into 2 branches in c#.
 			else if (List.class.isAssignableFrom(ft)
 					|| AbstractCollection.class.isAssignableFrom(ft)
 					|| Map.class.isAssignableFrom(ft)) {
@@ -834,10 +845,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		JsonableFactory factory = factorys.get(f.getType());
 		try { return factory.fromJson(v);}
 		catch (Throwable t) {
+			Throwable cause = t.getCause();
 			throw new AnsonException(0,
-					"Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
-					+ "Or don't declare the field as %1$s, use a subclass of Anson",
-					f.getType());
+					"Invoking registered factory failed for value: %s\n" +
+					"Field Type: %s\n,Cause: %s\nMessage: %s\n" +
+					"And make sure factories for both server and java client side are registered.",
+					v, f.getType().getName(),
+					cause == null ? "null" : cause.getClass().getName(), cause == null ? "null" : cause.getMessage());
 		}
 	}
 
