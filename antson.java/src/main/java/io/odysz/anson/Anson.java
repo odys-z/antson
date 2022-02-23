@@ -483,7 +483,12 @@ public class Anson implements IJsonable {
 		JsonContext ctx = parser.json();
 		ParseTreeWalker walker = new ParseTreeWalker();
 		JSONAnsonListener lstner = new JSONAnsonListener();
-		if (verbose) Utils.logi(ctx.getText());
+
+		if (verbose) {
+			Utils.logi("Anson.verbose - ctx.getText():");
+			Utils.logi(ctx.getText());
+		}
+
 		walker.walk(lstner, ctx);
 		return lstner.parsedEnvelope(verbose);
 	}
