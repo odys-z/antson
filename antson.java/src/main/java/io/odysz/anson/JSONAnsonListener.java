@@ -272,7 +272,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				// entering an envelope
 				// push(fmap.get(top.parsingProp).getType());
 				push(ft, null);
-		} catch (SecurityException | ReflectiveOperationException | AnsonException e) {
+		} catch (SecurityException | ReflectiveOperationException e) {
 			e.printStackTrace();
 		}
 	}
@@ -752,8 +752,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 			Object enclosing = top().enclosing;
 			Field f = top.fmap.get(fn);
-			if (f == null)
-				throw new AnsonException(0, "Field ignored: field: %s, value: %s", fn, ctx.getText());
+			if (f == null) {
+				// throw new AnsonException(0, "Field ignored: field: %s, value: %s", fn, ctx.getText());
+				Utils.warn("Field ignored: field: %s, value: %s", fn, ctx.getText());
+				return;
+			}
 
 			f.setAccessible(true);
 			AnsonField af = f.getAnnotation(AnsonField.class);
@@ -828,10 +831,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 			// not necessary, top is dropped
 			top.parsedVal = null;
-		} catch (ReflectiveOperationException | RuntimeException e) {
+		} catch (ReflectiveOperationException e) {
 			e.printStackTrace();
-		} catch (AnsonException e) {
-			Utils.warn(e.getMessage());
+//		} catch (AnsonException e) {
+//			Utils.warn(e.getMessage());
 		}
 	}
 

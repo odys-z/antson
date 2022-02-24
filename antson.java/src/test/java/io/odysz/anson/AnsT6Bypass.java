@@ -6,6 +6,11 @@ import java.io.OutputStream;
 import io.odysz.anson.x.AnsonException;
 
 public class AnsT6Bypass extends Anson {
+	static {
+		JSONAnsonListener.registFactory(Port.class, (s) -> {
+				return new Port(s);
+		});
+	}
 
 	public static class Port implements IJsonable { 
 		static final int heartbeat = 1; // ("ping.serv11"),
@@ -40,10 +45,6 @@ public class AnsT6Bypass extends Anson {
 		@Override
 		public IJsonable toJson(StringBuffer buf) throws IOException, AnsonException {
 			throw new AnsonException(0, "To keep consists with c#, this interface method will be replaced with constructor?");
-//			buf.append('\"');
-//			buf.append(url().getBytes());
-//			buf.append('\"');
-//			return this;
 		}
 	};
 

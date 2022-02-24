@@ -414,6 +414,16 @@ class AnsonTest {
 		assertEquals(tst, s);
 	}
 
+	/**
+	 * <p>Note about v0.9.14</p>
+	 * I'm not sure what's bypass test want to do here - too long ago idea.
+	 * This test result in error since v0.9.14 (change AnsonException as subclass a RuntimeException).
+	 * It's fixed with register a factory to {@link AnsT6Bypass.Port}, which is probable not
+	 * initial intention of this test.
+	 * 
+	 * @throws AnsonException
+	 * @throws IOException
+	 */
 	@Test
 	void testBypass() throws AnsonException, IOException {
 		AnsT6Bypass t6 = new AnsT6Bypass();
