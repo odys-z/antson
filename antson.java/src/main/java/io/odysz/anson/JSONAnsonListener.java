@@ -281,7 +281,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	public IJsonable parsedEnvelope(boolean verbose) throws AnsonException {
 		this.verbose = verbose;
 		if (stack == null || stack.size() == 0)
-			throw new AnsonException(0, "No envelope is avaliable.");
+			throw new AnsonException(0, "No envelope can be found.");
 		return (IJsonable) stack.get(0).enclosing;
 	}
 
