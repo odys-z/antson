@@ -17,7 +17,7 @@ public class AnsT4Enum extends Anson {
 	}
 
 	public enum Port implements IPort { 
-		heartbeat("ping.serv11"), session("login.serv11"), dataset("ds.serv11");
+		heartbeat("ping.serv"), session("login.serv11"), dataset("ds.serv11");
 
 		static {
 			JSONAnsonListener.registFactory(IPort.class, (s) -> {

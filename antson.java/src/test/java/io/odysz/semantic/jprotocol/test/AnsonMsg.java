@@ -23,7 +23,7 @@ public class AnsonMsg <T extends AnsonBody> extends Anson {
 	 * NOTE: java code shouldn't use switch-case block on enum. That cause problem with generated class.
 	 * @author odys-z@github.com
 	 */
-	public enum Port implements IPort {  heartbeat("ping.serv11"), session("login-serv11"),
+	public enum Port implements IPort {  heartbeat("ping.serv"), session("login-serv11"),
 						query("r.serv11"), update("u.serv11"),
 						insert("c.serv11"), delete("d.serv11"),
 						echo("echo.serv11"),

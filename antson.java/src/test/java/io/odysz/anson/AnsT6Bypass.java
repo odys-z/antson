@@ -13,7 +13,7 @@ public class AnsT6Bypass extends Anson {
 	}
 
 	public static class Port implements IJsonable { 
-		static final int heartbeat = 1; // ("ping.serv11"),
+		static final int heartbeat = 1; // ("ping.serv"),
 		static final int session = 2;   // ("login.serv11"),
 		static final int dataset = 3;   // ("ds.serv11");
 

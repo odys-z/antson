@@ -14,7 +14,7 @@ public interface IJsonable {
 	 * factory to JSONAsonListener through {@link JSONAnsonListener#registFactory(Class, JsonableFactory)}.</p>
 	 * <p>The AnsT4Enum.Port is a tested example for registering a java enum constructor:<pre>
 	 public enum Port implements IPort { 
-		heartbeat("ping.serv11"), session("login.serv11"), dataset("ds.serv11");
+		heartbeat("ping.serv"), session("login.serv11"), dataset("ds.serv11");
 
 		// using static initialized is not always correct
 		// - may be there are different implementation of IPort
