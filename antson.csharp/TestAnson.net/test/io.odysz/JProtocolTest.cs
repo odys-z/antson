@@ -14,7 +14,7 @@ namespace io.odysz.anson.jprotocol
 		const string iv64 = "iv: I'm base64";
         const string tk64 = "tk: I'm base64";
         const string uid = "test-id";
-        const string ssid = "ssid-base64";
+        // const string ssid = "ssid-base64";
 		const string respjson =
         @"{ ""type"": ""io.odysz.semantic.jprotocol.AnsonMsg"",
             ""code"": ""ok"", ""opts"": null, ""port"": ""update"", ""header"": null,
