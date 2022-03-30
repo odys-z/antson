@@ -833,17 +833,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			top.parsedVal = null;
 		} catch (ReflectiveOperationException e) {
 			e.printStackTrace();
-//		} catch (AnsonException e) {
-//			Utils.warn(e.getMessage());
 		}
 	}
 
 	private IJsonable invokeFactory(Field f, String v) throws AnsonException {
 		if (factorys == null || !factorys.containsKey(f.getType()))
 			throw new AnsonException(0,
-					"Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
-					+ "Or don't declare the field as %1$s, use a subclass of Anson",
-					f.getType());
+					"Subclass of IJsonable (%s %s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
+					+ "Or don't declare the field as %1$s, use a subclass of Anson\n"
+					+ "For java client, this is possible IPort implementation class not registered at client side (FIXME: Jserv should deprecate IPort)",
+					f.getType(),
+					f.getName());
 
 		JsonableFactory factory = factorys.get(f.getType());
 		try { return factory.fromJson(v);}
@@ -851,8 +851,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			Throwable cause = t.getCause();
 			throw new AnsonException(0,
 					"Invoking registered factory failed for value: %s\n" +
-					"Field Type: %s\n,Cause: %s\nMessage: %s\n" +
-					"And make sure factories for both server and java client side are registered.",
+					"Field Type: %s,\nCause: %s\tMessage: %s\n",
 					v, f.getType().getName(),
 					cause == null ? "null" : cause.getClass().getName(), cause == null ? "null" : cause.getMessage());
 		}
