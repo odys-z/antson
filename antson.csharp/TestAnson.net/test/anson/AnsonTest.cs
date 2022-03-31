@@ -1,3 +1,4 @@
+using io.odysz.anson.src.common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections;
 using System.IO;
@@ -12,6 +13,17 @@ namespace io.odysz.anson
         {
             JSONAnsonListener.setAssembly(Assembly.GetExecutingAssembly().GetName().Name);
         } 
+
+        [TestMethod]
+        public void TestCommon()
+        {
+            string blank = null;
+            Assert.AreEqual(true, LangExt.isBlank(blank));
+            blank = "";
+            Assert.AreEqual(true, LangExt.isBlank(blank));
+            blank = ".";
+            Assert.AreEqual(true, LangExt.isBlank(blank, new string[] { "." }));
+        }
 
         [TestMethod]
         public void Test2Block()

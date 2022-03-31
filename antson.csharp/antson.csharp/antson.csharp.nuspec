@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Antson.CSharp</id>
-    <version>0.9.24</version>
+    <version>0.9.27</version>
     <title>Antson.C#</title>
     <authors>odys-z.github.io</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
@@ -11,7 +11,7 @@
     <iconUrl>https://odys-z.github.io/css/odysz.png</iconUrl>
     <description>C# version of Antson</description>
     <releaseNotes>Fall back to .net framework 4.0</releaseNotes>
-    <copyright>Odys Zhou 2022</copyright>
+    <copyright>Ody Zhou 2023</copyright>
     <tags>Antson C#</tags>
     <dependencies>
       <group targetFramework=".NETFramework4.7.1" >

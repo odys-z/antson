@@ -38,5 +38,6 @@ namespace io.odysz.anson
 
 	    public int refer = undefined;
 
+        public bool shortoString = false;
     }
 }

@@ -2,11 +2,11 @@ using io.odysz.anson;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 
 namespace io.odysz.semantic.jprotocol
 {
 	/// <summary>
+	/// json type: io.odysz.semantic.jprotocol.AnsonMsg
 	/// <p>Base class of message used by
 	/// <see cref="jserv.ServPort{T}">serv11</see>
 	/// .</p>
@@ -28,7 +28,7 @@ namespace io.odysz.semantic.jprotocol
 		/// </remarks>
 		/// <author>odys-z@github.com</author>
 		[Serializable]
-		public sealed class Port : IPort
+		public class Port : IPort
 		{
 			/// <summary>ping.serv11</summary>
 			public const int heartbeat = 0;

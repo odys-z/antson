@@ -4,6 +4,7 @@ using io.odysz.semantics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections;
 using System.IO;
+using System.Reflection;
 using static io.odysz.semantic.jprotocol.AnsonMsg;
 
 namespace io.odysz.anson.jprotocol
@@ -11,7 +12,12 @@ namespace io.odysz.anson.jprotocol
     [TestClass]
     public class JProtocolTest
     {
-		const string iv64 = "iv: I'm base64";
+        static JProtocolTest()
+        {
+            JSONAnsonListener.setAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+        }
+
+        const string iv64 = "iv: I'm base64";
         const string tk64 = "tk: I'm base64";
         const string uid = "test-id";
         // const string ssid = "ssid-base64";
