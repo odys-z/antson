@@ -1,3 +1,6 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/)
+[![NuGet version](https://badge.fury.io/nu/Antson.CSharp.svg)](https://badge.fury.io/nu/Antson.CSharp)
+
 # What's Antson
 
 Antson is ANother Tool for JSON (de)serializing java/c# object to / from json.
