@@ -5,6 +5,7 @@ namespace io.odysz.semantic.jsession
     public class SessionInf : Anson
     {
         public string ssid { get; private set; }
+        public string device { get; private set; }
         public string uid { get; private set; }
         public string roleId { get; private set; }
 

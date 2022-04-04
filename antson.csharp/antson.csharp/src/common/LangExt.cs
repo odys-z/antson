@@ -8,6 +8,11 @@ namespace io.odysz.anson.common
 {
     public class LangExt
     {
+        static public bool isblank(string s, string takeAsNull, string takeAsNull2 = null)
+        {
+			return isblank(s, new string[] { takeAsNull, takeAsNull2 });
+        }
+
         static public bool isblank(string s, string[] takeAsNull = null)
         {
 			if (s == null || s.Trim().Length == 0)

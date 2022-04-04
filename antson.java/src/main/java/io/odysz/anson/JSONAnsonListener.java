@@ -270,7 +270,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else
 				// entering an envelope
-				// push(fmap.get(top.parsingProp).getType());
 				push(ft, null);
 		} catch (SecurityException | ReflectiveOperationException e) {
 			e.printStackTrace();
@@ -804,9 +803,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
                 {
                 	Constructor ctor = ft.getConstructor(new Class<?>[] {String.class});
                     if (ctor == null)
-                        throw new AnsonException(0, "To deserialize json to {0}, the class must has a constructor(1 string parameter)\n"
-                                        + "string value: {1}",
-                                        ft.getTypeName(), top.parsedVal);
+                        throw new AnsonException(0,
+                        		"To deserialize json to %s, the class must has a constructor(1 string parameter)\n" +
+                        		"string value: %s",
+                        		ft.getTypeName(), top.parsedVal);
                     f.set(enclosing, ctor.newInstance(top.parsedVal));
                 }
                 else if (Anson.class.isAssignableFrom(ft))

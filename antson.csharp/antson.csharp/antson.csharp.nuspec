@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>Antson.CSharp</id>
-    <version>0.9.27</version>
+    <version>0.9.28</version>
     <title>Antson.C#</title>
     <authors>odys-z.github.io</authors>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

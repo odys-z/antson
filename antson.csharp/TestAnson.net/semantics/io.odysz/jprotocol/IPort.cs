@@ -14,24 +14,25 @@ namespace io.odysz.semantic.jprotocol
         public const int echo = 6;      // ("echo.serv11"),
         /// <summary> serv port for downloading json/xml file or uploading a file.</summary>
         /// <see cref="jserv.file.JFileServ"/>
-        public const int file = 6; // ("file.serv11"),
+        public const int file = 7;      // ("file.serv11"),
         /// <summary>Any user defined request using message body of subclass of JBody must use this port </summary>
-        public const int user = 7; // ("user.serv11"),
+        public const int user = 8;      // ("user.serv11"),
         /// <summary>semantic tree of dataset extensions</summary>
         /// <see cref="ext.SemanticTree"/>
-        public const int stree = 8; // ("s-tree.serv11"),
+        public const int stree = 9;     // ("s-tree.serv11"),
         /// <summary>dataset extensions<br> </summary> 
         /// <see cref="ext.Dataset" />
-        public const int dataset = 9; // ("ds.serv11");
+        public const int dataset = 10;  // ("ds.serv11");
     }
 
 	public interface IPort : IJsonable
 	{
+        string url();
         string name { get; }
 
 		/// <summary>Equivalent of enum.valueOf(), except for subclass returning instance of jserv.Port.
 		/// 	</summary>
 		/// <exception cref="SemanticException"></exception>
-		IPort valof(string pname);
+		int valof(string pname);
 	}
 }

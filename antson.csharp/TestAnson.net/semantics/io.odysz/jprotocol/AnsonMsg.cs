@@ -1,4 +1,5 @@
 using io.odysz.anson;
+using io.odysz.semantics.x;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +29,7 @@ namespace io.odysz.semantic.jprotocol
 		/// </remarks>
 		/// <author>odys-z@github.com</author>
 		[Serializable]
-		public class Port : IPort
+		public sealed class Port : IPort
 		{
 			/// <summary>ping.serv11</summary>
 			public const int heartbeat = 0;
@@ -79,47 +80,30 @@ namespace io.odysz.semantic.jprotocol
 
 			public const int NA = -1;
 
-			private int _port;
+			public readonly int port;
 
+            class PortFactory : JsonableFactory {
+                public IJsonable fromJson(string p) { return new Port(p); }
+            }
 			/// <summary>
-			/// TODO Setup a register for extinding new port.
+			/// Setup a register for extinding new port.
 			/// </summary>
             static Port()
             {
-                /*
-                JSONAnsonListener.registFactory(Sharpen.Runtime.getClassForType(typeof(IPort)),
-                    @"TODO: Lambda Expression Ignored
-                    (s) -> {
-                      try {
-                        return defaultPortImpl.valof(s);
-                      }
-                     catch (  SemanticException e) {
-                        e.printStackTrace();
-                        return null;
-                      }
-                    }" );
-                */
+				JSONAnsonListener.registFactory(typeof(Port), new PortFactory());
 			}
 
-			public string name { get; private set; }
+			// public string name { get; private set; }
 
-			public Port(string name)
+			public Port(string name) { port = valof(name); }
+
+			public Port(int port) { this.port = port; }
+
+			public string name { get { return nameof(port); } }
+
+			public int valof(string pname)
 			{
-				this.name = name;
-                _port = valof(this.name);
-			}
-
-			public Port(int port)
-			{
-				_port = port;
-				name = nameof(port);
-			}
-
-			public int port() { return _port; }
-
-			static public int valof(string pname)
-			{
-				return pname == "haartbeat" ? Port.heartbeat
+				int p = pname == "haartbeat" ? Port.heartbeat
 					: pname == "session" ? Port.session
 					: pname == "query" ? Port.query
 					: pname == "update" ? Port.update
@@ -131,7 +115,9 @@ namespace io.odysz.semantic.jprotocol
 					: pname == "stree" || pname == "s-tree" ? Port.stree
 					: pname == "dataset" ? Port.dataset
 					: Port.NA;
+				return p;
 			}
+
 			static public string nameof(int port)
 			{
 				return port == Port.heartbeat ? "heartbeat"
@@ -148,38 +134,21 @@ namespace io.odysz.semantic.jprotocol
 					: "NA";
 			}
 
-			IPort IPort.valof(string pname)
+            public string url()
 			{
-				throw new NotImplementedException("FIXME this translation shouldn't happen at client side.");
-			}
-			//{	// FIXME this translation shouldn't happen at client side
-			//	return pname == "ping.serv11" ? new Port(IPort.heartbeat)
-			//		: pname == "login.serv11" ? new Port(IPort.session)
-			//		: pname == "r.serv11" ? new Port(IPort.query)
-			//		: pname == "u.serv11" ? new Port(IPort.update)
-			//		: pname == "c.serv11" ? new Port(IPort.insert)
-			//		: pname == "d.serv11" ? new Port(IPort.delete)
-			//		: pname == "echo.serv11" ? new Port(IPort.echo)
-			//		: pname == "file.serv" ? new Port(IPort.file)
-			//		: pname == "user.serv11" ? new Port(IPort.user)
-			//		: pname == "s-tree.serv11" ? new Port(IPort.stree)
-			//		: pname == "ds.serv11" ? new Port(IPort.dataset)
-			//		: new Port(IPort.NA);
-			public string Url() {
-				return _port == heartbeat ? "ping.serv11"
-                    : _port == session ? "login.serv11"
-                    : _port == query ? "r.serv11"
-                    : _port == update ? "u.serv11"
-                    : _port == insert ? "c.serv11"
-                    : _port == delete ? "d.serv11"
-                    : _port == echo ? "echo.serv11"
-                    : _port == file ? "file.serv"
-                    : _port == user ? "user.serv11"
-                    : _port == stree ? "s-tree.serv11"
-                    : _port == dataset ? "ds.serv11"
+				return port == heartbeat ? "ping.serv"
+                    : port == session ? "login.serv11"
+                    : port == query ? "r.serv11"
+                    : port == update ? "u.serv11"
+                    : port == insert ? "c.serv11"
+                    : port == delete ? "d.serv11"
+                    : port == echo ? "echo.less"
+                    : port == file ? "file.serv"
+                    : port == user ? "user.serv11"
+                    : port == stree ? "s-tree.serv11"
+                    : port == dataset ? "ds.serv11"
                     : "unknown.serv";
-        }
-
+			}
 
             public IJsonable ToBlock(Stream stream, anson.JsonOpt opts = null)
             {
@@ -240,9 +209,9 @@ namespace io.odysz.semantic.jprotocol
 
 			public string Name()
             {
-				return code == MsgCode.ok ? "ok" 
+				return code == MsgCode.ok ? "ok"
 					: code == MsgCode.exSession ? "exSession"
-					: code == MsgCode.exSemantic ? "exSemantic" 
+					: code == MsgCode.exSemantic ? "exSemantic"
 					: code == MsgCode.exIo ? "exIo"
 					: code == MsgCode.exTransct ? "exTransct"
 					: code == MsgCode.exDA ? "exDA"
@@ -284,30 +253,13 @@ namespace io.odysz.semantic.jprotocol
 		//	defaultPortImpl = p;
 		//}
 
-		private string version = "1.0";
+		string version = "1.0";
 
 		internal int seq { get; set; }
 
 		public Port port { get; private set; }
 
 		public MsgCode code { get; private set; }
-
-		public virtual void portOf(string pport)
-		{
-			/// translate from string to enum
-			//if (defaultPortImpl == null)
-			//{
-			//	port = new Port(Port.echo);
-			//}
-			//else
-			//{
-			//	port = new Port(pport);
-			//}
-			port = new Port(pport);
-			if (port == null)
-			{
-			}
-		}
 
 		public AnsonMsg()
 		{

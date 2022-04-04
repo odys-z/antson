@@ -1,4 +1,5 @@
 ﻿using Antlr4.Runtime.Tree;
+using io.odysz.anson.common;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -64,7 +65,7 @@ namespace io.odysz.anson
 				this.enclosing = enclosing;
 			}
 
-			internal bool IsInList()
+            internal bool IsInList()
 			{
                 // return enclosing instanceof List || enclosing.getClass().isArray();
                 Type t = enclosing.GetType();
@@ -114,6 +115,8 @@ namespace io.odysz.anson
 
 			internal string SubTypes() { return subTypes; }
 		}
+
+        private static Dictionary<Type, JsonableFactory> factorys;
 
 		internal static void MergeFields(Type type, Hashtable fmap, Hashtable pmap)
         {
@@ -867,7 +870,7 @@ namespace io.odysz.anson
                 CSharp.SetFPValueKv(enclosing, et, top.parsingProp, top.parsedVal);
             }
 
-            else if (fptype == typeof(String) || fptype == typeof(string))
+            else if (fptype == typeof(string) || fptype == typeof(string))
             {
                 string v = GetStringVal(ctx);
                 CSharp.SetFPValue(enclosing, f, p, v);
@@ -909,28 +912,29 @@ namespace io.odysz.anson
                 {
                     ConstructorInfo ctor = fptype.GetConstructor(new Type[] { typeof(string) });
                     if (ctor == null)
-                        throw new AnsonException(0, "To deserialize json to {0}, the class must has a constructor(1 string parameter)\n"
-                                        + "string value: {1}",
-                                        fptype.FullName, top.parsedVal);
+                        throw new AnsonException(0,
+                            "To deserialize json to {0}, the class must has a constructor(1 string parameter)\n" +
+                            "string value: {1}",
+                            fptype.FullName, top.parsedVal);
                     CSharp.SetFPValue(enclosing, f, p, ctor.Invoke(new string[] { top.parsedVal }));
                 }
                 else if (typeof(Anson).IsAssignableFrom(fptype))
-                    // f.SetValue(enclosing, top.parsedVal);
                     CSharp.SetFPValue(enclosing, f, p, (Anson)top.parsedVal);
                 // ignore null value
                 else if (top.parsedVal != null)
                 {
-                    // Subclass of IJsonable must registered
-                    //string v = GetStringVal(ctx);
-                    //if (!string.IsNullOrEmpty(v))
-                    //    f.SetValue(enclosing, invokeFactory(f, v));
-                    throw new AnsonException("Shouldn't reach here in C#.");
+                    // throw new AnsonException("Shouldn't reach here in C#.");
+
+                    // subclass of IJsonable must registered
+                    string v = GetStringVal(ctx);
+                    if (!LangExt.isblank(v, "null"))
+                        f.SetValue(enclosing, invokeFactory(f, v));
                 }
             }
             else if (typeof(object).IsAssignableFrom(fptype))
             {
                 Debug.WriteLine(string.Format(
-                        "\nDeserializing unsupported type, field: {0}, type: {1}, enclosing type: {1}",
+                        "\nDeserializing unsupported type, field: {0}, type: {1}, enclosing type: {2}",
                         fn, fptype.Name, enclosing?.GetType().Name));
                 string v = ctx.GetChild(2).GetText(); // null -> "null"
 
@@ -943,24 +947,24 @@ namespace io.odysz.anson
             top.parsedVal = null;
         }
 
-        //private IJsonable invokeFactory(FieldInfo f, string v)
-        //{
-        //    if (factorys == null || !factorys.containsKey(f.GetType()))
-        //        throw new AnsonException(0,
-        //                "Subclass of IJsonable ({0}) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
-        //                + "Or don't declare the field as {0:S}, use a subclass of Anson",
-        //                f.GetType().FullName);
+        private IJsonable invokeFactory(FieldInfo f, string v)
+        {
+            if (factorys == null || !factorys.ContainsKey(f.GetType()))
+                throw new AnsonException(0,
+                        "Subclass of IJsonable ({0}) must registered.\n - See javadoc of IJsonable.JsonFacotry\n" +
+                        "Or don't declare the field as {0:S}, use a subclass of Anson",
+                        f.GetType().FullName);
 
-        //    JsonableFactory factory = factorys.get(f.GetType());
-        //    try { return factory.fromJson(v); }
-        //    catch (Exception t)
-        //    {
-        //        throw new AnsonException(0,
-        //                "Subclass of IJsonable ({0}) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
-        //                + "Or don't declare the field as {0:S}, use a subclass of Anson",
-        //                f.GetType().FullName);
-        //    }
-        //}
+            JsonableFactory factory = factorys[f.GetType()];
+            try { return factory.fromJson(v); }
+            catch (Exception t)
+            {
+                throw new AnsonException(0,
+                        "Subclass of IJsonable ({0}) must registered.\n - See javadoc of IJsonable.JsonFacotry\n" +
+                        "Or don't declare the field as {0:S}, use a subclass of Anson",
+                        f.GetType().FullName);
+            }
+        }
 
         internal static void SetPrimitive(IJsonable obj, FieldInfo f, PropertyInfo p, string v)
         {
@@ -1150,6 +1154,17 @@ namespace io.odysz.anson
             internal static bool IsList(Type fptype)
                 => fptype.IsInterface && fptype.Name == "IList"
                     || fptype.Name == "IList`1" || fptype.GetInterface("IList`1") != null;
+        }
+
+        /**Register a factory of IJsonable implementation.
+         * @param jsonable
+         * @param factory
+         */
+        public static void registFactory(Type jsonable, JsonableFactory factory)
+        {
+            if (factorys == null)
+                factorys = new Dictionary<Type, JsonableFactory>();
+            factorys[jsonable] = factory;
         }
     }
 }

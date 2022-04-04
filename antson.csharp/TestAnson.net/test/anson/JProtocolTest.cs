@@ -74,7 +74,7 @@ namespace io.odysz.anson.jprotocol
         {
             AnsonMsg respmsg = (AnsonMsg)Anson.FromJson(respjson);
             Assert.AreEqual("ok", respmsg.code.Name());
-            Assert.AreEqual(Port.update, respmsg.port.port());
+            Assert.AreEqual(Port.update, respmsg.port.port);
 
             AnsonResp resp = (AnsonResp)respmsg.Body(0);
             Assert.IsNotNull(resp);

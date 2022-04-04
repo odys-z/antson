@@ -1,4 +1,4 @@
-using io.odysz.anson.src.common;
+using io.odysz.anson.common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections;
 using System.IO;
@@ -18,11 +18,11 @@ namespace io.odysz.anson
         public void TestCommon()
         {
             string blank = null;
-            Assert.AreEqual(true, LangExt.isBlank(blank));
+            Assert.AreEqual(true, LangExt.isblank(blank));
             blank = "";
-            Assert.AreEqual(true, LangExt.isBlank(blank));
+            Assert.AreEqual(true, LangExt.isblank(blank));
             blank = ".";
-            Assert.AreEqual(true, LangExt.isBlank(blank, new string[] { "." }));
+            Assert.AreEqual(true, LangExt.isblank(blank, new string[] { "." }));
         }
 
         [TestMethod]
