@@ -1,4 +1,4 @@
-﻿namespace io.odysz.semantic.jserv.U
+﻿namespace io.odysz.semantic.jserv.R
 {
     public class Query
     {
