@@ -736,7 +736,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 
 		try {
-			// String fn = getProp(ctx);
 			ParsingCtx top = top();
 			String fn = top.parsingProp;
 
