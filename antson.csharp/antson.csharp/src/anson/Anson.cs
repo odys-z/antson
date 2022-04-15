@@ -13,10 +13,10 @@ namespace io.odysz.anson
     /// </summary>
     public class Anson : IJsonable
     {
-        public string ver { get; protected set; }
+        // public string ver { get; protected set; }
 
         public Anson() {
-            ver = "0.9.xx";
+            // ver = "0.9.xx";
         }
 
         public IJsonable ToBlock(Stream stream, JsonOpt opt = null)
@@ -49,6 +49,7 @@ namespace io.odysz.anson
             }
 
             Utils.WriteByt(stream, '}');
+            Utils.WriteByt(stream, '\n');
             stream.Flush();
             return this;
         }

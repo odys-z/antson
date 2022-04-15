@@ -32,7 +32,7 @@ namespace io.odysz.anson
 
             MemoryStream stream = new MemoryStream();
             an.ToBlock(stream);
-            string expect = "{\"type\": \"io.odysz.anson.Anson\", \"ver\": \"0.9.xx\"}";
+            string expect = "{\"type\": \"io.odysz.anson.Anson\"}\n";
 
             Assert.AreEqual(expect, Utils.ToString(stream));
         }
@@ -40,20 +40,20 @@ namespace io.odysz.anson
         [TestMethod]
         public void TestFromJson()
         {
-            Anson ans = (Anson)Anson.FromJson("{type:io.odysz.anson.Anson, ver: \"v0.1\"}");
-            Assert.AreEqual("v0.1", ans.ver);
+            Anson ans = (Anson)Anson.FromJson("{type:io.odysz.anson.Anson}");
+            // Assert.AreEqual("v0.1", ans.ver);
 
-            AnsT1 anson = (AnsT1)Anson.FromJson("{type:io.odysz.anson.AnsT1, ver: \"v0.1\", "
+            AnsT1 anson = (AnsT1)Anson.FromJson("{type:io.odysz.anson.AnsT1, "
                     // our C# listener repaced $ -> +
                     + "m: {type:io.odysz.anson.AnsT1$AnsM1, \"name\": \"x\"}}");
             Assert.AreEqual("x", anson.m.name);
 
-            anson = (AnsT1)Anson.FromJson("{type: io.odysz.anson.AnsT1, ver: \"v0.1\"}");
-            Assert.AreEqual("v0.1", anson.ver);
+            anson = (AnsT1)Anson.FromJson("{type: io.odysz.anson.AnsT1}");
+            // Assert.AreEqual("v0.1", anson.ver);
             Assert.AreEqual(null, anson.m);
 
-            anson = (AnsT1)Anson.FromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\n1\", m: null}");
-            Assert.AreEqual("v0\\n.\\n1", anson.ver);
+            anson = (AnsT1)Anson.FromJson("{type: io.odysz.anson.AnsT1, m: null}");
+            // Assert.AreEqual("v0\\n.\\n1", anson.ver);
             Assert.AreEqual(null, anson.m);
 
             AnsT2 anson2 = (AnsT2)Anson.FromJson("{type:io.odysz.anson.AnsT2, m: [\"e1\", \"e2\"]}");
@@ -79,7 +79,7 @@ namespace io.odysz.anson
             MemoryStream stream = new MemoryStream();
             a2d.ToBlock(stream);
             string s = Utils.ToString(stream);
-            string expect = "{\"type\": \"io.odysz.anson.Ans2dArr\", \"strs\": [[\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], []], \"ver\": \"0.9.xx\"}";
+            string expect = "{\"type\": \"io.odysz.anson.Ans2dArr\", \"strs\": [[\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], []]}\n";
             Assert.AreEqual(expect, s);
 
             a2d = (Ans2dArr)Anson.FromJson(expect);
@@ -102,11 +102,11 @@ namespace io.odysz.anson
             parent.ToBlock(stream);
             string s = Utils.ToString(stream);
             string expect = "{\"type\": \"io.odysz.anson.AnsT3\", \"ms\": null, "
-                            + "\"m\": [{\"type\": \"io.odysz.anson.AnsT3Child\", \"ver\": \"0.9.xx\"}, "
-                            + "{\"type\": \"io.odysz.anson.AnsT3son\", \"gendre\": \"male\", \"parent\": \"io.odysz.anson.AnsT3\", \"ver\": \"0.9.xx\"}], \"ver\": \"0.9.xx\"}";
+                            + "\"m\": [{\"type\": \"io.odysz.anson.AnsT3Child\"}\n, "
+                            + "{\"type\": \"io.odysz.anson.AnsT3son\", \"gendre\": \"male\", \"parent\": \"io.odysz.anson.AnsT3\"}\n]}\n";
 
             // in .net framwork 4.72, fields and properties are not always the same order
-            Assert.AreEqual(expect.Length, s.Length);
+            Assert.AreEqual(expect, s);
 
             // should resolve parent ref with a type guess
             AnsT3 p = (AnsT3)Anson.FromJson(s);
@@ -116,7 +116,7 @@ namespace io.odysz.anson
 
             AnsT3 p0 = (AnsT3)Anson.FromJson(expect);
             Assert.AreEqual(((AnsT3son)p0.m[1]).gendre, ((AnsT3son)p.m[1]).gendre);
-            Assert.AreEqual(p0.ver, p.ver);
+            // Assert.AreEqual(p0.ver, p.ver);
         }
 
         [TestMethod]

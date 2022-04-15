@@ -838,10 +838,12 @@ namespace io.odysz.anson
             Type fptype = f == null ? p?.PropertyType : f.FieldType;
 
             if ( f == null && p == null &&
-               !(typeof(Hashtable).IsAssignableFrom(et) ||
-                 // et.Name == "Dictionary`2" || et.GetInterface("Dictionary`2") != null) )
-                 CSharp.IsDict(et)) )
-                throw new AnsonException(0, "Field/property ignored: field: {0}, value: {1}", fn, ctx.GetText());
+               !(typeof(Hashtable).IsAssignableFrom(et) || CSharp.IsDict(et)) )
+            {
+                // throw new AnsonException(0, "Field/property ignored: field: {0}, value: {1}", fn, ctx.GetText());
+                Utils.Warn("Field ignored: field: {0}, value: {1}", fn, ctx.GetText());
+                return;
+            }
 
             AnsonField af = (AnsonField) (f == null ?
                                ((MemberInfo)p)?.GetCustomAttribute(typeof(AnsonField))
@@ -849,13 +851,15 @@ namespace io.odysz.anson
             if (af != null && af.ignoreFrom)
             {
                 if (AnsonFlags.parser)
-                    Debug.WriteLine(string.Format("[AnsonFlags.parser] {0} ignored", fn));
+                    // Debug.WriteLine(string.Format("[AnsonFlags.parser] {0} ignored", fn));
+                    Utils.Warn("[AnsonFlags.parser] {0} ignored", fn);
                 return;
             }
             else if (af != null && af.refer == AnsonField.enclosing) {
                 object parent = Toparent(fptype);
                 if (parent == null)
-                    Debug.WriteLine(string.Format("parent {0} is ignored: reference is null", fn));
+                    // Debug.WriteLine(string.Format("parent {0} is ignored: reference is null", fn));
+                    Utils.Warn("parent {0} is ignored: reference is null", fn);
 
                 CSharp.SetFPValue(enclosing, f, p, parent);
                 return;
@@ -1148,10 +1152,15 @@ namespace io.odysz.anson
                 => "java.util.ArrayList" == tname ?
                     "System.Collections.Generic.List`1[[System.Object]]" : tname;
 
-            internal static bool IsDict(Type fptype)
+             /// <summary>
+             /// fptype.Name == "Dictionary`2" || fptype.GetInterface("Dictionary`2") != null) )
+             /// </summary>
+             /// <param name="fptype"></param>
+             /// <returns></returns>
+             internal static bool IsDict(Type fptype)
                 => fptype.Name == "Dictionary`2" || fptype.GetInterface("Dictionary`2") != null;
 
-            internal static bool IsList(Type fptype)
+             internal static bool IsList(Type fptype)
                 => fptype.IsInterface && fptype.Name == "IList"
                     || fptype.Name == "IList`1" || fptype.GetInterface("IList`1") != null;
         }

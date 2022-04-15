@@ -120,7 +120,7 @@ public class Anson implements IJsonable {
 				throw new AnsonException(0, e1.getMessage());
 			}
 		}
-		stream.write("}".getBytes(StandardCharsets.UTF_8));
+		stream.write("}\n".getBytes(StandardCharsets.UTF_8));
 		stream.flush();
 		return this;
 	}

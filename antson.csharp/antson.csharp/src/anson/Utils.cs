@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 
 namespace io.odysz.anson
@@ -44,6 +46,11 @@ namespace io.odysz.anson
                     stream.WriteByte((byte)c);
             }
            return stream;
+        }
+
+        internal static void Warn(string template, object v1, object v2 = null, object v3 = null)
+        {
+            Debug.WriteLine(string.Format(template, v1, v2, v3));
         }
     }
 }
