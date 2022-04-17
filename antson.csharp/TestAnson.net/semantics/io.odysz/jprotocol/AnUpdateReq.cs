@@ -29,22 +29,6 @@ namespace io.odysz.semantic.jserv.U
 	/// <author>odys-z@github.com</author>
 	public class AnUpdateReq : AnsonBody
 	{
-		/// <exception cref="AnsonException"/>
-		/// <exception cref="System.IO.IOException"/>
-		//public override Anson toBlock(java.io.OutputStream stream, params 
-		//	io.odysz.anson.JsonOpt[] opts)
-		//{
-		//	if (jprotocol.JProtocol.CRUD.C.Equals(a) && (cols == null || cols
-		//		.Length == 0))
-		//	{
-		//		io.odysz.common.Utils.warn("WARN - UpdateReq.toJson():\nFound inserting request but cols are null, this is wrong for no insert statement can be generated.\n"
-		//			 + "Suggestion: call the InsertReq.col(col-name) before serialize this to json for table: %s\n"
-		//			 + "Another common error leads to this is using UpdateReq for inserting with java client."
-		//			, mtabl);
-		//	}
-		//	return base.toBlock(stream, opts);
-		//}
-
 		/// <summary>Format an update request.</summary>
 		/// <param name="conn"/>
 		/// <param name="parent"/>

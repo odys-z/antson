@@ -27,5 +27,12 @@ namespace io.odysz.anson.common
 				return false;
 			}
         }
-    }
+
+		static public T[] Fill<T>(T[] arr, T value)
+		{
+			for (int i = 0; i < arr.Length; i++)
+				arr[i] = value;
+			return arr;
+		}
+	}
 }

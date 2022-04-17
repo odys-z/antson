@@ -15,7 +15,7 @@ namespace io.odysz.anson
         } 
 
         [TestMethod]
-        public void TestCommon()
+        public void TestLangEx()
         {
             string blank = null;
             Assert.AreEqual(true, LangExt.isblank(blank));
@@ -23,6 +23,12 @@ namespace io.odysz.anson
             Assert.AreEqual(true, LangExt.isblank(blank));
             blank = ".";
             Assert.AreEqual(true, LangExt.isblank(blank, new string[] { "." }));
+
+            byte[] b = new byte[16];
+            LangExt.Fill<byte>(b, 1);
+
+            foreach (byte bayraktar in b)
+                Assert.AreEqual(1, bayraktar);
         }
 
         [TestMethod]
