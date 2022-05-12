@@ -32,7 +32,7 @@ class AnsonTest {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		anson.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT1, ver: \"v0.1\", m: null}", s);
+		assertEquals("{type: io.odysz.anson.AnsT1, ver: \"v0.1\", m: null}\n", s);
  
 		// ESC
 		AnsT2 a2 = new AnsT2();
@@ -40,7 +40,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}", s);
+		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
 
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
@@ -48,7 +48,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		cll.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTList, anss: null, ans2: null, lst: [\"A\", \"B\"]}", s);
+		assertEquals("{type: io.odysz.anson.AnsTList, anss: null, ans2: null, lst: [\"A\", \"B\"]}\n", s);
 
 		AnsTRs anrs = new AnsTRs();
 		bos = new ByteArrayOutputStream(); 
@@ -58,7 +58,7 @@ class AnsonTest {
 				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {1: [1, \"1\"], 2: [2, \"2\"], 3: [3, \"3\"], 4: [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
-				+ "}}", s);
+				+ "}\n}\n", s);
 		
 	}
 	
@@ -74,7 +74,7 @@ class AnsonTest {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		a2d.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []]}";
+		String expect = "{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []]}\n";
 		assertEquals(expect, s);
 		
 		a2d = (Ans2dArr) Anson.fromJson(expect);
@@ -98,8 +98,8 @@ class AnsonTest {
 		parent.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
-				+ "m: [{type: io.odysz.anson.AnsT3Child}, "
-					+ "{type: io.odysz.anson.AnsT3son, parent: \"io.odysz.anson.AnsT3\", gendre: \"male\"}]}";
+					+ "m: [{type: io.odysz.anson.AnsT3Child}\n"
+					+ ", {type: io.odysz.anson.AnsT3son, parent: \"io.odysz.anson.AnsT3\", gendre: \"male\"}\n]}\n";
 		assertEquals(expect, s);
 	
 		// should resolve parent ref with a type guess
@@ -121,8 +121,8 @@ class AnsonTest {
 		enclosing.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
-				+ "m: [{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"param A\"}, "
-					+ "{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"B\"}]}";
+				+ "m: [{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"param A\"}\n"
+				+ ", {type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"B\"}\n]}\n";
 		assertEquals(expect, s);
 		
 		AnsT3 clone = (AnsT3) Anson.fromJson(s);
@@ -142,7 +142,7 @@ class AnsonTest {
 		en.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		bos.close();
-		String expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: null}";
+		String expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: null}\n";
 		assertEquals(expect, s);
 		
 		AnsT4Enum denum = (AnsT4Enum) Anson.fromJson(expect);
@@ -154,7 +154,7 @@ class AnsonTest {
 		en.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		bos.close();
-		expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: \"dataset\"}";
+		expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: \"dataset\"}\n";
 		assertEquals(expect, s);
 
 		AnsT4Enum problem = (AnsT4Enum) Anson.fromJson(expect);
@@ -184,12 +184,12 @@ class AnsonTest {
 		lst.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsTStrsList, "
-				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 0\"]}, "
-						  + "{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 1\"]}], "
-						 + "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
-						 + "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"1 1 1 1\"]}]]]], "
-				+ "lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
-				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}";
+				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 0\"]}\n"
+				+ ", {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 1\"]}\n], "
+				+ "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
+				+ "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"1 1 1 1\"]}\n"
+				+ "]]]], lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
+				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}\n";
 		assertEquals(expect, s);
 	
 		AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
@@ -313,7 +313,7 @@ class AnsonTest {
 		AnsTMap m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
 		assertEquals("B", m.map.get("A"));
 
-		m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, map: {\"A\": \"B\"}, mapArr: {a: [1, \"s\"]}}");
+		m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, map: {\"A\": \"B\"}, mapArr: {a: [1, \"s\"]}}\n");
 		assertEquals("B", m.map.get("A"));
 		assertEquals(2, m.mapArr.get("a").length);
 		assertEquals(1, m.mapArr.get("a")[0]);
@@ -324,14 +324,14 @@ class AnsonTest {
 		opt.quotKey(true);
 		m.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{\"type\": \"io.odysz.anson.AnsTMap\", \"map\": {\"A\": \"B\", \"v-null\": null}, \"mapArr\": {\"a\": [1, \"s\"]}}", s);
+		assertEquals("{\"type\": \"io.odysz.anson.AnsTMap\", \"map\": {\"A\": \"B\", \"v-null\": null}, \"mapArr\": {\"a\": [1, \"s\"]}}\n", s);
 		bos.close();
 
 		bos = new ByteArrayOutputStream(); 
 		opt.quotKey(false);
 		m.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}", s);
+		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}\n", s);
 	}
 	
 	void testEscape() throws AnsonException {
@@ -401,7 +401,7 @@ class AnsonTest {
 						   + "node: {fullpath: \"1 sys.1 domain\", "
 						   + "id: \"sys-domain\", text: \"Domain Settings\", "
 						   + "sort: \"1\", parentId: \"sys\", url: \"views/sys/domain/domain.html\""
-						   + "}}]}";
+						   + "}}\n]}\n";
 		SubTree tr = (SubTree) Anson.fromJson(tst);
 	
 		assertEquals(1, tr.children.size());
@@ -431,7 +431,7 @@ class AnsonTest {
 		t6.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		
-		assertEquals("{type: io.odysz.anson.AnsT6Bypass, p: \"session\"}", s);
+		assertEquals("{type: io.odysz.anson.AnsT6Bypass, p: \"session\"}\n", s);
 		
 		AnsT6Bypass bypass = (AnsT6Bypass) Anson.fromJson(s);
 		
