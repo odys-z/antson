@@ -251,7 +251,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 							+ "E.g. Java field example: @AnsonField(valType=\"io.your.type\")\n"
 							+ "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
 							top.enclosing.getClass(), ctx.getText());;
-				throw new AnsonException(0, "Obj type not found. property: %s", top.parsingProp);
+				throw new AnsonException(0, "Obj type not found. property / field name: %s", top.parsingProp);
 			}
 
 			Class<?> ft = fmap.get(top.parsingProp).getType();
