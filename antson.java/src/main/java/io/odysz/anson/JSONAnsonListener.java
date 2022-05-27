@@ -141,7 +141,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private ParsingCtx top() { return stack.get(0); }
 
-	/**Push parsing node (a envelope, map, list) into this' {@link #stack}.
+	/**Push the parsing node (a envelope, map, list) into this' {@link #stack}.
 	 * @param enclosingClazz new parsing IJsonable object's class
 	 * @param elemType type annotation of enclosing list/array. 0: main type, 1: sub-types<br>
 	 * This parameter can't be null if is pushing a list node.
@@ -166,16 +166,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				Constructor<?> ctor = null;
 				try { ctor = enclosingClazz.getConstructor(new Class<?>[] {});
 				} catch (NoSuchMethodException e) {
-					throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default public constructor(0 parameter)\n"
-							+ "Also, inner class must be static.\n"
-							+ "Class.getConstructor() error on getting: %s %s",
-							enclosingClazz.getName(), e.getMessage(), e.getClass().getName());
+					throw new AnsonException(0,
+						"To make json can be parsed to %s, the class must has a default public constructor(0 parameter)\n"
+						+ "Also, inner class must be static.\n"
+						+ "Class.getConstructor() error on getting: %s %s\n",
+						enclosingClazz.getName(), e.getMessage(), e.getClass().getName());
 				}
 
 				if (IJsonable.class.isAssignableFrom(enclosingClazz)) {
 					if (ctor == null)
-						throw new AnsonException(0, "To make json can be parsed to %0$s, the class must has a default public constructor(0 parameter)\n",
-										enclosingClazz.getName());
+						throw new AnsonException(0,
+							"To make json can be parsed to %0$s, the class must has a default public constructor(0 parameter)\n",
+							enclosingClazz.getName());
 					fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
 					try {
 						IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
@@ -246,12 +248,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				// In a list, found object, if not type specified with annotation, must failed.
 				// But this is confusing to user. Set some report here.
 				if (top.isInList() || top.isInMap())
-					Utils.warn("Type of elements in list or map is complicate, but no annotation for type info can be found.\n"
+					Utils.warn("Type of elements in the list or map is complicate, but no annotation for type info can be found.\n"
 							+ "field type: %s\njson: %s\n"
 							+ "E.g. Java field example: @AnsonField(valType=\"io.your.type\")\n"
 							+ "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
 							top.enclosing.getClass(), ctx.getText());;
-				throw new AnsonException(0, "Obj type not found. property / field name: %s", top.parsingProp);
+				throw new AnsonException(0, "Obj type not found. property / field name: %s, type: %s",
+						top.parsingProp, top.enclosing == null ? "null" : top.enclosing.getClass().getName());
 			}
 
 			Class<?> ft = fmap.get(top.parsingProp).getType();
