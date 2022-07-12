@@ -34,6 +34,15 @@ public interface IJsonable {
 	}
 
 	/**
+	 * {@link Anson} implemented this for almost all the case, user shouldn't care about this.
+	 * 
+	 * But typically, IPort implementation should handle this specially like
+	 * <pre>
+	 	stream.write('\"');
+		stream.write(name().getBytes());
+		stream.write('\"');
+		return this;
+	 </pre> 
 	 * @param stream
 	 * @param opts
 	 * @return this
