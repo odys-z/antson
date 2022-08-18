@@ -11,7 +11,7 @@ public class LangExt {
 	 * <p>Empty element won't be ignored if there are 2 consequent separator. <br>
 	 * That means two junctural, succeeding, cascading separators without an element in between, expect white space.
 	 * Sorry for that poor English.</p>
-	 * <p> See https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
+	 * @see https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
 	 * @param s
 	 * @param regex
 	 * @param noTrim
