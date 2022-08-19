@@ -36,7 +36,7 @@ public class LangExt {
 				.filter(e -> e != null)
 				.map(e -> e.toString()).collect(Collectors.joining(",", "[", "]"));
 	}
-	
+
 	public static String toString(int[] ss) {
 		return ss == null ? null : Arrays.stream(ss)
 				.mapToObj(e -> String.valueOf(e)).collect(Collectors.joining(",", "[", "]"));
@@ -75,6 +75,10 @@ public class LangExt {
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
 	}
+
+//	public static String toString(List<String> exif) {
+//		return null;
+//	}
 	
 	/**Parse formatted string into hash map.
 	 * @param str "k1:v1,k2:v2,..."
@@ -438,5 +442,6 @@ public class LangExt {
                 return buf.toString();
         }
     }
+
 }
 
