@@ -103,7 +103,17 @@ public class LangExt {
 		return null;
 	}
 
-	/**Is s empty of only space - not logic meanings?
+
+	public static boolean is(boolean[] isAdmin, boolean... deflt) {
+		if (isAdmin == null || isAdmin.length < 1)
+			return (deflt == null || deflt.length < 1) ? false : is(deflt);
+		else
+			return isAdmin[0];
+	}
+
+	/**
+	 * Is s empty of only space - not logic meanings?
+	 * If space can not be ignored, use {@link #isEmpty(CharSequence)}.
 	 * 
 	 * @param s
 	 * @param takeAsNull regex take as null, e.g. "\\s*null\\s*" will take the string "null " as null.
@@ -141,8 +151,8 @@ public class LangExt {
      * StringUtils.isEmpty("  bob  ") = false
      * </pre>
      *
-     * <p>NOTE: This method changed in LangExt version 2.0.
-     * It no longer trims the CharSequence.
+     * <p>NOTE: This method is changed in LangExt version 2.0.
+     * It's no longer trims the CharSequence.
      * That functionality is available in {@link #isblank(String, String...)}.</p>
      *
      * @param cs  the CharSequence to check, may be null
