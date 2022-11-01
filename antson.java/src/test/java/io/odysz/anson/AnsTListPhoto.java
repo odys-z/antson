@@ -4,13 +4,13 @@ import java.util.ArrayList;
 
 public class AnsTListPhoto extends Anson {
 
-	ArrayList<Photo[]> ansp;
+	ArrayList<AnsPhoto[]> ansp;
 	
 	public AnsTListPhoto() {
 	}
 
 	public AnsTListPhoto(String pid) {
-		ansp = new ArrayList<Photo[]>();
-		ansp.add(new Photo[] { new Photo(pid) });
+		ansp = new ArrayList<AnsPhoto[]>();
+		ansp.add(new AnsPhoto[] { new AnsPhoto(pid) });
 	}
 }
