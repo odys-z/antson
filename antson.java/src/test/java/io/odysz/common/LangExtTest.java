@@ -19,4 +19,13 @@ class LangExtTest {
 		assertTrue(is(new boolean[] {true}, false));
 	}
 
+	@Test
+	void testIsNull() {
+		assertTrue(isNull(new Object[] {}));
+		assertTrue(isNull(new Object[] {null}));
+		assertTrue(isNull(new Object[0]));
+		assertTrue(isNull(null));
+		assertFalse(isNull(new Object[] {""}));
+		assertFalse(isNull(new Object[] {null, ""}));
+	}
 }

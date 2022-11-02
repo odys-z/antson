@@ -162,6 +162,16 @@ public class LangExt {
     public static boolean isEmpty(final CharSequence cs) {
         return cs == null || cs.length() == 0;
     }
+    
+    /**
+     * @param args
+     * @return args == null || args.length == 0 || args.length == 1 && args[0] == null;
+     */
+    public static boolean isNull(final Object[] args) {
+    	return args == null || args.length == 0
+    		|| args.length == 1 && args[0] == null
+    		|| args.length == 2 && args[1] == null && args[1] == null;
+    }
 
 	public static String prefixIfnull(String prefix, String dest) {
 		if (isblank(prefix) || dest.startsWith(prefix))
