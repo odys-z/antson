@@ -1,6 +1,9 @@
 package io.odysz.common;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
+
 import static io.odysz.common.LangExt.*;
 
 import org.junit.jupiter.api.Test;
@@ -24,8 +27,10 @@ class LangExtTest {
 		assertTrue(isNull(new Object[] {}));
 		assertTrue(isNull(new Object[] {null}));
 		assertTrue(isNull(new Object[0]));
-		assertTrue(isNull(null));
+		assertTrue(isNull((Object[])null));
 		assertFalse(isNull(new Object[] {""}));
 		assertFalse(isNull(new Object[] {null, ""}));
+
+		assertTrue(isNull((List<?>)null));
 	}
 }

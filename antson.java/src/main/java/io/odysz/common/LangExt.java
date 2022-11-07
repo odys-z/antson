@@ -170,7 +170,11 @@ public class LangExt {
     public static boolean isNull(final Object[] args) {
     	return args == null || args.length == 0
     		|| args.length == 1 && args[0] == null
-    		|| args.length == 2 && args[1] == null && args[1] == null;
+    		|| args.length == 2 && args[0] == null && args[1] == null;
+    }
+
+    public static boolean isNull(final List<?> args) {
+    	return args == null || args.isEmpty();
     }
 
 	public static String prefixIfnull(String prefix, String dest) {
