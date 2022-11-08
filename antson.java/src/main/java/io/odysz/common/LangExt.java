@@ -27,7 +27,7 @@ public class LangExt {
 		}
 	}
 	
-	/** Get a string that can be parsed by {@link #toArray(String)}.
+	/**Get a string array that composed into string by {@link #toString(Object[])}.
 	 * @param ss
 	 * @return [e0, e1, ...]
 	 */
@@ -42,7 +42,7 @@ public class LangExt {
 				.mapToObj(e -> String.valueOf(e)).collect(Collectors.joining(",", "[", "]"));
 	}
 
-	/**Get a string array that composed into string by {@link #toString(Object[])}.<br>
+	/** Get a string that can be parsed by {@link #toArray(String)}.<br>
 	 * E.g. "[a, b]" =&gt; ["a", "b"]
 	 * @param str
 	 * @return string[]
@@ -76,10 +76,6 @@ public class LangExt {
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-//	public static String toString(List<String> exif) {
-//		return null;
-//	}
-	
 	/**Parse formatted string into hash map.
 	 * @param str "k1:v1,k2:v2,..."
 	 * @return hash map
