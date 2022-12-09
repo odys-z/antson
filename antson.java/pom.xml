@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.16</version>
+  <version>0.9.20</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
@@ -21,8 +21,8 @@
     <developer>
       <name>Odys Zhou</name>
       <email>odys.zhou@gmail.com</email>
-      <organization>odysz.github.io</organization>
-      <organizationUrl>https://odysz.github.io</organizationUrl>
+      <organization>odys-z.github.io</organization>
+      <organizationUrl>https://odys-z.github.io</organizationUrl>
     </developer>
   </developers>
 
@@ -200,5 +200,5 @@
 	 -->
      </plugins>
    </build>
-  <description>Java, c#, python data type to json (de)serializer</description>
+  <description>Java user type to json (de)serializer</description>
 </project>

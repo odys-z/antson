@@ -361,10 +361,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        	Type argType = pType.getActualTypeArguments()[0]; // jdk: class [Lio.odysz.anson.Photo;  
 	        	if (!(argType instanceof TypeVariable) && !(argType instanceof WildcardType)) {
 	        				
-	        		/* change for Andriod compatibility
+	        		/* change for Android compatibility
 	        		 * for field : List<Photo[]> photos,
-	        		 * on JDK 1.8: Class<T>(io.odysz.anson.Photo[])
-	        		 * on Andoid : GeneralArrayTypeImpl(io.oz.album.tier.Photo[])
+	        		 * on JDK 1.8: argType = Class<T>(io.odysz.anson.Photo[])
+	        		 * on Andoid : argType = GeneralArrayTypeImpl(io.oz.album.tier.Photo[])
 	        		 * 
 					@SuppressWarnings("unchecked")
 					Class<? extends Object> eleClzz = ((Class<? extends Object>) argType);

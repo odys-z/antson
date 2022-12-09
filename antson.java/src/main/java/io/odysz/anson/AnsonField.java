@@ -47,12 +47,13 @@ public @interface AnsonField {
 	String valType() default "";
 	
 	/**
-	 * If a sting field, e.g. base64 string come with this, Anson.toString() will ignore the content.
-	 * - long string printed only for debugging.
+	 * If a sting field, e.g. base64 string come with this,
+	 * {@link Anson#toBlock(JsonOpt)} (opt.shortenOnAnnotation = true) will ignore the content.
+	 * <br/>- long string printed only for debugging.
 	 * 
-	 * @return short use shorten string when possible
+	 * @return the annotation. If true, use shorten string when possible
 	 */
-	boolean shortoString() default false;
+	boolean shortenString() default false;
 
 	int ref() default undefined;
 }

@@ -1,4 +1,4 @@
-package io.odysz.antson;
+package io.odysz.anson;
 
 /**
  * Help message handling here - in the future, to support CLI.

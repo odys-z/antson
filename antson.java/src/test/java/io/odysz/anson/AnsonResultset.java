@@ -88,7 +88,7 @@ public class AnsonResultset extends Anson {
 			String colName = rsMeta.getColumnLabel(i).toUpperCase();
 			if (colnames.containsKey(colName)) {
 				if (debug)
-					System.err.println("WARN: Duplicated col name found, only the last one's index reserved: " + colName);
+					System.err.println("WARN: As duplicated col name been found, only the last one's index is reserved: " + colName);
 			}
 			colnames.put(colName, new Object[] {i, rsMeta.getColumnLabel(i)});
 		}

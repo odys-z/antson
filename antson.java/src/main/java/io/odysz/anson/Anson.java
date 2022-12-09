@@ -101,7 +101,7 @@ public class Anson implements IJsonable {
 			try {
 				Object v = f.get(this);
 				AnsonField anno = f.getAnnotation(AnsonField.class);
-				if (v != null && anno != null && anno.shortoString()
+				if (v != null && anno != null && anno.shortenString()
 					&& opts != null && opts.length > 0 && opts[0] != null && opts[0].shortenOnAnnotation())
 					stream.write(("\"Asnon field shortened ... \"").getBytes(StandardCharsets.UTF_8));
 				else {

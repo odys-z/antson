@@ -296,8 +296,8 @@ class AnsonTest {
 	@Test
 	void testFromJson_list2d() throws AnsonException {
 		AnsTListPhoto cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [["
-				+ "{type: io.odysz.anson.Photo, pid: \"1\" },"
-				+ "{type: io.odysz.anson.Photo, pid: \"2\" } ]]}");
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\" },"
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\" } ]]}");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(2, cll.ansp.get(0).length);
 		assertEquals("2", cll.ansp.get(0)[1].pid);

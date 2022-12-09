@@ -11,7 +11,7 @@ public class LangExt {
 	 * <p>Empty element won't be ignored if there are 2 consequent separator. <br>
 	 * That means two junctural, succeeding, cascading separators without an element in between, expect white space.
 	 * Sorry for that poor English.</p>
-	 * <p> See https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
+	 * @see https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
 	 * @param s
 	 * @param regex
 	 * @param noTrim
@@ -27,7 +27,7 @@ public class LangExt {
 		}
 	}
 	
-	/** Get a string that can be parsed by {@link #toArray(String)}.
+	/**Get a string array that composed into string by {@link #toString(Object[])}.
 	 * @param ss
 	 * @return [e0, e1, ...]
 	 */
@@ -36,13 +36,13 @@ public class LangExt {
 				.filter(e -> e != null)
 				.map(e -> e.toString()).collect(Collectors.joining(",", "[", "]"));
 	}
-	
+
 	public static String toString(int[] ss) {
 		return ss == null ? null : Arrays.stream(ss)
 				.mapToObj(e -> String.valueOf(e)).collect(Collectors.joining(",", "[", "]"));
 	}
 
-	/**Get a string array that composed into string by {@link #toString(Object[])}.<br>
+	/** Get a string that can be parsed by {@link #toArray(String)}.<br>
 	 * E.g. "[a, b]" =&gt; ["a", "b"]
 	 * @param str
 	 * @return string[]
@@ -75,7 +75,7 @@ public class LangExt {
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
 	}
-	
+
 	/**Parse formatted string into hash map.
 	 * @param str "k1:v1,k2:v2,..."
 	 * @return hash map
@@ -99,7 +99,17 @@ public class LangExt {
 		return null;
 	}
 
-	/**Is s empty of only space - not logic meanings?
+
+	public static boolean is(boolean[] isAdmin, boolean... deflt) {
+		if (isAdmin == null || isAdmin.length < 1)
+			return (deflt == null || deflt.length < 1) ? false : is(deflt);
+		else
+			return isAdmin[0];
+	}
+
+	/**
+	 * Is s empty of only space - not logic meanings?
+	 * If space can not be ignored, use {@link #isEmpty(CharSequence)}.
 	 * 
 	 * @param s
 	 * @param takeAsNull regex take as null, e.g. "\\s*null\\s*" will take the string "null " as null.
@@ -124,6 +134,44 @@ public class LangExt {
 				: bid == null;
 	}
 
+    // Empty checks
+    //-----------------------------------------------------------------------
+    /**
+     * <p>Checks if a CharSequence is empty ("") or null.</p>
+     *
+     * <pre>
+     * StringUtils.isEmpty(null)      = true
+     * StringUtils.isEmpty("")        = true
+     * StringUtils.isEmpty(" ")       = false
+     * StringUtils.isEmpty("bob")     = false
+     * StringUtils.isEmpty("  bob  ") = false
+     * </pre>
+     *
+     * <p>NOTE: This method is changed in LangExt version 2.0.
+     * It's no longer trims the CharSequence.
+     * That functionality is available in {@link #isblank(String, String...)}.</p>
+     *
+     * @param cs  the CharSequence to check, may be null
+     * @return {@code true} if the CharSequence is empty or null
+     * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
+     */
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
+    
+    /**
+     * @param args
+     * @return args == null || args.length == 0 || args.length == 1 && args[0] == null;
+     */
+    public static boolean isNull(final Object[] args) {
+    	return args == null || args.length == 0
+    		|| args.length == 1 && args[0] == null
+    		|| args.length == 2 && args[0] == null && args[1] == null;
+    }
+
+    public static boolean isNull(final List<?> args) {
+    	return args == null || args.isEmpty();
+    }
 
 	public static String prefixIfnull(String prefix, String dest) {
 		if (isblank(prefix) || dest.startsWith(prefix))
@@ -415,28 +463,5 @@ public class LangExt {
         }
     }
 
-    // Empty checks
-    //-----------------------------------------------------------------------
-    /**
-     * <p>Checks if a CharSequence is empty ("") or null.</p>
-     *
-     * <pre>
-     * StringUtils.isEmpty(null)      = true
-     * StringUtils.isEmpty("")        = true
-     * StringUtils.isEmpty(" ")       = false
-     * StringUtils.isEmpty("bob")     = false
-     * StringUtils.isEmpty("  bob  ") = false
-     * </pre>
-     *
-     * <p>NOTE: This method changed in Lang version 2.0.
-     * It no longer trims the CharSequence.
-     * That functionality is available in isBlank().</p>
-     *
-     * @param cs  the CharSequence to check, may be null
-     * @return {@code true} if the CharSequence is empty or null
-     * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
-     */
-    public static boolean isEmpty(final CharSequence cs) {
-        return cs == null || cs.length() == 0;
-    }
 }
+

@@ -51,6 +51,7 @@ public interface IJsonable {
 	 */
 	IJsonable toBlock(OutputStream stream, JsonOpt... opts) throws AnsonException, IOException;
 
+	/** @see #toBlock(OutputStream, JsonOpt...) */
 	public default String toBlock(JsonOpt opt) throws AnsonException, IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		toBlock(bos, opt);
