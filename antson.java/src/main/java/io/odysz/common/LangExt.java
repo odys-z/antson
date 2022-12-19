@@ -463,5 +463,26 @@ public class LangExt {
         }
     }
 
+	/**
+	 * see {@link LangExtTest#testEndwith()}
+	 * 
+	 * @param uri
+	 * @param postfix
+	 * @return
+	 */
+	public static boolean endWith(String uri, String ...postfix) {
+		if (!isEmpty(uri)) {
+			if (isNull(postfix))
+				return true;
+			else {
+				for (String s : postfix)
+					if (uri.endsWith(s))
+						return true;
+				return false;
+			}
+		}
+		else return false;
+	}
+
 }
 

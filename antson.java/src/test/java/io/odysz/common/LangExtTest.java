@@ -33,4 +33,30 @@ class LangExtTest {
 
 		assertTrue(isNull((List<?>)null));
 	}
+
+	/**
+	 *<pre>
+	assertFalse(endWith(null, new String[] {}));
+	assertFalse(endWith("", new String[] {}));
+	assertTrue(endWith(" "));
+	assertTrue(endWith(" ", " "));
+	assertTrue(endWith("anything"));
+	assertTrue(endWith("anything", ""));
+	assertTrue(endWith("anything", "g", "ing"));
+	assertFalse(endWith("anythin-", "g", "ing"));
+	assertTrue(endWith("anythin-", "g", "ing", "-"));
+	</pre>
+	 */
+	@Test
+	void testEndwith() {
+		assertFalse(endWith(null, new String[] {}));
+		assertFalse(endWith("", new String[] {}));
+		assertTrue(endWith(" "));
+		assertTrue(endWith(" ", " "));
+		assertTrue(endWith("anything"));
+		assertTrue(endWith("anything", ""));
+		assertTrue(endWith("anything", "g", "ing"));
+		assertFalse(endWith("anythin-", "g", "ing"));
+		assertTrue(endWith("anythin-", "g", "ing", "-"));
+	}
 }
