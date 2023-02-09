@@ -15,9 +15,7 @@ import java.util.HashMap;
 import io.odysz.common.LangExt;
 import io.odysz.common.Regex;
 
-/**This Resultset is used for non-connected manipulation.
- * Rows and Cols are start at 1, the same as {@link java.sql.Resultset}.<br>
- * TODO This will be changed in the future (It's proved starting at 0 is more bug free).
+/**Test structure. Don't use this in application.
  * 
  * @author odys-z@github.com
  *
