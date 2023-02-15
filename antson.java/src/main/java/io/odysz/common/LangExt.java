@@ -27,6 +27,17 @@ public class LangExt {
 		}
 	}
 	
+	public static String[][] split(String[] ss) {
+		if (ss == null)
+			return null;
+		String[][] argss = new String[ss.length][];
+		for (int ix = 0; ix < ss.length; ix++) {
+			String[] args = LangExt.split(ss[ix], "\\s+");
+			argss[ix] = args;
+		}
+		return argss;
+	}
+
 	/**Get a string array that composed into string by {@link #toString(Object[])}.
 	 * @param ss
 	 * @return [e0, e1, ...]
