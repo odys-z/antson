@@ -8,24 +8,25 @@ Antson is ANother Tool for JSON (de)serializing java/c# object to / from json.
 
 # Why Antson?
 
-For short, there is no such tool / lib that can convert javascript object to or
-from java or other programming language like C#, on the fly.
+For short, there is no such tool / lib that can convert javascript objects to or
+from java or other programming languages like C#, on the fly.
 
-Why? Because js object has no structure types with support of compiler. You can
-not define a "io.app.User" type in js. All js objects are only a HashMap for Java.
-Any json data are converted into java.lang.Map in java world traditionally. There
-are a lot of tools helping to do this. For java, js object is data without type,
-this is every upsetting to java programmers, at least to the author.
+Why? Because js objects has no structure types with support of any compiler. Users
+can not define a "io.app.User" type in js. All js objects are only a HashMap in typed
+languages e.g. Java. Any json data is converted into java.lang.Map in java the world 
+traditionally. Although there are a lot of tools helping to do this, a js object is 
+data without type which means no type checking and the data is nothing carrying any
+semantic meanings. This is every upsetting to java programmers, at least to the author.
 
-In many cases, only HashMap structure is not enought. Take a SOA architecture for
-example, protocol packages needing a way to tell the reciever how to deserialize
-the package. Server needing to know how the request been parsed, even for finding
-the parser - like finding the correct mothod for a
+In many cases, only a hash table structure is not enough. Take a SOA architecture for
+example, protocol packages needing a way to tell the receivers how to deserialize
+the package. Servers needing to know how the requests been parsed, even for finding
+the parser - like finding the correct method for a
 [SOAP Envelope](https://en.wikipedia.org/wiki/SOAP#Example_message_(encapsulated_in_HTTP)).
 
-If all envelopes can not parsed before dispatched, the dispatcher must at least
-first try to docode "port" name, then let the reciever handle the rest of the
-content - because it's not understandable by dispatcher.
+If all envelopes can not be parsed before dispatched, the dispatcher must at 
+least first try to docode "port" name, then let the receivers handle the rest 
+of the content - because it's not understandable by dispatcher.
 
 One way to do this is use semantics defined by structure, like this:
 
@@ -33,33 +34,33 @@ One way to do this is use semantics defined by structure, like this:
     {port: p-name, data : {method-requesting-type-data}}
 ~~~
 
-It's no longer simply a map now, it's structured data. If this structure getting
-more complex, data user will have to explain the structure, otherwise it won't been
-deserialized properly. Then the (de)serializer will getting complicate. The down
-side of this is your architecture will turn into mess because you can't separate
-the protocol layer from the application's business handling - your massage parsing
-depends on business logics.
+It's no longer simply a map now, it's structured data. If this structure is getting
+more complex, data users will have to explain the structure, otherwise it won't been
+deserialized properly. Then the (de)serializer will become complicated. The down
+side of this is your architecture will turn into a mess because you can't separate
+the protocol layer from the application's business handling as the message parsing
+depends on business logic.
 
-For java or c# data type, the structure is supported at language level. The server
+For java or c# data types, this semantics is supported at language level. The server
 and client should talk on the same data type and exchange object at ease. To achieve
 this, typed data should been deserialized transparently, and exchanged between the
-client and server. If you are comfort with MS .net webservice framework, you are
-not supprised with this idea.
+client and server. If users are comfortable with MS .net webservice framework, they
+shouldn't be suprised with this idea.
 
 [Gson](https://github.com/google/gson) is a good try to go further. But the method
 is still not enough. The main weakness is it's not smart enough - it doesn't handle
 java fields with type information and (de)serialize back forth. Every Gson translation
-of json data to Java object needing user implementing business handlers, one problem
+of json data to Java object needing users implementing business handlers, one problem
 a time.
 
-Antson is trying to go further. Users only needing to define their business gramma -
+Antson is trying to go further. Users only need to define their business gramma -
 the application business data defined in strictly typed language like java or c#,
 then send json packages back and forth with the help of Antson API, consuming the
 data objects like normal structured objects, and only take care of it's business
 processing.
 
 (Since 0.9.4, Antson also implemented a c# version, and we are still comparing it
-with [https://www.newtonsoft.com/json](Newtonsoft Json.NET). )
+with [Newtonsoft Json.NET](https://www.newtonsoft.com/json). )
 
 # Why no input stream mode?
 
@@ -78,20 +79,20 @@ try a test in the future.
 Antson will be used as the transport protocol layer for semantic-\*. see his
 [home page](https://odys-z.github.io) for details.
 
-Before Antson, one of the important way to extend semantic-jserv logics, the servlet
-way, is limited for it's unconvenient of message (de)serializing - message's structure
-must been handled with Gson extension by user implementation. With Antson, users
-don't need to override handler for different structure anymore. Following some
-basic rules like extends io.odysz.Anson or break reference loop with annotation,
-json v.s java type translation will be automatically handled and being transparent
-to upper tiers.
+If you are interested in other usages, the test cases located in antson.java/src/test
+subfolder provides a bunch of examples for (de)serialize json objects to and from java types.
 
 Currently there are only two different language runtime lib, c# & java. There is
-a js client, but it's not a neccessary, only a helper lib for keeping json protocol
-packages keep consists with server side. Users can parse the json data by themselves.
+a ts client, [@anclient/semantier](). Although it's not necessary, users are not recommended
+to use Antson from scratch for parsing the raw json data by themselves.
 
 The runtimes are antson.java & antson.csharp sub folder. The c# version come with
 an example in [Anclient/example.cs](https://github.com/odys-z/Anclient#repository-structure).
+
+Unfortunately, only antson.java can work stably currently. See [API documents](https://odys-z.github.io/javadoc/antson/).
+
+A c# version is pushed in Nuget and verified it is efficient, but it is pretty old and
+you should waste time on it.
 
 # Known Issues
 
@@ -103,7 +104,7 @@ which is kept consistency with [JSON Gramma](https://www.json.org/).
 The problem of this official version is that an object value's type present in
 an array can not been figured out automatically.
 
-So Antson uses a slightly modified version of JSON specificateion, adding a new
+So Antson uses a slightly modified version of JSON specification, adding a new
 type of value (envelope) to value's declaration, like this:
 
 ~~~
@@ -124,7 +125,7 @@ type of value (envelope) to value's declaration, like this:
 	;
 ~~~
 
-The difference between envelope and obj is an evelope must have a type-pair:
+The difference between envelope and obj is an envelope must have a type-pair:
 
 ~~~
     envelope // also top node
@@ -166,7 +167,7 @@ Note that all envelopes in java are instances of io.odysz.anson.Anson.
 
 See the test case [AnsonTest#testFromJson_asonArr()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
-## 2. You need provide annotation if your type in List or Map is complicate
+## 2. Needing provide an annotation if a type in List or Map is complicate
 
 If the value's type in a list or map is more complicate than string, you must
 provide the information.
@@ -303,4 +304,4 @@ for enum type "en" to create the instance, with call to JSONAnsonListener#regist
 
 See test case: [AnsonTest#test2Json4Enum](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java) and the testing type AnsT4Enum.Port.
 
-If you have any idea, please let the him know.
+If you have any idea, please let the author know.
