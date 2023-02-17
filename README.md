@@ -59,7 +59,7 @@ data objects like normal structured objects, and only take care of it's business
 processing.
 
 (Since 0.9.4, Antson also implemented a c# version, and we are still comparing it
-with [https://www.newtonsoft.com/json](Newtonsoft Json.NET). )
+with [Newtonsoft Json.NET](https://www.newtonsoft.com/json). )
 
 # Why no input stream mode?
 
@@ -166,7 +166,7 @@ Note that all envelopes in java are instances of io.odysz.anson.Anson.
 
 See the test case [AnsonTest#testFromJson_asonArr()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
-## 2. You need provide annotation if your type in List or Map is complicate
+## 2. Needing provide an annotation if a type in List or Map is complicate
 
 If the value's type in a list or map is more complicate than string, you must
 provide the information.
