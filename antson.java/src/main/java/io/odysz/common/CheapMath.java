@@ -2,6 +2,13 @@ package io.odysz.common;
 
 public class CheapMath {
 	
+	/**
+	 * (gcd * n) / (gcd * m) =&gt; n / m,
+	 * where gcd (n, m) = 1
+	 * @param x n * gcd
+	 * @param y m * gcd
+	 * @return n / m
+	 */
 	public static int[] reduceFract(int x, int y) {
 		int g = gcd(x, y);
 		if (x > y)
