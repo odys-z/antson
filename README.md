@@ -35,7 +35,8 @@ Antson will be used as the transport protocol layer for semantic-\*. see his
 [home page](https://odys-z.github.io) for details.
 
 Currently there are only two different language runtime lib, c# & java. There is
-a typescript client, [@anclient/semantier](), implementing the protocol layer between
+a typescript client, [@anclient/semantier](https://github.com/odys-z/Anclient/tree/master/js/semantier), 
+implementing the protocol layer between
 json data service, usually by java, and the the js front end. Although it's plausible, 
 users are not recommended to use Antson from scratch for parsing the raw json data by 
 themselves. But if you are interested in other usages, the test cases located in 
