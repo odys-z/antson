@@ -282,7 +282,7 @@ test case:
 
 More freature requirement is open to comments and discussion.
 
-## 4. Inner class (java) can only been declared as static
+## 4. Inner class (java) can only be declared as static
 
 This is because it's not easy to figure out the parent object to create the inner class instance.
 
