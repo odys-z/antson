@@ -29,6 +29,27 @@ is sereialized into json
     }
 ```
 
+# What it is for?
+
+Antson will be used as the transport protocol layer for semantic-\*. see his
+[home page](https://odys-z.github.io) for details.
+
+Currently there are only two different language runtime lib, c# & java. There is
+a typescript client, [@anclient/semantier](), implementing the protocol layer between
+json data service, usually by java, and the the js front end. Although it's plausible, 
+users are not recommended to use Antson from scratch for parsing the raw json data by 
+themselves. But if you are interested in other usages, the test cases located in 
+antson.java/src/test subfolder provided a bunch of examples for (de)serializing json 
+objects to and from java types.
+
+The runtimes are antson.java & antson.csharp sub folders. The c# version come with
+an example in [Anclient/example.cs](https://github.com/odys-z/Anclient#repository-structure).
+
+Unfortunately, only antson.java can work stably currently. See [API documents](https://odys-z.github.io/javadoc/antson/).
+
+A c# version is pushed in Nuget and verified that it is efficient, but it is pretty old
+and you should not waste time on it.
+
 # Why Antson?
 
 For short, there is no such tool / lib that can convert javascript objects to or
@@ -96,26 +117,6 @@ which is an LL(\*) parsing tool that can not work in stream mode.
 If your json data is large, try breack it into small chunks, or may be let Anston
 working as a [Karfka](https://kafka.apache.org/intro) message consummer - might
 try a test in the future.
-
-# What's it for?
-
-Antson will be used as the transport protocol layer for semantic-\*. see his
-[home page](https://odys-z.github.io) for details.
-
-If you are interested in other usages, the test cases located in antson.java/src/test
-subfolder provides a bunch of examples for (de)serialize json objects to and from java types.
-
-Currently there are only two different language runtime lib, c# & java. There is
-a ts client, [@anclient/semantier](). Although it's not necessary, users are not recommended
-to use Antson from scratch for parsing the raw json data by themselves.
-
-The runtimes are antson.java & antson.csharp sub folder. The c# version come with
-an example in [Anclient/example.cs](https://github.com/odys-z/Anclient#repository-structure).
-
-Unfortunately, only antson.java can work stably currently. See [API documents](https://odys-z.github.io/javadoc/antson/).
-
-A c# version is pushed in Nuget and verified it is efficient, but it is pretty old and
-you should waste time on it.
 
 # Anson Envelope
 
