@@ -57,10 +57,10 @@ from java or other programming languages like C#, on the fly.
 
 Why? Because js objects has no structure types with support of any compiler. Users
 can not define a "io.app.User" type in js. All js objects are only a HashMap in typed
-languages e.g. Java. Any json data is converted into java.lang.Map in java the world 
+languages e.g. Java. Any json data is converted into java.lang.Map in java world 
 traditionally. Although there are a lot of tools helping to do this, a js object is 
 data without type which means no type checking and the data is nothing carrying any
-semantic meanings. This is every upsetting to java programmers, at least to the author.
+semantic rules. This is every upsetting to java programmers, at least to the author.
 
 In many cases, only a hash table structure is not enough. Take a SOA architecture for
 example, protocol packages needing a way to tell the receivers how to deserialize
@@ -94,8 +94,8 @@ shouldn't be suprised with this idea.
 [Gson](https://github.com/google/gson) is a good try to go further. But the method
 is still not enough. The main weakness is it's not smart enough - it doesn't handle
 java fields with type information and (de)serialize back forth. Every Gson translation
-of json data to Java object needing users implementing business handlers, one problem
-a time.
+of json data to Java object needing users implementing business handlers, handling 
+one problem a time.
 
 Antson is trying to go further. Users only need to define their business gramma -
 the application business data defined in strictly typed language like java or c#,
@@ -109,7 +109,7 @@ with [Newtonsoft Json.NET](https://www.newtonsoft.com/json). )
 # Why no input stream mode?
 
 Antson provid only output stream writing API, for serializing into json string.
-No input stream mode is supported.
+No input (deserializing) stream mode is supported.
 
 The reason behind this is that Antson is based on [Antlr4](https://github.com/antlr/antlr4),
 which is an LL(\*) parsing tool that can not work in stream mode.
@@ -117,6 +117,10 @@ which is an LL(\*) parsing tool that can not work in stream mode.
 If your json data is large, try breack it into small chunks, or may be let Anston
 working as a [Karfka](https://kafka.apache.org/intro) message consummer - might
 try a test in the future.
+
+(Since Apr. 2022, a block chain schema based on java client on Android and Tomcat
+proved (without workbench results) the "chuck" mode can work efficiently. 
+See [Anclient example for Android](https://github.com/odys-z/Anclient/tree/master/examples/example.android))
 
 # Anson Envelope
 
