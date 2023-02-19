@@ -29,8 +29,6 @@ is sereialized into json
     }
 ```
 
-#### [API documents](https://odys-z.github.io/javadoc/antson/)
-
 # Why Antson?
 
 For short, there is no such tool / lib that can convert javascript objects to or
@@ -244,7 +242,7 @@ Row type and cell type are separated with "/".
 Also, another error prone annotation is the array of list:
 
 ~~~
-    @AnsonField (valType="java.util.ArrayList/java.util.ArrayList/[Ljava.lang.Object;")
+    @AnsonField (valType="java.util.ArrayList/[Ljava.lang.Object;")
     protected ArrayList<Object[]>[] name_value_pairs;
 ~~~
 
@@ -292,3 +290,6 @@ For how inner class examples, see test case
 [AnsonTest#test_innerClass()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
 If you have any idea, please let the author know.
+
+#### [API documents](https://odys-z.github.io/javadoc/antson/)
+
