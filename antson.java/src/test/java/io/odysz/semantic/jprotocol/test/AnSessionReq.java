@@ -3,7 +3,7 @@ package io.odysz.semantic.jprotocol.test;
 import java.util.HashMap;
 
 import io.odysz.common.LangExt;
-import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
 
 /**<p>Sessin Request<br>
  * a = "login" | "logout" | "heartbeat" ...</p>
@@ -17,7 +17,7 @@ public class AnSessionReq extends AnsonBody {
 	/**Session connection is ignored and controlled by server.
 	 * @param parent
 	 */
-	public AnSessionReq(AnsonMsg<AnSessionReq> parent) {
+	public AnSessionReq(Test_AnsonMsg<AnSessionReq> parent) {
 		super(parent, null); // session's DB access is controlled by server
 	}
 
@@ -46,8 +46,8 @@ public class AnSessionReq extends AnsonBody {
 	 * @param iv64
 	 * @return login request message
 	 */
-	public static AnsonMsg<AnSessionReq> formatLogin(String uid, String tk64, String iv64) {
-		AnsonMsg<AnSessionReq> jmsg = new AnsonMsg<AnSessionReq>(Port.session);
+	public static Test_AnsonMsg<AnSessionReq> formatLogin(String uid, String tk64, String iv64) {
+		Test_AnsonMsg<AnSessionReq> jmsg = new Test_AnsonMsg<AnSessionReq>(Port.session);
 
 		AnSessionReq itm = new AnSessionReq(jmsg);
 		itm.uid = uid;

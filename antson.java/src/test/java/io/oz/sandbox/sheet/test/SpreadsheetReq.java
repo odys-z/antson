@@ -1,7 +1,7 @@
 package io.oz.sandbox.sheet.test;
 
 import io.odysz.semantic.jprotocol.test.AnsonBody;
-import io.odysz.semantic.jprotocol.test.AnsonMsg;
+import io.odysz.semantic.jprotocol.test.Test_AnsonMsg;
 import io.odysz.semantic.jprotocol.test.PageInf;
 
 public class SpreadsheetReq<T extends SpreadsheetRec> extends AnsonBody {
@@ -19,7 +19,7 @@ public class SpreadsheetReq<T extends SpreadsheetRec> extends AnsonBody {
 		super(null, null);
 	}
 
-	protected SpreadsheetReq(AnsonMsg<? extends AnsonBody> parent, String uri) {
+	protected SpreadsheetReq(Test_AnsonMsg<? extends AnsonBody> parent, String uri) {
 		super(parent, uri);
 	}
 

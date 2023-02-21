@@ -8,8 +8,8 @@ import io.odysz.anson.x.AnsonException;
 import io.odysz.semantic.jprotocol.test.AnsonBody;
 import io.odysz.semantic.jprotocol.test.AnsonHeader;
 import io.odysz.semantic.jprotocol.test.IPort;
-import io.odysz.semantic.jprotocol.test.AnsonMsg.MsgCode;
-import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.MsgCode;
+import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
 
 /**<p>A mimic of AnsonMsg for testing error prone issue alarm</p>
  * 1. declare field of IJsonable instead of enum when the type is implemented with enum,

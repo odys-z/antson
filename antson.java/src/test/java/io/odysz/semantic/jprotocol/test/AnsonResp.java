@@ -18,11 +18,11 @@ public class AnsonResp extends AnsonBody {
 		super(null, null);
 	}
 
-	public AnsonResp(AnsonMsg<? extends AnsonResp> parent) {
+	public AnsonResp(Test_AnsonMsg<? extends AnsonResp> parent) {
 		super(parent, null);
 	}
 
-	public AnsonResp(AnsonMsg<? extends AnsonResp> parent, String txt) {
+	public AnsonResp(Test_AnsonMsg<? extends AnsonResp> parent, String txt) {
 		super(parent, null);
 		this.m = txt;
 	}

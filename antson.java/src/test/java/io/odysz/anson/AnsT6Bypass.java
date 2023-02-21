@@ -7,12 +7,12 @@ import io.odysz.anson.x.AnsonException;
 
 public class AnsT6Bypass extends Anson {
 	static {
-		JSONAnsonListener.registFactory(Port.class, (s) -> {
-				return new Port(s);
+		JSONAnsonListener.registFactory(T6_Port.class, (s) -> {
+				return new T6_Port(s);
 		});
 	}
 
-	public static class Port implements IJsonable { 
+	public static class T6_Port implements IJsonable { 
 		static final int heartbeat = 1; // ("ping.serv"),
 		static final int session = 2;   // ("login.serv11"),
 		static final int dataset = 3;   // ("ds.serv11");
@@ -23,7 +23,7 @@ public class AnsT6Bypass extends Anson {
 		private String url;
 		public String url() { return url; }
 
-		Port(String url) {
+		T6_Port(String url) {
 			this.url = url;
 			port = valof(url);
 		}
@@ -56,9 +56,9 @@ public class AnsT6Bypass extends Anson {
 		}
 	};
 
-	Port p;
+	T6_Port p;
 
 	public AnsT6Bypass() {
-		p = new Port("session");
+		p = new T6_Port("session");
 	}
 }

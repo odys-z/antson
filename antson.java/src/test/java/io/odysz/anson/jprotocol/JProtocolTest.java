@@ -18,14 +18,14 @@ import io.odysz.anson.x.AnsonException;
 import io.odysz.semantic.ext.test.AnDatasetResp;
 import io.odysz.semantic.jprotocol.test.AnSessionReq;
 import io.odysz.semantic.jprotocol.test.AnSessionResp;
-import io.odysz.semantic.jprotocol.test.AnsonMsg;
+import io.odysz.semantic.jprotocol.test.Test_AnsonMsg;
 import io.odysz.semantic.jprotocol.test.AnsonResp;
 import io.odysz.semantic.jprotocol.test.SemanticObject;
 import io.odysz.semantic.jprotocol.test.SessionInf;
 import io.odysz.semantic.jprotocol.test.TransException;
 import io.odysz.semantic.jprotocol.test.UserReq;
-import io.odysz.semantic.jprotocol.test.AnsonMsg.MsgCode;
-import io.odysz.semantic.jprotocol.test.AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.MsgCode;
+import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
 
 class JProtocolTest {
 	static final String iv64 = "iv: I'm base64";
@@ -41,7 +41,7 @@ class JProtocolTest {
 	@SuppressWarnings("unchecked")
 	void test_SessionReq() throws AnsonException, IOException {
 		// formatLogin: {a: "login", logid: logId, pswd: tokenB64, iv: ivB64};
-		AnsonMsg<AnSessionReq> reqv11 = AnSessionReq.formatLogin(uid, tk64, iv64);
+		Test_AnsonMsg<AnSessionReq> reqv11 = AnSessionReq.formatLogin(uid, tk64, iv64);
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		reqv11.toBlock(bos);
@@ -58,7 +58,7 @@ class JProtocolTest {
 		//          a: "login", conn: null,
 		//          iv: "iv: I'm base64", mds: null,
 		//          token: "tk: I'm base64"}], seq: 909}
-		AnsonMsg<AnSessionReq> msg = (AnsonMsg<AnSessionReq>) Anson.fromJson(json);
+		Test_AnsonMsg<AnSessionReq> msg = (Test_AnsonMsg<AnSessionReq>) Anson.fromJson(json);
 
 		assertEquals(reqv11.code(), msg.code());
 		assertEquals(reqv11.port(), msg.port());
@@ -74,7 +74,7 @@ class JProtocolTest {
 	void test_SessionResp() throws AnsonException, IOException {
 		SessionInf ssinf = new SessionInf(ssid, uid);
 		AnSessionResp bd = new AnSessionResp(null, ssinf);
-		AnsonMsg<AnSessionResp> resp = ok(Port.session, bd);
+		Test_AnsonMsg<AnSessionResp> resp = ok(Port.session, bd);
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		resp.toBlock(bos);
@@ -91,7 +91,7 @@ class JProtocolTest {
 		//                  uid: "test-id", roleId: null, 
 		//                  ssid: "ssid-base64"}, m: null, map: null}], seq: 0}
 		@SuppressWarnings("unchecked")
-		AnsonMsg<AnSessionResp> msg = (AnsonMsg<AnSessionResp>) Anson.fromJson(json);
+		Test_AnsonMsg<AnSessionResp> msg = (Test_AnsonMsg<AnSessionResp>) Anson.fromJson(json);
 
 		assertEquals(MsgCode.ok, msg.code());
 		assertEquals(resp.port(), msg.port());
@@ -111,7 +111,7 @@ class JProtocolTest {
 		((SemanticObject) props.get("resulved")).add("vec", "000x");
 		props.put("res", new int[] { 1, 20 });
 
-		AnsonMsg<AnsonResp> resp = new AnsonMsg<AnsonResp>(Port.insert, MsgCode.ok)
+		Test_AnsonMsg<AnsonResp> resp = new Test_AnsonMsg<AnsonResp>(Port.insert, MsgCode.ok)
 				.body(new AnsonResp().data(props));
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
@@ -119,7 +119,7 @@ class JProtocolTest {
 		String json = bos.toString(StandardCharsets.UTF_8.name());
 
 		@SuppressWarnings("unchecked")
-		AnsonMsg<AnsonResp> msg = (AnsonMsg<AnsonResp>) Anson.fromJson(json);
+		Test_AnsonMsg<AnsonResp> msg = (Test_AnsonMsg<AnsonResp>) Anson.fromJson(json);
 
 		assertEquals(MsgCode.ok, msg.code());
 		assertEquals(resp.port(), msg.port());
@@ -137,7 +137,7 @@ class JProtocolTest {
 	void test_datasetResp() throws AnsonException, IOException, SQLException {
 		AnsonResultset rs = new AnsonResultset(2, 2);
 		AnDatasetResp dr = (AnDatasetResp) new AnDatasetResp().rs(rs);
-		AnsonMsg<AnDatasetResp> resp = ok(Port.dataset, dr);
+		Test_AnsonMsg<AnDatasetResp> resp = ok(Port.dataset, dr);
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		resp.toBlock(bos);
@@ -146,7 +146,7 @@ class JProtocolTest {
 		// {"type": "io.odysz.semantic.jprotocol.test.AnsonMsg", "code": "ok", "opts": null, "port": "dataset", "header": null, "vestion": "1.0", "body": [{"type": "io.odysz.semantic.ext.test.AnDatasetResp", "rs": [{"type": "io.odysz.anson.AnsonResultset", "stringFormats": null, "total": 0, "rowCnt": 2, "colCnt": 2, "colnames": {"1": [1, "1"], "2": [2, "2"]}, "rowIdx": 0, "results": [["0, 1", "0, 2"], ["1, 1", "1, 2"]]}], "parent": "io.odysz.semantic.jprotocol.test.AnsonMsg", "a": null, "forest": null, "conn": null, "m": "", "map": null}], "seq": 0}
 
 		@SuppressWarnings("unchecked")
-		AnsonMsg<AnDatasetResp> msg = (AnsonMsg<AnDatasetResp>) Anson.fromJson(json);
+		Test_AnsonMsg<AnDatasetResp> msg = (Test_AnsonMsg<AnDatasetResp>) Anson.fromJson(json);
 
 		assertEquals(MsgCode.ok, msg.code());
 		assertEquals(resp.port(), msg.port());
@@ -172,7 +172,7 @@ class JProtocolTest {
 					+ "\"iv\":\"KikpUxk0GREELlU7KGJUJw==\","
 					+ "\"a\":\"login\"}]}";
 	
-		AnsonMsg<AnSessionReq> msg = (AnsonMsg<AnSessionReq>) Anson.fromJson(req);
+		Test_AnsonMsg<AnSessionReq> msg = (Test_AnsonMsg<AnSessionReq>) Anson.fromJson(req);
 
 		assertEquals(null, msg.code());
 		assertEquals(Port.session, msg.port());
@@ -182,7 +182,7 @@ class JProtocolTest {
 		assertEquals(24, msg.body(0).token().length());
 		
 		req = "{\"type\":\"io.odysz.semantic.jprotocol.test.AnsonMsg\",\"version\":\"1.1\",\"seq\":218,\"opts\":{\"noNull\":true,\"noBoolean\":false,\"doubleFormat\":\".2f\"},\"port\":\"session\",\"header\":{},\"body\":[{\"type\":\"io.odysz.semantic.jprotocol.test.AnSessionReq\",\"uid\":\"admin\",\"token\":\"OIuFP3XNGXeLK2Yec9WVRw==\",\"iv\":\"FWMLMy5aBBk3GDEFUwMfGA==\",\"a\":\"login\"}]}";
-		msg = (AnsonMsg<AnSessionReq>) Anson.fromJson(req);
+		msg = (Test_AnsonMsg<AnSessionReq>) Anson.fromJson(req);
 		assertEquals(null, msg.code());
 		assertEquals(Port.session, msg.port());
 		assertEquals("login", msg.body(0).a());
@@ -203,7 +203,7 @@ class JProtocolTest {
 			+              "\"a\":\"logout\",\"parent\":\"io.odysz.semantic.jprotocol.AnsonMsg\"}]}";
 			
 		@SuppressWarnings("unchecked")
-		AnsonMsg<AnSessionReq> msg = (AnsonMsg<AnSessionReq>) AnsonMsg.fromJson(json);
+		Test_AnsonMsg<AnSessionReq> msg = (Test_AnsonMsg<AnSessionReq>) Test_AnsonMsg.fromJson(json);
 		assertEquals(null, msg.code());
 		assertEquals(Port.session, msg.port());
 		assertEquals("0014eKTs", msg.header().ssid());
@@ -272,10 +272,10 @@ class JProtocolTest {
 	@SuppressWarnings("unchecked")
     @Test
 	void test_js_userReq() throws AnsonException {
-    	AnsonMsg<UserReq> pollsUsers = (AnsonMsg<UserReq>) AnsonMsg.fromJson(jsonPollsUsers);
+    	Test_AnsonMsg<UserReq> pollsUsers = (Test_AnsonMsg<UserReq>) Test_AnsonMsg.fromJson(jsonPollsUsers);
 		assertEquals("polls-users", pollsUsers.body(0).a());
 
-		AnsonMsg<UserReq> reduced = (AnsonMsg<UserReq>) AnsonMsg.fromJson(userReqJsonReduced);
+		Test_AnsonMsg<UserReq> reduced = (Test_AnsonMsg<UserReq>) Test_AnsonMsg.fromJson(userReqJsonReduced);
 		assertEquals(null, reduced.code());
 
 		ArrayList<?> rques = (ArrayList<?>) reduced.body(0).data("questions");
@@ -287,7 +287,7 @@ class JProtocolTest {
 		assertEquals("question", ((String[][]) r1)[0][0].toString());
 		assertEquals("学习压力", ((String[][]) r1)[0][1].toString());
 
-		AnsonMsg<UserReq> msg = (AnsonMsg<UserReq>) AnsonMsg.fromJson(userReqJson);
+		Test_AnsonMsg<UserReq> msg = (Test_AnsonMsg<UserReq>) Test_AnsonMsg.fromJson(userReqJson);
 		assertEquals(null, msg.code());
 		assertEquals("Emotion Poll (Type A)", msg.body(0).data("qtitle"));
 		
@@ -305,8 +305,8 @@ class JProtocolTest {
 		assertEquals("学习压力", ((String[][]) q1)[0][1].toString());
 	}
 
-	static <U extends AnsonResp> AnsonMsg<U> ok(Port p, U body) {
-		AnsonMsg<U> msg = new AnsonMsg<U>(p, MsgCode.ok);
+	static <U extends AnsonResp> Test_AnsonMsg<U> ok(Port p, U body) {
+		Test_AnsonMsg<U> msg = new Test_AnsonMsg<U>(p, MsgCode.ok);
 		msg.body(body);
 		return msg;
 	}
