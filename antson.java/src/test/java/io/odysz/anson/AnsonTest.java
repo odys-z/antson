@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import io.odysz.anson.AnTreeNode.SubTree;
 import io.odysz.anson.AnsT4Enum.MsgCode;
-import io.odysz.anson.AnsT4Enum.Port;
+import io.odysz.anson.AnsT4Enum.T4_Port;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
 
@@ -136,7 +136,7 @@ class AnsonTest {
 	@Test
 	void test2Json4Enum() throws AnsonException, IOException {
 		AnsT4Enum en = new AnsT4Enum();
-		en.p = Port.heartbeat;
+		en.p = T4_Port.heartbeat;
 		en.c = MsgCode.ok;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		en.toBlock(bos, opt);
@@ -147,9 +147,9 @@ class AnsonTest {
 		
 		AnsT4Enum denum = (AnsT4Enum) Anson.fromJson(expect);
 		assertEquals(denum.c, MsgCode.ok);
-		assertEquals(denum.p, Port.heartbeat);
+		assertEquals(denum.p, T4_Port.heartbeat);
 		
-		en.problem = Port.dataset;
+		en.problem = T4_Port.dataset;
 		bos = new ByteArrayOutputStream(); 
 		en.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
@@ -159,8 +159,8 @@ class AnsonTest {
 
 		AnsT4Enum problem = (AnsT4Enum) Anson.fromJson(expect);
 		assertEquals(MsgCode.ok, problem.c);
-		assertEquals(Port.heartbeat, problem.p);
-		assertEquals(Port.dataset, problem.problem);
+		assertEquals(T4_Port.heartbeat, problem.p);
+		assertEquals(T4_Port.dataset, problem.problem);
 	}
 	
 	@SuppressWarnings("serial")
@@ -418,7 +418,7 @@ class AnsonTest {
 	 * <p>Note about v0.9.14</p>
 	 * I'm not sure what's bypass test want to do here - too long ago idea.
 	 * This test result in error since v0.9.14 (change AnsonException as subclass of RuntimeException).
-	 * It's fixed with register a factory to {@link AnsT6Bypass.Port}, which is probable not
+	 * It's fixed with register a factory to {@link AnsT6Bypass.T6_Port}, which is probable not
 	 * initial intention of this test.
 	 * 
 	 * @throws AnsonException
@@ -435,7 +435,7 @@ class AnsonTest {
 		
 		AnsT6Bypass bypass = (AnsT6Bypass) Anson.fromJson(s);
 		
-		assertEquals(AnsT6Bypass.Port.session, t6.p.port());
+		assertEquals(AnsT6Bypass.T6_Port.session, t6.p.port());
 		assertEquals(bypass.p.port(), t6.p.port());
 	}
 }

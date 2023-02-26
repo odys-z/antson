@@ -9,7 +9,7 @@ public abstract class AnsonBody extends Anson {
 	}
 
 	@AnsonField(ref=AnsonField.enclosing)
-	public AnsonMsg<? extends AnsonBody> parent;
+	public Test_AnsonMsg<? extends AnsonBody> parent;
 
 	protected String uri;
 	public String uri() { return uri; }
@@ -24,7 +24,7 @@ public abstract class AnsonBody extends Anson {
 		return this;
 	}
 
-	protected AnsonBody(AnsonMsg<? extends AnsonBody> parent, String uri) {
+	protected AnsonBody(Test_AnsonMsg<? extends AnsonBody> parent, String uri) {
 		this.parent = parent;
 		this.uri = uri;
 	}

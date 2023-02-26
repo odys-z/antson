@@ -30,7 +30,7 @@ public class UserReq extends AnsonBody {
 	String tabl;
 	public String tabl() { return tabl; }
 
-	public UserReq(AnsonMsg<? extends AnsonBody> parent, String conn) {
+	public UserReq(Test_AnsonMsg<? extends AnsonBody> parent, String conn) {
 		super(parent, conn);
 	}
 	
