@@ -5,7 +5,10 @@ import java.util.HashMap;
 import io.odysz.common.LangExt;
 import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
 
-/**<p>Sessin Request<br>
+/**
+ * Test Only
+ * 
+ * <p>Sessin Request<br>
  * a = "login" | "logout" | "heartbeat" ...</p>
  * @author odys-z@github.com
  */

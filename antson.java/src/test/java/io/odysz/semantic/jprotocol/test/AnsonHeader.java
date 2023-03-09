@@ -5,6 +5,11 @@ import java.util.stream.Collectors;
 
 import io.odysz.anson.Anson;
 
+/**
+ * Test Only
+ * 
+ * @author odys-z@github.com
+ */
 public class AnsonHeader extends Anson {
 
 	String uid;

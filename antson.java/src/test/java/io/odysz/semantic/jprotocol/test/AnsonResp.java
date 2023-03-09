@@ -5,7 +5,10 @@ import java.util.HashMap;
 
 import io.odysz.anson.AnsonResultset;
 
-/**Anson message response body
+/**
+ * Test Only -
+ * Anson message response body
+ * 
  * @author odys-z@github.com
  */
 public class AnsonResp extends AnsonBody {

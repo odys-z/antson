@@ -1,5 +1,10 @@
 package io.odysz.semantic.jprotocol.test;
 
+/**
+ * Test Only
+ * 
+ * @author odys-z@github.com
+ */
 public class AnSessionResp extends AnsonResp {
 
 	public SessionInf ssInf;

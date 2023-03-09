@@ -3,6 +3,11 @@ package io.odysz.semantic.jprotocol.test;
 import io.odysz.anson.Anson;
 import io.odysz.anson.AnsonField;
 
+/**
+ * Test Only
+ * 
+ * @author odys-z@github.com
+ */
 public abstract class AnsonBody extends Anson {
 	public static String[] jcondt(String logic, String field, String v, String tabl) {
 		return new String[] {logic, field, v, tabl};
