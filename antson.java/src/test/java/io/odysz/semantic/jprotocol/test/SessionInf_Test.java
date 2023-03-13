@@ -2,15 +2,15 @@ package io.odysz.semantic.jprotocol.test;
 
 import io.odysz.anson.Anson;
 
-public class SessionInf extends Anson {
+public class SessionInf_Test extends Anson {
 	public String ssid;
 	public String uid;
 	public String roleId; 
 
-	public SessionInf () {
+	public SessionInf_Test () {
 	}
 	
-	public SessionInf (String ssid, String uid, String... roleId) {
+	public SessionInf_Test (String ssid, String uid, String... roleId) {
 		this.ssid = ssid;
 		this.uid = uid;
 		this.roleId = roleId == null || roleId.length == 0 ? null : roleId[0];

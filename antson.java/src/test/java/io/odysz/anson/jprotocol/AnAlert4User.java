@@ -5,11 +5,11 @@ import java.util.List;
 
 import io.odysz.anson.Anson;
 import io.odysz.anson.x.AnsonException;
-import io.odysz.semantic.jprotocol.test.AnsonBody;
-import io.odysz.semantic.jprotocol.test.AnsonHeader;
-import io.odysz.semantic.jprotocol.test.IPort;
-import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.MsgCode;
-import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.AnsonBody_Test;
+import io.odysz.semantic.jprotocol.test.AnsonHeader_Test;
+import io.odysz.semantic.jprotocol.test.IPort_Test;
+import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.MsgCode;
+import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
 
 /**<p>A mimic of AnsonMsg for testing error prone issue alarm</p>
  * 1. declare field of IJsonable instead of enum when the type is implemented with enum,
@@ -17,15 +17,15 @@ import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
  * 
  * @author odys-z@github.com
  */
-public class AnAlert4User <T extends AnsonBody> extends Anson {
+public class AnAlert4User <T extends AnsonBody_Test> extends Anson {
 
-	static IPort defaultPortImpl;
+	static IPort_Test defaultPortImpl;
 
 	int seq;
 	public int seq() { return seq; }
 
-	IPort port;
-	public IPort port() { return port; }
+	IPort_Test port;
+	public IPort_Test port() { return port; }
 
 	private MsgCode code;
 	public MsgCode code() { return code; }
@@ -67,7 +67,7 @@ public class AnAlert4User <T extends AnsonBody> extends Anson {
 	 * @return new message object
 	 */
 	@SuppressWarnings("unchecked")
-	public AnAlert4User<T> body(AnsonBody bodyItem) {
+	public AnAlert4User<T> body(AnsonBody_Test bodyItem) {
 		if (body == null)
 			body = new ArrayList<T>();
 		body.add((T)bodyItem);
@@ -80,9 +80,9 @@ public class AnAlert4User <T extends AnsonBody> extends Anson {
 		return this;
 	}
 	
-	AnsonHeader header;
-	public AnsonHeader header() { return header; }
-	public AnAlert4User<T> header(AnsonHeader header) {
+	AnsonHeader_Test header;
+	public AnsonHeader_Test header() { return header; }
+	public AnAlert4User<T> header(AnsonHeader_Test header) {
 		this.header = header;
 		return this;
 	}

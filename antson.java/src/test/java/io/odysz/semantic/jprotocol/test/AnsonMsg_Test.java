@@ -18,12 +18,12 @@ import io.odysz.anson.x.AnsonException;
  * 
  * @author odys-z@github.com
  */
-public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
+public class AnsonMsg_Test <T extends AnsonBody_Test> extends Anson {
 	/**Port is the conceptual equivalent to the SOAP port, the service methods' group.<br>
 	 * NOTE: java code shouldn't use switch-case block on enum. That cause problem with generated class.
 	 * @author odys-z@github.com
 	 */
-	public enum Port implements IPort {  heartbeat("ping.serv"), session("login-serv11"),
+	public enum Port implements IPort_Test {  heartbeat("ping.serv"), session("login-serv11"),
 						query("r.serv11"), update("u.serv11"),
 						insert("c.serv11"), delete("d.serv11"),
 						echo("echo.serv11"),
@@ -44,7 +44,7 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 		private String url;
 		@Override public String url() { return url; }
 		Port(String url) { this.url = url; }
-		@Override public IPort valof(String pname) { return valueOf(pname); }
+		@Override public IPort_Test valof(String pname) { return valueOf(pname); }
 
 		@Override
 		public IJsonable toBlock(OutputStream stream, JsonOpt... opts) throws AnsonException, IOException {
@@ -74,16 +74,16 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 	/**The default IPort implelemtation.
 	 * Used for parsing port name (string) to IPort instance, like {@link #Port}.<br>
 	 * */
-	static IPort defaultPortImpl;
+	static IPort_Test defaultPortImpl;
 
 	/**Set the default IPort implelemtation, which is used for parsing port name (string)
-	 * to IPort instance, like {@link Test_AnsonMsg.Port}.<br>
-	 * Because {{@link Port} only defined limited ports, user must initialize JMessage with {@link #understandPorts(IPort)}.<br>
+	 * to IPort instance, like {@link AnsonMsg_Test.Port}.<br>
+	 * Because {{@link Port} only defined limited ports, user must initialize JMessage with {@link #understandPorts(IPort_Test)}.<br>
 	 * An example of how to use this is shown in jserv-sample/io.odysz.jsample.SysMenu.<br>
 	 * Also check how to implement IPort extending {@link Port}, see example of jserv-sample/io.odysz.jsample.protocol.Samport.
 	 * @param p extended Port
 	 */
-	static public void understandPorts(IPort p) {
+	static public void understandPorts(IPort_Test p) {
 		defaultPortImpl = p;
 	}
 	
@@ -93,7 +93,7 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 	public int seq() { return seq; }
 
 	Port port;
-	public IPort port() { return port; }
+	public IPort_Test port() { return port; }
 
 	MsgCode code;
 	public MsgCode code() { return code; }
@@ -109,11 +109,11 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 			throw new AnsonException(-1, "Port can not be null. Not initialized? To use JMassage understand ports, call understandPorts(IPort) first.");
 	}
 
-	public Test_AnsonMsg() {
+	public AnsonMsg_Test() {
 		seq = (int) (Math.random() * 1000);
 	}
 
-	public Test_AnsonMsg(Port port) {
+	public AnsonMsg_Test(Port port) {
 		this.port = port;
 		seq = (int) (Math.random() * 1000);
 	}
@@ -122,7 +122,7 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 	 * @param p 
 	 * @param code
 	 */
-	public Test_AnsonMsg(Port p, MsgCode code) {
+	public AnsonMsg_Test(Port p, MsgCode code) {
 		this.port = p;
 		this.code = code;
 	}
@@ -136,7 +136,7 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 	 * @return new message object
 	 */
 	@SuppressWarnings("unchecked")
-	public Test_AnsonMsg<T> body(AnsonBody bodyItem) {
+	public AnsonMsg_Test<T> body(AnsonBody_Test bodyItem) {
 		if (body == null)
 			body = new ArrayList<T>();
 		body.add((T)bodyItem);
@@ -144,14 +144,14 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 		return this;
 	}
 
-	public Test_AnsonMsg<T> incSeq() {
+	public AnsonMsg_Test<T> incSeq() {
 		seq++;
 		return this;
 	}
 	
-	AnsonHeader header;
-	public AnsonHeader header() { return header; }
-	public Test_AnsonMsg<T> header(AnsonHeader header) {
+	AnsonHeader_Test header;
+	public AnsonHeader_Test header() { return header; }
+	public AnsonMsg_Test<T> header(AnsonHeader_Test header) {
 		this.header = header;
 		return this;
 	}
@@ -162,17 +162,17 @@ public class Test_AnsonMsg <T extends AnsonBody> extends Anson {
 		return opts == null ? new JsonOpt() : opts;
 	}
 
-	public Test_AnsonMsg<T> body(List<T> bodyItems) {
+	public AnsonMsg_Test<T> body(List<T> bodyItems) {
 		this.body = bodyItems;
 		return this;
 	}
 
-	public static Test_AnsonMsg<AnsonResp> ok(Port p, String txt) {
-		AnsonResp bd = new AnsonResp(txt);
-		return new Test_AnsonMsg<AnsonResp>(p, MsgCode.ok).body(bd);
+	public static AnsonMsg_Test<AnsonResp_Test> ok(Port p, String txt) {
+		AnsonResp_Test bd = new AnsonResp_Test(txt);
+		return new AnsonMsg_Test<AnsonResp_Test>(p, MsgCode.ok).body(bd);
 	}
 
-	public static Test_AnsonMsg<AnsonResp> ok(Port p, AnsonResp resp) {
-		return new Test_AnsonMsg<AnsonResp>(p, MsgCode.ok).body(resp);
+	public static AnsonMsg_Test<AnsonResp_Test> ok(Port p, AnsonResp_Test resp) {
+		return new AnsonMsg_Test<AnsonResp_Test>(p, MsgCode.ok).body(resp);
 	}
 }

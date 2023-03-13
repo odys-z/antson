@@ -3,7 +3,7 @@ package io.odysz.semantic.jprotocol.test;
 import java.util.HashMap;
 
 import io.odysz.common.LangExt;
-import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
 
 /**
  * Test Only
@@ -12,15 +12,15 @@ import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
  * a = "login" | "logout" | "heartbeat" ...</p>
  * @author odys-z@github.com
  */
-public class AnSessionReq extends AnsonBody {
-	public AnSessionReq() {
+public class AnSessionReq_Test extends AnsonBody_Test {
+	public AnSessionReq_Test() {
 		super(null, null); // session's DB access is controlled by server
 	}
 
 	/**Session connection is ignored and controlled by server.
 	 * @param parent
 	 */
-	public AnSessionReq(Test_AnsonMsg<AnSessionReq> parent) {
+	public AnSessionReq_Test(AnsonMsg_Test<AnSessionReq_Test> parent) {
 		super(parent, null); // session's DB access is controlled by server
 	}
 
@@ -32,7 +32,7 @@ public class AnSessionReq extends AnsonBody {
 
 	HashMap<String,Object> mds;
 	public String md(String k) { return mds == null ? null : (String) mds.get(k); }
-	public AnSessionReq md(String k, String md) {
+	public AnSessionReq_Test md(String k, String md) {
 		if (k == null || LangExt.isblank(md))
 			return this;
 		if (mds == null)
@@ -49,16 +49,16 @@ public class AnSessionReq extends AnsonBody {
 	 * @param iv64
 	 * @return login request message
 	 */
-	public static Test_AnsonMsg<AnSessionReq> formatLogin(String uid, String tk64, String iv64) {
-		Test_AnsonMsg<AnSessionReq> jmsg = new Test_AnsonMsg<AnSessionReq>(Port.session);
+	public static AnsonMsg_Test<AnSessionReq_Test> formatLogin(String uid, String tk64, String iv64) {
+		AnsonMsg_Test<AnSessionReq_Test> jmsg = new AnsonMsg_Test<AnSessionReq_Test>(Port.session);
 
-		AnSessionReq itm = new AnSessionReq(jmsg);
+		AnSessionReq_Test itm = new AnSessionReq_Test(jmsg);
 		itm.uid = uid;
 		itm.a("login");
 
 		itm.setup(uid, tk64, iv64);
 
-		jmsg.body((AnsonBody)itm);
+		jmsg.body((AnsonBody_Test)itm);
 		return jmsg;
 	}
 

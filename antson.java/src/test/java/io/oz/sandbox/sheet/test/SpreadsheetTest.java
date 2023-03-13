@@ -16,7 +16,7 @@ class SpreadsheetTest {
 
 	@Test
 	void testFromJson() throws AnsonException {
-		SpreadsheetReq<MyCurriculum> anson;
+		SpreadsheetReq_Test<MyCurriculum> anson;
 
 		/* FIXME let's finish this
 		anson = (SpreadsheetReq<MyCurriculum>) Anson.fromJson(

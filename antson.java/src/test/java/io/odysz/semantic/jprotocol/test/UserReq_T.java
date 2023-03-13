@@ -1,24 +1,25 @@
 package io.odysz.semantic.jprotocol.test;
 
-/**A stub for user's message body extension - subclassing {@link JBody}.
- * @author ody
+/**
+ * A stub for user's message body extension - subclassing {@link JBody}.
+ * @author Ody Zelensky
  *
  */
-public class UserReq extends AnsonBody {
+public class UserReq_T extends AnsonBody_Test {
 	@SuppressWarnings("unused")
 	private String code;
 	
-	public UserReq() {
+	public UserReq_T() {
 		super(null, null);
 		code = "";
 	}
 
-	private SemanticObject data;
-	public UserReq data(String k, Object v) {
+	private SemanticObject_Test data;
+	public UserReq_T data(String k, Object v) {
 		if (k == null) return this;
 
 		if (data == null)
-			data = new SemanticObject();
+			data = new SemanticObject_Test();
 		data.put(k, v);
 		return this;
 	}
@@ -30,7 +31,7 @@ public class UserReq extends AnsonBody {
 	String tabl;
 	public String tabl() { return tabl; }
 
-	public UserReq(Test_AnsonMsg<? extends AnsonBody> parent, String conn) {
+	public UserReq_T(AnsonMsg_Test<? extends AnsonBody_Test> parent, String conn) {
 		super(parent, conn);
 	}
 	

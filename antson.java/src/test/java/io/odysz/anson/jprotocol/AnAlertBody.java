@@ -1,13 +1,13 @@
 package io.odysz.anson.jprotocol;
 
 import io.odysz.anson.AnsonField;
-import io.odysz.semantic.jprotocol.test.AnsonBody;
-import io.odysz.semantic.jprotocol.test.Test_AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.AnsonBody_Test;
+import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
 
 /**<p>A mimic of AnSessionReq for testing error prone issue's alarm</p>
  * @author odys-z@github.com
  */
-public class AnAlertBody extends AnsonBody {
+public class AnAlertBody extends AnsonBody_Test {
 	@AnsonField(ref=AnsonField.enclosing)
 	private AnAlert4User<AnAlertBody> parent_;
 
@@ -35,7 +35,7 @@ public class AnAlertBody extends AnsonBody {
 		AnAlertBody itm = new AnAlertBody(jmsg);
 		itm.a("login");
 
-		jmsg.body((AnsonBody)itm);
+		jmsg.body((AnsonBody_Test)itm);
 		return jmsg;
 	}
 }
