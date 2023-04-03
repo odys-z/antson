@@ -1,6 +1,10 @@
 package io.odysz.common;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -196,5 +200,16 @@ public class Utils {
 		}
 	}
 
+
+	public static <T extends Object> HashSet<T> assertIn(T id, T ... ids) {
+		HashSet<T> s = new HashSet<T>(Arrays.asList(ids));
+		assertTrue(s.contains(id));
+		return s;
+	}
+
+	public static <T extends Object> HashSet<T> assertIn(T id, HashSet<T> set) {
+		assertTrue(set.contains(id));
+		return set;
+	}
 
 }
