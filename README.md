@@ -29,6 +29,8 @@ is sereialized into json
     }
 ```
 
+Then the json object can be deserialized to an Object in client side, any one of Java, C# or Typescript.
+
 # What it is for?
 
 Antson will be used as the transport protocol layer for semantic-\*. see his
