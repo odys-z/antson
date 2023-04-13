@@ -1,8 +1,14 @@
 package io.odysz.common;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.odysz.anson.Anson;
 
@@ -196,4 +202,14 @@ public class Utils {
 		}
 	}
 
+	public static String loadPackageTxt(Class<?> clzz, String txt) throws IOException, URISyntaxException {
+		return Files.readAllLines(
+			Paths.get(clzz.getResource(txt).toURI()), Charset.defaultCharset())
+			.stream().collect(Collectors.joining("\n"));
+	}
+
+	public static String loadRes(String txt) throws IOException, URISyntaxException {
+		StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+		return loadPackageTxt(stElements[2].getClass(), txt);
+	}
 }
