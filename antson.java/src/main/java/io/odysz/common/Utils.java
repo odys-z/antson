@@ -202,14 +202,32 @@ public class Utils {
 		}
 	}
 
-	public static String loadPackageTxt(Class<?> clzz, String txt) throws IOException, URISyntaxException {
+	/**
+	 * Load text in the file located within the package path.
+	 * @since 0.9.26
+	 * @param clzz
+	 * @param filename
+	 * @return text
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 */
+	public static String loadTxt(Class<?> clzz, String filename) throws IOException, URISyntaxException {
 		return Files.readAllLines(
-			Paths.get(clzz.getResource(txt).toURI()), Charset.defaultCharset())
+			Paths.get(clzz.getResource(filename).toURI()), Charset.defaultCharset())
 			.stream().collect(Collectors.joining("\n"));
 	}
 
-	public static String loadRes(String txt) throws IOException, URISyntaxException {
+	/**
+	 * Load text in the file located within the calling class' package path.
+	 * @since 0.9.26
+	 * @param filename
+	 * @return text
+	 * @throws IOException
+	 * @throws URISyntaxException
+	 * @throws ClassNotFoundException
+	 */
+	public static String loadTxt(String filename) throws IOException, URISyntaxException, ClassNotFoundException {
 		StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-		return loadPackageTxt(stElements[2].getClass(), txt);
+		return loadTxt(Class.forName(stElements[2].getClassName()), filename);
 	}
 }

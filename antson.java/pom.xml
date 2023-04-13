@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.25</version>
+  <version>0.9.26</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
@@ -84,6 +84,22 @@
   </distributionManagement>
 
   <build>
+	<testResources>
+	  <!-- for testing load txt -->
+	  <testResource>
+		<directory>${project.basedir}/src/test/java</directory>
+		<includes>
+			<include>**/txt</include>
+		</includes>
+		<excludes>
+			<exclude>**/*.java</exclude>
+		</excludes>
+	  </testResource>
+	  <testResource>
+		<directory>${project.basedir}/src/test/resources</directory>
+	  </testResource>
+	</testResources>
+
     <plugins>
       <plugin>
       	<groupId>org.apache.maven.plugins</groupId>
