@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class LangExt {
@@ -182,6 +183,10 @@ public class LangExt {
 
     public static boolean isNull(final List<?> args) {
     	return args == null || args.isEmpty();
+    }
+
+    public static boolean isNull(final Object args) {
+    	return args == null;
     }
 
 	public static String prefixIfnull(String prefix, String dest) {
@@ -493,6 +498,10 @@ public class LangExt {
 			}
 		}
 		else return false;
+	}
+	
+	public static int len(Set<?> s) {
+		return isNull(s) ? 0 : s.size();
 	}
 
 }
