@@ -211,10 +211,15 @@ public class Utils {
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	public static String loadTxt(Class<?> clzz, String filename) throws IOException, URISyntaxException {
-		return Files.readAllLines(
-			Paths.get(clzz.getResource(filename).toURI()), Charset.defaultCharset())
-			.stream().collect(Collectors.joining("\n"));
+	public static String loadTxt(Class<?> clzz, String filename) throws IOException {
+		try {
+			return Files.readAllLines(
+				Paths.get(clzz.getResource(filename).toURI()), Charset.defaultCharset())
+				.stream().collect(Collectors.joining("\n"));
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
@@ -226,7 +231,7 @@ public class Utils {
 	 * @throws URISyntaxException
 	 * @throws ClassNotFoundException
 	 */
-	public static String loadTxt(String filename) throws IOException, URISyntaxException, ClassNotFoundException {
+	public static String loadTxt(String filename) throws IOException, ClassNotFoundException {
 		StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
 		return loadTxt(Class.forName(stElements[2].getClassName()), filename);
 	}
