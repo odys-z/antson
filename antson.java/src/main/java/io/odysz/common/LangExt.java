@@ -1,5 +1,6 @@
 package io.odysz.common;
 
+import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -504,5 +505,8 @@ public class LangExt {
 		return isNull(s) ? 0 : s.size();
 	}
 
+	public static String str(AbstractCollection<String> c) {
+		return c.stream().collect(Collectors.joining(","));
+	}
 }
 
