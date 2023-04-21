@@ -11,33 +11,33 @@ import io.odysz.anson.AnsonResultset;
  * 
  * @author odys-z@github.com
  */
-public class AnsonResp_Test extends AnsonBody_Test {
+public class T_AnsonResp extends T_AnsonBody {
 
 	protected String m;
 	protected ArrayList<AnsonResultset> rs;
 	protected HashMap<String, Object> map;
 
-	public AnsonResp_Test() {
+	public T_AnsonResp() {
 		super(null, null);
 	}
 
-	public AnsonResp_Test(AnsonMsg_Test<? extends AnsonResp_Test> parent) {
+	public T_AnsonResp(T_AnsonMsg<? extends T_AnsonResp> parent) {
 		super(parent, null);
 	}
 
-	public AnsonResp_Test(AnsonMsg_Test<? extends AnsonResp_Test> parent, String txt) {
+	public T_AnsonResp(T_AnsonMsg<? extends T_AnsonResp> parent, String txt) {
 		super(parent, null);
 		this.m = txt;
 	}
 
-	public AnsonResp_Test(String txt) {
+	public T_AnsonResp(String txt) {
 		super(null, null);
 		this.m = txt;
 	}
 
 	public String msg() { return m; }
 
-	public AnsonBody_Test rs(AnsonResultset rs) {
+	public T_AnsonBody rs(AnsonResultset rs) {
 		if (this.rs == null)
 			this.rs = new ArrayList<AnsonResultset>(1);
 		this.rs.add(rs);
@@ -50,7 +50,7 @@ public class AnsonResp_Test extends AnsonBody_Test {
 		return this.rs == null ? null : this.rs.get(ix);
 	}
 
-	public AnsonResp_Test data(HashMap<String, Object> props) {
+	public T_AnsonResp data(HashMap<String, Object> props) {
 		this.map = props;
 		return this;
 	}

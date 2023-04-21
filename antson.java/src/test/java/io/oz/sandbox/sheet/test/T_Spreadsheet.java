@@ -8,7 +8,7 @@ import io.odysz.anson.Anson;
 import io.odysz.anson.x.AnsonException;
 
 @SuppressWarnings("unused")
-class SpreadsheetTest {
+class T_Spreadsheet {
 
 	@Test
 	void testToJson() throws Exception {
@@ -16,7 +16,7 @@ class SpreadsheetTest {
 
 	@Test
 	void testFromJson() throws AnsonException {
-		SpreadsheetReq_Test<MyCurriculum> anson;
+		T_SpreadsheetReq<T_MyCurriculum> anson;
 
 		/* FIXME let's finish this
 		anson = (SpreadsheetReq<MyCurriculum>) Anson.fromJson(

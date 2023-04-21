@@ -10,19 +10,19 @@ import io.odysz.anson.Anson;
  * 
  * @author odys-z@github.com
  */
-public class AnsonHeader_Test extends Anson {
+public class T_AnsonHeader extends Anson {
 
 	String uid;
 	String ssid;
 	String iv64;
 	String[] usrAct;
 
-	public AnsonHeader_Test(String ssid, String uid) {
+	public T_AnsonHeader(String ssid, String uid) {
 		this.uid = uid;
 		this.ssid = ssid;
 	}
 	
-	public AnsonHeader_Test() { }
+	public T_AnsonHeader() { }
 
 	public String logid() {
 		return uid;
@@ -35,12 +35,12 @@ public class AnsonHeader_Test extends Anson {
 	/**
 	 * @return js equivalent {md: ssinf.md, ssid: ssinf.ssid, uid: ssinf.uid, iv: ssinf.iv};
 	 */
-	public static AnsonHeader_Test format(String uid, String ssid) {
+	public static T_AnsonHeader format(String uid, String ssid) {
 		// formatLogin: {a: "login", logid: logId, pswd: tokenB64, iv: ivB64};
-		return new AnsonHeader_Test(ssid, uid);
+		return new T_AnsonHeader(ssid, uid);
 	}
 
-	public AnsonHeader_Test act(String[] act) {
+	public T_AnsonHeader act(String[] act) {
 		usrAct = act;
 		return this;
 	}

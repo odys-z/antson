@@ -1,24 +1,24 @@
 package io.odysz.anson.jprotocol;
 
 import io.odysz.anson.AnsonField;
-import io.odysz.semantic.jprotocol.test.AnsonBody_Test;
-import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
+import io.odysz.semantic.jprotocol.test.T_AnsonBody;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.Port;
 
 /**<p>A mimic of AnSessionReq for testing error prone issue's alarm</p>
  * @author odys-z@github.com
  */
-public class AnAlertBody extends AnsonBody_Test {
+public class T_AlertBody extends T_AnsonBody {
 	@AnsonField(ref=AnsonField.enclosing)
-	private AnAlert4User<AnAlertBody> parent_;
+	private T_Alert4User<T_AlertBody> parent_;
 
-	public AnAlertBody() {
+	public T_AlertBody() {
 		super(null, null); // session's DB access is controlled by server
 	}
 
 	/**Session connection is ignored and controlled by server.
 	 * @param jmsg
 	 */
-	public AnAlertBody(AnAlert4User<AnAlertBody> jmsg) {
+	public T_AlertBody(T_Alert4User<T_AlertBody> jmsg) {
 		super(null, null); // session's DB access is controlled by server
 		parent_ = jmsg;
 	}
@@ -29,13 +29,13 @@ public class AnAlertBody extends AnsonBody_Test {
 	 * @param iv64
 	 * @return login request message
 	 */
-	public static AnAlert4User<AnAlertBody> formatMsg(String uid, String tk64, String iv64) {
-		AnAlert4User<AnAlertBody> jmsg = new AnAlert4User<AnAlertBody>(Port.heartbeat);
+	public static T_Alert4User<T_AlertBody> formatMsg(String uid, String tk64, String iv64) {
+		T_Alert4User<T_AlertBody> jmsg = new T_Alert4User<T_AlertBody>(Port.heartbeat);
 
-		AnAlertBody itm = new AnAlertBody(jmsg);
+		T_AlertBody itm = new T_AlertBody(jmsg);
 		itm.a("login");
 
-		jmsg.body((AnsonBody_Test)itm);
+		jmsg.body((T_AnsonBody)itm);
 		return jmsg;
 	}
 }

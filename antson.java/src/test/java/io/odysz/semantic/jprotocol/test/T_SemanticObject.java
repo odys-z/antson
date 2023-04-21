@@ -20,7 +20,7 @@ import io.odysz.anson.Anson;
  * 
  * @author odys-z@github.com
  */
-public class SemanticObject_Test extends Anson {
+public class T_SemanticObject extends Anson {
 
 	protected HashMap<String, Object> props;
 	public HashMap<String, Object> props() { return props; }
@@ -50,11 +50,11 @@ public class SemanticObject_Test extends Anson {
 		return props == null ? null : (String) props.get(prop);
 	}
 
-	public SemanticObject_Test data() {
-		return (SemanticObject_Test) get("data");
+	public T_SemanticObject data() {
+		return (T_SemanticObject) get("data");
 	}
 
-	public SemanticObject_Test data(SemanticObject_Test data) {
+	public T_SemanticObject data(T_SemanticObject data) {
 		return put("data", data);
 	}
 	
@@ -62,7 +62,7 @@ public class SemanticObject_Test extends Anson {
 		return (String) get("port");
 	}
 
-	public SemanticObject_Test code(String c) {
+	public T_SemanticObject code(String c) {
 		return put("code", c);
 	}
 	
@@ -70,7 +70,7 @@ public class SemanticObject_Test extends Anson {
 		return (String) get("code");
 	}
 	
-	public SemanticObject_Test port(String port) {
+	public T_SemanticObject port(String port) {
 		return put("port", port);
 	}
 
@@ -78,7 +78,7 @@ public class SemanticObject_Test extends Anson {
 		return (String) get("msg");
 	}
 	
-	public SemanticObject_Test msg(String msg, Object... args) {
+	public T_SemanticObject msg(String msg, Object... args) {
 		if (args == null || args.length == 0)
 			return put("msg", msg);
 		else
@@ -90,9 +90,9 @@ public class SemanticObject_Test extends Anson {
 	 * @param resultset
 	 * @param total 
 	 * @return this
-	 * @throws TransException
+	 * @throws T_TransException
 	 */
-	public SemanticObject_Test rs(Object resultset, int total) throws TransException {
+	public T_SemanticObject rs(Object resultset, int total) throws T_TransException {
 		add("total", total);
 		return add("rs", resultset);
 	}
@@ -114,14 +114,14 @@ public class SemanticObject_Test extends Anson {
 		return (int)obj;
 	}
 	
-	public SemanticObject_Test total(int rsIdx, int total) throws TransException {
+	public T_SemanticObject total(int rsIdx, int total) throws T_TransException {
 		// the total(int) returned -1
 		if (total < 0) return this;
 
 		@SuppressWarnings("unchecked")
 		ArrayList<Integer> lst = (ArrayList<Integer>) get("total");
 		if (lst == null || lst.size() <= rsIdx)
-			throw new TransException("No such index for rs; %s", rsIdx);
+			throw new T_TransException("No such index for rs; %s", rsIdx);
 		lst.set(rsIdx, total);
 		return this;
 	}
@@ -130,14 +130,14 @@ public class SemanticObject_Test extends Anson {
 		return (String) get("error");
 	}
 	
-	public SemanticObject_Test error(String error, Object... args) {
+	public T_SemanticObject error(String error, Object... args) {
 		if (args == null || args.length == 0)
 			return put("error", error);
 		else
 			return put("error", String.format(error, args));
 	}
 	
-	public SemanticObject_Test put(String prop, Object v) {
+	public T_SemanticObject put(String prop, Object v) {
 		if (props == null)
 			props = new HashMap<String, Object>();
 		props.put(prop, v);
@@ -148,17 +148,17 @@ public class SemanticObject_Test extends Anson {
 	 * @param prop
 	 * @param elem
 	 * @return this
-	 * @throws TransException 
+	 * @throws T_TransException 
 	 */
 	@SuppressWarnings("unchecked")
-	public SemanticObject_Test add(String prop, Object elem) throws TransException {
+	public T_SemanticObject add(String prop, Object elem) throws T_TransException {
 		if (props == null)
 			props = new HashMap<String, Object>();
 		if (!props.containsKey(prop))
 			props.put(prop, new ArrayList<Object>());
 		if (props.get(prop) instanceof List)
 			((ArrayList<Object>) props.get(prop)).add(elem);
-		else throw new TransException("%s seams is not an array. elem %s can't been added", prop, elem);
+		else throw new T_TransException("%s seams is not an array. elem %s can't been added", prop, elem);
 		return this;
 	}
 
@@ -166,9 +166,9 @@ public class SemanticObject_Test extends Anson {
 	 * @param prop
 	 * @param ints
 	 * @return this
-	 * @throws TransException
+	 * @throws T_TransException
 	 */
-	public SemanticObject_Test addInts(String prop, int[] ints) throws TransException {
+	public T_SemanticObject addInts(String prop, int[] ints) throws T_TransException {
 		for (int e : ints)
 			add(prop, e);
 		return this;
@@ -191,18 +191,18 @@ public class SemanticObject_Test extends Anson {
 				Class<?> c = getType(k);
 				if (c == null)
 					continue;
-				else if (c.isAssignableFrom(SemanticObject_Test.class)
-					|| SemanticObject_Test.class.isAssignableFrom(c))
-					((SemanticObject_Test)get(k)).print(out);
+				else if (c.isAssignableFrom(T_SemanticObject.class)
+					|| T_SemanticObject.class.isAssignableFrom(c))
+					((T_SemanticObject)get(k)).print(out);
 				else if (Collection.class.isAssignableFrom(c) || Map.class.isAssignableFrom(c)) {
 					Iterator<?> i = ((Collection<?>) get(k)).iterator(); 
 					out.println("[" + ((Collection<?>) get(k)).size() + "]");
 					while (i.hasNext()) {
 						Object ele = i.next();
 						c = ele.getClass();
-						if (c.isAssignableFrom(SemanticObject_Test.class)
-								|| SemanticObject_Test.class.isAssignableFrom(c))
-							((SemanticObject_Test)ele).print(out);
+						if (c.isAssignableFrom(T_SemanticObject.class)
+								|| T_SemanticObject.class.isAssignableFrom(c))
+							((T_SemanticObject)ele).print(out);
 						else
 							out.print(get(k));
 					}

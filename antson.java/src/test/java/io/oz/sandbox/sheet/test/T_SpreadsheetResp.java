@@ -1,16 +1,16 @@
 package io.oz.sandbox.sheet.test;
 
-import io.odysz.semantic.jprotocol.test.AnsonResp_Test;
+import io.odysz.semantic.jprotocol.test.T_AnsonResp;
 
-public class SpreadsheetResp<T extends SpreadsheetRec> extends AnsonResp_Test {
+public class T_SpreadsheetResp<T extends T_SpreadsheetRec> extends T_AnsonResp {
 
 	// AnResultset sheet;
 	T rec;
 
-	public SpreadsheetResp() {
+	public T_SpreadsheetResp() {
 	}
 
-	public SpreadsheetResp(T rec) {
+	public T_SpreadsheetResp(T rec) {
 		this.rec = rec;
 	}
 

@@ -5,21 +5,21 @@ package io.odysz.semantic.jprotocol.test;
  * @author Ody Zelensky
  *
  */
-public class UserReq_T extends AnsonBody_Test {
+public class T_UserReq extends T_AnsonBody {
 	@SuppressWarnings("unused")
 	private String code;
 	
-	public UserReq_T() {
+	public T_UserReq() {
 		super(null, null);
 		code = "";
 	}
 
-	private SemanticObject_Test data;
-	public UserReq_T data(String k, Object v) {
+	private T_SemanticObject data;
+	public T_UserReq data(String k, Object v) {
 		if (k == null) return this;
 
 		if (data == null)
-			data = new SemanticObject_Test();
+			data = new T_SemanticObject();
 		data.put(k, v);
 		return this;
 	}
@@ -31,7 +31,7 @@ public class UserReq_T extends AnsonBody_Test {
 	String tabl;
 	public String tabl() { return tabl; }
 
-	public UserReq_T(AnsonMsg_Test<? extends AnsonBody_Test> parent, String conn) {
+	public T_UserReq(T_AnsonMsg<? extends T_AnsonBody> parent, String conn) {
 		super(parent, conn);
 	}
 	

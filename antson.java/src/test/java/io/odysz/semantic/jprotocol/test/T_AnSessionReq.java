@@ -3,7 +3,7 @@ package io.odysz.semantic.jprotocol.test;
 import java.util.HashMap;
 
 import io.odysz.common.LangExt;
-import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.Port;
 
 /**
  * Test Only
@@ -12,15 +12,15 @@ import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
  * a = "login" | "logout" | "heartbeat" ...</p>
  * @author odys-z@github.com
  */
-public class AnSessionReq_Test extends AnsonBody_Test {
-	public AnSessionReq_Test() {
+public class T_AnSessionReq extends T_AnsonBody {
+	public T_AnSessionReq() {
 		super(null, null); // session's DB access is controlled by server
 	}
 
 	/**Session connection is ignored and controlled by server.
 	 * @param parent
 	 */
-	public AnSessionReq_Test(AnsonMsg_Test<AnSessionReq_Test> parent) {
+	public T_AnSessionReq(T_AnsonMsg<T_AnSessionReq> parent) {
 		super(parent, null); // session's DB access is controlled by server
 	}
 
@@ -32,7 +32,7 @@ public class AnSessionReq_Test extends AnsonBody_Test {
 
 	HashMap<String,Object> mds;
 	public String md(String k) { return mds == null ? null : (String) mds.get(k); }
-	public AnSessionReq_Test md(String k, String md) {
+	public T_AnSessionReq md(String k, String md) {
 		if (k == null || LangExt.isblank(md))
 			return this;
 		if (mds == null)
@@ -49,16 +49,16 @@ public class AnSessionReq_Test extends AnsonBody_Test {
 	 * @param iv64
 	 * @return login request message
 	 */
-	public static AnsonMsg_Test<AnSessionReq_Test> formatLogin(String uid, String tk64, String iv64) {
-		AnsonMsg_Test<AnSessionReq_Test> jmsg = new AnsonMsg_Test<AnSessionReq_Test>(Port.session);
+	public static T_AnsonMsg<T_AnSessionReq> formatLogin(String uid, String tk64, String iv64) {
+		T_AnsonMsg<T_AnSessionReq> jmsg = new T_AnsonMsg<T_AnSessionReq>(Port.session);
 
-		AnSessionReq_Test itm = new AnSessionReq_Test(jmsg);
+		T_AnSessionReq itm = new T_AnSessionReq(jmsg);
 		itm.uid = uid;
 		itm.a("login");
 
 		itm.setup(uid, tk64, iv64);
 
-		jmsg.body((AnsonBody_Test)itm);
+		jmsg.body((T_AnsonBody)itm);
 		return jmsg;
 	}
 

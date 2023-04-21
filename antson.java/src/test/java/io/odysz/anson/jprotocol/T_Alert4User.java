@@ -5,11 +5,11 @@ import java.util.List;
 
 import io.odysz.anson.Anson;
 import io.odysz.anson.x.AnsonException;
-import io.odysz.semantic.jprotocol.test.AnsonBody_Test;
-import io.odysz.semantic.jprotocol.test.AnsonHeader_Test;
-import io.odysz.semantic.jprotocol.test.IPort_Test;
-import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.MsgCode;
-import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
+import io.odysz.semantic.jprotocol.test.T_AnsonBody;
+import io.odysz.semantic.jprotocol.test.T_AnsonHeader;
+import io.odysz.semantic.jprotocol.test.T_IPort;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.MsgCode;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.Port;
 
 /**<p>A mimic of AnsonMsg for testing error prone issue alarm</p>
  * 1. declare field of IJsonable instead of enum when the type is implemented with enum,
@@ -17,15 +17,15 @@ import io.odysz.semantic.jprotocol.test.AnsonMsg_Test.Port;
  * 
  * @author odys-z@github.com
  */
-public class AnAlert4User <T extends AnsonBody_Test> extends Anson {
+public class T_Alert4User <T extends T_AnsonBody> extends Anson {
 
-	static IPort_Test defaultPortImpl;
+	static T_IPort defaultPortImpl;
 
 	int seq;
 	public int seq() { return seq; }
 
-	IPort_Test port;
-	public IPort_Test port() { return port; }
+	T_IPort port;
+	public T_IPort port() { return port; }
 
 	private MsgCode code;
 	public MsgCode code() { return code; }
@@ -40,11 +40,11 @@ public class AnAlert4User <T extends AnsonBody_Test> extends Anson {
 			throw new AnsonException(-1, "Port can not be null. Not initialized? To use JMassage understand ports, call understandPorts(IPort) first.");
 	}
 
-	public AnAlert4User() {
+	public T_Alert4User() {
 		seq = (int) (Math.random() * 1000);
 	}
 
-	public AnAlert4User(Port port) {
+	public T_Alert4User(Port port) {
 		this.port = port;
 		seq = (int) (Math.random() * 1000);
 	}
@@ -53,7 +53,7 @@ public class AnAlert4User <T extends AnsonBody_Test> extends Anson {
 	 * @param p 
 	 * @param code
 	 */
-	public AnAlert4User(Port p, MsgCode code) {
+	public T_Alert4User(Port p, MsgCode code) {
 		this.port = p;
 		this.code = code;
 	}
@@ -67,7 +67,7 @@ public class AnAlert4User <T extends AnsonBody_Test> extends Anson {
 	 * @return new message object
 	 */
 	@SuppressWarnings("unchecked")
-	public AnAlert4User<T> body(AnsonBody_Test bodyItem) {
+	public T_Alert4User<T> body(T_AnsonBody bodyItem) {
 		if (body == null)
 			body = new ArrayList<T>();
 		body.add((T)bodyItem);
@@ -75,19 +75,19 @@ public class AnAlert4User <T extends AnsonBody_Test> extends Anson {
 		return this;
 	}
 
-	public AnAlert4User<T> incSeq() {
+	public T_Alert4User<T> incSeq() {
 		seq++;
 		return this;
 	}
 	
-	AnsonHeader_Test header;
-	public AnsonHeader_Test header() { return header; }
-	public AnAlert4User<T> header(AnsonHeader_Test header) {
+	T_AnsonHeader header;
+	public T_AnsonHeader header() { return header; }
+	public T_Alert4User<T> header(T_AnsonHeader header) {
 		this.header = header;
 		return this;
 	}
 	
-	public AnAlert4User<T> body(List<T> bodyItems) {
+	public T_Alert4User<T> body(List<T> bodyItems) {
 		this.body = bodyItems;
 		return this;
 	}
