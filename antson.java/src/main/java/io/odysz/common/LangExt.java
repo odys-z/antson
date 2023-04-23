@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LangExt {
 	/**Split and trim elements.
@@ -545,6 +546,60 @@ public class LangExt {
 	public static String trim(String s) {
 		if (isNull(s)) return null;
 		else return s.trim();
+	}
+
+	/**
+	 * Join strings.
+	 * 
+	 * @param sep, null as ","
+	 * @param vi "a", null, "b", ...
+	 * @return "a,b,..."
+	 */
+	public static String join(String sep, String ... vi) {
+		if (sep == null) sep = ",";
+		return vi == null ? null
+			: Stream.of(vi).filter(v -> v != null).collect(Collectors.joining(sep));
+	}
+
+	/**
+	 * Join strings, escape sep with esc. If sep = "\n", esc = "\\n".
+	 * 
+	 * <p>It's the user's responsiblity to unescape the result value or distinguish what's messed up.</p>
+	 * @see #joinEsc(String, String, String...)
+	 * 
+	 * @param sep, null as ",", e.g. "\n"
+	 * @param esc, replacement, e.g. "\\n"
+	 * @param vi "a\nx", null, "bb", ...
+	 * @return "a\\nx\nb\n..."
+	 */
+	public static String join(final String sep, String esc, String ... vi) {
+		final String sap = (sep == null) ? "," : sep;
+		return vi == null ? null
+				: Stream.of(vi)
+				.filter(v -> v != null)
+				.map(v -> v.replaceAll(sap, esc))
+				.collect(Collectors.joining(sep));
+	}
+
+	/**
+	 * Join strings, escape sep with esc. If sep = "\n", esc = "\\n",
+	 * the returned string is the same as Funcall.compound(), and can
+	 * be restored using StringEscapeUtils.unescapeJava(returned).
+	 * 
+	 * @param sep
+	 * @param esc
+	 * @param vi
+	 * @return
+	 */
+	public static String joinEsc(String sep, String esc, String... vi) {
+		final String sap = (sep == null) ? "," : sep;
+		return vi == null ? null
+				: Stream.of(vi)
+				.filter(v -> v != null)
+				.map(v -> v
+						.replaceAll("\\\\", "\\\\\\\\")
+						.replaceAll(sap, esc))
+				.collect(Collectors.joining(sep));
 	}
 }
 

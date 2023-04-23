@@ -6,6 +6,7 @@ import java.util.List;
 
 import static io.odysz.common.LangExt.*;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.junit.jupiter.api.Test;
 
 class LangExtTest {
@@ -84,5 +85,35 @@ class LangExtTest {
 		assertFalse(eqs("a", "a", "a"));
 		assertFalse(eqs("a", "a", "a", "b"));
 		assertTrue(eqs("a", "a", "a", "a"));
+	}
+	
+	@Test
+	void testJoin() {
+		assertEquals("a,b", join(null, new String[] { "a", "b" }));
+		assertEquals("a-b", join("-",  new String[] { "a", "b" }));
+		assertEquals("", join("-",  new String[] {}));
+		assertEquals("", join(null, new String[] {}));
+		assertEquals(null, join(null, (String[])null));
+
+		assertEquals("a\\nx\nb", join("\n", "\\\\n", new String[] { "a\nx", "b"}));
+
+		assertEquals("a\\nx\\ny\nb", join("\n", "\\\\n", new String[] { "a\nx\ny", "b"}));
+		String c = join("\n", "\\\\n", new String[] { "a\nx\\ny", "b"});
+		assertEquals("a\\nx\\ny\nb", c);
+		String e = StringEscapeUtils.unescapeJava(c);
+		assertEquals("a\nx\ny\nb", e);
+
+		assertEquals("a\\nx\\ny\nb", join("\n", "\\\\n", new String[] { "a\nx\ny", "b"}));
+		String hybrides = "a\nx\\ny";
+		c = join("\n", "\\\\n", new String[] { StringEscapeUtils.escapeJava(hybrides), "b"});
+		assertEquals("a\\nx\\\\ny\nb", c);
+		e = StringEscapeUtils.unescapeJava(c);
+		assertEquals(hybrides + "\nb", e);
+		
+		assertEquals("a\\nx\\ny\nb", joinEsc("\n", "\\\\n", new String[] { "a\nx\ny", "b"}));
+		c = joinEsc("\n", "\\\\n", new String[] { hybrides, "b"});
+		assertEquals("a\\nx\\\\ny\nb", c);
+		e = StringEscapeUtils.unescapeJava(c);
+		assertEquals(hybrides + "\nb", e);
 	}
 }
