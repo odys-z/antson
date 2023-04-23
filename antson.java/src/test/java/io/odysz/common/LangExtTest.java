@@ -59,4 +59,30 @@ class LangExtTest {
 		assertFalse(endWith("anythin-", "g", "ing"));
 		assertTrue(endWith("anythin-", "g", "ing", "-"));
 	}
+	
+	@Test
+	void testTrimStrEq() {
+		assertEquals("", str(new Object[] {}));
+		assertEquals("9", str(9));
+		assertEquals("9,1", str(new int[] {9,1}));
+		assertEquals("9,1", str(new Integer[] {9,1}));
+		assertEquals("9,1", str(new String[] {"9","1"}));
+		
+		assertEquals("", trim(" "));
+		assertEquals("9", trim(" 9"));
+		assertEquals("9", trim("9 "));
+		
+		assertFalse(eq("a", null));
+		assertFalse(eq(null, "b"));
+		assertTrue(eq(null, null));
+		assertTrue(eqs(null, null));
+		assertTrue(eqs());
+		assertTrue(eqs((String[])null));
+		assertFalse(eqs("a"));
+		assertFalse(eqs("a", "b"));
+		assertTrue(eqs("a", "a"));
+		assertFalse(eqs("a", "a", "a"));
+		assertFalse(eqs("a", "a", "a", "b"));
+		assertTrue(eqs("a", "a", "a", "a"));
+	}
 }

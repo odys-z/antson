@@ -208,15 +208,13 @@ public class Utils {
 	 * @param clzz
 	 * @param filename
 	 * @return text
-	 * @throws IOException
-	 * @throws URISyntaxException
 	 */
-	public static String loadTxt(Class<?> clzz, String filename) throws IOException {
+	public static String loadTxt(Class<?> clzz, String filename) {
 		try {
 			return Files.readAllLines(
 				Paths.get(clzz.getResource(filename).toURI()), Charset.defaultCharset())
 				.stream().collect(Collectors.joining("\n"));
-		} catch (URISyntaxException e) {
+		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 			return null;
 		}
@@ -227,12 +225,14 @@ public class Utils {
 	 * @since 0.9.26
 	 * @param filename
 	 * @return text
-	 * @throws IOException
-	 * @throws URISyntaxException
-	 * @throws ClassNotFoundException
 	 */
-	public static String loadTxt(String filename) throws IOException, ClassNotFoundException {
-		StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-		return loadTxt(Class.forName(stElements[2].getClassName()), filename);
+	public static String loadTxt(String filename) {
+		try {
+			StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+			return loadTxt(Class.forName(stElements[2].getClassName()), filename);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

@@ -189,6 +189,27 @@ public class LangExt {
     public static boolean isNull(final Object args) {
     	return args == null;
     }
+    
+    /**
+     * @param v
+     * @return v != null && v[0] == v[1] && v[2] == v[3] && ...
+     */
+    public static boolean eqs(String ... v) {
+    	if (isNull(v))
+    		return true;
+    	else {
+    		if ((v.length %2) != 0) return false;
+    		for (int i = 0; i < v.length; i+=2) {
+				if (!eq(v[i], v[i+1]))
+					return false;
+    		}
+    		return true;
+    	}
+    }
+
+	public static boolean eq(String v, String u) {
+		return (v == null && u == null || (u != null && v != null && v.equals(u)));
+	}
 
 	public static String prefixIfnull(String prefix, String dest) {
 		if (isblank(prefix) || dest.startsWith(prefix))
@@ -507,6 +528,23 @@ public class LangExt {
 
 	public static String str(AbstractCollection<String> c) {
 		return c.stream().collect(Collectors.joining(","));
+	}
+	
+	public static String str(int v) {
+		return String.valueOf(v);
+	}
+	
+	public static String str(int[] v) {
+		return Arrays.stream(v).mapToObj(String::valueOf).collect(Collectors.joining(","));
+	}
+
+	public static String str(Object[] v) {
+		return Arrays.stream(v).map(o -> o.toString()).collect(Collectors.joining(","));
+	}
+
+	public static String trim(String s) {
+		if (isNull(s)) return null;
+		else return s.trim();
 	}
 }
 
