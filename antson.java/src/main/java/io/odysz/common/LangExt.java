@@ -40,6 +40,20 @@ public class LangExt {
 		}
 		return argss;
 	}
+	
+	/**
+	 * Reverse of {@link #compoundVal(String...).
+	 * 
+	 * @since 1.5.0
+	 * @param v
+	 * @return deserialized compound values
+	 */
+	public static String[] uncombine(String v) {
+		return (String[]) Stream
+				.of(v.split("\n"))
+				.filter(s -> !isNull(s))
+				.toArray();
+	}
 
 	/**Get a string array that composed into string by {@link #toString(Object[])}.
 	 * @param ss
@@ -190,6 +204,10 @@ public class LangExt {
     public static boolean isNull(final Object args) {
     	return args == null;
     }
+
+	public static Object ifnull(Object op, Object deflt) {
+		return isblank(op) ? deflt : op;
+	}
     
     /**
      * @param v
@@ -458,7 +476,7 @@ public class LangExt {
      * StringUtils.repeat("a", -2) = ""
      * </pre>
      *
-     * @param str  the String to repeat, may be null
+     * @param str  the String to be duplicated, may be null
      * @param repeat  number of times to repeat str, negative treated as zero
      * @return a new String consisting of the original String repeated,
      *  {@code null} if null String input
@@ -523,26 +541,60 @@ public class LangExt {
 		else return false;
 	}
 	
+	/**
+	 * @since 1.5.0
+	 * @param s
+	 * @return
+	 */
 	public static int len(Set<?> s) {
 		return isNull(s) ? 0 : s.size();
 	}
 
+	public static int len(Object[] s) {
+		return isNull(s) ? 0 : s.length;
+	}
+
+	/**
+	 * @since 1.5.0
+	 * @param c
+	 * @return
+	 */
 	public static String str(AbstractCollection<String> c) {
 		return c.stream().collect(Collectors.joining(","));
 	}
 	
+	/**
+	 * @since 1.5.0
+	 * @param v
+	 * @return
+	 */
 	public static String str(int v) {
 		return String.valueOf(v);
 	}
 	
+	/**
+	 * @since 1.5.0
+	 * @param v
+	 * @return
+	 */
 	public static String str(int[] v) {
 		return Arrays.stream(v).mapToObj(String::valueOf).collect(Collectors.joining(","));
 	}
 
+	/**
+	 * @since 1.5.0
+	 * @param v
+	 * @return
+	 */
 	public static String str(Object[] v) {
 		return Arrays.stream(v).map(o -> o.toString()).collect(Collectors.joining(","));
 	}
 
+	/**
+	 * @since 1.5.0
+	 * @param s
+	 * @return
+	 */
 	public static String trim(String s) {
 		if (isNull(s)) return null;
 		else return s.trim();
@@ -551,6 +603,7 @@ public class LangExt {
 	/**
 	 * Join strings.
 	 * 
+	 * @since 1.5.0
 	 * @param sep, null as ","
 	 * @param vi "a", null, "b", ...
 	 * @return "a,b,..."
@@ -567,6 +620,7 @@ public class LangExt {
 	 * <p>It's the user's responsiblity to unescape the result value or distinguish what's messed up.</p>
 	 * @see #joinEsc(String, String, String...)
 	 * 
+	 * @since 1.5.0
 	 * @param sep, null as ",", e.g. "\n"
 	 * @param esc, replacement, e.g. "\\n"
 	 * @param vi "a\nx", null, "bb", ...
@@ -586,6 +640,7 @@ public class LangExt {
 	 * the returned string is the same as Funcall.compound(), and can
 	 * be restored using StringEscapeUtils.unescapeJava(returned).
 	 * 
+	 * @since 1.5.0
 	 * @param sep
 	 * @param esc
 	 * @param vi
@@ -600,6 +655,16 @@ public class LangExt {
 						.replaceAll("\\\\", "\\\\\\\\")
 						.replaceAll(sap, esc))
 				.collect(Collectors.joining(sep));
+	}
+
+	/**
+	 * Concatenate strings into a "\n" separated string. 
+	 * @since 1.5.0
+	 * @param vals
+	 * @return
+	 */
+	public static String compoundVal(String... vals) {
+		return joinEsc("\n", "\\n", vals);
 	}
 }
 
