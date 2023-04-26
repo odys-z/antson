@@ -29,6 +29,10 @@ public class LangExt {
 			return s.split(regex);
 		}
 	}
+
+	public static String[] split(String s) {
+		return split(s, ",");
+	}
 	
 	public static String[][] split(String[] ss) {
 		if (ss == null)
