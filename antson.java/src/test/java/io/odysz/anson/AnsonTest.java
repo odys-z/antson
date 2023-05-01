@@ -293,15 +293,29 @@ class AnsonTest {
 		assertEquals("z", ((AnsT1)cll.ans2.get(1)).ver);
 	}
 	
+	/**
+	 * @since 0.9.30 also test windows path escape
+	 * @throws AnsonException
+	 */
 	@Test
 	void testFromJson_list2d() throws AnsonException {
 		AnsTListPhoto cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [["
-				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\" },"
-				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\" } ]]}");
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\", clientpath: \"raw\\res\\\\my.jpg\" },"
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\", clientpath: \"raw/res/my.jpg\"} ]]}");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(2, cll.ansp.get(0).length);
 		assertEquals("2", cll.ansp.get(0)[1].pid);
+		assertEquals("raw\\res\\\\my.jpg", cll.ansp.get(0)[0].clientpath);
+		assertEquals("raw/res/my.jpg", cll.ansp.get(0)[1].clientpath);
 		
+		/* FIXME error report: line 1:47 extraneous input '<EOF>' expecting {',', '}'}
+		 * This should be a grammar error.
+		 * g4:
+			array
+			: '[' value (',' value)* ']'
+			| '[' ']'
+			;
+		*/
 		cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [[]]");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(0, cll.ansp.get(0).length);
