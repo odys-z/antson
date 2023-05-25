@@ -507,7 +507,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			else {
 				Field f = top.fmap.get(top.parsingProp);
 				if (f == null)
-					throw new AnsonException(1, "Field not found: field: %s, value: %s", top.parsingProp, ctx.getText());
+					throw new AnsonException(1, "Field not found in %s field: %s, value: %s",
+							top.enclosing.getClass().getName(), top.parsingProp, ctx.getText());
 				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				// AnsT3 { ArrayList<Anson[]> ms; }
 				// ctx: [[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]]
