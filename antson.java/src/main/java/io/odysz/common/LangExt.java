@@ -231,7 +231,11 @@ public class LangExt {
     }
 
 	public static boolean eq(String v, String u) {
-		return (v == null && u == null || (u != null && v != null && v.equals(u)));
+		return v == null && u == null || (u != null && v != null && v.equals(u));
+	}
+
+	public static boolean eq(String[] v, String u) {
+		return isNull(v) && u == null || (u != null && v != null && len(v) > 0 && v[0].equals(u));
 	}
 
 	public static String prefixIfnull(String prefix, String dest) {
@@ -556,6 +560,10 @@ public class LangExt {
 
 	public static int len(Object[] s) {
 		return isNull(s) ? 0 : s.length;
+	}
+
+	public static int len(List<?> s) {
+		return isNull(s) ? 0 : s.size();
 	}
 
 	/**
