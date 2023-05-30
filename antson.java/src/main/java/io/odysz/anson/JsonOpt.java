@@ -2,6 +2,12 @@ package io.odysz.anson;
 
 public class JsonOpt extends Anson {
 
+	public boolean escape4DB = false;
+	public JsonOpt escape4DB(boolean esc) {
+		escape4DB = esc;
+		return this;
+	}
+
 	public String doubleFormat;
 	/**Must serialize key with quotes */
 	private boolean quotKey = true;

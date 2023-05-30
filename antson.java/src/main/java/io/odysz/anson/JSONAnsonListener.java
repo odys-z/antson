@@ -593,7 +593,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    	 */
 	    	if (eleType == String.class && !eleType.isAssignableFrom(lstItem.getClass()))
 	    		lstItem = lstItem.toString();
-	    	else if (!eleType.isAssignableFrom(lstItem.getClass()))
+	    	else if (!eleType.isAssignableFrom(lstItem.getClass()) && !matchPrimaryObj(eleType, lstItem.getClass()))
 	    		throw new AnsonException(1, "Set element (v: %s, type %s) to array of type of \"%s[]\" failed.\n"
 	    				+ "Array element's type not annotated?\n"
 	    				+ "Please also note that all values in string are tolerated. (which is typical in js for array of elements in different types.)",
@@ -603,6 +603,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    }
 
 	    return array;
+	}
+
+	private static boolean matchPrimaryObj(Class<?> primtype, Class<? extends Object> objtype) {
+		// https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html
+		return primtype == int.class && objtype == Integer.class
+			|| primtype == float.class && objtype == Float.class
+			|| primtype == double.class && objtype == Double.class
+			|| primtype == long.class && objtype == Long.class
+			|| primtype == short.class && objtype == Short.class
+			|| primtype == boolean.class && objtype == Boolean.class
+			|| primtype == char.class && objtype == Character.class
+			;
 	}
 
 	/**

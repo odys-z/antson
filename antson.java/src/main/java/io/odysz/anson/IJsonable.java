@@ -34,6 +34,8 @@ public interface IJsonable {
 	}
 
 	/**
+	 * <p>TODO to be renamed as toEnvelope().</p>
+	 * 
 	 * {@link Anson} implemented this for almost all the case, user shouldn't care about this.
 	 * 
 	 * But typically, IPort implementation should handle this specially like
@@ -52,7 +54,7 @@ public interface IJsonable {
 	IJsonable toBlock(OutputStream stream, JsonOpt... opts) throws AnsonException, IOException;
 
 	/** @see #toBlock(OutputStream, JsonOpt...) */
-	public default String toBlock(JsonOpt opt) throws AnsonException, IOException {
+	public default String toBlock(JsonOpt... opt) throws AnsonException, IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		toBlock(bos, opt);
 		return bos.toString(StandardCharsets.UTF_8.name());

@@ -23,6 +23,7 @@ import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
+import static io.odysz.common.LangExt.isNull;
 
 /**
  * Base class for any user's type that can be transmitted over JServ protocol to AnClient.
@@ -49,6 +50,83 @@ public class Anson implements IJsonable {
 
 	public Anson() {}
 
+	/**
+	 * Serialize into an envelope. 
+	 * @since 1.5.0
+	 * @param anson
+	 * @param stream
+	 * @param opts
+	 * @return anson
+	 * @throws IOException
+	 */
+	public static IJsonable toEnvelope(IJsonable anson, OutputStream stream, JsonOpt... opts) throws IOException {
+		boolean quotK = opts == null || opts.length == 0 || opts[0] == null || opts[0].quotKey();
+		if (quotK) {
+			stream.write("{\"type\": \"".getBytes(StandardCharsets.UTF_8));
+			stream.write(anson.getClass().getName().getBytes(StandardCharsets.UTF_8));
+			stream.write('\"');
+		}
+		else {
+			stream.write("{type: ".getBytes(StandardCharsets.UTF_8));
+			stream.write(anson.getClass().getName().getBytes(StandardCharsets.UTF_8));
+		}
+
+		HashMap<String, Field> fmap = new HashMap<String, Field>();
+		fmap = JSONAnsonListener.mergeFields(anson.getClass(), fmap);
+
+		for (Field f : fmap.values()) {
+			// is this ignored?
+			AnsonField af = f.getAnnotation(AnsonField.class);
+			if (af != null && af.ignoreTo())
+				continue;
+
+			f.setAccessible(true);
+
+			stream.write(", ".getBytes(StandardCharsets.UTF_8));
+
+			// prop
+			if (quotK)
+				stream.write(("\"" + f.getName() + "\": ").getBytes(StandardCharsets.UTF_8));
+			else
+				stream.write((f.getName() + ": ").getBytes(StandardCharsets.UTF_8));
+
+			// value
+			if (af != null && af.ref() == AnsonField.enclosing) {
+				stream.write('\"');
+				stream.write(f.getType().getName().getBytes(StandardCharsets.UTF_8));
+				stream.write('\"');
+				continue;
+			}
+
+			try {
+				Object v = f.get(anson);
+				AnsonField anno = f.getAnnotation(AnsonField.class);
+				if (v != null && anno != null && anno.shortenString()
+					&& opts != null && opts.length > 0 && opts[0] != null && opts[0].shortenOnAnnotation())
+					stream.write(("\"Asnon field shortened ... \"").getBytes(StandardCharsets.UTF_8));
+				else {
+					if (!f.getType().isPrimitive()) {
+						Class<? extends Object> vclz = v == null ? null : v.getClass();
+
+						writeNonPrimitive(stream, vclz, v, opts);
+					}
+					if (f.getType() == char.class) {
+						char c = f.getChar(anson);
+						stream.write(c == 0 ? '0' : c);
+					}
+					else if (f.getType().isPrimitive())
+						stream.write(String.valueOf(f.get(anson)).getBytes(StandardCharsets.UTF_8));
+				}
+			} catch (IllegalArgumentException | IllegalAccessException e1) {
+				throw new AnsonException(0, e1.getMessage());
+			}
+		}
+		stream.write("}\n".getBytes(StandardCharsets.UTF_8));
+		stream.flush();
+
+		return anson;
+	}
+
 	/**Serialize Anson object.
 	 * 
 	 * <p>Debug Note, 1 Dec. 2021:</p>
@@ -60,6 +138,7 @@ public class Anson implements IJsonable {
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
+		/*
 		boolean quotK = opts == null || opts.length == 0 || opts[0] == null || opts[0].quotKey();
 		if (quotK) {
 			stream.write("{\"type\": \"".getBytes(StandardCharsets.UTF_8));
@@ -124,6 +203,8 @@ public class Anson implements IJsonable {
 		stream.write("}\n".getBytes(StandardCharsets.UTF_8));
 		stream.flush();
 		return this;
+		*/
+		return (Anson) toEnvelope(this, stream, opts);
 	}
 
 	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
@@ -149,7 +230,7 @@ public class Anson implements IJsonable {
 
 			else if (o instanceof String) {
 				stream.write('"');
-				stream.write(escape(o.toString()));
+				stream.write(escape(o.toString(), opt));
 				stream.write('"');
 			}
 			else stream.write(o.toString().getBytes(StandardCharsets.UTF_8));
@@ -157,7 +238,7 @@ public class Anson implements IJsonable {
 		stream.write(']');
 	}
 
-	private static void toPrimArrayBlock(OutputStream stream, Object v) throws IOException {
+	private static void toPrimArrayBlock(OutputStream stream, Object v, JsonOpt... opt) throws IOException {
 		if (v == null) {
 			stream.write("null".getBytes(StandardCharsets.UTF_8));
 			return;
@@ -178,7 +259,7 @@ public class Anson implements IJsonable {
 
 			else if (o instanceof String) {
 				stream.write('"');
-				stream.write(escape(o.toString()));
+				stream.write(escape(o.toString(), opt));
 				stream.write('"');
 			}
 			else stream.write(o.toString().getBytes(StandardCharsets.UTF_8));
@@ -261,6 +342,7 @@ public class Anson implements IJsonable {
 
 	@Override
 	public IJsonable toJson(StringBuffer sbuf) throws IOException, AnsonException {
+		/*
 		sbuf.append("{");
 
 		Field flist[] = this.getClass().getDeclaredFields();
@@ -280,6 +362,39 @@ public class Anson implements IJsonable {
 
 		sbuf.append("}");
 		return this;
+		*/
+		return toJson(sbuf, this);
+	}
+	
+	/**
+	 * @since 1.5.0
+	 * @param sbuf
+	 * @param anson
+	 * @return JSON string
+	 * @throws AnsonException
+	 * @throws IOException
+	 */
+	public static IJsonable toJson(StringBuffer sbuf, IJsonable anson) throws AnsonException, IOException {
+		sbuf.append("{");
+
+		Field flist[] = anson.getClass().getDeclaredFields();
+		Class<?> parentCls = anson.getClass().getDeclaringClass();
+		for (int i = 0; i < flist.length; i++) {
+			Field f = flist[i];
+			f.setAccessible(true);
+			try {
+				appendPair(sbuf, f.getName(), f.get(anson), parentCls, null);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new AnsonException(0, e.getMessage());
+			}
+
+			if (i < flist.length - 1)
+				sbuf.append(",");
+		}
+
+		sbuf.append("}");
+		
+		return anson;
 	}
 
 	/**Write field (element)'s value to stream.<br>
@@ -313,13 +428,13 @@ public class Anson implements IJsonable {
 		else if (fdClz.isArray()) {
 			if (v != null && v.getClass().getComponentType() != null
 				&& v.getClass().getComponentType().isPrimitive() == true)
-				toPrimArrayBlock(stream, v);
+				toPrimArrayBlock(stream, v, opts);
 			else
 				toArrayBlock(stream, (Object[]) v, opts != null && opts.length > 0 ? opts[0] : null);
 		}
 		else if (v instanceof String) {
 			stream.write('\"');
-			stream.write(escape(v));
+			stream.write(escape(v, opts));
 			stream.write('\"');
 		}
 		else if (fdClz.isEnum())
@@ -338,16 +453,24 @@ public class Anson implements IJsonable {
 		}
 	}
 
-	/**<pre>fragment ESC
+	/**
+	 * <pre>fragment ESC
      : '\\' (["\\/bfnrt] | UNICODE) ;</pre>
+     * TODO using stream as output
 	 * @param v
+	 * @param opts use opts.escape_singlquot = true for db writing.
 	 * @return escaped bytes
 	 */
-	private static byte[] escape(Object v) {
+	private static byte[] escape(Object v, JsonOpt... opts) {
 		if (v == null)
 			return new byte[0];
 		String s = v.toString();
-		// What about Performance ?
+
+		// Performance optimization using sql(context, stream)
+		
+		if (!isNull(opts) && opts[0].escape4DB)
+			s = s.replace("'", "''");
+
 		return s
 				/** NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
 				 * v1.3.0 NOTE 19 Aug 2021
@@ -408,14 +531,14 @@ public class Anson implements IJsonable {
 				Object elem = Array.get(v, e);
 				sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 					.append(": [");
-				appendArr(sbuf, elem);
+				appendArr(sbuf, elem, opt);
 				if (e < Array.getLength(v) - 1)
 					sbuf.append(", ");
 			}
 		}
 	}
 
-	private static void appendArr(StringBuffer sbuf, Object e)
+	private static void appendArr(StringBuffer sbuf, Object e, JsonOpt opts)
 			throws AnsonException, IOException {
 		if (e instanceof Anson)
 			((IJsonable)e).toJson(sbuf);
@@ -423,7 +546,7 @@ public class Anson implements IJsonable {
 			sbuf.append(String.valueOf(e));
 		else if (e instanceof String)
 			sbuf.append("\"")
-				.append(escape((String)e))
+				.append(escape((String)e, opts))
 				.append("\"");
 		else // java.lang.Object
 			appendObjStr(sbuf, e);
