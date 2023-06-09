@@ -3,15 +3,15 @@ package io.odysz.anson;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class AnTreeNode extends Anson {
+public class T_AnTreeNode extends Anson {
 	public static class SubTree extends Anson {
-		public ArrayList<AnTreeNode> children;
+		public ArrayList<T_AnTreeNode> children;
 		
 		public SubTree() {
-			children = new ArrayList<AnTreeNode>();
+			children = new ArrayList<T_AnTreeNode>();
 		}
 		
-		public SubTree add(AnTreeNode child) {
+		public SubTree add(T_AnTreeNode child) {
 			children.add(child);
 			return this;
 		}
@@ -19,11 +19,11 @@ public class AnTreeNode extends Anson {
 
 	HashMap<String, Object> node;
 
-	public AnTreeNode() {
+	public T_AnTreeNode() {
 		node = new HashMap<String, Object>();
 	}
 	
-	public AnTreeNode put(String k, Object v) {
+	public T_AnTreeNode put(String k, Object v) {
 		node.put(k, v);
 		return this;
 	}

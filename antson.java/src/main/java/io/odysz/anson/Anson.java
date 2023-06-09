@@ -1,5 +1,7 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt.isNull;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +25,6 @@ import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
-import static io.odysz.common.LangExt.isNull;
 
 /**
  * Base class for any user's type that can be transmitted over JServ protocol to AnClient.
@@ -616,4 +617,5 @@ public class Anson implements IJsonable {
 		walker.walk(lstner, ctx);
 		return lstner.parsedEnvelope(verbose);
 	}
+
 }
