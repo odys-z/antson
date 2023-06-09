@@ -201,6 +201,10 @@ public class LangExt {
     		|| args.length == 2 && args[0] == null && args[1] == null;
     }
 
+    /**
+     * @param args
+     * @return true if the args is null or is zero length
+     */
     public static boolean isNull(final List<?> args) {
     	return args == null || args.isEmpty();
     }

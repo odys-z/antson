@@ -467,7 +467,11 @@ class AnsonTest {
 		TreeIndenode n22   = new TreeIndenode("2.2", n2 ).asLastSibling();
 		n2.child(n22);
 		
-		// Utils.logi(root.toBlock());
+		assertEquals("{\"type\": \"io.odysz.anson.utils.TreeIndenode\", "
+				+ "\"node\": {}, \"parent\": \"io.odysz.anson.utils.TreeIndenode\", "
+				+ "\"indents\": [\"vlink\", \"space\", \"childx\"], "
+				+ "\"lastSibling\": true, \"id\": \"2.1.1.1\", \"parentId\": \"2.1.1\"}\n",
+				n2111.toBlock());
 		/**
 		 * (+)2 or
 		 *  2

@@ -1,6 +1,7 @@
 package io.odysz.anson.utils;
 
 import static io.odysz.common.LangExt.len;
+import static io.odysz.common.LangExt.isNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,6 +17,8 @@ import io.odysz.anson.x.AnsonException;
 /**
  * Tree node supporting indent for rendering tree structure.
  * 
+ * TODO to be moved to Semantic.DA
+ * 
  * @author Ody Z
  *
  */
@@ -23,13 +26,14 @@ public class TreeIndenode extends Anson {
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
-		ArrayList<IndentFlag> indents =
-			parent == null ? new ArrayList<IndentFlag>() : parent.getChildIndents();
-
-		if (lastSibling)
-			indents.add(IndentFlag.childx);
-		else
-			indents.add(IndentFlag.vlink);
+//		ArrayList<IndentFlag> indents =
+//			parent == null ? new ArrayList<IndentFlag>() : parent.getChildIndents();
+//
+//		if (lastSibling)
+//			indents.add(IndentFlag.childx);
+//		else
+//			indents.add(IndentFlag.vlink);
+		indents();
 		
 		return super.toBlock(stream, opts);
 	}
@@ -123,8 +127,21 @@ public class TreeIndenode extends Anson {
 		put("children", arrChildren);
 	}
 
-	public void children_(List<? extends TreeIndenode> childrenArray) {
+	public TreeIndenode children_(List<? extends TreeIndenode> childrenArray) {
 		put("children", childrenArray);
+		return this;
+	}
+	
+	/**
+	 * Set last child a last-sibling.
+	 * @return this
+	 */
+	public TreeIndenode tagLast() {
+		@SuppressWarnings("unchecked")
+		ArrayList<TreeIndenode> children = (ArrayList<TreeIndenode>) get("children");
+		if (!isNull(children))
+			children.get(children.size() - 1).asLastSibling();
+		return this;
 	}
 
 	boolean lastSibling;
