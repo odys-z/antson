@@ -26,15 +26,7 @@ public class TreeIndenode extends Anson {
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
-//		ArrayList<IndentFlag> indents =
-//			parent == null ? new ArrayList<IndentFlag>() : parent.getChildIndents();
-//
-//		if (lastSibling)
-//			indents.add(IndentFlag.childx);
-//		else
-//			indents.add(IndentFlag.vlink);
 		indents();
-		
 		return super.toBlock(stream, opts);
 	}
 
