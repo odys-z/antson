@@ -868,7 +868,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					"Invoking registered factory failed for value: %s\n" +
 					"Field Type: %s,\nCause: %s\tMessage: %s\n",
 					v, f.getType().getName(),
-					cause == null ? "null" : cause.getClass().getName(), cause == null ? "null" : cause.getMessage());
+					cause == null ? "null" : cause.getClass().getName(), cause == null ? t.getMessage() : "null");
 		}
 	}
 

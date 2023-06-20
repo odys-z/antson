@@ -399,7 +399,7 @@ public class Anson implements IJsonable {
 	private static byte[] escape(Object v, JsonOpt... opts) {
 		if (v == null)
 			return new byte[0];
-		String s = v.toString();
+		String s = v.toString();// TODO performance problem
 
 		// Performance optimization using sql(context, stream)
 		
