@@ -44,7 +44,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
+		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
 
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");

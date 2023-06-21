@@ -20,6 +20,7 @@ import io.odysz.common.Utils;
 import io.odysz.semantic.ext.test.T_AnDatasetResp;
 import io.odysz.semantic.jprotocol.test.T_AnSessionReq;
 import io.odysz.semantic.jprotocol.test.T_AnSessionResp;
+import io.odysz.semantic.jprotocol.test.T_AnsonBody;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg;
 import io.odysz.semantic.jprotocol.test.T_AnsonResp;
 import io.odysz.semantic.jprotocol.test.T_SemanticObject;
@@ -224,16 +225,19 @@ class T_JProtocol {
 	void test_echo() throws AnsonException, IOException {
 		T_EchoReq req = new T_EchoReq(null);
 		T_AnsonMsg<T_AnsonResp> msg = T_AnsonMsg.ok(T_Port.echo, req.toString());
-		/*
-		 {"type": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "code": "ok", "opts": null, "port": "echo", "header": null, "body": [{"type": "io.odysz.semantic.jprotocol.test.T_AnsonResp", "rs": null, "parent": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "a": null, "m": "{\"type\": \"io.odysz.anson.jprotocol.T_EchoReq\", \"parent\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", \"a\": null, \"uri\": null}\
+		/* Utils.logi(msg.toBlock());
+		 * 
+{"type": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "code": "ok", "opts": null, "port": "echo", "header": null, "body": [{"type": "io.odysz.semantic.jprotocol.test.T_AnsonResp", "rs": null, "parent": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "a": null, "m": "{\"type\": \"io.odysz.anson.jprotocol.T_EchoReq\", \"parent\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", \"a\": null, \"uri\": null}\
 ", "map": null, "uri": null}
 ], "version": "1.0", "seq": 0}
 		 */
-		Utils.logi(msg.toBlock());
 		
-		T_AnsonMsg e = (T_AnsonMsg) Anson.fromJson(msg.toBlock());
+		@SuppressWarnings("unchecked")
+		T_AnsonMsg<T_AnsonResp> e = (T_AnsonMsg<T_AnsonResp>) Anson.fromJson(msg.toBlock());
+		T_AnsonResp rbd = e.body(0);
+		byte[] esc = Anson.escape(req.toBlock());
+		assertEquals(new String(esc), rbd.msg());
 	}
-	
 	
     String userReqJsonReduced =  
 		"{ \"type\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", \"version\": \"0.9\", \"seq\": 238, \"port\": \"quiz\", \"opts\": {}," + 

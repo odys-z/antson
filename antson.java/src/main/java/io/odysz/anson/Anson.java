@@ -391,18 +391,20 @@ public class Anson implements IJsonable {
 	/**
 	 * <pre>fragment ESC
      : '\\' (["\\/bfnrt] | UNICODE) ;</pre>
+     * See <a href='https://www.json.org/json-en.html'>JSON Introduction</a>
+     * 
      * TODO using stream as output
+     * 
 	 * @param v
 	 * @param opts use opts.escape_singlquot = true for db writing.
 	 * @return escaped bytes
 	 */
-	private static byte[] escape(Object v, JsonOpt... opts) {
+	public static byte[] escape(Object v, JsonOpt... opts) {
 		if (v == null)
 			return new byte[0];
 		String s = v.toString();
 
 		// Performance optimization using sql(context, stream)
-		
 		if (!isNull(opts) && opts[0].escape4DB)
 			s = s.replace("'", "''");
 
@@ -423,9 +425,9 @@ public class Anson implements IJsonable {
 				 * that.alert(L(\"Quiz saved!\\n\\nQuestions number: {questions}\", {questions}));
 				 */
 
-				.replace("\n", "\\\n")
-				.replace("\t", "\\\t")
-				.replace("\"", "\\\"")
+				.replace("\n", "\\n")  // v 0.9.99  '' -> '\', 'n'
+				.replace("\t", "\\t")  // v 0.9.99  '' -> '\', 't'
+				.replace("\"", "\\\"") // v 0.9.99  '' -> '\', '"'
 				.getBytes(StandardCharsets.UTF_8);
 	}
 	
