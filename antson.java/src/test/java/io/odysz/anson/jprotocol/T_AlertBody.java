@@ -2,7 +2,7 @@ package io.odysz.anson.jprotocol;
 
 import io.odysz.anson.AnsonField;
 import io.odysz.semantic.jprotocol.test.T_AnsonBody;
-import io.odysz.semantic.jprotocol.test.T_AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
 
 /**<p>A mimic of AnSessionReq for testing error prone issue's alarm</p>
  * @author odys-z@github.com
@@ -30,7 +30,7 @@ public class T_AlertBody extends T_AnsonBody {
 	 * @return login request message
 	 */
 	public static T_Alert4User<T_AlertBody> formatMsg(String uid, String tk64, String iv64) {
-		T_Alert4User<T_AlertBody> jmsg = new T_Alert4User<T_AlertBody>(Port.heartbeat);
+		T_Alert4User<T_AlertBody> jmsg = new T_Alert4User<T_AlertBody>(T_Port.heartbeat);
 
 		T_AlertBody itm = new T_AlertBody(jmsg);
 		itm.a("login");

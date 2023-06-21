@@ -23,7 +23,7 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 	 * NOTE: java code shouldn't use switch-case block on enum. That cause problem with generated class.
 	 * @author odys-z@github.com
 	 */
-	public enum Port implements T_IPort {  heartbeat("ping.serv"), session("login-serv11"),
+	public enum T_Port implements T_IPort {  heartbeat("ping.serv"), session("login-serv11"),
 						query("r.serv11"), update("u.serv11"),
 						insert("c.serv11"), delete("d.serv11"),
 						echo("echo.serv11"),
@@ -43,7 +43,7 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 		
 		private String url;
 		@Override public String url() { return url; }
-		Port(String url) { this.url = url; }
+		T_Port(String url) { this.url = url; }
 		@Override public T_IPort valof(String pname) { return valueOf(pname); }
 
 		@Override
@@ -77,10 +77,10 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 	static T_IPort defaultPortImpl;
 
 	/**Set the default IPort implelemtation, which is used for parsing port name (string)
-	 * to IPort instance, like {@link T_AnsonMsg.Port}.<br>
-	 * Because {{@link Port} only defined limited ports, user must initialize JMessage with {@link #understandPorts(T_IPort)}.<br>
+	 * to IPort instance, like {@link T_AnsonMsg.T_Port}.<br>
+	 * Because {{@link T_Port} only defined limited ports, user must initialize JMessage with {@link #understandPorts(T_IPort)}.<br>
 	 * An example of how to use this is shown in jserv-sample/io.odysz.jsample.SysMenu.<br>
-	 * Also check how to implement IPort extending {@link Port}, see example of jserv-sample/io.odysz.jsample.protocol.Samport.
+	 * Also check how to implement IPort extending {@link T_Port}, see example of jserv-sample/io.odysz.jsample.protocol.Samport.
 	 * @param p extended Port
 	 */
 	static public void understandPorts(T_IPort p) {
@@ -92,7 +92,7 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 	int seq;
 	public int seq() { return seq; }
 
-	Port port;
+	T_Port port;
 	public T_IPort port() { return port; }
 
 	MsgCode code;
@@ -101,9 +101,9 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 	public void port(String pport) throws AnsonException {
 		/// translate from string to enum
 		if (defaultPortImpl == null)
-			port = (Port) Port.echo.valof(pport);
+			port = (T_Port) T_Port.echo.valof(pport);
 		else
-			port = (Port) defaultPortImpl.valof(pport);
+			port = (T_Port) defaultPortImpl.valof(pport);
 
 		if (port == null)
 			throw new AnsonException(-1, "Port can not be null. Not initialized? To use JMassage understand ports, call understandPorts(IPort) first.");
@@ -113,7 +113,7 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 		seq = (int) (Math.random() * 1000);
 	}
 
-	public T_AnsonMsg(Port port) {
+	public T_AnsonMsg(T_Port port) {
 		this.port = port;
 		seq = (int) (Math.random() * 1000);
 	}
@@ -122,7 +122,7 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 	 * @param p 
 	 * @param code
 	 */
-	public T_AnsonMsg(Port p, MsgCode code) {
+	public T_AnsonMsg(T_Port p, MsgCode code) {
 		this.port = p;
 		this.code = code;
 	}
@@ -167,12 +167,12 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 		return this;
 	}
 
-	public static T_AnsonMsg<T_AnsonResp> ok(Port p, String txt) {
+	public static T_AnsonMsg<T_AnsonResp> ok(T_Port p, String txt) {
 		T_AnsonResp bd = new T_AnsonResp(txt);
 		return new T_AnsonMsg<T_AnsonResp>(p, MsgCode.ok).body(bd);
 	}
 
-	public static T_AnsonMsg<T_AnsonResp> ok(Port p, T_AnsonResp resp) {
+	public static T_AnsonMsg<T_AnsonResp> ok(T_Port p, T_AnsonResp resp) {
 		return new T_AnsonMsg<T_AnsonResp>(p, MsgCode.ok).body(resp);
 	}
 }

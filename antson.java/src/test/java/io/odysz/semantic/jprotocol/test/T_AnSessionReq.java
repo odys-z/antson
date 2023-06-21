@@ -3,7 +3,7 @@ package io.odysz.semantic.jprotocol.test;
 import java.util.HashMap;
 
 import io.odysz.common.LangExt;
-import io.odysz.semantic.jprotocol.test.T_AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
 
 /**
  * Test Only
@@ -50,7 +50,7 @@ public class T_AnSessionReq extends T_AnsonBody {
 	 * @return login request message
 	 */
 	public static T_AnsonMsg<T_AnSessionReq> formatLogin(String uid, String tk64, String iv64) {
-		T_AnsonMsg<T_AnSessionReq> jmsg = new T_AnsonMsg<T_AnSessionReq>(Port.session);
+		T_AnsonMsg<T_AnSessionReq> jmsg = new T_AnsonMsg<T_AnSessionReq>(T_Port.session);
 
 		T_AnSessionReq itm = new T_AnSessionReq(jmsg);
 		itm.uid = uid;

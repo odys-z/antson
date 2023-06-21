@@ -9,7 +9,7 @@ import io.odysz.semantic.jprotocol.test.T_AnsonBody;
 import io.odysz.semantic.jprotocol.test.T_AnsonHeader;
 import io.odysz.semantic.jprotocol.test.T_IPort;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg.MsgCode;
-import io.odysz.semantic.jprotocol.test.T_AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
 
 /**<p>A mimic of AnsonMsg for testing error prone issue alarm</p>
  * 1. declare field of IJsonable instead of enum when the type is implemented with enum,
@@ -32,7 +32,7 @@ public class T_Alert4User <T extends T_AnsonBody> extends Anson {
 
 	public void port(String pport) throws AnsonException {
 		if (defaultPortImpl == null)
-			port = Port.echo.valof(pport);
+			port = T_Port.echo.valof(pport);
 
 		port = defaultPortImpl.valof(pport);
 
@@ -44,7 +44,7 @@ public class T_Alert4User <T extends T_AnsonBody> extends Anson {
 		seq = (int) (Math.random() * 1000);
 	}
 
-	public T_Alert4User(Port port) {
+	public T_Alert4User(T_Port port) {
 		this.port = port;
 		seq = (int) (Math.random() * 1000);
 	}
@@ -53,7 +53,7 @@ public class T_Alert4User <T extends T_AnsonBody> extends Anson {
 	 * @param p 
 	 * @param code
 	 */
-	public T_Alert4User(Port p, MsgCode code) {
+	public T_Alert4User(T_Port p, MsgCode code) {
 		this.port = p;
 		this.code = code;
 	}

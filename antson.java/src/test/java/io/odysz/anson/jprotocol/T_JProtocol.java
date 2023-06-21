@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 
 import io.odysz.anson.Anson;
 import io.odysz.anson.AnsonResultset;
+import io.odysz.anson.IJsonable;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.common.Utils;
 import io.odysz.semantic.ext.test.T_AnDatasetResp;
 import io.odysz.semantic.jprotocol.test.T_AnSessionReq;
 import io.odysz.semantic.jprotocol.test.T_AnSessionResp;
@@ -25,7 +27,7 @@ import io.odysz.semantic.jprotocol.test.T_SessionInf;
 import io.odysz.semantic.jprotocol.test.T_TransException;
 import io.odysz.semantic.jprotocol.test.T_UserReq;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg.MsgCode;
-import io.odysz.semantic.jprotocol.test.T_AnsonMsg.Port;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
 
 class T_JProtocol {
 	static final String iv64 = "iv: I'm base64";
@@ -74,7 +76,7 @@ class T_JProtocol {
 	void test_SessionResp() throws AnsonException, IOException {
 		T_SessionInf ssinf = new T_SessionInf(ssid, uid);
 		T_AnSessionResp bd = new T_AnSessionResp(null, ssinf);
-		T_AnsonMsg<T_AnSessionResp> resp = ok(Port.session, bd);
+		T_AnsonMsg<T_AnSessionResp> resp = ok(T_Port.session, bd);
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		resp.toBlock(bos);
@@ -111,7 +113,7 @@ class T_JProtocol {
 		((T_SemanticObject) props.get("resulved")).add("vec", "000x");
 		props.put("res", new int[] { 1, 20 });
 
-		T_AnsonMsg<T_AnsonResp> resp = new T_AnsonMsg<T_AnsonResp>(Port.insert, MsgCode.ok)
+		T_AnsonMsg<T_AnsonResp> resp = new T_AnsonMsg<T_AnsonResp>(T_Port.insert, MsgCode.ok)
 				.body(new T_AnsonResp().data(props));
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
@@ -137,7 +139,7 @@ class T_JProtocol {
 	void test_datasetResp() throws AnsonException, IOException, SQLException {
 		AnsonResultset rs = new AnsonResultset(2, 2);
 		T_AnDatasetResp dr = (T_AnDatasetResp) new T_AnDatasetResp().rs(rs);
-		T_AnsonMsg<T_AnDatasetResp> resp = ok(Port.dataset, dr);
+		T_AnsonMsg<T_AnDatasetResp> resp = ok(T_Port.dataset, dr);
 
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		resp.toBlock(bos);
@@ -175,7 +177,7 @@ class T_JProtocol {
 		T_AnsonMsg<T_AnSessionReq> msg = (T_AnsonMsg<T_AnSessionReq>) Anson.fromJson(req);
 
 		assertEquals(null, msg.code());
-		assertEquals(Port.session, msg.port());
+		assertEquals(T_Port.session, msg.port());
 		assertEquals("login", msg.body(0).a());
 		assertEquals("admin", msg.body(0).uid);
 		assertEquals(24, msg.body(0).iv().length());
@@ -189,7 +191,7 @@ class T_JProtocol {
 				+ "\"a\":\"login\"}]}";
 		msg = (T_AnsonMsg<T_AnSessionReq>) Anson.fromJson(req);
 		assertEquals(null, msg.code());
-		assertEquals(Port.session, msg.port());
+		assertEquals(T_Port.session, msg.port());
 		assertEquals("login", msg.body(0).a());
 		assertEquals("admin", msg.body(0).uid);
 		assertEquals(24, msg.body(0).iv().length());
@@ -210,13 +212,28 @@ class T_JProtocol {
 		@SuppressWarnings("unchecked")
 		T_AnsonMsg<T_AnSessionReq> msg = (T_AnsonMsg<T_AnSessionReq>) T_AnsonMsg.fromJson(json);
 		assertEquals(null, msg.code());
-		assertEquals(Port.session, msg.port());
+		assertEquals(T_Port.session, msg.port());
 		assertEquals("0014eKTs", msg.header().ssid());
 		assertEquals("admin", msg.header().logid());
 		assertTrue(msg.body(0) instanceof T_AnSessionReq);
 		assertEquals("logout", msg.body(0).a());
 		assertEquals(msg, msg.body(0).parent);
 	}
+	
+	@Test
+	void test_echo() throws AnsonException, IOException {
+		T_EchoReq req = new T_EchoReq(null);
+		T_AnsonMsg<T_AnsonResp> msg = T_AnsonMsg.ok(T_Port.echo, req.toString());
+		/*
+		 {"type": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "code": "ok", "opts": null, "port": "echo", "header": null, "body": [{"type": "io.odysz.semantic.jprotocol.test.T_AnsonResp", "rs": null, "parent": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "a": null, "m": "{\"type\": \"io.odysz.anson.jprotocol.T_EchoReq\", \"parent\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", \"a\": null, \"uri\": null}\
+", "map": null, "uri": null}
+], "version": "1.0", "seq": 0}
+		 */
+		Utils.logi(msg.toBlock());
+		
+		T_AnsonMsg e = (T_AnsonMsg) Anson.fromJson(msg.toBlock());
+	}
+	
 	
     String userReqJsonReduced =  
 		"{ \"type\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", \"version\": \"0.9\", \"seq\": 238, \"port\": \"quiz\", \"opts\": {}," + 
@@ -239,7 +256,7 @@ class T_JProtocol {
           "]" + 
         "}";	
  
-    String userReqJson =  
+    String userReqJson =
 		"{ \"type\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", \"version\": \"0.9\", \"seq\": 238, \"port\": \"quiz\", \"opts\": {}," + 
           "\"header\": { \"type\": \"io.odysz.semantic.jprotocol.test.T_AnsonHeader\", \"ssid\": \"001ETPAo\", \"uid\": \"becky\" }," + 
           "\"body\": [" + 
@@ -260,7 +277,8 @@ class T_JProtocol {
           "]" + 
         "}";	
     
-    String jsonPollsUsers = "{ \"type\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\"," +
+    String jsonPollsUsers =
+    	  "{ \"type\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\"," +
     	    "\"version\": \"0.9\", \"seq\": 14, \"port\": \"quiz\", \"opts\": {}," +
     	    "\"header\": { \"type\": \"io.odysz.semantic.jprotocol.test.T_AnsonHeader\", \"ssid\": \"001AzjA9\", \"uid\": \"becky\" }," +
     	    "\"body\": [ {" +
@@ -269,10 +287,9 @@ class T_JProtocol {
     	            "\"parent\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\"," +
     	            "\"data\": { \"props\": {} }" +
     	        "}" +
-    	    "]" +
-    	"}";
+    	    "] }";
 
-    /**TODO TODO TODO TODO TODO the c# version could also need this test case.
+    /**
      * @throws AnsonException
      */
 	@SuppressWarnings("unchecked")
@@ -311,7 +328,7 @@ class T_JProtocol {
 		assertEquals("学习压力", ((String[][]) q1)[0][1].toString());
 	}
 
-	static <U extends T_AnsonResp> T_AnsonMsg<U> ok(Port p, U body) {
+	static <U extends T_AnsonResp> T_AnsonMsg<U> ok(T_Port p, U body) {
 		T_AnsonMsg<U> msg = new T_AnsonMsg<U>(p, MsgCode.ok);
 		msg.body(body);
 		return msg;
