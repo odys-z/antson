@@ -570,6 +570,24 @@ public class LangExt {
 		return isNull(s) ? 0 : s.size();
 	}
 
+	public static int len(String s) {
+		return isNull(s) ? 0 : s.length();
+	}
+
+	public static int len(char[] ch) {
+		return isNull(ch) ? 0 : ch.length;
+	}
+	
+	public static int indexOf(char[] arr, char e) {
+		int i = 0;
+		while (i < len(arr)) {
+			if (arr[i] == e)
+				return i;
+			i++;
+		}
+		return -1;
+	}
+
 	/**
 	 * @since 1.5.0
 	 * @param c
