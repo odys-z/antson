@@ -27,4 +27,14 @@ public class CheapMath {
 		}  
 		return a;  
 	}
+	
+	/**
+	 * 
+	 * @param v
+	 * @param size
+	 * @return 1 + (int)(v - 1) / size;
+	 */
+	public static int blocks(int v, int size) {
+		return v <= 0 ? 0 : 1 + (int)(v - 1) / size;
+	}
 }

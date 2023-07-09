@@ -19,5 +19,18 @@ class CheapMathTest {
 		assertEquals(9, uv[0]);
 		assertEquals(16, uv[1]);
 	}
+	
+	@Test
+	void testBlocks() {
+		assertEquals(0, blocks(0, 1));
+		assertEquals(1, blocks(1, 1));
+		assertEquals(1, blocks(1, 2));
+		assertEquals(1, blocks(2, 2));
+		assertEquals(2, blocks(3, 2));
+		assertEquals(2, blocks(4, 2));
+		assertEquals(3, blocks(5, 2));
+
+		assertEquals(0, blocks(0, 10));
+	}
 
 }
