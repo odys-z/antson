@@ -578,6 +578,13 @@ public class LangExt {
 		return isNull(ch) ? 0 : ch.length;
 	}
 	
+	/**
+	 * @since 0.9.33
+	 * 
+	 * @param arr
+	 * @param e
+	 * @return
+	 */
 	public static int indexOf(char[] arr, char e) {
 		int i = 0;
 		while (i < len(arr)) {
@@ -589,7 +596,7 @@ public class LangExt {
 	}
 
 	/**
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param c
 	 * @return
 	 */
@@ -598,7 +605,7 @@ public class LangExt {
 	}
 	
 	/**
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param v
 	 * @return
 	 */
@@ -607,7 +614,7 @@ public class LangExt {
 	}
 	
 	/**
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param v
 	 * @return
 	 */
@@ -616,7 +623,7 @@ public class LangExt {
 	}
 
 	/**
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param v
 	 * @return
 	 */
@@ -637,7 +644,7 @@ public class LangExt {
 	/**
 	 * Join strings.
 	 * 
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param sep, null as ","
 	 * @param vi "a", null, "b", ...
 	 * @return "a,b,..."
@@ -654,7 +661,7 @@ public class LangExt {
 	 * <p>It's the user's responsiblity to unescape the result value or distinguish what's messed up.</p>
 	 * @see #joinEsc(String, String, String...)
 	 * 
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param sep, null as ",", e.g. "\n"
 	 * @param esc, replacement, e.g. "\\n"
 	 * @param vi "a\nx", null, "bb", ...
@@ -674,7 +681,7 @@ public class LangExt {
 	 * the returned string is the same as Funcall.compound(), and can
 	 * be restored using StringEscapeUtils.unescapeJava(returned).
 	 * 
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param sep
 	 * @param esc
 	 * @param vi
@@ -693,7 +700,7 @@ public class LangExt {
 
 	/**
 	 * Concatenate strings into a "\n" separated string. 
-	 * @since 1.5.0
+	 * @since 0.9.33
 	 * @param vals
 	 * @return
 	 */
