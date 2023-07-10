@@ -1,9 +1,12 @@
 package io.odysz.common;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -218,6 +221,11 @@ public class Utils {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public static FileInputStream input(Class<?> clzz, String filename) throws URISyntaxException, FileNotFoundException {
+		Path pth = Paths.get(clzz.getResource(filename).toURI());
+		return new FileInputStream(pth.toAbsolutePath().toString());
 	}
 
 	/**
