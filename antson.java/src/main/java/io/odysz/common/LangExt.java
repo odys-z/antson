@@ -234,12 +234,14 @@ public class LangExt {
     	}
     }
 
-	public static boolean eq(String v, String u) {
-		return v == null && u == null || (u != null && v != null && v.equals(u));
+	public static boolean eq(String v, String u, boolean ... ignoreCase) {
+		return v == null && u == null || (u != null && v != null &&
+				(is(ignoreCase) ? v.equalsIgnoreCase(u) : v.equals(u)));
 	}
 
-	public static boolean eq(String[] v, String u) {
-		return isNull(v) && u == null || (u != null && v != null && len(v) > 0 && v[0].equals(u));
+	public static boolean eq(String[] v, String u, boolean ... ignoreCase ) {
+		return isNull(v) && u == null || (u != null && v != null && len(v) > 0 &&
+				(is(ignoreCase) ? v[0].equalsIgnoreCase(u) : v[0].equals(u)));
 	}
 
 	public static String prefixIfnull(String prefix, String dest) {

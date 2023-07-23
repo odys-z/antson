@@ -76,6 +76,7 @@ class LangExtTest {
 		assertFalse(eq("a", null));
 		assertFalse(eq((String)null, "b"));
 		assertTrue(eq((String)null, null));
+		assertTrue(eq("A", "a", true));
 		assertTrue(eqs(null, null));
 		assertTrue(eqs());
 		assertTrue(eqs((String[])null));
