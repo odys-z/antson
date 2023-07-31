@@ -65,7 +65,8 @@ public class LangExt {
 	assertFalse(startsOneOf("v1234w", new String[] { "1v", "v1234wx" }));</pre>
 	 * @param s
 	 * @param prefixes
-	 * @return
+	 * @return true if exist a prefix, other wise false
+	 * @since 0.9.39
 	 */
 	public static boolean startsOneOf(String s, String... prefixes) {
 		for (String prefix : prefixes)
@@ -110,14 +111,19 @@ public class LangExt {
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-	public static String toString(Map<String, ?> map) {
+	/**
+	 * @param map
+	 * @return map in string
+	 * @since 0.9.39
+	 */
+	public static String str(Map<String, ?> map) {
 		if (map == null) return null;
 		else return map.entrySet().stream()
 				.map(e -> "{" + e.getKey() + ": " + e.getValue() + "}")
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-	public static String toString(List<Object[]> lst) {
+	public static String str(List<Object[]> lst) {
 		if (lst == null) return null;
 		else return lst.stream()
 				.map(e -> toString(e))
