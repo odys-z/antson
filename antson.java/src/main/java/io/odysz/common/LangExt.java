@@ -193,7 +193,7 @@ public class LangExt {
     
     /**
      * @param args
-     * @return args == null || args.length == 0 || args.length == 1 && args[0] == null;
+     * @return args == null || args.length == 0 || args.length == 1 &amp;&amp; args[0] == null;
      */
     public static boolean isNull(final Object[] args) {
     	return args == null || args.length == 0
@@ -219,7 +219,7 @@ public class LangExt {
     
     /**
      * @param v
-     * @return v != null && v[0] == v[1] && v[2] == v[3] && ...
+     * @return v != null &amp;&amp; v[0] == v[1] &amp;&amp; v[2] == v[3] &amp;&amp; ...
      */
     public static boolean eqs(String ... v) {
     	if (isNull(v))
