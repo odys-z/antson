@@ -59,6 +59,22 @@ public class LangExt {
 				.toArray();
 	}
 
+	/**
+	 * <pre>
+	assertTrue(startsOneOf("v1234w", new String[] { "w1234", "v1234" }));
+	assertFalse(startsOneOf("v1234w", new String[] { "1v", "v1234wx" }));</pre>
+	 * @param s
+	 * @param prefixes
+	 * @return true if exist a prefix, other wise false
+	 * @since 0.9.39
+	 */
+	public static boolean startsOneOf(String s, String... prefixes) {
+		for (String prefix : prefixes)
+			if (s.startsWith(prefix))
+				return true;
+		return false;
+	}
+	
 	/**Get a string array that composed into string by {@link #toString(Object[])}.
 	 * @param ss
 	 * @return [e0, e1, ...]
@@ -86,22 +102,28 @@ public class LangExt {
 	/**Convert 2D array to string: "[{ss[0][1]: ss[0][1]}, {ss[1][0]: ss[1][1]}, ...]"
 	 * @param ss
 	 * @return converted String
-	 */
-	public static String toString(String[][] ss) {
+	 * @since 0.9.38
+	*/
+	public static String str(String[][] ss) {
 		return Arrays.stream(ss)
 				.filter(s -> s != null)
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-	public static String toString(Map<String, ?> map) {
+	/**
+	 * @param map
+	 * @return map in string
+	 * @since 0.9.39
+	 */
+	public static String str(Map<String, ?> map) {
 		if (map == null) return null;
 		else return map.entrySet().stream()
 				.map(e -> "{" + e.getKey() + ": " + e.getValue() + "}")
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-	public static String toString(List<Object[]> lst) {
+	public static String str(List<Object[]> lst) {
 		if (lst == null) return null;
 		else return lst.stream()
 				.map(e -> toString(e))
@@ -213,7 +235,7 @@ public class LangExt {
     	return args == null;
     }
 
-	public static Object ifnull(Object op, Object deflt) {
+	public static <T> T ifnull(T op, T deflt) {
 		return isblank(op) ? deflt : op;
 	}
     

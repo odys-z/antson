@@ -1,4 +1,6 @@
 
+[![Ukraine](https://cdn3.emoji.gg/emojis/6101-ukraine.gif)](https://emoji.gg/emoji/6101-ukraine)
+
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/)
 [![NuGet version](https://badge.fury.io/nu/Antson.CSharp.svg)](https://badge.fury.io/nu/Antson.CSharp)
 
@@ -37,12 +39,12 @@ Antson will be used as the transport protocol layer for semantic-\*. see his
 [home page](https://odys-z.github.io) for details.
 
 Currently there are only two different language runtime lib, c# & java. There is
-a typescript client, [@anclient/semantier](https://github.com/odys-z/Anclient/tree/master/js/semantier), 
+a typescript client, [@anclient/semantier](https://github.com/odys-z/Anclient/tree/master/js/semantier),
 implementing the protocol layer between
-json data service, usually by java, and the the js front end. Although it's plausible, 
-users are not recommended to use Antson from scratch for parsing the raw json data by 
-themselves. But if you are interested in other usages, the test cases located in 
-antson.java/src/test subfolder provided a bunch of examples for (de)serializing json 
+json data service, usually by java, and the the js front end. Although it's plausible,
+users are not recommended to use Antson from scratch for parsing the raw json data by
+themselves. But if you are interested in other usages, the test cases located in
+antson.java/src/test subfolder provided a bunch of examples for (de)serializing json
 objects to and from java types.
 
 The runtimes are antson.java & antson.csharp sub folders. The c# version come with
@@ -60,8 +62,8 @@ from java or other programming languages like C#, on the fly.
 
 Why? Because js objects has no structure types with support of any compiler. Users
 can not define a "io.app.User" type in js. All js objects are only a HashMap in typed
-languages e.g. Java. Any json data is converted into java.lang.Map in java world 
-traditionally. Although there are a lot of tools helping to do this, a js object is 
+languages e.g. Java. Any json data is converted into java.lang.Map in java world
+traditionally. Although there are a lot of tools helping to do this, a js object is
 data without type which means no type checking and the data is nothing carrying any
 semantic rules. This is every upsetting to java programmers, at least to the author.
 
@@ -71,8 +73,8 @@ the package. Servers needing to know how the requests been parsed, even for find
 the parser - like finding the correct method for a
 [SOAP Envelope](https://en.wikipedia.org/wiki/SOAP#Example_message_(encapsulated_in_HTTP)).
 
-If all envelopes can not be parsed before dispatched, the dispatcher must at 
-least first try to docode "port" name, then let the receivers handle the rest 
+If all envelopes can not be parsed before dispatched, the dispatcher must at
+least first try to docode "port" name, then let the receivers handle the rest
 of the content - because it's not understandable by dispatcher.
 
 One way to do this is use semantics defined by structure, like this:
@@ -97,7 +99,7 @@ shouldn't be suprised with this idea.
 [Gson](https://github.com/google/gson) is a good try to go further. But the method
 is still not enough. The main weakness is it's not smart enough - it doesn't handle
 java fields with type information and (de)serialize back forth. Every Gson translation
-of json data to Java object needing users implementing business handlers, handling 
+of json data to Java object needing users implementing business handlers, handling
 one problem a time.
 
 Antson is trying to go further. Users only need to define their business gramma -
@@ -122,7 +124,7 @@ working as a [Karfka](https://kafka.apache.org/intro) message consummer - might
 try a test in the future.
 
 (Since Apr. 2022, a block chain schema based on java client on Android and Tomcat
-proved (without workbench results) the "chuck" mode can work efficiently. 
+proved (without workbench results) the "chuck" mode can work efficiently.
 See [Anclient example for Android](https://github.com/odys-z/Anclient/tree/master/examples/example.android))
 
 # Anson Envelope
@@ -300,4 +302,3 @@ For how inner class examples, see test case
 If you have any idea, please let the author know.
 
 #### [API documents](https://odys-z.github.io/javadoc/antson/)
-
