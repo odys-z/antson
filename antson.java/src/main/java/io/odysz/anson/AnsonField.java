@@ -41,7 +41,7 @@ public @interface AnsonField {
 	   </pre>
 	 * for ArrayList&lt;Object[]&gt;, use <pre>
 	   {@literal @}AnsonField(valType="java.util.ArrayList;[Ljava.lang.Object;"
-	   ArrayList<ArrayList<Object[]>>
+	   ArrayList&lt;ArrayList&lt;Object[]&gt;&gt;
 	   </pre>
 	 */
 	String valType() default "";
