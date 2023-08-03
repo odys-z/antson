@@ -6,20 +6,20 @@ import io.odysz.anson.Anson;
 
 /**Type for typical {name, values}, where values is an array of String.
  * 
- * @see AnsonNv
+ * @see NV
  * @author odys-z@github.com
  */
-public class AnsonNvs extends Anson {
+public class NVs extends Anson {
 
 	protected String name;
 	protected ArrayList<Object> values;
 
-	public AnsonNvs name(String n) {
+	public NVs name(String n) {
 		name = n;
 		return this;
 	}
 
-	public AnsonNvs value(Object v) {
+	public NVs value(Object v) {
 		if (values == null)
 			values = new ArrayList<Object>();
 		values.add(v);

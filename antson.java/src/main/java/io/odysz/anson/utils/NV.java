@@ -4,17 +4,18 @@ import io.odysz.anson.Anson;
 
 /**Type for typical {name, value}.
  * 
- * @see AnsonNvs
+ * @see NVs
  * @author odys-z@github.com
  *
  */
-public class AnsonNv extends Anson {
+public class NV extends Anson {
 
 	protected String name;
 	protected Object value;
 
-	public void nv(String n, Object v) {
+	public NV nv(String n, Object v) {
 		this.name = n;
 		this.value = v;
+		return this;
 	}
 }
