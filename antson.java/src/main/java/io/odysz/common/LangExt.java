@@ -48,7 +48,7 @@ public class LangExt {
 	/**
 	 * Reverse of {@link #compoundVal(String...).
 	 * 
-	 * @since 1.5.0
+	 * @since 0.9.41
 	 * @param v
 	 * @return deserialized compound values
 	 */
@@ -578,7 +578,7 @@ public class LangExt {
 	}
 	
 	/**
-	 * @since 1.5.0
+	 * @since 0.9.41
 	 * @param s
 	 * @return
 	 */
@@ -656,7 +656,7 @@ public class LangExt {
 	}
 
 	/**
-	 * @since 1.5.0
+	 * @since 0.9.41
 	 * @param s
 	 * @return
 	 */

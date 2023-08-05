@@ -53,7 +53,7 @@ public class Anson implements IJsonable {
 
 	/**
 	 * Serialize into an envelope. 
-	 * @since 1.5.0
+	 * @since 0.9.41
 	 * @param anson
 	 * @param stream
 	 * @param opts
@@ -109,7 +109,7 @@ public class Anson implements IJsonable {
 					if (!f.getType().isPrimitive()) {
 						Class<? extends Object> vclz = v == null ? null : v.getClass();
 
-						writeNonPrimitive(stream, vclz, v, opts);
+						writeNonPrimitive(stream, vclz, v, isNull(opts) ? null : opts[0]);
 					}
 					if (f.getType() == char.class) {
 						char c = f.getChar(anson);
@@ -173,7 +173,7 @@ public class Anson implements IJsonable {
 		stream.write(']');
 	}
 
-	private static void toPrimArrayBlock(OutputStream stream, Object v, JsonOpt... opt) throws IOException {
+	private static void toPrimArrayBlock(OutputStream stream, Object v, JsonOpt opt) throws IOException {
 		if (v == null) {
 			stream.write("null".getBytes(StandardCharsets.UTF_8));
 			return;
@@ -242,10 +242,10 @@ public class Anson implements IJsonable {
 			Object v = map.get(k);
 			if (v != null) {
 				Class<?> elemtype = v.getClass();
-				writeNonPrimitive(stream, elemtype, v);
+				writeNonPrimitive(stream, elemtype, v, opts);
 			}
 			else 
-				writeNonPrimitive(stream, null, v);
+				writeNonPrimitive(stream, null, v, opts);
 		}
 		stream.write('}');
 	}
@@ -302,7 +302,7 @@ public class Anson implements IJsonable {
 	}
 	
 	/**
-	 * @since 1.5.0
+	 * @since 0.9.41
 	 * @param sbuf
 	 * @param anson
 	 * @return JSON string
@@ -343,7 +343,7 @@ public class Anson implements IJsonable {
 	 * @throws IOException
 	 */
 	private static void writeNonPrimitive(OutputStream stream,
-			Class<? extends Object> fdClz, Object v, JsonOpt... opts)
+			Class<? extends Object> fdClz, Object v, JsonOpt opts)
 			throws AnsonException, IOException {
 		if (v == null) {
 			stream.write("null".getBytes(StandardCharsets.UTF_8));
@@ -355,17 +355,17 @@ public class Anson implements IJsonable {
 			((IJsonable)v).toBlock(stream, opts);
 		}
 		else if (List.class.isAssignableFrom(v.getClass()))
-			toListBlock(stream, (AbstractCollection<?>) v, opts == null || opts.length == 0 ? null : opts[0]);
+			toListBlock(stream, (AbstractCollection<?>) v, opts);
 		else if ( Map.class.isAssignableFrom(vclz))
-			toMapBlock(stream, (Map<?, ?>) v, opts == null || opts.length == 0 ? null : opts[0]);
+			toMapBlock(stream, (Map<?, ?>) v, opts);
 		else if (AbstractCollection.class.isAssignableFrom(vclz))
-			toCollectionBlock(stream, (AbstractCollection<?>) v, opts == null || opts.length == 0 ? null : opts[0]);
+			toCollectionBlock(stream, (AbstractCollection<?>) v, opts);
 		else if (fdClz.isArray()) {
 			if (v != null && v.getClass().getComponentType() != null
 				&& v.getClass().getComponentType().isPrimitive() == true)
 				toPrimArrayBlock(stream, v, opts);
 			else
-				toArrayBlock(stream, (Object[]) v, opts != null && opts.length > 0 ? opts[0] : null);
+				toArrayBlock(stream, (Object[]) v, opts);
 		}
 		else if (v instanceof String) {
 			stream.write('\"');
