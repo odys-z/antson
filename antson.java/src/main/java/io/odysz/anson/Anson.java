@@ -233,7 +233,7 @@ public class Anson implements IJsonable {
 
 			if (quote)
 				stream.write('\"');
-			stream.write(k.toString().getBytes(StandardCharsets.UTF_8));
+			stream.write(escape(k.toString(), opts)); //.getBytes(StandardCharsets.UTF_8));
 			if (quote)
 				stream.write(new byte[] {'\"', ':', ' '});
 			else
@@ -389,8 +389,11 @@ public class Anson implements IJsonable {
 	}
 
 	/**
+	 * If opts.escape4DB = true, scape "'" as "''" first, then
+	 * escape according to JSON escape:
 	 * <pre>fragment ESC
      : '\\' (["\\/bfnrt] | UNICODE) ;</pre>
+     * 
      * See <a href='https://www.json.org/json-en.html'>JSON Introduction</a>
      * 
      * TODO using stream as output
@@ -398,6 +401,7 @@ public class Anson implements IJsonable {
 	 * @param v
 	 * @param opts use opts.escape_singlquot = true for db writing.
 	 * @return escaped bytes
+	 * @since 0.9.43
 	 */
 	public static byte[] escape(Object v, JsonOpt... opts) {
 		if (v == null)
@@ -425,20 +429,21 @@ public class Anson implements IJsonable {
 				 * that.alert(L(\"Quiz saved!\\n\\nQuestions number: {questions}\", {questions}));
 				 */
 
-				.replace("\n", "\\n")  // v 0.9.99  '' -> '\', 'n'
-				.replace("\t", "\\t")  // v 0.9.99  '' -> '\', 't'
-				.replace("\"", "\\\"") // v 0.9.99  '' -> '\', '"'
+				.replace("\n", "\\n")  // '?' -> '\', 'n'
+				.replace("\t", "\\t")  // '?' -> '\', 't'
+				.replace("\"", "\\\"") // '?' -> '\', '"'
 				.getBytes(StandardCharsets.UTF_8);
 	}
 	
-	/** NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
-	 *  When client upload json, it's automatically escaped.
-	 *  This makes DB (or server stored data) are mixed with escaped and un-escaped strings.
-	 *  When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
-	 *  The following is experimental to keep server side data be consists with raw data.
+	/**
+	 * NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
+	 * When client upload json, it's automatically escaped.
+	 * This makes DB (or server stored data) are mixed with escaped and un-escaped strings.
+	 * When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
+	 * The following is experimental to keep server side data be consists with raw data.
 	 *  
-	 *  befor change:
-	 *  top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
+	 * befor change:
+	 * top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
 	 * @param v
 	 * @return unescaped string
 	 */
@@ -446,8 +451,16 @@ public class Anson implements IJsonable {
 		return v == null ? null
 			 : v.replace("\\\n", "\n")
 				.replace("\\\t", "\t")
-				.replace("\\\"", "\"");
+				.replace("\\\"", "\"")
+				;
 	}
+
+//	public static String unescapeDB(String v) {
+//		return v == null ? null
+//			 : v.replace("\\n", "\n")
+//				.replace("\\t", "\t")
+//				;
+//	}
 
 	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls, JsonOpt opt)
 			throws IOException, AnsonException {

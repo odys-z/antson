@@ -15,12 +15,13 @@ import java.util.HashMap;
 import io.odysz.common.LangExt;
 import io.odysz.common.Regex;
 
-/**Test structure. Don't use this in application.
+/**
+ * Test structure. Don't use this in application.
  * 
  * @author odys-z@github.com
  *
  */
-public class AnsonResultset extends Anson {
+public class T_AnResultset extends Anson {
 	private static final boolean debug = true;
 
 	private int colCnt = 0;
@@ -60,13 +61,13 @@ public class AnsonResultset extends Anson {
 	private HashMap<Class<?>,String> stringFormats;
 
 	/** for deserializing */
-	public AnsonResultset() { }
+	public T_AnResultset() { }
 
-	public AnsonResultset(ResultSet rs) throws SQLException {
+	public T_AnResultset(ResultSet rs) throws SQLException {
 		ICRconstructor(rs);
 	}
 
-	public AnsonResultset(ResultSet rs, Connection connection, Statement statement) throws SQLException {
+	public T_AnResultset(ResultSet rs, Connection connection, Statement statement) throws SQLException {
 		this.rs = rs;
 		conn = connection;
 		stmt = statement;
@@ -102,7 +103,7 @@ public class AnsonResultset extends Anson {
 		}
 	}
 
-	public AnsonResultset(AnsonResultset icrs) throws SQLException {
+	public T_AnResultset(T_AnResultset icrs) throws SQLException {
 		results = new ArrayList<ArrayList<Object>>();
 		if (icrs == null) return;
 		HashMap<String, Object[]> src_colnames = icrs.getColnames();
@@ -129,7 +130,7 @@ public class AnsonResultset extends Anson {
 	/**Construct an empty set, used for appending rows.
 	 * @param colnames
 	 */
-	public AnsonResultset(HashMap<String, Integer> colnames) {
+	public T_AnResultset(HashMap<String, Integer> colnames) {
 		results = new ArrayList<ArrayList<Object>>();
 		colCnt = colnames.size();
 		this.colnames = new HashMap<String, Object[]>(colCnt);
@@ -144,7 +145,7 @@ public class AnsonResultset extends Anson {
 	 * Cols are deep copied.
 	 * @param colnames
 	 */
-	public AnsonResultset(HashMap<String, Object[]> colnames, boolean toUpperCase) {
+	public T_AnResultset(HashMap<String, Object[]> colnames, boolean toUpperCase) {
 		results = new ArrayList<ArrayList<Object>>();
 		colCnt = colnames.size();
 		this.colnames = new HashMap<String, Object[]>(colCnt);
@@ -159,7 +160,7 @@ public class AnsonResultset extends Anson {
 	 * @param row
 	 * @return this
 	 */
-	public AnsonResultset appendDeeply(ArrayList<Object> row) {
+	public T_AnResultset appendDeeply(ArrayList<Object> row) {
 		ArrayList<Object> newRow = new ArrayList<Object>(row.size());
 		for (int j = 0; j < row.size(); j++) {
 			String v = "";
@@ -173,7 +174,7 @@ public class AnsonResultset extends Anson {
 		return this;
 	}
 	
-	public AnsonResultset append(ArrayList<Object> includingRow) {
+	public T_AnResultset append(ArrayList<Object> includingRow) {
 		results.add(includingRow);
 		rowCnt++;
 		rowIdx = results.size();
@@ -184,7 +185,7 @@ public class AnsonResultset extends Anson {
 	 * @param rows
 	 * @param cols
 	 */
-	public AnsonResultset(int rows, int cols, String... colPrefix) {
+	public T_AnResultset(int rows, int cols, String... colPrefix) {
 		if (rows <= 0 || cols <= 0)
 			return;
 		results = new ArrayList<ArrayList<Object>>(rows);
@@ -206,7 +207,7 @@ public class AnsonResultset extends Anson {
 		}
 	}
 	
-	public AnsonResultset(int rows, String[] colNames, boolean generateData) {
+	public T_AnResultset(int rows, String[] colNames, boolean generateData) {
 		if (rows <= 0 || colNames == null  || colNames.length == 0)
 			return;
 		results = new ArrayList<ArrayList<Object>>(rows);
@@ -230,7 +231,7 @@ public class AnsonResultset extends Anson {
 		}
 	}
 
-	public AnsonResultset(String[] colNames) {
+	public T_AnResultset(String[] colNames) {
 		results = new ArrayList<ArrayList<Object>>(16);
 		colCnt = colNames.length;
 		this.colnames = new HashMap<String, Object[]>(colCnt);
@@ -243,7 +244,7 @@ public class AnsonResultset extends Anson {
 		rowCnt = 0;
 	}
 
-	public AnsonResultset(ArrayList<String> colNames) {
+	public T_AnResultset(ArrayList<String> colNames) {
 		results = new ArrayList<ArrayList<Object>>(16);
 		colCnt = colNames.size();
 		this.colnames = new HashMap<String, Object[]>(colCnt);
@@ -291,11 +292,11 @@ public class AnsonResultset extends Anson {
 		else return true;
 	}
 	
-	public int append(AnsonResultset more) throws SQLException {
+	public int append(T_AnResultset more) throws SQLException {
 		// check cols
 		if (colCnt != more.getColCount()) throw new SQLException("Columns not matched.");
-		results.addAll(((AnsonResultset)more).results);
-		rowCnt += ((AnsonResultset)more).rowCnt;
+		results.addAll(((T_AnResultset)more).results);
+		rowCnt += ((T_AnResultset)more).rowCnt;
 		return rowCnt;
 	}
 	
@@ -304,7 +305,7 @@ public class AnsonResultset extends Anson {
 	 * @param format
 	 * @return this
 	 */
-	public AnsonResultset stringFormat(Class<?> clz, String format) {
+	public T_AnResultset stringFormat(Class<?> clz, String format) {
 		if (stringFormats == null)
 			stringFormats = new HashMap<Class<?>, String>();
 		stringFormats.put(clz, format);
@@ -534,7 +535,7 @@ public class AnsonResultset extends Anson {
 		if (rs != null) rs.first();
 	}
 
-	public AnsonResultset beforeFirst() throws SQLException {
+	public T_AnResultset beforeFirst() throws SQLException {
 		if (getRow() > 0) rowIdx = 0;
 		if (rs != null) rs.beforeFirst();
 		return this;
@@ -547,7 +548,7 @@ public class AnsonResultset extends Anson {
 	 * @return this
 	 * @throws SQLException
 	 */
-	public AnsonResultset before(int idx) throws SQLException {
+	public T_AnResultset before(int idx) throws SQLException {
 		if (rs != null) throw new SQLException("before(int) can't been called when there is an associate java.sql.Resultset.");
 		rowIdx = idx - 1;
 		return this;
@@ -633,7 +634,7 @@ public class AnsonResultset extends Anson {
 	 * @return this
 	 * @throws SQLException 
 	 */
-	public AnsonResultset set(int colIndex, String v) throws SQLException {
+	public T_AnResultset set(int colIndex, String v) throws SQLException {
 		try {
 			if (rowIdx <= 0 || results == null || results.get(rowIdx - 1) == null) return this;
 			//if (results.get(rowIdx - 1).get(colIndex - 1) == null) return false;
@@ -653,7 +654,7 @@ public class AnsonResultset extends Anson {
 	 * @return this
 	 * @throws SQLException 
 	 */
-	public AnsonResultset set (String colName, String v) throws SQLException {
+	public T_AnResultset set (String colName, String v) throws SQLException {
 		return set((Integer)colnames.get(colName.toUpperCase())[0], v);
 	}
 
@@ -753,7 +754,7 @@ public class AnsonResultset extends Anson {
 	 * @return ['row0 field-val', 'row1 field-val', ...]
 	 * @throws SQLException
 	 */
-	public static String collectFields(AnsonResultset rs, String... fields) throws SQLException {
+	public static String collectFields(T_AnResultset rs, String... fields) throws SQLException {
 		String s = "";
 		if (rs != null) {
 			rs.beforeFirst();
@@ -783,7 +784,7 @@ public class AnsonResultset extends Anson {
 		return total < getRowCount() ? getRowCount() : total;
 	}
 
-	public AnsonResultset total(int total) {
+	public T_AnResultset total(int total) {
 		this.total = total;
 		return this;
 	}

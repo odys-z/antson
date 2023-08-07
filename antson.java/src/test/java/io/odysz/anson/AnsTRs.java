@@ -2,9 +2,9 @@ package io.odysz.anson;
 
 public class AnsTRs extends Anson {
 
-	AnsonResultset rs;
+	T_AnResultset rs;
 	
 	public AnsTRs() {
-		rs = new AnsonResultset(3, 4);
+		rs = new T_AnResultset(3, 4);
 	}
 }
