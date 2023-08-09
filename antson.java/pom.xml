@@ -9,6 +9,7 @@
 
   <name>antson</name>
   <url>http://github.com/odys-z/antson</url>
+  <description>Java user type to json (de)serializer</description>
 
   <licenses>
     <license>
@@ -231,5 +232,4 @@
 	 -->
      </plugins>
    </build>
-  <description>Java user type to json (de)serializer</description>
 </project>
