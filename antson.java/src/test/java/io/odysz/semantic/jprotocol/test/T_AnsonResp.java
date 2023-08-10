@@ -3,7 +3,7 @@ package io.odysz.semantic.jprotocol.test;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import io.odysz.anson.AnsonResultset;
+import io.odysz.anson.T_AnResultset;
 
 /**
  * Test Only -
@@ -14,7 +14,7 @@ import io.odysz.anson.AnsonResultset;
 public class T_AnsonResp extends T_AnsonBody {
 
 	protected String m;
-	protected ArrayList<AnsonResultset> rs;
+	protected ArrayList<T_AnResultset> rs;
 	protected HashMap<String, Object> map;
 
 	public T_AnsonResp() {
@@ -37,16 +37,16 @@ public class T_AnsonResp extends T_AnsonBody {
 
 	public String msg() { return m; }
 
-	public T_AnsonBody rs(AnsonResultset rs) {
+	public T_AnsonBody rs(T_AnResultset rs) {
 		if (this.rs == null)
-			this.rs = new ArrayList<AnsonResultset>(1);
+			this.rs = new ArrayList<T_AnResultset>(1);
 		this.rs.add(rs);
 		return this;
 	}
 
-	public ArrayList<AnsonResultset> rs() { return this.rs; }
+	public ArrayList<T_AnResultset> rs() { return this.rs; }
 
-	public AnsonResultset rs(int ix) {
+	public T_AnResultset rs(int ix) {
 		return this.rs == null ? null : this.rs.get(ix);
 	}
 

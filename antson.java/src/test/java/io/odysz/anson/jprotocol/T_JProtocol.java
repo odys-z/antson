@@ -1,6 +1,7 @@
 package io.odysz.anson.jprotocol;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,22 +14,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.odysz.anson.Anson;
-import io.odysz.anson.AnsonResultset;
-import io.odysz.anson.IJsonable;
+import io.odysz.anson.T_AnResultset;
 import io.odysz.anson.x.AnsonException;
-import io.odysz.common.Utils;
 import io.odysz.semantic.ext.test.T_AnDatasetResp;
 import io.odysz.semantic.jprotocol.test.T_AnSessionReq;
 import io.odysz.semantic.jprotocol.test.T_AnSessionResp;
-import io.odysz.semantic.jprotocol.test.T_AnsonBody;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.MsgCode;
+import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
 import io.odysz.semantic.jprotocol.test.T_AnsonResp;
 import io.odysz.semantic.jprotocol.test.T_SemanticObject;
 import io.odysz.semantic.jprotocol.test.T_SessionInf;
 import io.odysz.semantic.jprotocol.test.T_TransException;
 import io.odysz.semantic.jprotocol.test.T_UserReq;
-import io.odysz.semantic.jprotocol.test.T_AnsonMsg.MsgCode;
-import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
 
 class T_JProtocol {
 	static final String iv64 = "iv: I'm base64";
@@ -138,7 +136,7 @@ class T_JProtocol {
 
 	@Test
 	void test_datasetResp() throws AnsonException, IOException, SQLException {
-		AnsonResultset rs = new AnsonResultset(2, 2);
+		T_AnResultset rs = new T_AnResultset(2, 2);
 		T_AnDatasetResp dr = (T_AnDatasetResp) new T_AnDatasetResp().rs(rs);
 		T_AnsonMsg<T_AnDatasetResp> resp = ok(T_Port.dataset, dr);
 

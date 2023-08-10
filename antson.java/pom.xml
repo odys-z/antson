@@ -4,11 +4,12 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.42</version>
+  <version>0.9.45</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
   <url>http://github.com/odys-z/antson</url>
+  <description>Java user type to json (de)serializer</description>
 
   <licenses>
     <license>
@@ -216,12 +217,14 @@
 			  <goals>
 			  <goal>sign</goal>
 			  </goals>
+              <!-- 
 			  <configuration>
 				  <gpgArguments>
-					  <arg>--pinentry-mode</arg>
+					  <arg>- -pinentry-mode</arg>
 					  <arg>loopback</arg>
 			  	  </gpgArguments>
 		  	  </configuration>
+              -->
 			</execution>
 		</executions>
 	  </plugin>
@@ -229,5 +232,4 @@
 	 -->
      </plugins>
    </build>
-  <description>Java user type to json (de)serializer</description>
 </project>
