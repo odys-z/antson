@@ -195,6 +195,10 @@ class LangExtTest {
 				}).collect(Collectors.joining(" ")),
 				str(t.trim(), d));
 		}
+		
+		int seq = 1, total = 7;
+		assertEquals("3 / 0, 6 14.3%", str("%d / %d, %s %.1f%%", new Object[] { 3, 0, 6, (float) seq / total * 100 } ));
+		
 	}
 
 }
