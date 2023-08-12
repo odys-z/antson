@@ -1,10 +1,23 @@
 package io.odysz.common;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static io.odysz.common.LangExt.endWith;
+import static io.odysz.common.LangExt.eq;
+import static io.odysz.common.LangExt.eqs;
+import static io.odysz.common.LangExt.is;
+import static io.odysz.common.LangExt.isNull;
+import static io.odysz.common.LangExt.ix;
+import static io.odysz.common.LangExt.join;
+import static io.odysz.common.LangExt.joinEsc;
+import static io.odysz.common.LangExt.startsOneOf;
+import static io.odysz.common.LangExt.str;
+import static io.odysz.common.LangExt.trim;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-
-import static io.odysz.common.LangExt.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.junit.jupiter.api.Test;
@@ -123,4 +136,69 @@ class LangExtTest {
 		assertTrue(startsOneOf("v1234w", new String[] { "w1234", "v1234" }));
 		assertFalse(startsOneOf("v1234w", new String[] { "1v", "v1234wx" }));
 	}
+	
+	@Test
+	void testFormat() {
+		assertEquals(0,  ix("%d %d %d %d %d %d", "%", 1));
+		assertEquals(3,  ix("%d %d %d %d %d %d", "%", 2));
+		assertEquals(6,  ix("%d %d %d %d %d %d", "%", 3));
+		assertEquals(15, ix("%d %d %d %d %d %d", "%", 6));
+		assertEquals(-1, ix("%d %d %d %d %d %d", "%", 7));
+		assertEquals(-1, ix("%d %d %d %d %d %d", "%", 0));
+		
+		assertEquals("1",
+				str("%d", new Integer[]
+					{1}));
+		assertEquals("1 2",
+				str("%d %d", new Integer[]
+					{1, 2}));
+//		assertEquals("1 2 3",
+//				str("%d %d %d", new Integer[]
+//					{1, 2, 3}));
+//		assertEquals("1 2 3 4",
+//				str("%d %d %d %d", new Integer[]
+//					{1, 2, 3, 4}));
+//		assertEquals("1 2 3 4 5",
+//				str("%d %d %d %d %d", new Integer[]
+//					{1, 2, 3, 4, 5}));
+//		assertEquals("1 2 3 4 5 6",
+//				str("%d %d %d %d %d %d", new Integer[]
+//					{1, 2, 3, 4, 5, 6}));
+//		assertEquals("1 2 3 4 5 6 7",
+//				str("%d %d %d %d %d %d %d", new Integer[]
+//					{1, 2, 3, 4, 5, 6, 7}));
+//		assertEquals("1 2 3 4 5 6 7 8",
+//				str("%d %d %d %d %d %d %d %d", new Integer[]
+//					{1, 2, 3, 4, 5, 6, 7, 8}));
+//		assertEquals("1 2 3 4 5 6 7 8 9",
+//				str("%d %d %d %d %d %d %d %d %d", new Integer[]
+//					{1, 2, 3, 4, 5, 6, 7, 8, 9}));
+//		assertEquals("1 2 3 4 5 6 7 8 9 10",
+//				str("%d %d %d %d %d %d %d %d %d %d", new Integer[]
+//					{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
+//		assertEquals("1 2 3 4 5 6 7 8 9 10 11",
+//				str("%d %d %d %d %d %d %d %d %d %d %d", new Integer[]
+//					{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}));
+		assertEquals("1 2 3 4 5 6 7 8 9 10 11 12",
+				str("%d %d %d %d %d %d %d %d %d %d %d %d", new Integer[]
+					{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}));
+		for (int i = 3; i < 17; i++) {
+			Integer[] d  = new Integer[i];
+			String t = "";
+			for (int k = 0; k < i; k++) {
+				d[k] = k; t += "%d ";
+			}
+
+			assertEquals(
+				Stream.of(d).map(x -> {
+					return String.valueOf(x);
+				}).collect(Collectors.joining(" ")),
+				str(t.trim(), d));
+		}
+		
+		int seq = 1, total = 7;
+		assertEquals("3 / 0, 6 14.3%", str("%d / %d, %s %.1f%%", new Object[] { 3, 0, 6, (float) seq / total * 100 } ));
+		
+	}
+
 }

@@ -656,6 +656,66 @@ public class LangExt {
 	}
 
 	/**
+	 * Equivalent of String.format().
+	 * 
+	 * <p>Tests:</p>
+	 * <pre>
+	 * assertEquals("1", str("%d", new Integer[] {1}));
+	 * ...
+	 * assertEquals("1 2 3 4 5", str("%d %d %d %d %d", new Integer[] {1, 2, 3, 4, 5}));
+	 * </pre>
+	 * @since 0.9.46
+	 * @param template
+	 * @param args
+	 * @return
+	 */
+	public static String str(String template, Object[] args) {
+		int len = len(args);
+		int ix4  = ix(template, "%", 5);
+		return (args == null) ? template
+			 : (len == 1) ? String.format(template, args[0])
+			 : (len == 2) ? String.format(template, args[0], args[1])
+			 : (len == 3) ? String.format(template, args[0], args[1], args[2])
+			 : (len == 4) ? String.format(template, args[0], args[1], args[2], args[3])
+			 : String.format(template.substring(0, ix4), args[0], args[1], args[2], args[3])
+				+ str(template.substring(ix4), Arrays.copyOfRange(args, 4, len))
+			 ;
+	}
+	
+	/**
+	 * Find the i-th repeat of match occurrence in f.
+	 * 
+	 * <p>Test:</p><pre>
+	 * assertEquals(0,  ix("%d %d %d %d %d %d", "%", 1));
+	 * assertEquals(3,  ix("%d %d %d %d %d %d", "%", 2));
+	 * assertEquals(6,  ix("%d %d %d %d %d %d", "%", 3));
+	 * assertEquals(15, ix("%d %d %d %d %d %d", "%", 6));
+	 * assertEquals(-1, ix("%d %d %d %d %d %d", "%", 7));
+	 * assertEquals(-1, ix("%d %d %d %d %d %d", "%", 0));
+	</pre>
+	 * @param f
+	 * @param match
+	 * @param repeat
+	 * @return i-th index
+	 * @since 0.9.46
+	 */
+	static int ix (String f, String match, int repeat) {
+		if (repeat <= 0)
+			return -1;
+		
+		int currentIndex = f.indexOf(match);
+		while (currentIndex >= 0 && repeat > 1) {
+			int x = f.indexOf(match, currentIndex + 1);
+			if (x > currentIndex) {
+				currentIndex = x;
+				repeat--;
+			}
+			else return -1;
+		}
+		return repeat > 1 ? -1 : currentIndex;
+	}
+	
+	/**
 	 * @since 0.9.41
 	 * @param s
 	 * @return
