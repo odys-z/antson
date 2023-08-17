@@ -179,6 +179,12 @@ class LangExtTest {
 //		assertEquals("1 2 3 4 5 6 7 8 9 10 11",
 //				str("%d %d %d %d %d %d %d %d %d %d %d", new Integer[]
 //					{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}));
+
+		assertEquals("%d %d %d %d %d %d %d %d %d %d %d %d",
+				str("%d %d %d %d %d %d %d %d %d %d %d %d", null));
+		assertEquals("%d %d %d %d %d %d %d %d %d %d %d %d",
+				str("%d %d %d %d %d %d %d %d %d %d %d %d", new Integer[0]));
+
 		assertEquals("1 2 3 4 5 6 7 8 9 10 11 12",
 				str("%d %d %d %d %d %d %d %d %d %d %d %d", new Integer[]
 					{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}));

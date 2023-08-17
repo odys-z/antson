@@ -671,6 +671,8 @@ public class LangExt {
 	 */
 	public static String str(String template, Object[] args) {
 		int len = len(args);
+		if (len == 0) return template;
+
 		int ix4  = ix(template, "%", 5);
 		return (args == null) ? template
 			 : (len == 1) ? String.format(template, args[0])
