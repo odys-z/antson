@@ -1,6 +1,7 @@
 package io.odysz.common;
 
 import java.util.AbstractCollection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -265,6 +266,53 @@ public class LangExt {
 		return isNull(v) && u == null || (u != null && v != null && len(v) > 0 &&
 				(is(ignoreCase) ? v[0].equalsIgnoreCase(u) : v[0].equals(u)));
 	}
+
+	public static <T> boolean gt(T a, T b) {
+		return (isblank(a) || isblank(b)) ? false
+				: a instanceof String ? Double.valueOf((String)a) > Double.valueOf((String)b)
+				: a instanceof Integer ? (Integer)a > (Integer)b
+				: a instanceof Float ? (Float)a > (Float)b
+				: a instanceof Double ? (Double)a > (Double)b
+				: a instanceof Long ? (Long)a > (Long)b
+				: a instanceof Short ? (Short)a > (Short)b
+				: ((String)a).compareTo((String) b) > 0;
+	}
+
+	public static <T> boolean lt(T a, T b) {
+		return (isblank(a) || isblank(b)) ? false
+				: a instanceof String ? Double.valueOf((String)a) < Double.valueOf((String)b)
+				: a instanceof Integer ? (Integer)a < (Integer)b
+				: a instanceof Float ? (Float)a < (Float)b
+				: a instanceof Double ? (Double)a < (Double)b
+				: a instanceof Long ? (Long)a < (Long)b
+				: a instanceof Short ? (Short)a < (Short)b
+				: ((String)a).compareTo((String) b) < 0;
+	}
+	
+    public static String units = "BKMGTPEZY";
+
+    public static long filesize(String size) {
+    	if (isblank(size)) return 0;
+    	size = size.toUpperCase();
+
+        int spaceNdx = size.indexOf(" ");    
+        double ret = Double.parseDouble(size.substring(0, spaceNdx));
+        String unitString = size.substring(spaceNdx+1);
+        int unitChar = unitString.charAt(0);
+        int power = units.indexOf(unitChar);
+        boolean isSi = unitString.indexOf('I')!=-1;
+        int factor = 1024;
+        if (isSi)
+            factor = 1000;
+
+        return new Double(ret * Math.pow(factor, power)).longValue();
+    }
+    
+    public static Regex regexMysqlCol = new Regex("(\\d+)");
+    public static int imagesize(String measure) {
+		ArrayList<String> typeLen = regexMysqlCol.findGroups(measure);
+		return isNull(typeLen) ? 0 : Integer.valueOf(typeLen.get(0));
+    }
 
 	public static String prefixIfnull(String prefix, String dest) {
 		if (isblank(prefix) || dest.startsWith(prefix))
@@ -561,7 +609,7 @@ public class LangExt {
 	 * 
 	 * @param uri
 	 * @param postfix
-	 * @return
+	 * @return true if matched
 	 */
 	public static boolean endWith(String uri, String ...postfix) {
 		if (!isEmpty(uri)) {
@@ -580,7 +628,7 @@ public class LangExt {
 	/**
 	 * @since 0.9.41
 	 * @param s
-	 * @return
+	 * @return len
 	 */
 	public static int len(Set<?> s) {
 		return isNull(s) ? 0 : s.size();
@@ -607,7 +655,7 @@ public class LangExt {
 	 * 
 	 * @param arr
 	 * @param e
-	 * @return
+	 * @return position
 	 */
 	public static int indexOf(char[] arr, char e) {
 		int i = 0;
@@ -622,7 +670,7 @@ public class LangExt {
 	/**
 	 * @since 0.9.33
 	 * @param c
-	 * @return
+	 * @return string
 	 */
 	public static String str(AbstractCollection<String> c) {
 		return c.stream().collect(Collectors.joining(","));
@@ -631,7 +679,7 @@ public class LangExt {
 	/**
 	 * @since 0.9.33
 	 * @param v
-	 * @return
+	 * @return string
 	 */
 	public static String str(int v) {
 		return String.valueOf(v);
@@ -640,7 +688,7 @@ public class LangExt {
 	/**
 	 * @since 0.9.33
 	 * @param v
-	 * @return
+	 * @return string
 	 */
 	public static String str(int[] v) {
 		return Arrays.stream(v).mapToObj(String::valueOf).collect(Collectors.joining(","));
@@ -649,7 +697,7 @@ public class LangExt {
 	/**
 	 * @since 0.9.33
 	 * @param v
-	 * @return
+	 * @return string
 	 */
 	public static String str(Object[] v) {
 		return Arrays.stream(v).map(o -> o.toString()).collect(Collectors.joining(","));
@@ -667,7 +715,7 @@ public class LangExt {
 	 * @since 0.9.46
 	 * @param template
 	 * @param args
-	 * @return
+	 * @return string
 	 */
 	public static String str(String template, Object[] args) {
 		int len = len(args);
@@ -720,7 +768,7 @@ public class LangExt {
 	/**
 	 * @since 0.9.41
 	 * @param s
-	 * @return
+	 * @return string
 	 */
 	public static String trim(String s) {
 		if (isNull(s)) return null;
@@ -771,7 +819,7 @@ public class LangExt {
 	 * @param sep
 	 * @param esc
 	 * @param vi
-	 * @return
+	 * @return string
 	 */
 	public static String joinEsc(String sep, String esc, String... vi) {
 		final String sap = (sep == null) ? "," : sep;
@@ -788,7 +836,7 @@ public class LangExt {
 	 * Concatenate strings into a "\n" separated string. 
 	 * @since 0.9.33
 	 * @param vals
-	 * @return
+	 * @return string
 	 */
 	public static String compoundVal(String... vals) {
 		return joinEsc("\n", "\\n", vals);

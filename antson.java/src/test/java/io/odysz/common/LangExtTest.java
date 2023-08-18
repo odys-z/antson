@@ -3,6 +3,10 @@ package io.odysz.common;
 import static io.odysz.common.LangExt.endWith;
 import static io.odysz.common.LangExt.eq;
 import static io.odysz.common.LangExt.eqs;
+import static io.odysz.common.LangExt.filesize;
+import static io.odysz.common.LangExt.gt;
+import static io.odysz.common.LangExt.imagesize;
+import static io.odysz.common.LangExt.lt;
 import static io.odysz.common.LangExt.is;
 import static io.odysz.common.LangExt.isNull;
 import static io.odysz.common.LangExt.ix;
@@ -100,7 +104,38 @@ class LangExtTest {
 		assertFalse(eqs("a", "a", "a", "b"));
 		assertTrue(eqs("a", "a", "a", "a"));
 	}
+
+	@Test
+	void testGtLt() {
+		assertFalse(gt("1", null));
+		assertFalse(lt(null, null));
+		assertFalse(lt(null, ""));
+		assertFalse(gt("1", "1"));
+		assertFalse(gt("9", "10"));
+		assertTrue(gt("11", "10"));
+		assertFalse(lt("11", "10"));
+		assertTrue(lt("11", "12"));
+		assertTrue(lt(11, 12));
+		assertTrue(lt(11.0, 12.0));
+		assertTrue(gt(13.0, 12.0));
+	}
 	
+	@Test
+	void testFilesize2Long() {
+		assertEquals((long) (6.2 * 1024), filesize("6.2 KB"));
+		assertEquals((long) (6.2 * 1024), filesize("6.2 kb"));
+		assertEquals((long) (6.2 * 1000), filesize("6.2 ki"));
+		assertEquals((long) (6.2 * 1000), filesize("6.2 Ki"));
+		assertEquals((long) (6.2 * 1024 * 1024), filesize("6.2 MB"));
+		assertEquals((long) (6.2 * 1024 * 1024 * 1024), filesize("6.2 GB"));
+	}
+	
+	@Test
+	void testImagesize2int() {
+		assertEquals(1024, imagesize("1024pixels"));
+		assertEquals(1024, imagesize("1024 em"));
+	}
+
 	@Test
 	void testJoin() {
 		assertEquals("a,b", join(null, new String[] { "a", "b" }));
