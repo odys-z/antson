@@ -6,6 +6,7 @@ import static io.odysz.common.LangExt.eqs;
 import static io.odysz.common.LangExt.filesize;
 import static io.odysz.common.LangExt.gt;
 import static io.odysz.common.LangExt.imagesize;
+import static io.odysz.common.LangExt.isblank;
 import static io.odysz.common.LangExt.lt;
 import static io.odysz.common.LangExt.is;
 import static io.odysz.common.LangExt.isNull;
@@ -50,6 +51,16 @@ class LangExtTest {
 		assertFalse(isNull(new Object[] {null, ""}));
 
 		assertTrue(isNull((List<?>)null));
+	}
+	
+	@Test
+	void testIsblank() {
+		assertTrue(isblank("家", ".", "/"));
+		assertTrue(isblank("H", ".", "/"));
+		assertFalse(isblank("家", "\\.", "/"));
+		assertFalse(isblank("H", "\\.", "/"));
+		assertTrue(isblank(".", "\\.", "/"));
+		assertTrue(isblank("/", "\\.", "/"));
 	}
 
 	/**
