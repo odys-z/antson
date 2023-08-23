@@ -634,6 +634,10 @@ public class LangExt {
 		return isNull(s) ? 0 : s.size();
 	}
 
+	public static int len(Map<?, ?> s) {
+		return isNull(s) ? 0 : s.size();
+	}
+
 	public static int len(Object[] s) {
 		return isNull(s) ? 0 : s.length;
 	}

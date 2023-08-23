@@ -125,7 +125,7 @@ public class TreeIndenode extends Anson {
 	}
 	
 	/**
-	 * Set last child a last-sibling.
+	 * Set last child as the last sibling.
 	 * @return this
 	 */
 	public TreeIndenode tagLast() {
