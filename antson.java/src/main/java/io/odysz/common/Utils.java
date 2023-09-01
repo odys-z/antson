@@ -126,7 +126,19 @@ public class Utils {
 			ex.printStackTrace();
 		}
 	}
-	
+
+	public static void logMap(Map<?, ?> map, String indent) {
+		try {
+			if (map != null)
+				for (Object mk : map.keySet())
+					System.out.println(indent == null ? "" : indent + mk + ",\t" + map.get(mk));
+		} catch (Exception ex) {
+			StackTraceElement[] x = ex.getStackTrace();
+			System.err.println(String.format("logMap(): Can't print. Error: %s. called by %s.%s()",
+					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
+		}
+	}
+
 	public static void logkeys(Map<String, ?> map) {
 		try {
 			if (map != null)
