@@ -305,7 +305,8 @@ public class LangExt {
         if (isSi)
             factor = 1000;
 
-        return new Double(ret * Math.pow(factor, power)).longValue();
+        // return new Double(ret * Math.pow(factor, power)).longValue();
+        return (long) (ret * Math.pow(factor, power));
     }
     
     public static Regex regexMysqlCol = new Regex("(\\d+)");
@@ -669,6 +670,30 @@ public class LangExt {
 			i++;
 		}
 		return -1;
+	}
+	
+	/**
+	 * Get array item, null if not exists.
+	 * @param <T>
+	 * @param arr
+	 * @param x
+	 * @return the element
+	 * @since 0.9.50
+	 */
+	public static <T> T ix(T[] arr, int x) {
+		return (len(arr) > x) ? arr[x] : null;
+	}
+
+	/**
+	 * Get array item, null if not exists.
+	 * @param <T>
+	 * @param arr
+	 * @param x
+	 * @return item
+	 * @since 0.9.50
+	 */
+	public static <T> T ix(ArrayList<T> arr, int x) {
+		return (len(arr) > x) ? arr.get(x) : null;
 	}
 
 	/**
