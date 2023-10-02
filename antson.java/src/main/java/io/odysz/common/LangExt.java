@@ -155,11 +155,26 @@ public class LangExt {
 	}
 
 
-	public static boolean is(boolean[] isAdmin, boolean... deflt) {
-		if (isAdmin == null || isAdmin.length < 1)
+	/**
+	 * <pre>
+	assertFalse(is(null));
+	assertTrue (is(null, true));
+
+	assertFalse(is(new boolean[] {false}));
+	assertFalse(is(new boolean[] {false}, false));
+	assertTrue (is(new boolean[] {true}));
+	assertTrue (is(new boolean[] {}, true));
+	assertTrue (is(new boolean[] {true}, false));
+	 * </pre>
+	 * @param val
+	 * @param deflt
+	 * @return
+	 */
+	public static boolean is(boolean[] val, boolean... deflt) {
+		if (val == null || val.length < 1)
 			return (deflt == null || deflt.length < 1) ? false : is(deflt);
 		else
-			return isAdmin[0];
+			return val[0];
 	}
 
 	/**

@@ -32,13 +32,13 @@ class LangExtTest {
 	@Test
 	void testIs() {
 		assertFalse(is(null));
-		assertTrue(is(null, true));
+		assertTrue (is(null, true));
 
 		assertFalse(is(new boolean[] {false}));
 		assertFalse(is(new boolean[] {false}, false));
-		assertTrue(is(new boolean[] {true}));
-		assertTrue(is(new boolean[] {}, true));
-		assertTrue(is(new boolean[] {true}, false));
+		assertTrue (is(new boolean[] {true}));
+		assertTrue (is(new boolean[] {}, true));
+		assertTrue (is(new boolean[] {true}, false));
 	}
 
 	@Test
