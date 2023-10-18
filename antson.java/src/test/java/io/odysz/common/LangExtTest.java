@@ -1,25 +1,11 @@
 package io.odysz.common;
 
-import static io.odysz.common.LangExt.endWith;
-import static io.odysz.common.LangExt.eq;
-import static io.odysz.common.LangExt.eqs;
-import static io.odysz.common.LangExt.filesize;
-import static io.odysz.common.LangExt.gt;
-import static io.odysz.common.LangExt.imagesize;
-import static io.odysz.common.LangExt.isblank;
-import static io.odysz.common.LangExt.lt;
-import static io.odysz.common.LangExt.is;
-import static io.odysz.common.LangExt.isNull;
-import static io.odysz.common.LangExt.ix;
-import static io.odysz.common.LangExt.join;
-import static io.odysz.common.LangExt.joinEsc;
-import static io.odysz.common.LangExt.startsOneOf;
-import static io.odysz.common.LangExt.str;
-import static io.odysz.common.LangExt.trim;
+import static io.odysz.common.LangExt.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Array;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,6 +27,17 @@ class LangExtTest {
 		assertTrue (is(new boolean[] {true}, false));
 	}
 
+	
+	@Test
+	void testIndexOf() {
+		assertEquals(1, indexOf(new String[] {"a", "b", "c"}, "b"));
+		assertEquals(-1, indexOf(new String[] {}, "b"));
+
+		assertEquals(-1, indexOf(new Integer[] {}, 0));
+		assertEquals(1, indexOf(new Integer[] {1, 0}, 0));
+	}
+
+
 	@Test
 	void testIsNull() {
 		assertTrue(isNull(new Object[] {}));
@@ -51,6 +48,18 @@ class LangExtTest {
 		assertFalse(isNull(new Object[] {null, ""}));
 
 		assertTrue(isNull((List<?>)null));
+		
+
+		assertTrue(isNull((int[])null));
+		assertTrue(isNull(new int[] {}));
+		assertTrue(isNull(new int[0]));
+
+		assertTrue(isNull(new char[] {}));
+		assertTrue(isNull(new float[] {}));
+		assertTrue(isNull(new short[] {}));
+		assertTrue(isNull(new double[] {}));
+		
+		assertTrue(isNull(new String[] {}));
 	}
 	
 	@Test
@@ -250,7 +259,6 @@ class LangExtTest {
 		
 		int seq = 1, total = 7;
 		assertEquals("3 / 0, 6 14.3%", str("%d / %d, %s %.1f%%", new Object[] { 3, 0, 6, (float) seq / total * 100 } ));
-		
 	}
 
 }

@@ -1,5 +1,6 @@
 package io.odysz.common;
 
+import java.lang.reflect.Array;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -247,8 +248,13 @@ public class LangExt {
     	return args == null || args.isEmpty();
     }
 
-    public static boolean isNull(final Object args) {
-    	return args == null;
+    public static boolean isNull(final Object arg) {
+    	if (arg == null) return true;
+    	
+    	if (arg.getClass().isArray()) {
+			return Array.getLength(arg) == 0 || Array.get(arg, 0) == null;
+    	}
+    	else return false;
     }
 
 	public static <T> T ifnull(T op, T deflt) {
@@ -687,6 +693,55 @@ public class LangExt {
 		return -1;
 	}
 	
+    /**
+     * Using for-loop to find the index.
+     * @param arr array
+     * @param target
+     * @return index
+     * @param <T>
+	 * @since 0.9.51
+     */
+    public static <T> int indexOf(T[] arr, T target) {
+        for (int index = 0; index < arr.length; index++) {
+            if (arr[index] == target
+                    || target instanceof String && eq((String)arr[index], (String) target)) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * swap array elemetns 
+     * @param <T>
+     * @param arr
+     * @param a
+     * @param b
+	 * @since 0.9.51
+     */
+    public static <T> void swap(T[] arr, int a, int b) {
+        if (arr != null && 0 <= a && a < arr.length && 0 <= b && b <= arr.length) {
+            T x = arr[b];
+            arr[b] = arr[a];
+            arr[a] = x;
+        }
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param arr
+     * @param element
+     * @param position
+     * @return new arr copy
+	 * @since 0.9.51
+     */
+    public static <T> T[] insertAt(T[] arr, T element, int position) {
+        List<T> list = new ArrayList<>(Arrays.asList(arr));
+        list.add(position, element);
+        return list.toArray(arr);
+    }
+    
 	/**
 	 * Get array item, null if not exists.
 	 * @param <T>
