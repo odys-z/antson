@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.50</version>
+  <version>0.9.51</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
@@ -217,7 +217,7 @@
 			  <goals>
 			  <goal>sign</goal>
 			  </goals>
-              <!-- 
+              <!--
 			  <configuration>
 				  <gpgArguments>
 					  <arg>- -pinentry-mode</arg>
