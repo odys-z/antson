@@ -52,7 +52,7 @@ public class Anson implements IJsonable {
 	public Anson() {}
 
 	/**
-	 * Serialize into an envelope. 
+	 * Serialize an envelope int string. 
 	 * @since 0.9.41
 	 * @param anson
 	 * @param stream
@@ -131,13 +131,14 @@ public class Anson implements IJsonable {
 		return anson;
 	}
 
-	/**Serialize Anson object.
+	/**
+	 * Serialize Anson object.
 	 * 
 	 * <p>Debug Note, 1 Dec. 2021:</p>
 	 * javadoc of byte[] java.lang.String.getBytes(StandardCharsets.UTF_8)():<br>
-	 * Encodes this String into a sequence of bytes using theplatform's default charset,
+	 * Encodes this String into a sequence of bytes using the platform's default charset,
 	 * storing the result into a new byte array.<br>
-	 * So windows change UTF8 to whatever it likes.
+	 * So Windows change UTF8 to whatever it likes.
 	 */
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)

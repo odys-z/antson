@@ -14,12 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.odysz.anson.T_AnTreeNode.SubTree;
-import io.odysz.anson.utils.IndentFlag;
-import io.odysz.anson.utils.TreeIndenode;
 import io.odysz.anson.AnsT4Enum.MsgCode;
 import io.odysz.anson.AnsT4Enum.T4_Port;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
+import io.odysz.semantic.ext.test.T_IndentFlag;
+import io.odysz.semantic.ext.test.T_TreeIndenode;
 
 class AnsonTest {
 
@@ -415,9 +415,9 @@ class AnsonTest {
 	
 	@Test
 	void testSTree2block() throws AnsonException, IOException {
-		TreeIndenode n0  = new TreeIndenode("0");
-		n0 .child(new TreeIndenode("0.1", n0 ));
-		n0 .child(new TreeIndenode("0.2", n0 ).asLastSibling());
+		T_TreeIndenode n0  = new T_TreeIndenode("0");
+		n0 .child(new T_TreeIndenode("0.1", n0 ));
+		n0 .child(new T_TreeIndenode("0.2", n0 ).asLastSibling());
 
 		// Utils.logi(n0.toBlock());
 		n0.toBlock(); // test case for multiple DP visiting
@@ -427,19 +427,19 @@ class AnsonTest {
 		 *  |- 0.1
 		 *  L 0.2
 		 */
-		ArrayList<IndentFlag> ind01 = ((TreeIndenode)n0 .child(0))
+		ArrayList<T_IndentFlag> ind01 = ((T_TreeIndenode)n0 .child(0))
 				.indents();
 		assertEquals(1, len(ind01));
-		assertEquals(IndentFlag.childi, ind01.get(0));
+		assertEquals(T_IndentFlag.childi, ind01.get(0));
 
-		ArrayList<IndentFlag> ind0_2 = ((TreeIndenode)n0 .child(1))
+		ArrayList<T_IndentFlag> ind0_2 = ((T_TreeIndenode)n0 .child(1))
 				.indents();
 		assertEquals(1, len(ind0_2));
-		assertEquals(IndentFlag.childx, ind0_2.get(0));
+		assertEquals(T_IndentFlag.childx, ind0_2.get(0));
 
-		n0  = new TreeIndenode("1");
-		TreeIndenode n11 = new TreeIndenode("1.1", n0 ).asLastSibling();
-		TreeIndenode n111 = new TreeIndenode("1.1.1", n11).asLastSibling();
+		n0  = new T_TreeIndenode("1");
+		T_TreeIndenode n11 = new T_TreeIndenode("1.1", n0 ).asLastSibling();
+		T_TreeIndenode n111 = new T_TreeIndenode("1.1.1", n11).asLastSibling();
 		n0 .child(n11);
 		n11.child(n111);
 		
@@ -450,25 +450,25 @@ class AnsonTest {
 		 *  L  1.1
 		 *    L 1.1.1
 		 * */
-		ArrayList<IndentFlag> ind1_1_1 = n111.indents();
+		ArrayList<T_IndentFlag> ind1_1_1 = n111.indents();
 		assertEquals(2, len(ind1_1_1));
-		assertEquals(IndentFlag.space, ind1_1_1.get(0));
-		assertEquals(IndentFlag.childx, ind1_1_1.get(1));
+		assertEquals(T_IndentFlag.space, ind1_1_1.get(0));
+		assertEquals(T_IndentFlag.childx, ind1_1_1.get(1));
 
-		TreeIndenode n2    = new TreeIndenode("2");
-		TreeIndenode n21   = new TreeIndenode("2.1", n2 );
-		TreeIndenode n211  = new TreeIndenode("2.1.1", n21).asLastSibling();
-		TreeIndenode n2111 = new TreeIndenode("2.1.1.1", n211).asLastSibling();
+		T_TreeIndenode n2    = new T_TreeIndenode("2");
+		T_TreeIndenode n21   = new T_TreeIndenode("2.1", n2 );
+		T_TreeIndenode n211  = new T_TreeIndenode("2.1.1", n21).asLastSibling();
+		T_TreeIndenode n2111 = new T_TreeIndenode("2.1.1.1", n211).asLastSibling();
 
 		n2  .child(n21);
 		n21 .child(n211);
 		n211.child(n2111);
 
-		TreeIndenode n22   = new TreeIndenode("2.2", n2 ).asLastSibling();
+		T_TreeIndenode n22   = new T_TreeIndenode("2.2", n2 ).asLastSibling();
 		n2.child(n22);
 		
-		assertEquals("{\"type\": \"io.odysz.anson.utils.TreeIndenode\", "
-				+ "\"node\": {}, \"parent\": \"io.odysz.anson.utils.TreeIndenode\", "
+		assertEquals("{\"type\": \"io.odysz.semantic.ext.test.T_TreeIndenode\", "
+				+ "\"node\": {}, \"parent\": \"io.odysz.semantic.ext.test.T_TreeIndenode\", "
 				+ "\"indents\": [\"vlink\", \"space\", \"childx\"], "
 				+ "\"lastSibling\": true, \"id\": \"2.1.1.1\", \"parentId\": \"2.1.1\"}\n",
 				n2111.toBlock());
@@ -480,24 +480,24 @@ class AnsonTest {
 		 *  |   L 2.1.1.1 
 		 *  L 2.2
 		 * */
-		ArrayList<IndentFlag> ind21 = n21.indents();
+		ArrayList<T_IndentFlag> ind21 = n21.indents();
 		assertEquals(1, len(ind21));
-		assertEquals(IndentFlag.childi, ind21.get(0));
+		assertEquals(T_IndentFlag.childi, ind21.get(0));
 
-		ArrayList<IndentFlag> ind211 = n211.indents();
+		ArrayList<T_IndentFlag> ind211 = n211.indents();
 		assertEquals(2, len(ind211));
-		assertEquals(IndentFlag.vlink, ind211.get(0));
-		assertEquals(IndentFlag.childx, ind211.get(1));
+		assertEquals(T_IndentFlag.vlink, ind211.get(0));
+		assertEquals(T_IndentFlag.childx, ind211.get(1));
 
-		ArrayList<IndentFlag> ind2111 = n2111.indents();
+		ArrayList<T_IndentFlag> ind2111 = n2111.indents();
 		assertEquals(3, len(ind2111));
-		assertEquals(IndentFlag.vlink, ind2111.get(0));
-		assertEquals(IndentFlag.space, ind2111.get(1));
-		assertEquals(IndentFlag.childx, ind2111.get(2));
+		assertEquals(T_IndentFlag.vlink, ind2111.get(0));
+		assertEquals(T_IndentFlag.space, ind2111.get(1));
+		assertEquals(T_IndentFlag.childx, ind2111.get(2));
 
-		ArrayList<IndentFlag> ind22 = n22.indents();
+		ArrayList<T_IndentFlag> ind22 = n22.indents();
 		assertEquals(1, len(ind22));
-		assertEquals(IndentFlag.childx, ind22.get(0));
+		assertEquals(T_IndentFlag.childx, ind22.get(0));
 	}
 	
 	@Test
