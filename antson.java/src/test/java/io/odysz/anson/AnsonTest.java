@@ -1,8 +1,7 @@
 package io.odysz.anson;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static io.odysz.common.LangExt.len;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,9 +12,9 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.odysz.anson.T_AnTreeNode.SubTree;
 import io.odysz.anson.AnsT4Enum.MsgCode;
 import io.odysz.anson.AnsT4Enum.T4_Port;
+import io.odysz.anson.T_AnTreeNode.SubTree;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
 import io.odysz.semantic.ext.test.T_IndentFlag;
@@ -30,6 +29,27 @@ class AnsonTest {
 	}
 
 	@Test
+	void testEscape() throws AnsonException {
+		String value = "1\t 2\n 3\" 4\\";
+		// 1\\t 2\\n 3\" 4\\
+		// Utils.logi(new String(Anson.escape(value)));
+		assertEquals("1\\t 2\\n 3\\\" 4\\\\", new String(Anson.escape(value)));
+
+		value = "1\\t 2\\n3";
+		// 1	.2
+		// 3"
+		// Utils.logi(Anson.unescape(value));
+		assertEquals("1\t 2\n3", Anson.unescape(value));
+
+		Anson.unescape("1\\t 2\\n 3\\\" 4\\"); // warn in console
+
+		value = "1\\t 2\\n 3\\\" 4\\\\";
+		// 1	 2
+		//  3" 4\
+		assertEquals("1\t 2\n 3\" 4\\", Anson.unescape(value));
+	}
+	
+	@Test
 	void testToJson() throws Exception {
 		AnsT1 anson = new AnsT1();
 		anson.ver = "v0.1";
@@ -40,11 +60,11 @@ class AnsonTest {
  
 		// ESC
 		AnsT2 a2 = new AnsT2();
-		a2.m = new String[] {"e\n0", "e1", "{\"msg\": \"george\"}"};
+		a2.m = new String[] {"e\n0", "e1\r\nvalue", "{\"msg\": \"george\"}"};
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
+		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\n0\", \"e1\\r\\nvalue\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
 
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
@@ -229,21 +249,21 @@ class AnsonTest {
 		assertEquals("v0.1", anson.ver);
 		assertEquals(null, anson.m);
 
-		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\n1\", m: null}");
-		assertEquals("v0\\n.\\n1", anson.ver);
+		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\r\\n1\", m: null}");
+		assertEquals("v0\n.\r\n1", anson.ver);
 		assertEquals(null, anson.m);
 
-		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\", \"e2\"]}");
+		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\\nvalue\", \"e2\"]}");
 		assertEquals(true, anson2.b);
 		assertEquals('c', anson2.c);
-		assertEquals("e1", anson2.m[0]);
+		assertEquals("e1\nvalue", anson2.m[0]);
 		assertEquals("e2", anson2.m[1]);
 
 		anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: ["
 				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)\", "
 				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)\"]}");
-		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[0]);
-		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)", anson2.m[1]);
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\n)", anson2.m[0]);
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[1]);
 	}
 	
 	@Test
@@ -304,12 +324,12 @@ class AnsonTest {
 	@Test
 	void testFromJson_list2d() throws AnsonException {
 		AnsTListPhoto cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [["
-				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\", clientpath: \"raw\\res\\\\my.jpg\" },"
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\", clientpath: \"raw\\\\res\\\\my.jpg\" },"
 				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\", clientpath: \"raw/res/my.jpg\"} ]]}");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(2, cll.ansp.get(0).length);
 		assertEquals("2", cll.ansp.get(0)[1].pid);
-		assertEquals("raw\\res\\\\my.jpg", cll.ansp.get(0)[0].clientpath);
+		assertEquals("raw\\res\\my.jpg", cll.ansp.get(0)[0].clientpath);
 		assertEquals("raw/res/my.jpg", cll.ansp.get(0)[1].clientpath);
 		
 		/* FIXME error report: line 1:47 extraneous input '<EOF>' expecting {',', '}'}
@@ -350,10 +370,6 @@ class AnsonTest {
 		m.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}\n", s);
-	}
-	
-	void testEscape() throws AnsonException {
-		
 	}
 		
 	@Test

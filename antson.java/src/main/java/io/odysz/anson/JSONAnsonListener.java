@@ -450,7 +450,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				} catch (Exception e) { }
 				return rawTxt;
 		}
-		 else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		// v 0.9.44
+		// else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		else return Anson.unescape(str
+				.getText()
+				.replaceAll("(^\\s*\")|(\"\\s*$)", ""));
 	}
 
 	/**
