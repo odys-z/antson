@@ -253,7 +253,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 							+ "E.g. Java field example: @AnsonField(valType=\"io.your.type\")\n"
 							+ "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
 							top.enclosing.getClass(), ctx.getText());;
-				throw new AnsonException(0, "Obj type not found.\n\tproperty / field name: %s,\n\tenclosing type: %s",
+				throw new AnsonException(0, "Obj type not found.\n\tproperty / field name: %s,\n\tenclosing type: %s %s",
 						top.parsingProp, top.enclosing == null ? "null" : top.enclosing.getClass().getName());
 			}
 
@@ -316,7 +316,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// ignore this type specification, keep consist with java type
 			return;
 
-		// envetype = ctx.qualifiedName().getText();
 		TerminalNode str = ctx.qualifiedName().STRING();
 		String txt = ctx.qualifiedName().getText();
 		envetype = getStringVal(str, txt);
@@ -410,17 +409,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    }
 	}
 
-	/**Parse property name, tolerate enclosing quotes presenting or not.
+	/**
+	 * Parse property name, tolerate enclosing quotes presenting or not.
 	 * @param ctx
 	 * @return the prop value in string
 	 */
 	private static String getProp(PairContext ctx) {
 		TerminalNode p = ctx.propname().IDENTIFIER();
-		/*
-		return p == null
-				? ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
-				: p.getText();
-		*/
 
 		String prop = p == null ?
 				ctx.propname().STRING() != null ?
@@ -429,7 +424,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return prop.replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "");
 	}
 
-	/**Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
+	/**
+	 * Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
 	 * Can't handle NUMBER | obj | array.
 	 * @param ctx
 	 * @return value in string
@@ -876,7 +872,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	}
 }
 
-	/**Set primary type values.
+	/**
+	 * Set primary type values.
 	 * <p>byte short int long float double boolean char</p>
 	 * See <a href='https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html'>
 	 * Oracle Java Documentation</a>
