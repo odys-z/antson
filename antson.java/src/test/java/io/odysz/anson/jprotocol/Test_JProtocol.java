@@ -23,7 +23,6 @@ import io.odysz.semantic.jprotocol.test.T_AnSessionResp;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg.MsgCode;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
-import io.odysz.semantic.jprotocol.test.U.T_AnInsertReq;
 import io.odysz.semantic.jprotocol.test.T_AnsonResp;
 import io.odysz.semantic.jprotocol.test.T_SemanticObject;
 import io.odysz.semantic.jprotocol.test.T_SessionInf;
