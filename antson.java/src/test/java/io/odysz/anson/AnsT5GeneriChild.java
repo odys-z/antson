@@ -1,8 +1,5 @@
 package io.odysz.anson;
 
-import io.odysz.anson.Anson;
-import io.odysz.anson.AnsonField;
-
 /**Generic type of child of {@link AnsT3}
  * @author odys-z@github.com
  */

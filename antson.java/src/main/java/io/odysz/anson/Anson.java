@@ -1,5 +1,7 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt.isNull;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,8 +24,16 @@ import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.common.Utils;
 
+/**
+ * Base class for any user's type that can be transmitted over JServ protocol to AnClient.
+ * 
+ * @author odys-z@github.com
+ */
 public class Anson implements IJsonable {
+	public static boolean verbose;
+	
 	/**For debug, print, etc. The string can not been used for json data.
 	 * @see java.lang.Object#toString()
 	 */
@@ -31,7 +41,7 @@ public class Anson implements IJsonable {
 	public String toString() {
 		try {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			toBlock(bos);
+			toBlock(bos, new JsonOpt().shortenOnAnnoteRequired(true));
 			return bos.toString(StandardCharsets.UTF_8.name());
 		} catch (AnsonException | IOException e) {
 			e.printStackTrace();
@@ -41,22 +51,29 @@ public class Anson implements IJsonable {
 
 	public Anson() {}
 
-	@Override
-	public Anson toBlock(OutputStream stream, JsonOpt... opts)
-			throws AnsonException, IOException {
+	/**
+	 * Serialize an envelope int string. 
+	 * @since 0.9.41
+	 * @param anson
+	 * @param stream
+	 * @param opts
+	 * @return anson
+	 * @throws IOException
+	 */
+	public static IJsonable toEnvelope(IJsonable anson, OutputStream stream, JsonOpt... opts) throws IOException {
 		boolean quotK = opts == null || opts.length == 0 || opts[0] == null || opts[0].quotKey();
 		if (quotK) {
-			stream.write("{\"type\": \"".getBytes());
-			stream.write(getClass().getName().getBytes());
+			stream.write("{\"type\": \"".getBytes(StandardCharsets.UTF_8));
+			stream.write(anson.getClass().getName().getBytes(StandardCharsets.UTF_8));
 			stream.write('\"');
 		}
 		else {
-			stream.write("{type: ".getBytes());
-			stream.write(getClass().getName().getBytes());
+			stream.write("{type: ".getBytes(StandardCharsets.UTF_8));
+			stream.write(anson.getClass().getName().getBytes(StandardCharsets.UTF_8));
 		}
 
 		HashMap<String, Field> fmap = new HashMap<String, Field>();
-		fmap = JSONAnsonListener.mergeFields(this.getClass(), fmap);
+		fmap = JSONAnsonListener.mergeFields(anson.getClass(), fmap);
 
 		for (Field f : fmap.values()) {
 			// is this ignored?
@@ -66,38 +83,66 @@ public class Anson implements IJsonable {
 
 			f.setAccessible(true);
 
-			stream.write(", ".getBytes());
+			stream.write(", ".getBytes(StandardCharsets.UTF_8));
 
 			// prop
 			if (quotK)
-				stream.write(("\"" + f.getName() + "\": ").getBytes());
+				stream.write(("\"" + f.getName() + "\": ").getBytes(StandardCharsets.UTF_8));
 			else
-				stream.write((f.getName() + ": ").getBytes());
+				stream.write((f.getName() + ": ").getBytes(StandardCharsets.UTF_8));
 
 			// value
 			if (af != null && af.ref() == AnsonField.enclosing) {
 				stream.write('\"');
-				stream.write(f.getType().getName().getBytes());
+				stream.write(f.getType().getName().getBytes(StandardCharsets.UTF_8));
 				stream.write('\"');
 				continue;
 			}
 
 			try {
-				if (!f.getType().isPrimitive()) {
-					Object v = f.get(this);
-					Class<? extends Object> vclz = v == null ? null : v.getClass();
+				Object v = f.get(anson);
+				AnsonField anno = f.getAnnotation(AnsonField.class);
+				if (v != null && anno != null && anno.shortenString()
+					&& opts != null && opts.length > 0 && opts[0] != null && opts[0].shortenOnAnnotation())
+					stream.write(("\"Asnon field shortened ... \"").getBytes(StandardCharsets.UTF_8));
+				else {
+					if (!f.getType().isPrimitive()) {
+						Class<? extends Object> vclz = v == null ? null : v.getClass();
 
-					writeNonPrimitive(stream, vclz, v, opts);
+						writeNonPrimitive(stream, vclz, v, isNull(opts) ? null : opts[0]);
+					}
+					if (f.getType() == char.class) {
+						char c = f.getChar(anson);
+						stream.write(c == 0 ? '0' : c);
+					}
+					else if (f.getType().isPrimitive())
+						stream.write(String.valueOf(f.get(anson)).getBytes(StandardCharsets.UTF_8));
 				}
-				else if (f.getType().isPrimitive())
-					stream.write(String.valueOf(f.get(this)).getBytes());
 			} catch (IllegalArgumentException | IllegalAccessException e1) {
 				throw new AnsonException(0, e1.getMessage());
 			}
 		}
-		stream.write("}".getBytes());
+		stream.write('}');
+		if (isNull(opts) || !opts[0].escape4DB)
+			stream.write('\n');
 		stream.flush();
-		return this;
+
+		return anson;
+	}
+
+	/**
+	 * Serialize Anson object.
+	 * 
+	 * <p>Debug Note, 1 Dec. 2021:</p>
+	 * javadoc of byte[] java.lang.String.getBytes(StandardCharsets.UTF_8)():<br>
+	 * Encodes this String into a sequence of bytes using the platform's default charset,
+	 * storing the result into a new byte array.<br>
+	 * So Windows change UTF8 to whatever it likes.
+	 */
+	@Override
+	public Anson toBlock(OutputStream stream, JsonOpt... opts)
+			throws AnsonException, IOException {
+		return (Anson) toEnvelope(this, stream, opts);
 	}
 
 	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
@@ -109,10 +154,10 @@ public class Anson implements IJsonable {
 		Class<?> elemtype = v.getClass().getComponentType();
 		for (Object o : v) {
 			if (the1st) the1st = false;
-			else stream.write(", ".getBytes());
+			else stream.write(", ".getBytes(StandardCharsets.UTF_8));
 
 			if (o == null)
-				stream.write("null".getBytes());
+				stream.write("null".getBytes(StandardCharsets.UTF_8));
 			else if (IJsonable.class.isAssignableFrom(elemtype))
 				((IJsonable)o).toBlock(stream, opt);
 			else if (elemtype.isArray())
@@ -123,17 +168,17 @@ public class Anson implements IJsonable {
 
 			else if (o instanceof String) {
 				stream.write('"');
-				stream.write(escape(o.toString()));
+				stream.write(escape(o.toString(), opt));
 				stream.write('"');
 			}
-			else stream.write(o.toString().getBytes());
+			else stream.write(o.toString().getBytes(StandardCharsets.UTF_8));
 		}
 		stream.write(']');
 	}
 
-	private static void toPrimArrayBlock(OutputStream stream, Object v) throws IOException {
+	private static void toPrimArrayBlock(OutputStream stream, Object v, JsonOpt opt) throws IOException {
 		if (v == null) {
-			stream.write("null".getBytes());
+			stream.write("null".getBytes(StandardCharsets.UTF_8));
 			return;
 		}
 
@@ -148,14 +193,14 @@ public class Anson implements IJsonable {
 			else stream.write(new byte[] {',', ' '});
 
 			if (o == null)
-				stream.write("null".getBytes());
+				stream.write("null".getBytes(StandardCharsets.UTF_8));
 
 			else if (o instanceof String) {
 				stream.write('"');
-				stream.write(escape(o.toString()));
+				stream.write(escape(o.toString(), opt));
 				stream.write('"');
 			}
-			else stream.write(o.toString().getBytes());
+			else stream.write(o.toString().getBytes(StandardCharsets.UTF_8));
 		}
 		stream.write(']');
 	}
@@ -169,7 +214,7 @@ public class Anson implements IJsonable {
 		for (Object o : collect) {
 			if (the1st) the1st = false;
 			else
-				stream.write(", ".getBytes());
+				stream.write(", ".getBytes(StandardCharsets.UTF_8));
 
 			Class<?> elemtype = o.getClass();
 			writeNonPrimitive(stream, elemtype, o, opts);
@@ -191,7 +236,7 @@ public class Anson implements IJsonable {
 
 			if (quote)
 				stream.write('\"');
-			stream.write(k.toString().getBytes());
+			stream.write(escape(k.toString(), opts));
 			if (quote)
 				stream.write(new byte[] {'\"', ':', ' '});
 			else
@@ -200,10 +245,10 @@ public class Anson implements IJsonable {
 			Object v = map.get(k);
 			if (v != null) {
 				Class<?> elemtype = v.getClass();
-				writeNonPrimitive(stream, elemtype, v);
+				writeNonPrimitive(stream, elemtype, v, opts);
 			}
 			else 
-				writeNonPrimitive(stream, null, v);
+				writeNonPrimitive(stream, null, v, opts);
 		}
 		stream.write('}');
 	}
@@ -219,7 +264,7 @@ public class Anson implements IJsonable {
 				is1st = false;
 
 			if (e == null) {
-				stream.write("null".getBytes());
+				stream.write("null".getBytes(StandardCharsets.UTF_8));
 				continue;
 			}
 
@@ -227,7 +272,7 @@ public class Anson implements IJsonable {
 				writeNonPrimitive(stream, e.getClass(), e, opt);
 			else // if (f.getType().isPrimitive())
 				// must be primitive?
-				stream.write(String.valueOf(e).getBytes());
+				stream.write(String.valueOf(e).getBytes(StandardCharsets.UTF_8));
 
 		}
 		stream.write(']');
@@ -235,15 +280,27 @@ public class Anson implements IJsonable {
 
 	@Override
 	public IJsonable toJson(StringBuffer sbuf) throws IOException, AnsonException {
+		return toJson(sbuf, this);
+	}
+	
+	/**
+	 * @since 0.9.41
+	 * @param sbuf
+	 * @param anson
+	 * @return JSON string
+	 * @throws AnsonException
+	 * @throws IOException
+	 */
+	public static IJsonable toJson(StringBuffer sbuf, IJsonable anson) throws AnsonException, IOException {
 		sbuf.append("{");
 
-		Field flist[] = this.getClass().getDeclaredFields();
-		Class<?> parentCls = getClass().getDeclaringClass();
+		Field flist[] = anson.getClass().getDeclaredFields();
+		Class<?> parentCls = anson.getClass().getDeclaringClass();
 		for (int i = 0; i < flist.length; i++) {
 			Field f = flist[i];
 			f.setAccessible(true);
 			try {
-				appendPair(sbuf, f.getName(), f.get(this), parentCls, null);
+				appendPair(sbuf, f.getName(), f.get(anson), parentCls, null);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
 				throw new AnsonException(0, e.getMessage());
 			}
@@ -253,10 +310,12 @@ public class Anson implements IJsonable {
 		}
 
 		sbuf.append("}");
-		return this;
+		
+		return anson;
 	}
 
-	/**Write field (element)'s value to stream.<br>
+	/**
+	 * Write field (element)'s value to stream.<br>
 	 * The field type (fdClz) is not always the same as value's type.
 	 * When field is an array, collection, etc., they are different.
 	 * @param stream
@@ -267,10 +326,10 @@ public class Anson implements IJsonable {
 	 * @throws IOException
 	 */
 	private static void writeNonPrimitive(OutputStream stream,
-			Class<? extends Object> fdClz, Object v, JsonOpt... opts)
+			Class<? extends Object> fdClz, Object v, JsonOpt opts)
 			throws AnsonException, IOException {
 		if (v == null) {
-			stream.write("null".getBytes());
+			stream.write("null".getBytes(StandardCharsets.UTF_8));
 			return;
 		}
 
@@ -279,56 +338,152 @@ public class Anson implements IJsonable {
 			((IJsonable)v).toBlock(stream, opts);
 		}
 		else if (List.class.isAssignableFrom(v.getClass()))
-			toListBlock(stream, (AbstractCollection<?>) v, opts == null || opts.length == 0 ? null : opts[0]);
+			toListBlock(stream, (AbstractCollection<?>) v, opts);
 		else if ( Map.class.isAssignableFrom(vclz))
-			toMapBlock(stream, (Map<?, ?>) v, opts == null || opts.length == 0 ? null : opts[0]);
+			toMapBlock(stream, (Map<?, ?>) v, opts);
 		else if (AbstractCollection.class.isAssignableFrom(vclz))
-			toCollectionBlock(stream, (AbstractCollection<?>) v, opts == null || opts.length == 0 ? null : opts[0]);
+			toCollectionBlock(stream, (AbstractCollection<?>) v, opts);
 		else if (fdClz.isArray()) {
 			if (v != null && v.getClass().getComponentType() != null
 				&& v.getClass().getComponentType().isPrimitive() == true)
-				toPrimArrayBlock(stream, v);
+				toPrimArrayBlock(stream, v, opts);
 			else
-				toArrayBlock(stream, (Object[]) v, opts != null && opts.length > 0 ? opts[0] : null);
+				toArrayBlock(stream, (Object[]) v, opts);
 		}
 		else if (v instanceof String) {
 			stream.write('\"');
-			stream.write(escape(v));
+			stream.write(escape(v, opts));
 			stream.write('\"');
 		}
 		else if (fdClz.isEnum())
-			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes());
+			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes(StandardCharsets.UTF_8));
+		else if (v instanceof Number)
+			stream.write(v.toString().getBytes());
 		else
-			try { stream.write(v.toString().getBytes()); }
+		{
+			if (verbose)
+				Utils.warn("Don't know how to serialize object.\n\ttype: %s\n\tvalue: %s", vclz.getName(), v.toString());
+			try { stream.write(v.toString().getBytes(StandardCharsets.UTF_8)); }
 			catch (NotSerializableException e) {
 				throw new AnsonException(0, "A filed of type %s can't been serialized: %s",
 						vclz.getName(), e.getMessage());
 			}
+		}
 	}
 
-	/**<pre>fragment ESC
+	/**
+	 * If opts.escape4DB = true, scape "'" as "''" first, then
+	 * escape according to JSON escape:
+	 * <pre>fragment ESC
      : '\\' (["\\/bfnrt] | UNICODE) ;</pre>
+     * 
+     * See <a href='https://www.json.org/json-en.html'>JSON Introduction</a>
+     * 
+     * TODO using stream as output
+     * 
 	 * @param v
-	 * @return
+	 * @param opts use opts.escape_singlquot = true for db writing.
+	 * @return escaped bytes
+	 * @since 0.9.43
+	 * @since 0.9.55 This method scan through the string an will create a new for return 
 	 */
-	private static byte[] escape(Object v) {
+	public static byte[] escape(Object v, JsonOpt... opts) {
 		if (v == null)
 			return new byte[0];
 		String s = v.toString();
-		// What about Performance ?
+
+		/*
+		 * NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
+		 * v1.3.0 NOTE 19 Aug 2021
+		 * - why escape is disabled?
+		 * What's needed currently:
+		 * A DB varchar field is stored with value "{\"msg\": \"hello\"}",
+		 * which is a field in an Anson object. 
+		
+		 * NOTE 24 Aug 2021
+		 * The problem is DB saved both escaped and non-escaped string, e.g. v =
+		 * that.alert(L(\"Quiz saved!\\n\\nQuestions number: {questions}\", {questions}));
+		 * where '\' and '"' are separate characters.
+		 * because "{\"msg\": \"hello\"}" is generated by code,
+		 * but this is uploaded via json requests:
+		 * that.alert(L(\"Quiz saved!\\n\\nQuestions number: {questions}\", {questions}));
+		 *
 		return s
-//				// .replace("\n", "\\n")
-//				// .replace("\/", "\\/")
-//				// .replace("\t", "\\t")
-//
-//				.replace("\r", "\\r")
-//				.replace("\b", "\\b")
-//				.replace("\\", "\\\\")
-//				.replace("\f", "\\f")
-				.getBytes();
+				.replace("\n", "\\n")  // '?' -> '\', 'n'
+				.replace("\r", "\\r")  // '?' -> '\', 'r'
+				.replace("\t", "\\t")  // '?' -> '\', 't'
+				.replace("\"", "\\\"") // '?' -> '\', '"'
+				.getBytes(StandardCharsets.UTF_8);
+		 */
+		StringBuffer b = new StringBuffer();
+		s.chars()
+		 .forEachOrdered(c -> {
+			if      (c == '\n')
+				b.append("\\n");
+
+			else if (c == '\t')
+				b.append("\\t");
+
+			else if (c == '\r')
+				b.append("\\r");
+
+			else if (c == '\"')
+				b.append("\\\"");
+
+			else if (c == '\\')
+				b.append("\\\\");
+			else b.append((char)c);
+		});
+		return b.toString().getBytes();
+	}
+	
+	/**
+	 * NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
+	 * When client upload json, it's automatically escaped.
+	 * This makes DB (or server stored data) are mixed with escaped and un-escaped strings.
+	 * When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
+	 * The following is experimental to keep server side data be consists with raw data.
+	 *  
+	 * befor change:
+	 * top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
+	 * @since 0.9.55 This method scan through the string an will create a new for return 
+	 * @param v
+	 * @return unescaped string
+	 */
+	public static String unescape(String v) {
+		/*
+		return v == null ? null
+		 : v.replace("\\\\", "\\")
+		 	.replace("\\n", "\n")
+			.replace("\\r", "\r")
+			.replace("\\t", "\t")
+			.replace("\\\"", "\"")
+			;
+		*/
+		if (v == null) return null;
+		StringBuffer b = new StringBuffer();
+		boolean[] prebacklash = new boolean[] {false};
+		v.chars()
+		 .forEachOrdered(c -> {
+			if (prebacklash[0]) {
+				b.append( (char)c == 't' ? '\t'
+						: (char)c == 'n' ? '\n'
+						: (char)c == 'r' ? '\r'
+						: (char)c );
+				prebacklash[0] = false;
+			}
+			else {
+				if (c == '\\')
+					prebacklash[0] = true;
+				else b.append((char)c);
+			}
+		 });
+		if (prebacklash[0])
+			Utils.warn("There are unpaired '\\' in string:\n%s", v);
+		return b.toString();
 	}
 
-	private static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls, JsonOpt opt)
+	public static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls, JsonOpt opt)
 			throws IOException, AnsonException {
 		boolean forceQuote = opt == null || opt.quotKey();
 		if (v instanceof IJsonable)
@@ -347,14 +502,14 @@ public class Anson implements IJsonable {
 				Object elem = Array.get(v, e);
 				sbuf.append( forceQuote ? "\"" + n + "\"" : n)
 					.append(": [");
-				appendArr(sbuf, elem);
+				appendArr(sbuf, elem, opt);
 				if (e < Array.getLength(v) - 1)
 					sbuf.append(", ");
 			}
 		}
 	}
 
-	private static void appendArr(StringBuffer sbuf, Object e)
+	public static void appendArr(StringBuffer sbuf, Object e, JsonOpt opts)
 			throws AnsonException, IOException {
 		if (e instanceof Anson)
 			((IJsonable)e).toJson(sbuf);
@@ -362,13 +517,13 @@ public class Anson implements IJsonable {
 			sbuf.append(String.valueOf(e));
 		else if (e instanceof String)
 			sbuf.append("\"")
-				.append(escape((String)e))
+				.append(escape((String)e, opts))
 				.append("\"");
-		else // java.lang.Object
+		else
 			appendObjStr(sbuf, e);
 	}
 
-	private static void appendObjStr(StringBuffer sbuf, Object e) {
+	public static void appendObjStr(StringBuffer sbuf, Object e) {
 		sbuf.append("{")
 			.append("type: \"")
 			.append(e.getClass().getName())
@@ -377,7 +532,8 @@ public class Anson implements IJsonable {
 			.append("}");
 	}
 
-	/**@deprecated After reading some docs about Kafka like <a href='https://kafka.apache.org/intro.html'>
+	/**
+	 * @deprecated After reading some docs about Kafka like <a href='https://kafka.apache.org/intro.html'>
 	 * kafka.Apache.org</a>, thinking may be it's better let this been handlered
 	 * by Kafka, in any style as users liked.
 	 * @param stream
@@ -394,7 +550,8 @@ public class Anson implements IJsonable {
 		return this;
 	}
 
-	/**Parse Anson object from json string.
+	/**
+	 * Parse Anson object from json string.
 	 * <p><b>Note: </b><br>
 	 * As LL(*) parsing like Antlr won't work in stream mode,
 	 * this method won't have a input stream version.</p>
@@ -423,7 +580,13 @@ public class Anson implements IJsonable {
 		JsonContext ctx = parser.json();
 		ParseTreeWalker walker = new ParseTreeWalker();
 		JSONAnsonListener lstner = new JSONAnsonListener();
+
+		if (verbose) {
+			Utils.logi("Anson.verbose - ctx.getText():");
+			Utils.logi(ctx.getText());
+		}
+
 		walker.walk(lstner, ctx);
-		return lstner.parsedEnvelope();
+		return lstner.parsedEnvelope(verbose);
 	}
 }

@@ -3,7 +3,6 @@ package io.odysz.anson;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import io.odysz.anson.Anson;
 import io.odysz.anson.x.AnsonException;
 
 public class AnsT4Enum extends Anson {
@@ -17,18 +16,18 @@ public class AnsT4Enum extends Anson {
 			public IPort valof(String pname) throws AnsonException;
 	}
 
-	public enum Port implements IPort { 
-		heartbeat("ping.serv11"), session("login.serv11"), dataset("ds.serv11");
+	public enum T4_Port implements IPort { 
+		heartbeat("ping.serv"), session("login.serv11"), dataset("ds.serv11");
 
 		static {
 			JSONAnsonListener.registFactory(IPort.class, (s) -> {
-					return Port.valueOf(s);
+					return T4_Port.valueOf(s);
 			});
 		}
 
 		private String url;
 		@Override public String url() { return url; }
-		Port(String url) { this.url = url; }
+		T4_Port(String url) { this.url = url; }
 		@Override public IPort valof(String pname) { return valueOf(pname); }
 
 		@Override
@@ -57,7 +56,7 @@ public class AnsT4Enum extends Anson {
 	};
 
 	MsgCode c;
-	Port p;
+	T4_Port p;
 
 	IPort problem;
 

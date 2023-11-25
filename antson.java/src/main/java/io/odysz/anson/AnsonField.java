@@ -36,15 +36,24 @@ public @interface AnsonField {
 	 * <p>Specifying array's element type information.</p>
 	 * Example:<br>
 	 * for Object[], use<pre>
-	   @AnsonField(valType="[Ljava.lang.Object;")
+	   {@literal @}AnsonField(valType="[Ljava.lang.Object;")
 	   Object[][] f;
 	   </pre>
 	 * for ArrayList&lt;Object[]&gt;, use <pre>
-	   @AnsonField(valType="java.util.ArrayList;[Ljava.lang.Object;"
-	   ArrayList<ArrayList<Object[]>>
+	   {@literal @}AnsonField(valType="java.util.ArrayList;[Ljava.lang.Object;"
+	   ArrayList&lt;ArrayList&lt;Object[]&gt;&gt;
 	   </pre>
 	 */
 	String valType() default "";
+	
+	/**
+	 * If a sting field, e.g. base64 string come with this,
+	 * {@link Anson#toBlock(JsonOpt)} (opt.shortenOnAnnotation = true) will ignore the content.
+	 * <br/>- long string printed only for debugging.
+	 * 
+	 * @return the annotation. If true, use shorten string when possible
+	 */
+	boolean shortenString() default false;
 
 	int ref() default undefined;
 }

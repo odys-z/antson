@@ -17,6 +17,23 @@ namespace io.odysz.semantic.jprotocol
 			public const string D = "D";
 		}
 
+        public interface OnOk
+        {
+            void ok(AnsonResp resp);
+        }
+
+        /**
+         * Progress notifier called by block chain.
+         * Parameter blockResp provide the last uploaded block's sequence number.
+         */
+        public interface OnProcess
+        {
+            void proc(int listIndx, int totalBlocks, AnsonResp blockResp);
+        }
+
+        public interface OnError { void err(MsgCode ok, string msg, string[] args = null ); }
+
+
 		public interface SCallbackV11
 		{
 			/// <summary>call back function called by semantic.transact</summary>

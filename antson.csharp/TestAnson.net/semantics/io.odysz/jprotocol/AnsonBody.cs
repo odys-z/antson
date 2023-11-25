@@ -26,7 +26,7 @@ namespace io.odysz.semantic.jprotocol
         /// <summary>
         /// @return Action: login | C | R | U | D | any serv extension
         /// </summary>
-        // public string a() { return _a; }
+        public string A() { return a; }
 
         public AnsonBody A(string act)
         {

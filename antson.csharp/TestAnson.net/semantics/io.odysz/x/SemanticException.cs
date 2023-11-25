@@ -15,8 +15,5 @@ namespace io.odysz.semantics.x
 		public SemanticException(string message, Exception innerException) : base(message, innerException)
 		{
 		}
-
-		//protected SemanticException(SerializationInfo info, StreamingContext context)
-		//	: base(info, context) { }
 	}
 }

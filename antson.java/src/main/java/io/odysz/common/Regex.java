@@ -20,6 +20,7 @@ public class Regex {
 	}
 	
 	public boolean match(String v) {
+		if (v == null) return false;
 		Matcher matcher = regInst.matcher(v);
 		return matcher.find();
 	}
@@ -61,4 +62,5 @@ public class Regex {
         	return matcher.start();
         else return -1;
 	}
+	
 }

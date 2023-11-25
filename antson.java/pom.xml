@@ -4,11 +4,12 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.5</version>
+  <version>0.9.56</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
   <url>http://github.com/odys-z/antson</url>
+  <description>Java user type to json (de)serializer</description>
 
   <licenses>
     <license>
@@ -19,10 +20,10 @@
 
   <developers>
     <developer>
-      <name>Odys Zhou</name>
+      <name>Ody Zhou</name>
       <email>odys.zhou@gmail.com</email>
-      <organization>odysz.github.io</organization>
-      <organizationUrl>https://odysz.github.io</organizationUrl>
+      <organization>odys-z.github.io</organization>
+      <organizationUrl>https://odys-z.github.io</organizationUrl>
     </developer>
   </developers>
 
@@ -32,29 +33,43 @@
 	<maven.compiler.target>1.8</maven.compiler.target>
   </properties>
 
-  <!-- 
   <repositories>
   	<repository>
   		<id>sonatype-snapshots</id>
   		<url>https://oss.sonatype.org/content/repositories/snapshots</url>
   	</repository>
   </repositories>
-   -->
 
   <dependencies>
     <dependency>
     	<groupId>org.antlr</groupId>
     	<artifactId>antlr4-runtime</artifactId>
-    	<version>[4.9.2,)</version>
+    	<version>4.9.2</version>
     </dependency>
 
+	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+	<dependency>
+		<groupId>org.apache.commons</groupId>
+		<artifactId>commons-text</artifactId>
+		<version>1.10.0</version>
+		<scope>test</scope>
+	</dependency>
 
 	<dependency>
     	<groupId>org.junit.jupiter</groupId>
     	<artifactId>junit-jupiter-engine</artifactId>
-    	<version>5.3.1</version>
+    	<version>5.7.0</version>
     	<scope>test</scope>
     </dependency>
+
+    <!--
+    <dependency>
+    	<groupId>io.github.odys-z</groupId>
+    	<artifactId>jserv-album</artifactId>
+      <version>[0.1.0-SNAPSHOT,)</version>
+    	<scope>test</scope>
+    </dependency>
+    -->
   </dependencies>
 
   <scm>
@@ -77,6 +92,22 @@
   </distributionManagement>
 
   <build>
+	<testResources>
+	  <!-- for testing load txt -->
+	  <testResource>
+		<directory>${project.basedir}/src/test/java</directory>
+		<includes>
+			<include>**/txt</include>
+		</includes>
+		<excludes>
+			<exclude>**/*.java</exclude>
+		</excludes>
+	  </testResource>
+	  <testResource>
+		<directory>${project.basedir}/src/test/resources</directory>
+	  </testResource>
+	</testResources>
+
     <plugins>
       <plugin>
       	<groupId>org.apache.maven.plugins</groupId>
@@ -160,7 +191,7 @@
 	  <plugin>
 	      <groupId>org.apache.maven.plugins</groupId>
 	      <artifactId>maven-javadoc-plugin</artifactId>
-	      <version>2.9.1</version>
+	      <version>3.5.0</version>
 	      <executions>
 	        <execution>
 	          <id>attach-javadocs</id>
@@ -169,6 +200,10 @@
 	          </goals>
 	        </execution>
 	      </executions>
+	      <configuration>
+	      	<failOnError>false</failOnError>
+	      	<additionalJOption>-Xdoclint:none</additionalJOption>
+	      </configuration>
 	  </plugin>
 
 	  <plugin>
@@ -180,8 +215,16 @@
 			  <id>antson</id>
 			  <phase>verify</phase>
 			  <goals>
-				<goal>sign</goal>
+			  <goal>sign</goal>
 			  </goals>
+              <!--
+			  <configuration>
+				  <gpgArguments>
+					  <arg>- -pinentry-mode</arg>
+					  <arg>loopback</arg>
+			  	  </gpgArguments>
+		  	  </configuration>
+              -->
 			</execution>
 		</executions>
 	  </plugin>
@@ -189,5 +232,4 @@
 	 -->
      </plugins>
    </build>
-  <description>Java, c#, python data type to json (de)serializer</description>
 </project>

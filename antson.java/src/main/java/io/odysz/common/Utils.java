@@ -1,8 +1,17 @@
 package io.odysz.common;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import io.odysz.anson.Anson;
 
@@ -117,7 +126,22 @@ public class Utils {
 			ex.printStackTrace();
 		}
 	}
-	
+
+	public static void logMap(Map<?, ?> map, String indent) {
+		try {
+			if (map != null) {
+				System.out.println("Map size: " + map.size());
+				for (Object mk : map.keySet())
+					System.out.println(indent == null ? "" : indent + mk + ",\t" + map.get(mk));
+			}
+			else System.out.println("Map is null.");
+		} catch (Exception ex) {
+			StackTraceElement[] x = ex.getStackTrace();
+			System.err.println(String.format("logMap(): Can't print. Error: %s. called by %s.%s()",
+					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
+		}
+	}
+
 	public static void logkeys(Map<String, ?> map) {
 		try {
 			if (map != null)
@@ -196,5 +220,42 @@ public class Utils {
 		}
 	}
 
+	/**
+	 * Load text in the file located within the package path.
+	 * @since 0.9.26
+	 * @param clzz
+	 * @param filename
+	 * @return text
+	 */
+	public static String loadTxt(Class<?> clzz, String filename) {
+		try {
+			return Files.readAllLines(
+				Paths.get(clzz.getResource(filename).toURI()), Charset.defaultCharset())
+				.stream().collect(Collectors.joining("\n"));
+		} catch (IOException | URISyntaxException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static FileInputStream input(Class<?> clzz, String filename) throws URISyntaxException, FileNotFoundException {
+		Path pth = Paths.get(clzz.getResource(filename).toURI());
+		return new FileInputStream(pth.toAbsolutePath().toString());
+	}
 
+	/**
+	 * Load text in the file located within the calling class' package path.
+	 * @since 0.9.26
+	 * @param filename
+	 * @return text
+	 */
+	public static String loadTxt(String filename) {
+		try {
+			StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+			return loadTxt(Class.forName(stElements[2].getClassName()), filename);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

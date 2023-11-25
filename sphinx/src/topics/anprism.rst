@@ -27,6 +27,12 @@ Basic development process with Antson plugin
 --------------------------------------------
 
 1. create sample data used for binding with Anclient typescript, @anclient/anreact
+<<<<<<< HEAD
 2. requests & response package, code snipts (or base class) at serverside are generated
 3. load @anclient/anreact application UI components
 4. implement serverside semantier's functions
+=======
+2. requests & response package, code snipts (or base class) at serverside are generated 
+3. load @anclient/anreact application UI components
+4. implement serverside semantier's functions 
+>>>>>>> master

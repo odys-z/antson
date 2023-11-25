@@ -1,5 +1,6 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt.len;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
@@ -11,11 +12,13 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.odysz.anson.AnTreeNode.SubTree;
 import io.odysz.anson.AnsT4Enum.MsgCode;
-import io.odysz.anson.AnsT4Enum.Port;
+import io.odysz.anson.AnsT4Enum.T4_Port;
+import io.odysz.anson.T_AnTreeNode.SubTree;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
+import io.odysz.semantic.ext.test.T_IndentFlag;
+import io.odysz.semantic.ext.test.T_TreeIndenode;
 
 class AnsonTest {
 
@@ -26,38 +29,61 @@ class AnsonTest {
 	}
 
 	@Test
+	void testEscape() throws AnsonException {
+		String value = "1\t 2\n 3\" 4\\";
+		// 1\\t 2\\n 3\" 4\\
+		// Utils.logi(new String(Anson.escape(value)));
+		assertEquals("1\\t 2\\n 3\\\" 4\\\\", new String(Anson.escape(value)));
+
+		value = "1\\t 2\\n3";
+		// 1	.2
+		// 3"
+		// Utils.logi(Anson.unescape(value));
+		assertEquals("1\t 2\n3", Anson.unescape(value));
+
+		Anson.unescape("1\\t 2\\n 3\\\" 4\\"); // warn in console
+
+		value = "1\\t 2\\n 3\\\" 4\\\\";
+		// 1	 2
+		//  3" 4\
+		assertEquals("1\t 2\n 3\" 4\\", Anson.unescape(value));
+	}
+	
+	@Test
 	void testToJson() throws Exception {
 		AnsT1 anson = new AnsT1();
 		anson.ver = "v0.1";
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		anson.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT1, ver: \"v0.1\", m: null}", s);
-
+		assertEquals("{type: io.odysz.anson.AnsT1, ver: \"v0.1\", m: null}\n", s);
+ 
+		// ESC
 		AnsT2 a2 = new AnsT2();
-		a2.m = new String[] {"e\n0", "e1"}; // ESC
+		a2.m = new String[] {"e\n0", "e1\r\nvalue", "{\"msg\": \"george\"}"};
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, s: 0, m: [\"e\n0\", \"e1\"]}", s);
-		
+		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\n0\", \"e1\\r\\nvalue\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
+
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
 		cll.lst.add("B");
 		bos = new ByteArrayOutputStream(); 
 		cll.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTList, anss: null, ans2: null, lst: [\"A\", \"B\"]}", s);
+		assertEquals("{type: io.odysz.anson.AnsTList, anss: null, ans2: null, lst: [\"A\", \"B\"]}\n", s);
 
 		AnsTRs anrs = new AnsTRs();
 		bos = new ByteArrayOutputStream(); 
 		anrs.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsTRs, rs: "
-				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+				+ "{type: io.odysz.anson.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {1: [1, \"1\"], 2: [2, \"2\"], 3: [3, \"3\"], 4: [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
-				+ "}}", s);
+				+ "}\n}\n", s);
+		
 	}
 	
 	@Test
@@ -72,7 +98,7 @@ class AnsonTest {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		a2d.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []]}";
+		String expect = "{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []]}\n";
 		assertEquals(expect, s);
 		
 		a2d = (Ans2dArr) Anson.fromJson(expect);
@@ -96,8 +122,8 @@ class AnsonTest {
 		parent.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
-				+ "m: [{type: io.odysz.anson.AnsT3Child}, "
-					+ "{type: io.odysz.anson.AnsT3son, parent: \"io.odysz.anson.AnsT3\", gendre: \"male\"}]}";
+					+ "m: [{type: io.odysz.anson.AnsT3Child}\n"
+					+ ", {type: io.odysz.anson.AnsT3son, parent: \"io.odysz.anson.AnsT3\", gendre: \"male\"}\n]}\n";
 		assertEquals(expect, s);
 	
 		// should resolve parent ref with a type guess
@@ -119,8 +145,8 @@ class AnsonTest {
 		enclosing.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
-				+ "m: [{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"param A\"}, "
-					+ "{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"B\"}]}";
+				+ "m: [{type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"param A\"}\n"
+				+ ", {type: io.odysz.anson.AnsT5Child_paramA, parent: \"io.odysz.anson.AnsT3\", name: \"B\"}\n]}\n";
 		assertEquals(expect, s);
 		
 		AnsT3 clone = (AnsT3) Anson.fromJson(s);
@@ -134,31 +160,31 @@ class AnsonTest {
 	@Test
 	void test2Json4Enum() throws AnsonException, IOException {
 		AnsT4Enum en = new AnsT4Enum();
-		en.p = Port.heartbeat;
+		en.p = T4_Port.heartbeat;
 		en.c = MsgCode.ok;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		en.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		bos.close();
-		String expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: null}";
+		String expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: null}\n";
 		assertEquals(expect, s);
 		
 		AnsT4Enum denum = (AnsT4Enum) Anson.fromJson(expect);
 		assertEquals(denum.c, MsgCode.ok);
-		assertEquals(denum.p, Port.heartbeat);
+		assertEquals(denum.p, T4_Port.heartbeat);
 		
-		en.problem = Port.dataset;
+		en.problem = T4_Port.dataset;
 		bos = new ByteArrayOutputStream(); 
 		en.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		bos.close();
-		expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: \"dataset\"}";
+		expect = "{type: io.odysz.anson.AnsT4Enum, p: \"heartbeat\", c: \"ok\", problem: \"dataset\"}\n";
 		assertEquals(expect, s);
 
 		AnsT4Enum problem = (AnsT4Enum) Anson.fromJson(expect);
 		assertEquals(MsgCode.ok, problem.c);
-		assertEquals(Port.heartbeat, problem.p);
-		assertEquals(Port.dataset, problem.problem);
+		assertEquals(T4_Port.heartbeat, problem.p);
+		assertEquals(T4_Port.dataset, problem.problem);
 	}
 	
 	@SuppressWarnings("serial")
@@ -182,12 +208,12 @@ class AnsonTest {
 		lst.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		String expect = "{type: io.odysz.anson.AnsTStrsList, "
-				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, s: 0, m: [\"0 0 0 0\"]}, "
-						  + "{type: io.odysz.anson.AnsT2, s: 0, m: [\"0 0 0 1\"]}], "
-						 + "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
-						 + "[null, {type: io.odysz.anson.AnsT2, s: 0, m: [\"1 1 1 1\"]}]]]], "
-				+ "lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
-				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}";
+				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 0\"]}\n"
+				+ ", {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 1\"]}\n], "
+				+ "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
+				+ "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"1 1 1 1\"]}\n"
+				+ "]]]], lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
+				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}\n";
 		assertEquals(expect, s);
 	
 		AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
@@ -223,19 +249,21 @@ class AnsonTest {
 		assertEquals("v0.1", anson.ver);
 		assertEquals(null, anson.m);
 
-		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\n1\", m: null}");
-		assertEquals("v0\\n.\\n1", anson.ver);
+		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\r\\n1\", m: null}");
+		assertEquals("v0\n.\r\n1", anson.ver);
 		assertEquals(null, anson.m);
 
-		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: [\"e1\", \"e2\"]}");
-		assertEquals("e1", anson2.m[0]);
+		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\\nvalue\", \"e2\"]}");
+		assertEquals(true, anson2.b);
+		assertEquals('c', anson2.c);
+		assertEquals("e1\nvalue", anson2.m[0]);
 		assertEquals("e2", anson2.m[1]);
 
 		anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: ["
 				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)\", "
 				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)\"]}");
-		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[0]);
-		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)", anson2.m[1]);
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\n)", anson2.m[0]);
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[1]);
 	}
 	
 	@Test
@@ -288,13 +316,42 @@ class AnsonTest {
 		assertEquals(4, ((AnsT2)cll.ans2.get(0)).s);
 		assertEquals("z", ((AnsT1)cll.ans2.get(1)).ver);
 	}
+	
+	/**
+	 * @since 0.9.30 also test windows path escape
+	 * @throws AnsonException
+	 */
+	@Test
+	void testFromJson_list2d() throws AnsonException {
+		AnsTListPhoto cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [["
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\", clientpath: \"raw\\\\res\\\\my.jpg\" },"
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\", clientpath: \"raw/res/my.jpg\"} ]]}");
+		assertEquals(1, cll.ansp.size());
+		assertEquals(2, cll.ansp.get(0).length);
+		assertEquals("2", cll.ansp.get(0)[1].pid);
+		assertEquals("raw\\res\\my.jpg", cll.ansp.get(0)[0].clientpath);
+		assertEquals("raw/res/my.jpg", cll.ansp.get(0)[1].clientpath);
+		
+		/* FIXME error report: line 1:47 extraneous input '<EOF>' expecting {',', '}'}
+		 * This should be a grammar error.
+		 * g4:
+			array
+			: '[' value (',' value)* ']'
+			| '[' ']'
+			;
+		*/
+		cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [[]]");
+		assertEquals(1, cll.ansp.size());
+		assertEquals(0, cll.ansp.get(0).length);
+
+	}
 
 	@Test
 	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException, AnsonException, IOException {
 		AnsTMap m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
 		assertEquals("B", m.map.get("A"));
 
-		m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, map: {\"A\": \"B\"}, mapArr: {a: [1, \"s\"]}}");
+		m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, map: {\"A\": \"B\"}, mapArr: {a: [1, \"s\"]}}\n");
 		assertEquals("B", m.map.get("A"));
 		assertEquals(2, m.mapArr.get("a").length);
 		assertEquals(1, m.mapArr.get("a")[0]);
@@ -305,24 +362,20 @@ class AnsonTest {
 		opt.quotKey(true);
 		m.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{\"type\": \"io.odysz.anson.AnsTMap\", \"map\": {\"A\": \"B\", \"v-null\": null}, \"mapArr\": {\"a\": [1, \"s\"]}}", s);
+		assertEquals("{\"type\": \"io.odysz.anson.AnsTMap\", \"map\": {\"A\": \"B\", \"v-null\": null}, \"mapArr\": {\"a\": [1, \"s\"]}}\n", s);
 		bos.close();
 
 		bos = new ByteArrayOutputStream(); 
 		opt.quotKey(false);
 		m.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}", s);
-	}
-	
-	void testEscape() throws AnsonException {
-		
+		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}\n", s);
 	}
 		
 	@Test
 	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException, SQLException, AnsonException {
 		AnsTRs rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
-				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+				+ "{type: io.odysz.anson.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0 1\", \"0 2\", \"0 3\", \"0 4\"], [\"1 1\", \"1 2\", \"1 3\", \"1 4\"], [\"2 1\", \"2 2\", \"2 3\", \"2 4\"]]"
 				+ "}}");
@@ -332,7 +385,7 @@ class AnsonTest {
 		assertEquals("0 1", rs.rs.getString("1"));
 
 		rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
-				+ "{type: io.odysz.anson.AnsonResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+				+ "{type: io.odysz.anson.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
 				+ "}}");
@@ -344,27 +397,28 @@ class AnsonTest {
 	
 	@Test
 	void testFromJson_tree() throws AnsonException {
-		AnTreeNode tr = (AnTreeNode) Anson.fromJson("{type:io.odysz.anson.AnTreeNode,"
+		T_AnTreeNode tr = (T_AnTreeNode) Anson.fromJson(
+			  "{type:io.odysz.anson.T_AnTreeNode,"
 				+ "node:{\"fullpath\":\"1 sys.1 domain\","
 					  + "\"id\":\"sys-domain\",\"text\":\"Domain Settings\","
 					  + "\"sort\":\"1\",\"parentId\":\"sys\",\"url\":\"views/sys/domain/domain.html\""
 					 + "}},"
-			+ "{type:io.odysz.anson.AnTreeNode,"
+			+ "{type:io.odysz.anson.T_AnTreeNode,"
 				+ "node:{\"fullpath\":\"1 sys.2 role\","
 					  + "\"id\":\"sys-role\",\"text\":\"Role Manage\","
 					  + "\"sort\":\"2\",\"parentId\":\"sys\",\"url\":\"views/sys/role/roles.html\""
 					 + "}},"
-			+ "{type:io.odysz.anson.AnTreeNode,"
+			+ "{type:io.odysz.anson.T_AnTreeNode,"
 				+ "node:{\"fullpath\":\"1 sys.3 org\","
 					  + "\"id\":\"sys-org\",\"text\":\"Orgnization Manage\","
 					  + "\"sort\":\"3\",\"parentId\":\"sys\",\"url\":\"views/sys/org/orgs.html\""
 					 + "}},"
-			+ "{type:io.odysz.anson.AnTreeNode,"
+			+ "{type:io.odysz.anson.T_AnTreeNode,"
 				+ "node:{\"fullpath\":\"1 sys.4 user\","
 					  + "\"id\":\"sys-uesr\",\"text\":\"Uesr Manage\","
 					  + "\"sort\":\"4\",\"parentId\":\"sys\",\"url\":\"views/sys/user/users.html\""
 					 + "}},"
-			+ "{type:io.odysz.anson.AnTreeNode,"
+			+ "{type:io.odysz.anson.T_AnTreeNode,"
 				+ "node:{\"fullpath\":\"1 sys.5 wf\","
 					  + "\"id\":\"sys-wf\",\"text\":\"Workflow Settings\","
 					  + "\"sort\":\"5\",\"parentId\":\"sys\",\"url\":\"views/sys/workflow/workflows.html\""
@@ -376,13 +430,100 @@ class AnsonTest {
 	}
 	
 	@Test
+	void testSTree2block() throws AnsonException, IOException {
+		T_TreeIndenode n0  = new T_TreeIndenode("0");
+		n0 .child(new T_TreeIndenode("0.1", n0 ));
+		n0 .child(new T_TreeIndenode("0.2", n0 ).asLastSibling());
+
+		// Utils.logi(n0.toBlock());
+		n0.toBlock(); // test case for multiple DP visiting
+
+		/*
+		 * (+)0
+		 *  |- 0.1
+		 *  L 0.2
+		 */
+		ArrayList<T_IndentFlag> ind01 = ((T_TreeIndenode)n0 .child(0))
+				.indents();
+		assertEquals(1, len(ind01));
+		assertEquals(T_IndentFlag.childi, ind01.get(0));
+
+		ArrayList<T_IndentFlag> ind0_2 = ((T_TreeIndenode)n0 .child(1))
+				.indents();
+		assertEquals(1, len(ind0_2));
+		assertEquals(T_IndentFlag.childx, ind0_2.get(0));
+
+		n0  = new T_TreeIndenode("1");
+		T_TreeIndenode n11 = new T_TreeIndenode("1.1", n0 ).asLastSibling();
+		T_TreeIndenode n111 = new T_TreeIndenode("1.1.1", n11).asLastSibling();
+		n0 .child(n11);
+		n11.child(n111);
+		
+		// Utils.logi(root.toBlock());
+		n111.toBlock();
+		/**
+		 * (+)1
+		 *  L  1.1
+		 *    L 1.1.1
+		 * */
+		ArrayList<T_IndentFlag> ind1_1_1 = n111.indents();
+		assertEquals(2, len(ind1_1_1));
+		assertEquals(T_IndentFlag.space, ind1_1_1.get(0));
+		assertEquals(T_IndentFlag.childx, ind1_1_1.get(1));
+
+		T_TreeIndenode n2    = new T_TreeIndenode("2");
+		T_TreeIndenode n21   = new T_TreeIndenode("2.1", n2 );
+		T_TreeIndenode n211  = new T_TreeIndenode("2.1.1", n21).asLastSibling();
+		T_TreeIndenode n2111 = new T_TreeIndenode("2.1.1.1", n211).asLastSibling();
+
+		n2  .child(n21);
+		n21 .child(n211);
+		n211.child(n2111);
+
+		T_TreeIndenode n22   = new T_TreeIndenode("2.2", n2 ).asLastSibling();
+		n2.child(n22);
+		
+		assertEquals("{\"type\": \"io.odysz.semantic.ext.test.T_TreeIndenode\", "
+				+ "\"node\": {}, \"parent\": \"io.odysz.semantic.ext.test.T_TreeIndenode\", "
+				+ "\"indents\": [\"vlink\", \"space\", \"childx\"], "
+				+ "\"lastSibling\": true, \"id\": \"2.1.1.1\", \"parentId\": \"2.1.1\"}\n",
+				n2111.toBlock());
+		/**
+		 * (+)2 or
+		 *  2
+		 *  |-2.1
+		 *  | L 2.1.1
+		 *  |   L 2.1.1.1 
+		 *  L 2.2
+		 * */
+		ArrayList<T_IndentFlag> ind21 = n21.indents();
+		assertEquals(1, len(ind21));
+		assertEquals(T_IndentFlag.childi, ind21.get(0));
+
+		ArrayList<T_IndentFlag> ind211 = n211.indents();
+		assertEquals(2, len(ind211));
+		assertEquals(T_IndentFlag.vlink, ind211.get(0));
+		assertEquals(T_IndentFlag.childx, ind211.get(1));
+
+		ArrayList<T_IndentFlag> ind2111 = n2111.indents();
+		assertEquals(3, len(ind2111));
+		assertEquals(T_IndentFlag.vlink, ind2111.get(0));
+		assertEquals(T_IndentFlag.space, ind2111.get(1));
+		assertEquals(T_IndentFlag.childx, ind2111.get(2));
+
+		ArrayList<T_IndentFlag> ind22 = n22.indents();
+		assertEquals(1, len(ind22));
+		assertEquals(T_IndentFlag.childx, ind22.get(0));
+	}
+	
+	@Test
 	void test_innerClass() throws AnsonException, IOException {
-		String tst = "{type: io.odysz.anson.AnTreeNode$SubTree, "
-				+ "children: [{type: io.odysz.anson.AnTreeNode, "
-						   + "node: {fullpath: \"1 sys.1 domain\", "
-						   + "id: \"sys-domain\", text: \"Domain Settings\", "
-						   + "sort: \"1\", parentId: \"sys\", url: \"views/sys/domain/domain.html\""
-						   + "}}]}";
+		String tst = "{type: io.odysz.anson.T_AnTreeNode$SubTree, "
+		+ "children: [{type: io.odysz.anson.T_AnTreeNode, "
+				   + "node: {fullpath: \"1 sys.1 domain\", "
+				   + "id: \"sys-domain\", text: \"Domain Settings\", "
+				   + "sort: \"1\", parentId: \"sys\", url: \"views/sys/domain/domain.html\""
+				   + "}}\n]}\n";
 		SubTree tr = (SubTree) Anson.fromJson(tst);
 	
 		assertEquals(1, tr.children.size());
@@ -395,6 +536,16 @@ class AnsonTest {
 		assertEquals(tst, s);
 	}
 
+	/**
+	 * <p>Note about v0.9.14</p>
+	 * I'm not sure what's bypass test want to do here - too long ago idea.
+	 * This test result in error since v0.9.14 (change AnsonException as subclass of RuntimeException).
+	 * It's fixed with register a factory to {@link AnsT6Bypass.T6_Port}, which is probable not
+	 * initial intention of this test.
+	 * 
+	 * @throws AnsonException
+	 * @throws IOException
+	 */
 	@Test
 	void testBypass() throws AnsonException, IOException {
 		AnsT6Bypass t6 = new AnsT6Bypass();
@@ -402,11 +553,11 @@ class AnsonTest {
 		t6.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
 		
-		assertEquals("{type: io.odysz.anson.AnsT6Bypass, p: \"session\"}", s);
+		assertEquals("{type: io.odysz.anson.AnsT6Bypass, p: \"session\"}\n", s);
 		
 		AnsT6Bypass bypass = (AnsT6Bypass) Anson.fromJson(s);
 		
-		assertEquals(AnsT6Bypass.Port.session, t6.p.port());
+		assertEquals(AnsT6Bypass.T6_Port.session, t6.p.port());
 		assertEquals(bypass.p.port(), t6.p.port());
 	}
 }

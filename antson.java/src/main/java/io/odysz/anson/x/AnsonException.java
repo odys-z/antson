@@ -1,6 +1,6 @@
 package io.odysz.anson.x;
 
-public class AnsonException extends Exception {
+public class AnsonException extends RuntimeException {
 	/** * */
 	private static final long serialVersionUID = 1L;
 

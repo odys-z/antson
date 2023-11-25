@@ -47,22 +47,26 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="src\io.odysz\Anson.cs" />
+    <Compile Include="src\anson\Anson.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\common\LangExt.cs" />
     <Compile Include="src\gen\antlr\JSONBaseListener.cs" />
     <Compile Include="src\gen\antlr\JSONLexer.cs" />
     <Compile Include="src\gen\antlr\JSONListener.cs" />
     <Compile Include="src\gen\antlr\JSONParser.cs" />
-    <Compile Include="src\io.odysz\AnsonException.cs" />
-    <Compile Include="src\io.odysz\AnsonField.cs" />
-    <Compile Include="src\io.odysz\AnsonFlags.cs" />
-    <Compile Include="src\io.odysz\IJsonable.cs" />
-    <Compile Include="src\io.odysz\JSONAnsonListener.cs" />
-    <Compile Include="src\io.odysz\JsonOpt.cs" />
-    <Compile Include="src\io.odysz\Utils.cs" />
+    <Compile Include="src\anson\AnsonException.cs" />
+    <Compile Include="src\anson\AnsonField.cs" />
+    <Compile Include="src\anson\AnsonFlags.cs" />
+    <Compile Include="src\anson\IJsonable.cs" />
+    <Compile Include="src\anson\JSONAnsonListener.cs" />
+    <Compile Include="src\anson\JsonOpt.cs" />
+    <Compile Include="src\anson\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="antson.csharp.nuspec" />
+    <None Include="nuget.pack.bat" />
     <None Include="packages.config" />
+    <None Include="push.nuget.bat" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

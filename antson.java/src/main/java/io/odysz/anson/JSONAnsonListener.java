@@ -31,6 +31,8 @@ import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 
 public class JSONAnsonListener extends JSONBaseListener implements JSONListener {
+	public static boolean verbose;
+
 	/**<p>Parsing AST node's context, for handling the node's value,
 	 * the element class of parsing stack.</p>
 	 * <p>Memo: The hard lesson learned from this is if you want parse a grammar,
@@ -77,7 +79,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		/**Set type annotation.<br>
 		 * annotation is value of {@link AnsonField#valType()}
 		 * @param tn
-		 * @return
+		 * @return this
 		 */
 		ParsingCtx elemType(String[] tn) {
 			this.valType = tn == null || tn.length <= 0 ? null : tn[0];
@@ -109,7 +111,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	/**Merge clazz's field meta up to the IJsonable ancestor.
 	 * @param clazz
 	 * @param fmap
-	 * @return
+	 * @return fmap
 	 */
 	static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
 		Field flist[] = clazz.getDeclaredFields();
@@ -139,7 +141,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private ParsingCtx top() { return stack.get(0); }
 
-	/**Push parsing node (a envelope, map, list) into this' {@link #stack}.
+	/**Push the parsing node (a envelope, map, list) into this' {@link #stack}.
 	 * @param enclosingClazz new parsing IJsonable object's class
 	 * @param elemType type annotation of enclosing list/array. 0: main type, 1: sub-types<br>
 	 * This parameter can't be null if is pushing a list node.
@@ -164,16 +166,18 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				Constructor<?> ctor = null;
 				try { ctor = enclosingClazz.getConstructor(new Class<?>[] {});
 				} catch (NoSuchMethodException e) {
-					throw new AnsonException(0, "To make json can be parsed to %s, the class must has a default public constructor(0 parameter)\n"
-							+ "Also, inner class must be static.\n"
-							+ "Class.getConstructor() error on getting: %s %s",
-							enclosingClazz.getName(), e.getMessage(), e.getClass().getName());
+					throw new AnsonException(0,
+						"To make json can be parsed to %s, the class must has a default public constructor(0 parameter)\n"
+						+ "Also, inner class must be static.\n"
+						+ "Class.getConstructor() error on getting: %s %s\n",
+						enclosingClazz.getName(), e.getMessage(), e.getClass().getName());
 				}
 
 				if (IJsonable.class.isAssignableFrom(enclosingClazz)) {
 					if (ctor == null)
-						throw new AnsonException(0, "To make json can be parsed to %0$s, the class must has a default public constructor(0 parameter)\n",
-										enclosingClazz.getName());
+						throw new AnsonException(0,
+							"To make json can be parsed to %0$s, the class must has a default public constructor(0 parameter)\n",
+							enclosingClazz.getName());
 					fmap = mergeFields(enclosingClazz, fmap); // map merging is only needed by typed object
 					try {
 						IJsonable enclosing = (IJsonable) ctor.newInstance(new Object[0]);
@@ -244,12 +248,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				// In a list, found object, if not type specified with annotation, must failed.
 				// But this is confusing to user. Set some report here.
 				if (top.isInList() || top.isInMap())
-					Utils.warn("Type of elements in list or map is complicate, but no annotation for type info can be found.\n"
+					Utils.warn("Type of elements in the list or map is complicate, but no annotation for type info can be found.\n"
 							+ "field type: %s\njson: %s\n"
 							+ "E.g. Java field example: @AnsonField(valType=\"io.your.type\")\n"
 							+ "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
 							top.enclosing.getClass(), ctx.getText());;
-				throw new AnsonException(0, "Obj type not found. property: %s", top.parsingProp);
+				throw new AnsonException(0, "Obj type not found.\n\tproperty / field name: %s,\n\tenclosing type: %s %s",
+						top.parsingProp, top.enclosing == null ? "null" : top.enclosing.getClass().getName());
 			}
 
 			Class<?> ft = fmap.get(top.parsingProp).getType();
@@ -268,16 +273,17 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else
 				// entering an envelope
-				// push(fmap.get(top.parsingProp).getType());
 				push(ft, null);
-		} catch (SecurityException | ReflectiveOperationException | AnsonException e) {
+		} catch (SecurityException | ReflectiveOperationException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public IJsonable parsedEnvelope() throws AnsonException {
+	@SuppressWarnings("static-access")
+	public IJsonable parsedEnvelope(boolean verbose) throws AnsonException {
+		this.verbose = verbose;
 		if (stack == null || stack.size() == 0)
-			throw new AnsonException(0, "No envelope is avaliable.");
+			throw new AnsonException(0, "No envelope can be found.");
 		return (IJsonable) stack.get(0).enclosing;
 	}
 
@@ -310,7 +316,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// ignore this type specification, keep consist with java type
 			return;
 
-		// envetype = ctx.qualifiedName().getText();
 		TerminalNode str = ctx.qualifiedName().STRING();
 		String txt = ctx.qualifiedName().getText();
 		envetype = getStringVal(str, txt);
@@ -352,21 +357,31 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	        }
 	        // figure out array element class
 	        else {
-	        	Type argType = pType.getActualTypeArguments()[0];
+	        	Type argType = pType.getActualTypeArguments()[0]; // jdk: class [Lio.odysz.anson.Photo;  
 	        	if (!(argType instanceof TypeVariable) && !(argType instanceof WildcardType)) {
+	        				
+	        		/* change for Android compatibility
+	        		 * for field : List<Photo[]> photos,
+	        		 * on JDK 1.8: argType = Class<T>(io.odysz.anson.Photo[])
+	        		 * on Andoid : argType = GeneralArrayTypeImpl(io.oz.album.tier.Photo[])
+	        		 * 
 					@SuppressWarnings("unchecked")
 					Class<? extends Object> eleClzz = ((Class<? extends Object>) argType);
 					if (eleClzz.isArray()) {
 						ptypess = new String[] {ptypess[0], eleClzz.getComponentType().getName()};
 					}
+					*/
+	        		String lstName = argType.getTypeName();
+	        		if (lstName.matches(".*\\[\\]$")) {
+						ptypess = new String[] {ptypess[0], "[L" + lstName.replaceAll("\\[\\]$", ";")};
+	        		}
+
 	        	}
 	        	// else nothing can do here for a type parameter, e.g. "T"
 	        	else
 	        		if (AnsonFlags.parser)
 	        			Utils.warn("[AnsonFlags.parser] warn Element type <%s> for %s is a type parameter (%s) - ignored",
-	        				pType.getActualTypeArguments()[0], //.getTypeName(),
-	        				f.getName(),
-	        				pType.getActualTypeArguments()[0].getClass());
+	        				argType.getTypeName(), f.getName(), argType.getClass());
 	        }
 	        return ptypess;
 	    }
@@ -394,17 +409,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    }
 	}
 
-	/**Parse property name, tolerate enclosing quotes presenting or not.
+	/**
+	 * Parse property name, tolerate enclosing quotes presenting or not.
 	 * @param ctx
-	 * @return
+	 * @return the prop value in string
 	 */
 	private static String getProp(PairContext ctx) {
 		TerminalNode p = ctx.propname().IDENTIFIER();
-		/*
-		return p == null
-				? ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
-				: p.getText();
-		*/
 
 		String prop = p == null ?
 				ctx.propname().STRING() != null ?
@@ -413,7 +424,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return prop.replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "");
 	}
 
-	/**Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
+	/**
+	 * Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
 	 * Can't handle NUMBER | obj | array.
 	 * @param ctx
 	 * @return value in string
@@ -434,7 +446,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				} catch (Exception e) { }
 				return rawTxt;
 		}
-		 else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		// v 0.9.44
+		// else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		else return Anson.unescape(str
+				.getText()
+				.replaceAll("(^\\s*\")|(\"\\s*$)", ""));
 	}
 
 	/**
@@ -489,8 +505,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			// if field available, parse field's value type as the new node's value type
 			else {
-				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				Field f = top.fmap.get(top.parsingProp);
+				if (f == null)
+					throw new AnsonException(1, "Field not found in %s field: %s, value: %s",
+							top.enclosing.getClass().getName(), top.parsingProp, ctx.getText());
+				Class<?> ft = top.fmap.get(top.parsingProp).getType();
 				// AnsT3 { ArrayList<Anson[]> ms; }
 				// ctx: [[{type:io.odysz.anson.AnsT2,s:4},{type:io.odysz.anson.AnsT1,ver:"x"}]]
 				// [0]: io.odysz.anson.Anson[],
@@ -500,6 +519,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
+			throw new NullPointerException(e.getMessage() + "\n" + ctx.getText());
 		}
 	}
 
@@ -566,16 +586,35 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	    	if (lstItem == null)
 	    		continue;
 
-	    	// this guess is error prone, let's tell user why. May be more annotation is needed
-	    	if (!eleType.isAssignableFrom(lstItem.getClass()))
+	    	/* this guess is error prone, let's tell user why. May be more annotation is needed
+	    	 * Note: jserv v1.3.0
+	    	 * Sometimes the eleType is figured out (only a guess) from the first element, let's try tolerate type mismatch here.
+	    	 * This is correct in java, but it's ok in js for elements with different type. Just try convert it into string.
+	    	 */
+	    	if (eleType == String.class && !eleType.isAssignableFrom(lstItem.getClass()))
+	    		lstItem = lstItem.toString();
+	    	else if (!eleType.isAssignableFrom(lstItem.getClass()) && !matchPrimaryObj(eleType, lstItem.getClass()))
 	    		throw new AnsonException(1, "Set element (v: %s, type %s) to array of type of \"%s[]\" failed.\n"
-	    				+ "Array element's type not annotated?",
+	    				+ "Array element's type not annotated?\n"
+	    				+ "Please also note that all values in string are tolerated. (which is typical in js for array of elements in different types.)",
 	    				lstItem, lstItem.getClass(), eleType);
 
-	        Array.set(array, i, list.get(i));
+	        Array.set(array, i, lstItem);
 	    }
 
 	    return array;
+	}
+
+	private static boolean matchPrimaryObj(Class<?> primtype, Class<? extends Object> objtype) {
+		// https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html
+		return primtype == int.class && objtype == Integer.class
+			|| primtype == float.class && objtype == Float.class
+			|| primtype == double.class && objtype == Double.class
+			|| primtype == long.class && objtype == Long.class
+			|| primtype == short.class && objtype == Short.class
+			|| primtype == boolean.class && objtype == Boolean.class
+			|| primtype == char.class && objtype == Character.class
+			;
 	}
 
 	/**
@@ -636,12 +675,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 									}
 
 									// remember elem type for later null element
-									top.elemType(new String[] {eleClz.getName()});
+									// v1.3.0 This remembering wrong type. Nested array type doesn't figured out correctly - all test passed without this.
+									// top.elemType(new String[] {eleClz.getName()});
 								}
 								// all elements are null, ignore the list is the only way
 							}
 							else
-								// FIXME this will broken when first element's length is 0.
+								// FIXME this will be broken when first element's length is 0.
 								((List<Object>)enclosLst).add(lst.toArray());
 						}
 						// branch: with annotation or type name already figured out from 1st element
@@ -688,7 +728,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			else //if (top.isInMap()) {
 				// parsed Value can already got when exit array
 				if (top.parsedVal == null)
-					top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
+					/** NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
+					 *  When client upload json, it's automatically escaped.
+					 *  This makes DB (or server stored data) are mixed with escaped and un-escaped strings.
+					 *  When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
+					 *  The following is experimental to keep server side data be consists with raw data.
+					 *  
+					 *  befor change:
+					 *  top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
+					 */
+					top.parsedVal = Anson.unescape(getStringVal(ctx.STRING(), ctx.getText()));
 			// }
 		}
 	}
@@ -703,7 +752,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		}
 
 		try {
-			// String fn = getProp(ctx);
 			ParsingCtx top = top();
 			String fn = top.parsingProp;
 
@@ -718,8 +766,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 			Object enclosing = top().enclosing;
 			Field f = top.fmap.get(fn);
-			if (f == null)
-				throw new AnsonException(0, "Field ignored: field: %s, value: %s", fn, ctx.getText());
+			if (f == null) {
+				// throw new AnsonException(0, "Field ignored: field: %s, value: %s", fn, ctx.getText());
+				Utils.warn("Field ignored: field: %s, value: %s", fn, ctx.getText());
+				return;
+			}
 
 			f.setAccessible(true);
 			AnsonField af = f.getAnnotation(AnsonField.class);
@@ -730,7 +781,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (af != null && af.ref() == AnsonField.enclosing) {
 				Object parent = toparent(f.getType());
-				if (parent == null)
+				if (parent == null && verbose)
 					Utils.warn("parent %s is ignored: reference is null", fn);
 
 				f.set(enclosing, parent);
@@ -755,7 +806,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (ft.isArray())
 				f.set(enclosing, toPrimitiveArray((List<?>)top.parsedVal, ft));
-			// Design notes: this is broken into 2 branches if c#.
+			// Design notes: this is broken into 2 branches in c#.
 			else if (List.class.isAssignableFrom(ft)
 					|| AbstractCollection.class.isAssignableFrom(ft)
 					|| Map.class.isAssignableFrom(ft)) {
@@ -767,9 +818,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
                 {
                 	Constructor ctor = ft.getConstructor(new Class<?>[] {String.class});
                     if (ctor == null)
-                        throw new AnsonException(0, "To deserialize json to {0}, the class must has a constructor(1 string parameter)\n"
-                                        + "string value: {1}",
-                                        ft.getTypeName(), top.parsedVal);
+                        throw new AnsonException(0,
+                        		"To deserialize json to %s, the class must has a constructor(1 string parameter)\n" +
+                        		"string value: %s",
+                        		ft.getTypeName(), top.parsedVal);
                     f.set(enclosing, ctor.newInstance(top.parsedVal));
                 }
                 else if (Anson.class.isAssignableFrom(ft))
@@ -794,30 +846,44 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 			// not necessary, top is dropped
 			top.parsedVal = null;
-		} catch (ReflectiveOperationException | RuntimeException e) {
+		} catch (ReflectiveOperationException e) {
 			e.printStackTrace();
-		} catch (AnsonException e) {
-			Utils.warn(e.getMessage());
 		}
 	}
 
 	private IJsonable invokeFactory(Field f, String v) throws AnsonException {
 		if (factorys == null || !factorys.containsKey(f.getType()))
 			throw new AnsonException(0,
-					"Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
-					+ "Or don't declare the field as %1$s, use a subclass of Anson",
-					f.getType());
+				"Subclass of IJsonable (%s %s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
+				+ "Or don't declare the field as %1$s, use a subclass of Anson\n"
+				+ "For java client, this is possible IPort implementation class not registered at client side (FIXME: Jserv should deprecate IPort)",
+				f.getType(), f.getName());
 
 		JsonableFactory factory = factorys.get(f.getType());
 		try { return factory.fromJson(v);}
 		catch (Throwable t) {
+			Throwable cause = t.getCause();
 			throw new AnsonException(0,
-					"Subclass of IJsonable (%s) must registered.\n - See javadoc of IJsonable.JsonFacotry\n"
-					+ "Or don't declare the field as %1$s, use a subclass of Anson",
-					f.getType());
-		}
+				"[Quick Error check: AnsonMsg.understandPorts(Your-Port) in JSingleton ever working, which can be silenced in Docker conatianer]\n" +
+				"Invoking registered factory failed for value: %s\n" +
+				"Field Type: %s,\nCause: %s\tMessage: %s\n",
+				v, f.getType().getName(),
+				cause == null ? "null" : cause.getClass().getName(), cause == null ? t.getMessage() : "null");
 	}
+}
 
+	/**
+	 * Set primary type values.
+	 * <p>byte short int long float double boolean char</p>
+	 * See <a href='https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html'>
+	 * Oracle Java Documentation</a>
+	 * @param obj
+	 * @param f
+	 * @param v
+	 * @throws RuntimeException
+	 * @throws ReflectiveOperationException
+	 * @throws AnsonException
+	 */
 	private static void setPrimitive(IJsonable obj, Field f, String v)
 			throws RuntimeException, ReflectiveOperationException, AnsonException {
 		if (f.getType() == int.class || f.getType() == Integer.class)
@@ -832,6 +898,14 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			f.set(obj, Short.valueOf(v));
 		else if (f.getType() == byte.class || f.getType() == Byte.class)
 			f.set(obj, Byte.valueOf(v));
+		else if (f.getType() == boolean.class || f.getType() == Boolean.class)
+			f.set(obj, Boolean.valueOf(v));
+		else if (f.getType() == char.class) {
+			char c = v != null && v.length() > 0 ? v.charAt(0) == '"' ? v.charAt(1) : v.charAt(0) : '0';
+			if (verbose)
+				Utils.warn("Guessing json string (%s) as a char: %s", v, c);
+			f.set(obj, c);
+		}
 		else
 			// what's else?
 			throw new AnsonException(0, "Unsupported field type: %s (field %s)",

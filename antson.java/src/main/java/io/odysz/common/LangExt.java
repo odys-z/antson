@@ -1,17 +1,22 @@
 package io.odysz.common;
 
+import java.lang.reflect.Array;
+import java.util.AbstractCollection;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LangExt {
 	/**Split and trim elements.
 	 * <p>Empty element won't be ignored if there are 2 consequent separator. <br>
 	 * That means two junctural, succeeding, cascading separators without an element in between, expect white space.
 	 * Sorry for that poor English.</p>
-	 * <p> See https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
+	 * @see https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
 	 * @param s
 	 * @param regex
 	 * @param noTrim
@@ -26,8 +31,53 @@ public class LangExt {
 			return s.split(regex);
 		}
 	}
+
+	public static String[] split(String s) {
+		return split(s, ",");
+	}
 	
-	/** Get a string that can be parsed by {@link #toArray(String)}.
+	public static String[][] split(String[] ss) {
+		if (ss == null)
+			return null;
+		String[][] argss = new String[ss.length][];
+		for (int ix = 0; ix < ss.length; ix++) {
+			String[] args = LangExt.split(ss[ix], "\\s+");
+			argss[ix] = args;
+		}
+		return argss;
+	}
+	
+	/**
+	 * Reverse of {@link #compoundVal(String...).
+	 * 
+	 * @since 0.9.41
+	 * @param v
+	 * @return deserialized compound values
+	 */
+	public static String[] uncombine(String v) {
+		return (String[]) Stream
+				.of(v.split("\n"))
+				.filter(s -> !isNull(s))
+				.toArray();
+	}
+
+	/**
+	 * <pre>
+	assertTrue(startsOneOf("v1234w", new String[] { "w1234", "v1234" }));
+	assertFalse(startsOneOf("v1234w", new String[] { "1v", "v1234wx" }));</pre>
+	 * @param s
+	 * @param prefixes
+	 * @return true if exist a prefix, other wise false
+	 * @since 0.9.39
+	 */
+	public static boolean startsOneOf(String s, String... prefixes) {
+		for (String prefix : prefixes)
+			if (s.startsWith(prefix))
+				return true;
+		return false;
+	}
+	
+	/**Get a string array that composed into string by {@link #toString(Object[])}.
 	 * @param ss
 	 * @return [e0, e1, ...]
 	 */
@@ -36,13 +86,14 @@ public class LangExt {
 				.filter(e -> e != null)
 				.map(e -> e.toString()).collect(Collectors.joining(",", "[", "]"));
 	}
-	
+
 	public static String toString(int[] ss) {
 		return ss == null ? null : Arrays.stream(ss)
 				.mapToObj(e -> String.valueOf(e)).collect(Collectors.joining(",", "[", "]"));
 	}
 
-	/**Get a string array that composed into string by {@link #toString(Object[])}.
+	/** Get a string that can be parsed by {@link #toArray(String)}.<br>
+	 * E.g. "[a, b]" =&gt; ["a", "b"]
 	 * @param str
 	 * @return string[]
 	 */
@@ -53,28 +104,34 @@ public class LangExt {
 	/**Convert 2D array to string: "[{ss[0][1]: ss[0][1]}, {ss[1][0]: ss[1][1]}, ...]"
 	 * @param ss
 	 * @return converted String
-	 */
-	public static String toString(String[][] ss) {
+	 * @since 0.9.38
+	*/
+	public static String str(String[][] ss) {
 		return Arrays.stream(ss)
 				.filter(s -> s != null)
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-	public static String toString(Map<String, ?> map) {
+	/**
+	 * @param map
+	 * @return map in string
+	 * @since 0.9.39
+	 */
+	public static String str(Map<String, ?> map) {
 		if (map == null) return null;
 		else return map.entrySet().stream()
 				.map(e -> "{" + e.getKey() + ": " + e.getValue() + "}")
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-	public static String toString(List<Object[]> lst) {
+	public static String str(List<Object[]> lst) {
 		if (lst == null) return null;
 		else return lst.stream()
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
 	}
-	
+
 	/**Parse formatted string into hash map.
 	 * @param str "k1:v1,k2:v2,..."
 	 * @return hash map
@@ -98,7 +155,32 @@ public class LangExt {
 		return null;
 	}
 
-	/**Is s empty of only space - not logic meanings?
+
+	/**
+	 * <pre>
+	assertFalse(is(null));
+	assertTrue (is(null, true));
+
+	assertFalse(is(new boolean[] {false}));
+	assertFalse(is(new boolean[] {false}, false));
+	assertTrue (is(new boolean[] {true}));
+	assertTrue (is(new boolean[] {}, true));
+	assertTrue (is(new boolean[] {true}, false));
+	 * </pre>
+	 * @param val
+	 * @param deflt
+	 * @return
+	 */
+	public static boolean is(boolean[] val, boolean... deflt) {
+		if (val == null || val.length < 1)
+			return (deflt == null || deflt.length < 1) ? false : is(deflt);
+		else
+			return val[0];
+	}
+
+	/**
+	 * Is s empty of only space - not logic meanings?
+	 * If space can not be ignored, use {@link #isEmpty(CharSequence)}.
 	 * 
 	 * @param s
 	 * @param takeAsNull regex take as null, e.g. "\\s*null\\s*" will take the string "null " as null.
@@ -123,6 +205,136 @@ public class LangExt {
 				: bid == null;
 	}
 
+    // Empty checks
+    //-----------------------------------------------------------------------
+    /**
+     * <p>Checks if a CharSequence is empty ("") or null.</p>
+     *
+     * <pre>
+     * StringUtils.isEmpty(null)      = true
+     * StringUtils.isEmpty("")        = true
+     * StringUtils.isEmpty(" ")       = false
+     * StringUtils.isEmpty("bob")     = false
+     * StringUtils.isEmpty("  bob  ") = false
+     * </pre>
+     *
+     * <p>NOTE: This method is changed in LangExt version 2.0.
+     * It's no longer trims the CharSequence.
+     * That functionality is available in {@link #isblank(String, String...)}.</p>
+     *
+     * @param cs  the CharSequence to check, may be null
+     * @return {@code true} if the CharSequence is empty or null
+     * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
+     */
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
+    
+    /**
+     * @param args
+     * @return args == null || args.length == 0 || args.length == 1 &amp;&amp; args[0] == null;
+     */
+    public static boolean isNull(final Object[] args) {
+    	return args == null || args.length == 0
+    		|| args.length == 1 && args[0] == null
+    		|| args.length == 2 && args[0] == null && args[1] == null;
+    }
+
+    /**
+     * @param args
+     * @return true if the args is null or is zero length
+     */
+    public static boolean isNull(final List<?> args) {
+    	return args == null || args.isEmpty();
+    }
+
+    public static boolean isNull(final Object arg) {
+    	if (arg == null) return true;
+    	
+    	if (arg.getClass().isArray()) {
+			return Array.getLength(arg) == 0 || Array.get(arg, 0) == null;
+    	}
+    	else return false;
+    }
+
+	public static <T> T ifnull(T op, T deflt) {
+		return isblank(op) ? deflt : op;
+	}
+    
+    /**
+     * @param v
+     * @return v != null &amp;&amp; v[0] == v[1] &amp;&amp; v[2] == v[3] &amp;&amp; ...
+     */
+    public static boolean eqs(String ... v) {
+    	if (isNull(v))
+    		return true;
+    	else {
+    		if ((v.length %2) != 0) return false;
+    		for (int i = 0; i < v.length; i+=2) {
+				if (!eq(v[i], v[i+1]))
+					return false;
+    		}
+    		return true;
+    	}
+    }
+
+	public static boolean eq(String v, String u, boolean ... ignoreCase) {
+		return v == null && u == null || (u != null && v != null &&
+				(is(ignoreCase) ? v.equalsIgnoreCase(u) : v.equals(u)));
+	}
+
+	public static boolean eq(String[] v, String u, boolean ... ignoreCase ) {
+		return isNull(v) && u == null || (u != null && v != null && len(v) > 0 &&
+				(is(ignoreCase) ? v[0].equalsIgnoreCase(u) : v[0].equals(u)));
+	}
+
+	public static <T> boolean gt(T a, T b) {
+		return (isblank(a) || isblank(b)) ? false
+				: a instanceof String ? Double.valueOf((String)a) > Double.valueOf((String)b)
+				: a instanceof Integer ? (Integer)a > (Integer)b
+				: a instanceof Float ? (Float)a > (Float)b
+				: a instanceof Double ? (Double)a > (Double)b
+				: a instanceof Long ? (Long)a > (Long)b
+				: a instanceof Short ? (Short)a > (Short)b
+				: ((String)a).compareTo((String) b) > 0;
+	}
+
+	public static <T> boolean lt(T a, T b) {
+		return (isblank(a) || isblank(b)) ? false
+				: a instanceof String ? Double.valueOf((String)a) < Double.valueOf((String)b)
+				: a instanceof Integer ? (Integer)a < (Integer)b
+				: a instanceof Float ? (Float)a < (Float)b
+				: a instanceof Double ? (Double)a < (Double)b
+				: a instanceof Long ? (Long)a < (Long)b
+				: a instanceof Short ? (Short)a < (Short)b
+				: ((String)a).compareTo((String) b) < 0;
+	}
+	
+    public static String units = "BKMGTPEZY";
+
+    public static long filesize(String size) {
+    	if (isblank(size)) return 0;
+    	size = size.toUpperCase();
+
+        int spaceNdx = size.indexOf(" ");    
+        double ret = Double.parseDouble(size.substring(0, spaceNdx));
+        String unitString = size.substring(spaceNdx+1);
+        int unitChar = unitString.charAt(0);
+        int power = units.indexOf(unitChar);
+        boolean isSi = unitString.indexOf('I')!=-1;
+        int factor = 1024;
+        if (isSi)
+            factor = 1000;
+
+        // return new Double(ret * Math.pow(factor, power)).longValue();
+        return (long) (ret * Math.pow(factor, power));
+    }
+    
+    public static Regex regexMysqlCol = new Regex("(\\d+)");
+    public static int imagesize(String measure) {
+		ArrayList<String> typeLen = regexMysqlCol.findGroups(measure);
+		return isNull(typeLen) ? 0 : Integer.valueOf(typeLen.get(0));
+    }
 
 	public static String prefixIfnull(String prefix, String dest) {
 		if (isblank(prefix) || dest.startsWith(prefix))
@@ -370,7 +582,7 @@ public class LangExt {
      * StringUtils.repeat("a", -2) = ""
      * </pre>
      *
-     * @param str  the String to repeat, may be null
+     * @param str  the String to be duplicated, may be null
      * @param repeat  number of times to repeat str, negative treated as zero
      * @return a new String consisting of the original String repeated,
      *  {@code null} if null String input
@@ -414,28 +626,319 @@ public class LangExt {
         }
     }
 
-    // Empty checks
-    //-----------------------------------------------------------------------
+	/**
+	 * see {@link LangExtTest#testEndwith()}
+	 * 
+	 * @param uri
+	 * @param postfix
+	 * @return true if matched
+	 */
+	public static boolean endWith(String uri, String ...postfix) {
+		if (!isEmpty(uri)) {
+			if (isNull(postfix))
+				return true;
+			else {
+				for (String s : postfix)
+					if (uri.endsWith(s))
+						return true;
+				return false;
+			}
+		}
+		else return false;
+	}
+	
+	/**
+	 * @since 0.9.41
+	 * @param s
+	 * @return len
+	 */
+	public static int len(Set<?> s) {
+		return isNull(s) ? 0 : s.size();
+	}
+
+	public static int len(Map<?, ?> s) {
+		return isNull(s) ? 0 : s.size();
+	}
+
+	public static int len(Object[] s) {
+		return isNull(s) ? 0 : s.length;
+	}
+
+	public static int len(List<?> s) {
+		return isNull(s) ? 0 : s.size();
+	}
+
+	public static int len(String s) {
+		return isNull(s) ? 0 : s.length();
+	}
+
+	public static int len(char[] ch) {
+		return isNull(ch) ? 0 : ch.length;
+	}
+	
+	/**
+	 * @since 0.9.33
+	 * 
+	 * @param arr
+	 * @param e
+	 * @return position
+	 */
+	public static int indexOf(char[] arr, char e) {
+		int i = 0;
+		while (i < len(arr)) {
+			if (arr[i] == e)
+				return i;
+			i++;
+		}
+		return -1;
+	}
+	
     /**
-     * <p>Checks if a CharSequence is empty ("") or null.</p>
-     *
-     * <pre>
-     * StringUtils.isEmpty(null)      = true
-     * StringUtils.isEmpty("")        = true
-     * StringUtils.isEmpty(" ")       = false
-     * StringUtils.isEmpty("bob")     = false
-     * StringUtils.isEmpty("  bob  ") = false
-     * </pre>
-     *
-     * <p>NOTE: This method changed in Lang version 2.0.
-     * It no longer trims the CharSequence.
-     * That functionality is available in isBlank().</p>
-     *
-     * @param cs  the CharSequence to check, may be null
-     * @return {@code true} if the CharSequence is empty or null
-     * @since 3.0 Changed signature from isEmpty(String) to isEmpty(CharSequence)
+     * Using for-loop to find the index.
+     * @param arr array
+     * @param target
+     * @return index
+     * @param <T>
+	 * @since 0.9.51
      */
-    public static boolean isEmpty(final CharSequence cs) {
-        return cs == null || cs.length() == 0;
+    public static <T> int indexOf(T[] arr, T target) {
+        for (int index = 0; index < arr.length; index++) {
+            if (arr[index] == target
+                    || target instanceof String && eq((String)arr[index], (String) target)) {
+                return index;
+            }
+        }
+        return -1;
     }
+
+    /**
+     * swap array elemetns 
+     * @param <T>
+     * @param arr
+     * @param a
+     * @param b
+	 * @since 0.9.51
+     */
+    public static <T> void swap(T[] arr, int a, int b) {
+        if (arr != null && 0 <= a && a < arr.length && 0 <= b && b <= arr.length) {
+            T x = arr[b];
+            arr[b] = arr[a];
+            arr[a] = x;
+        }
+    }
+
+    /**
+     * 
+     * @param <T>
+     * @param arr
+     * @param element
+     * @param position
+     * @return new arr copy
+	 * @since 0.9.51
+     */
+    public static <T> T[] insertAt(T[] arr, T element, int position) {
+        List<T> list = new ArrayList<>(Arrays.asList(arr));
+        list.add(position, element);
+        return list.toArray(arr);
+    }
+    
+	/**
+	 * Get array item, null if not exists.
+	 * @param <T>
+	 * @param arr
+	 * @param x
+	 * @return the element
+	 * @since 0.9.50
+	 */
+	public static <T> T ix(T[] arr, int x) {
+		return (len(arr) > x) ? arr[x] : null;
+	}
+
+	/**
+	 * Get array item, null if not exists.
+	 * @param <T>
+	 * @param arr
+	 * @param x
+	 * @return item
+	 * @since 0.9.50
+	 */
+	public static <T> T ix(ArrayList<T> arr, int x) {
+		return (len(arr) > x) ? arr.get(x) : null;
+	}
+
+	/**
+	 * @since 0.9.33
+	 * @param c
+	 * @return string
+	 */
+	public static String str(AbstractCollection<String> c) {
+		return c.stream().collect(Collectors.joining(","));
+	}
+	
+	/**
+	 * @since 0.9.33
+	 * @param v
+	 * @return string
+	 */
+	public static String str(int v) {
+		return String.valueOf(v);
+	}
+	
+	/**
+	 * @since 0.9.33
+	 * @param v
+	 * @return string
+	 */
+	public static String str(int[] v) {
+		return Arrays.stream(v).mapToObj(String::valueOf).collect(Collectors.joining(","));
+	}
+
+	/**
+	 * @since 0.9.33
+	 * @param v
+	 * @return string
+	 */
+	public static String str(Object[] v) {
+		return Arrays.stream(v).map(o -> o.toString()).collect(Collectors.joining(","));
+	}
+
+	/**
+	 * Equivalent of String.format().
+	 * 
+	 * <p>Tests:</p>
+	 * <pre>
+	 * assertEquals("1", str("%d", new Integer[] {1}));
+	 * ...
+	 * assertEquals("1 2 3 4 5", str("%d %d %d %d %d", new Integer[] {1, 2, 3, 4, 5}));
+	 * </pre>
+	 * @since 0.9.46
+	 * @param template
+	 * @param args
+	 * @return string
+	 */
+	public static String str(String template, Object[] args) {
+		int len = len(args);
+		if (len == 0) return template;
+
+		int ix4  = ix(template, "%", 5);
+		return (args == null) ? template
+			 : (len == 1) ? String.format(template, args[0])
+			 : (len == 2) ? String.format(template, args[0], args[1])
+			 : (len == 3) ? String.format(template, args[0], args[1], args[2])
+			 : (len == 4) ? String.format(template, args[0], args[1], args[2], args[3])
+			 : String.format(template.substring(0, ix4), args[0], args[1], args[2], args[3])
+				+ str(template.substring(ix4), Arrays.copyOfRange(args, 4, len))
+			 ;
+	}
+	
+	/**
+	 * Find the i-th repeat of match occurrence in f.
+	 * 
+	 * <p>Test:</p><pre>
+	 * assertEquals(0,  ix("%d %d %d %d %d %d", "%", 1));
+	 * assertEquals(3,  ix("%d %d %d %d %d %d", "%", 2));
+	 * assertEquals(6,  ix("%d %d %d %d %d %d", "%", 3));
+	 * assertEquals(15, ix("%d %d %d %d %d %d", "%", 6));
+	 * assertEquals(-1, ix("%d %d %d %d %d %d", "%", 7));
+	 * assertEquals(-1, ix("%d %d %d %d %d %d", "%", 0));
+	</pre>
+	 * @param f
+	 * @param match
+	 * @param repeat
+	 * @return i-th index
+	 * @since 0.9.46
+	 */
+	static int ix (String f, String match, int repeat) {
+		if (repeat <= 0)
+			return -1;
+		
+		int currentIndex = f.indexOf(match);
+		while (currentIndex >= 0 && repeat > 1) {
+			int x = f.indexOf(match, currentIndex + 1);
+			if (x > currentIndex) {
+				currentIndex = x;
+				repeat--;
+			}
+			else return -1;
+		}
+		return repeat > 1 ? -1 : currentIndex;
+	}
+	
+	/**
+	 * @since 0.9.41
+	 * @param s
+	 * @return string
+	 */
+	public static String trim(String s) {
+		if (isNull(s)) return null;
+		else return s.trim();
+	}
+
+	/**
+	 * Join strings.
+	 * 
+	 * @since 0.9.33
+	 * @param sep, null as ","
+	 * @param vi "a", null, "b", ...
+	 * @return "a,b,..."
+	 */
+	public static String join(String sep, String ... vi) {
+		if (sep == null) sep = ",";
+		return vi == null ? null
+			: Stream.of(vi).filter(v -> v != null).collect(Collectors.joining(sep));
+	}
+
+	/**
+	 * Join strings, escape sep with esc. If sep = "\n", esc = "\\n".
+	 * 
+	 * <p>It's the user's responsiblity to unescape the result value or distinguish what's messed up.</p>
+	 * @see #joinEsc(String, String, String...)
+	 * 
+	 * @since 0.9.33
+	 * @param sep, null as ",", e.g. "\n"
+	 * @param esc, replacement, e.g. "\\n"
+	 * @param vi "a\nx", null, "bb", ...
+	 * @return "a\\nx\nb\n..."
+	 */
+	public static String join(final String sep, String esc, String ... vi) {
+		final String sap = (sep == null) ? "," : sep;
+		return vi == null ? null
+				: Stream.of(vi)
+				.filter(v -> v != null)
+				.map(v -> v.replaceAll(sap, esc))
+				.collect(Collectors.joining(sep));
+	}
+
+	/**
+	 * Join strings, escape sep with esc. If sep = "\n", esc = "\\n",
+	 * the returned string is the same as Funcall.compound(), and can
+	 * be restored using StringEscapeUtils.unescapeJava(returned).
+	 * 
+	 * @since 0.9.33
+	 * @param sep
+	 * @param esc
+	 * @param vi
+	 * @return string
+	 */
+	public static String joinEsc(String sep, String esc, String... vi) {
+		final String sap = (sep == null) ? "," : sep;
+		return vi == null ? null
+				: Stream.of(vi)
+				.filter(v -> v != null)
+				.map(v -> v
+						.replaceAll("\\\\", "\\\\\\\\")
+						.replaceAll(sap, esc))
+				.collect(Collectors.joining(sep));
+	}
+
+	/**
+	 * Concatenate strings into a "\n" separated string. 
+	 * @since 0.9.33
+	 * @param vals
+	 * @return string
+	 */
+	public static String compoundVal(String... vals) {
+		return joinEsc("\n", "\\n", vals);
+	}
 }
+
