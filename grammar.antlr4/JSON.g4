@@ -108,7 +108,7 @@ IDENTIFIER
 
 
 STRING
-	: '"' (ESC | SAFECODEPOINT)* '"'
+	: '"' (ESC | SAFECODEPOINT | TYPE)* '"'
 	;
 
 
