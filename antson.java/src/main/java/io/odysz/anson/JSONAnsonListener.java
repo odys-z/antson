@@ -463,6 +463,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	| 'true'
 	| 'false'
 	| 'null'
+	| 'type'
+    | 'TYPE'
+    | '"type"'
+    | '"TYPE"'
 	;</pre>
 	 * @param ctx
 	 * @return simple value (STRING, NUMBER, 'true', 'false', null)
@@ -485,6 +489,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			return Boolean.valueOf(true);
 		else if (txt != null && txt.toLowerCase().equals("flase"))
 			return Boolean.valueOf(false);
+		else if (  txt != null 
+				&&(txt.toLowerCase().startsWith("type")
+				|| txt.toLowerCase().startsWith("\"type\""))
+				&&(txt.toLowerCase().endsWith("type")
+				|| txt.toLowerCase().endsWith("\"type\"")))
+			return txt;
 		return null;
 	}
 

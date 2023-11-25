@@ -1,4 +1,4 @@
-// Generated from JSON.g4 by ANTLR 4.9.2
+// Generated from JSON.g4 by ANTLR 4.13.1
 package gen.antlr.json;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -97,4 +97,14 @@ public interface JSONListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitValue(JSONParser.ValueContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link JSONParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void enterType(JSONParser.TypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link JSONParser#type}.
+	 * @param ctx the parse tree
+	 */
+	void exitType(JSONParser.TypeContext ctx);
 }

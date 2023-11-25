@@ -338,7 +338,8 @@ class Test_JProtocol {
 				+ "\"header\":{\"type\":\"io.odysz.semantic.jprotocol.test.T_AnsonHeader\",\"ssid\":\"3SH2Rqsp\",\"uid\":\"ody\"},"
 				+ "\"body\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\","
 				+ "\"a\":\"I\",\"parent\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\",\"uri\":\"/c/myconn\","
-				+ "\"nvs\":[\"type\"],"
+				// This is what 0.9.57 fixed
+				+ "\"nvs\":[[\"type\"\"type\",\"type\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.oz.album.tier.PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"],[\"shareFlag\",\"priv\"],[\"shareby\",\"Ody\"]],"
 				+ "\"postUpds\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnUpdateReq\",\"a\":\"D\",\"uri\":\"/c/myconn\",\"mtabl\":\"h_photo_orgs\",\"nvs\":[],\"where\":[[\"=\",\"org\",\"'C0000001'\"]],"
 				+ "\"postUpds\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\",\"a\":\"I\",\"uri\":null,\"mtabl\":\"h_photo_orgs\",\"nvs\":[],\"nvss\":[[[\"\",null],[\"pid\",\"C0000001\"]],[[\"\",null],[\"pid\",\"C0000001\"]],[[\"\",null],[\"pid\",\"C0000001\"]]],\"cols\":[\"\",\"pid\"]}]}],"
 				+ "\"cols\":[\"shareFlag\"]}]}";
@@ -348,6 +349,8 @@ class Test_JProtocol {
 		assertNotNull(msg.body(0));
 		assertNotNull(msg.body(0).postUpds);
 		assertNotNull(msg.body(0).postUpds.get(0));
+		assertEquals ("\"type\"\"type\"", msg.body(0).nvs.get(0)[0]);
+		assertEquals ("\"type\"", msg.body(0).nvs.get(0)[1]);
 		assertNotNull(msg.body(0).postUpds.get(0).postUpds);
 		assertNotNull(msg.body(0).postUpds.get(0).postUpds.get(0).nvss);
 		assertEquals("", msg.body(0).postUpds.get(0).postUpds.get(0).nvss.get(0).get(0)[0]);
