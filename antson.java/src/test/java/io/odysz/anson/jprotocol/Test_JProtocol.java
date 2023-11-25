@@ -28,6 +28,7 @@ import io.odysz.semantic.jprotocol.test.T_SemanticObject;
 import io.odysz.semantic.jprotocol.test.T_SessionInf;
 import io.odysz.semantic.jprotocol.test.T_TransException;
 import io.odysz.semantic.jprotocol.test.T_UserReq;
+import io.odysz.semantic.jprotocol.test.U.T_AnInsertReq;
 
 class Test_JProtocol {
 	static final String iv64 = "iv: I'm base64";
