@@ -1,6 +1,7 @@
 package io.odysz.anson.jprotocol;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -22,16 +23,17 @@ import io.odysz.semantic.jprotocol.test.T_AnSessionResp;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg.MsgCode;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg.T_Port;
+import io.odysz.semantic.jprotocol.test.U.T_AnInsertReq;
 import io.odysz.semantic.jprotocol.test.T_AnsonResp;
 import io.odysz.semantic.jprotocol.test.T_SemanticObject;
 import io.odysz.semantic.jprotocol.test.T_SessionInf;
 import io.odysz.semantic.jprotocol.test.T_TransException;
 import io.odysz.semantic.jprotocol.test.T_UserReq;
 
-class T_JProtocol {
+class Test_JProtocol {
 	static final String iv64 = "iv: I'm base64";
 	static final String tk64 = "tk: I'm base64";
-	static final String uid = "test-id";
+	static final String uid  = "test-id";
 	static final String ssid = "ssid-base64";
 
 	@BeforeEach
@@ -222,7 +224,7 @@ class T_JProtocol {
 	@Test
 	void test_echo() throws AnsonException, IOException {
 		T_EchoReq req = new T_EchoReq(null);
-		T_AnsonMsg<T_AnsonResp> msg = T_AnsonMsg.ok(T_Port.echo, req.toString());
+		T_AnsonMsg<T_AnsonResp> msg = T_AnsonMsg.ok(T_Port.echo, req.toBlock());
 		/* Utils.logi(msg.toBlock());
 		 * 
 {"type": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "code": "ok", "opts": null, "port": "echo", "header": null, "body": [{"type": "io.odysz.semantic.jprotocol.test.T_AnsonResp", "rs": null, "parent": "io.odysz.semantic.jprotocol.test.T_AnsonMsg", "a": null, "m": "{\"type\": \"io.odysz.anson.jprotocol.T_EchoReq\", \"parent\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", \"a\": null, \"uri\": null}\
@@ -330,6 +332,28 @@ class T_JProtocol {
 		assertEquals("学习压力", ((String[][]) q1)[0][1].toString());
 	}
 
+	@Test
+	void test_nest_postUpds() {
+		String jblock = "{\"type\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\","
+				+ "\"version\":\"1.0\",\"seq\":530,\"port\":\"insert\","
+				+ "\"header\":{\"type\":\"io.odysz.semantic.jprotocol.test.T_AnsonHeader\",\"ssid\":\"3SH2Rqsp\",\"uid\":\"ody\"},"
+				+ "\"body\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\","
+				+ "\"a\":\"I\",\"parent\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\",\"uri\":\"/c/myconn\","
+				+ "\"nvs\":[\"type\"],"
+				+ "\"postUpds\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnUpdateReq\",\"a\":\"D\",\"uri\":\"/c/myconn\",\"mtabl\":\"h_photo_orgs\",\"nvs\":[],\"where\":[[\"=\",\"org\",\"'C0000001'\"]],"
+				+ "\"postUpds\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\",\"a\":\"I\",\"uri\":null,\"mtabl\":\"h_photo_orgs\",\"nvs\":[],\"nvss\":[[[\"\",null],[\"pid\",\"C0000001\"]],[[\"\",null],[\"pid\",\"C0000001\"]],[[\"\",null],[\"pid\",\"C0000001\"]]],\"cols\":[\"\",\"pid\"]}]}],"
+				+ "\"cols\":[\"shareFlag\"]}]}";
+
+		@SuppressWarnings("unchecked")
+		T_AnsonMsg<T_AnInsertReq> msg = (T_AnsonMsg<T_AnInsertReq>) Anson.fromJson(jblock);
+		assertNotNull(msg.body(0));
+		assertNotNull(msg.body(0).postUpds);
+		assertNotNull(msg.body(0).postUpds.get(0));
+		assertNotNull(msg.body(0).postUpds.get(0).postUpds);
+		assertNotNull(msg.body(0).postUpds.get(0).postUpds.get(0).nvss);
+		assertEquals("", msg.body(0).postUpds.get(0).postUpds.get(0).nvss.get(0).get(0)[0]);
+	}
+	
 	static <U extends T_AnsonResp> T_AnsonMsg<U> ok(T_Port p, U body) {
 		T_AnsonMsg<U> msg = new T_AnsonMsg<U>(p, MsgCode.ok);
 		msg.body(body);
