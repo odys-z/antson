@@ -37,7 +37,7 @@ json
 	;
 
 envelope // top obj
-	: '{' type_pair (',' pair)* '}'
+	: type_pair (',' pair)* '}'
 	;
 
 obj
@@ -53,7 +53,7 @@ type_pair
 	// Type can't specified as a list because it's a type_pair also a property of object {}.
 	// Object can not be an array.
 	// : TYPE ':' ('[' qualifiedName ']' | qualifiedName)	// [] means it's a list
-	: TYPE ':' qualifiedName
+	: type ':' qualifiedName
 	;
 
 qualifiedName
@@ -88,17 +88,18 @@ value
 	| 'true'
 	| 'false'
 	| 'null'
+    | ('type' | 'TYPE' | '"type"' | '"TYPE"')+
 	;
 
 
 // section: type name extension
 // ody: for grammar, see
 // https://github.com/antlr/grammars-v4/blob/master/java/JavaLexer.g4
-TYPE
-	: 'TYPE'
-	| '"TYPE"'
-	| 'type'
-	| '"type"'
+type
+	: '{' 'TYPE'
+	| '{' '"TYPE"'
+	| '{' 'type'
+	| '{' '"type"'
 	;
 
 // \- since - means "range" inside [...]
@@ -108,7 +109,7 @@ IDENTIFIER
 
 
 STRING
-	: '"' (ESC | SAFECODEPOINT | TYPE)* '"'
+	: '"' (ESC | SAFECODEPOINT)* '"'
 	;
 
 

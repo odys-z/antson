@@ -1,4 +1,4 @@
-// Generated from JSON.g4 by ANTLR 4.9.2
+// Generated from JSON.g4 by ANTLR 4.13.1
 package gen.antlr.json;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  * which can be extended to create a listener which only needs to handle a subset
  * of the available methods.
  */
+@SuppressWarnings("CheckReturnValue")
 public class JSONBaseListener implements JSONListener {
 	/**
 	 * {@inheritDoc}
@@ -119,6 +120,18 @@ public class JSONBaseListener implements JSONListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitValue(JSONParser.ValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterType(JSONParser.TypeContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitType(JSONParser.TypeContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
