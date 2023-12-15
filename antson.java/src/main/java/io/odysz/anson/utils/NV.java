@@ -10,8 +10,8 @@ import io.odysz.anson.Anson;
  */
 public class NV extends Anson {
 
-	protected String name;
-	protected Object value;
+	public String name;
+	public Object value;
 
 	public NV nv(String n, Object v) {
 		this.name = n;

@@ -323,14 +323,19 @@ class AnsonTest {
 	 */
 	@Test
 	void testFromJson_list2d() throws AnsonException {
-		AnsTListPhoto cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [["
+		T_ListPhoto cll = (T_ListPhoto) Anson.fromJson("{type: io.odysz.anson.T_ListPhoto, ansp: [["
 				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\", clientpath: \"raw\\\\res\\\\my.jpg\" },"
-				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\", clientpath: \"raw/res/my.jpg\"} ]]}");
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\", clientpath: \"raw/res/my.jpg\"} ]],"
+				+ "\"checkRels\":[[{\"name\":\"oid\",\"value\":\"ap01\"},{\"name\":\"pid\",\"value\":\"2023_12\"}]]}");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(2, cll.ansp.get(0).length);
 		assertEquals("2", cll.ansp.get(0)[1].pid);
 		assertEquals("raw\\res\\my.jpg", cll.ansp.get(0)[0].clientpath);
 		assertEquals("raw/res/my.jpg", cll.ansp.get(0)[1].clientpath);
+		assertEquals("oid", cll.checkRels[0][0].name);
+		assertEquals("ap01", cll.checkRels[0][0].value);
+		assertEquals("pid", cll.checkRels[0][1].name);
+		assertEquals("2023_12", cll.checkRels[0][1].value);
 		
 		/* FIXME error report: line 1:47 extraneous input '<EOF>' expecting {',', '}'}
 		 * This should be a grammar error.
@@ -340,7 +345,7 @@ class AnsonTest {
 			| '[' ']'
 			;
 		*/
-		cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [[]]");
+		cll = (T_ListPhoto) Anson.fromJson("{type: io.odysz.anson.T_ListPhoto, ansp: [[]]");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(0, cll.ansp.get(0).length);
 

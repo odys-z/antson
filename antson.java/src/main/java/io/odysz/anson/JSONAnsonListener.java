@@ -1,5 +1,7 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt.isblank;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -244,7 +246,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		try {
 			HashMap<String, Field> fmap = stack.size() > 0 ?
 					top.fmap : null;
-			if (fmap == null || !fmap.containsKey(top.parsingProp)) {
+			
+			if (top.isInList() && !isblank(top.valType)) {
+			}
+			else if (fmap == null || !fmap.containsKey(top.parsingProp)) {
 				// In a list, found object, if not type specified with annotation, must failed.
 				// But this is confusing to user. Set some report here.
 				if (top.isInList() || top.isInMap())
@@ -253,11 +258,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 							+ "E.g. Java field example: @AnsonField(valType=\"io.your.type\")\n"
 							+ "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
 							top.enclosing.getClass(), ctx.getText());;
-				throw new AnsonException(0, "Obj type not found.\n\tproperty / field name: %s,\n\tenclosing type: %s %s",
+				throw new AnsonException(0, "Obj type not found.\n\tproperty / field name: %s,\n\tenclosing type: %s",
 						top.parsingProp, top.enclosing == null ? "null" : top.enclosing.getClass().getName());
 			}
 
-			Class<?> ft = fmap.get(top.parsingProp).getType();
+			Class<?> ft = fmap.containsKey(top.parsingProp) ? fmap.get(top.parsingProp).getType()
+						: Class.forName(top.valType);
 			if (Map.class.isAssignableFrom(ft)) {
 				// entering a map
 				push(ft, null);
@@ -399,7 +405,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	    	if (valss != null && valss.length > 1)
 	    		return new String[] {eleType, valss[1]};
-	    	else return new String[] {eleType};
+	    	// else return new String[] {eleType};
+	    	else return parseArrSubtypes(eleType);
 	    }
 	    else {
 	    	// not a parameterized, not an array, try annotation
@@ -407,6 +414,31 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			String tn = a == null ? null : a.valType();
 			return parseElemType(tn);
 	    }
+	}
+	
+	/**
+	 * Expand array's sub-types 
+	 * @param typ e. g. io.odysz.anson.utils.NV[]
+	 * @return e. g. [ io.odysz.anson.utils.NV[], io.odysz.anson.utils.NV]
+	 */
+	private static String[] parseArrSubtypes(String typ) {
+		if (isblank(typ)) return null;
+		ArrayList<String> tns = new ArrayList<String>();
+		tns.add(typ);
+		while (typ.startsWith("[")) {
+			if (typ.startsWith("[L"))
+				typ = typ.replace("^[L", "");
+			else
+				typ = typ.replace("^[", "");
+			tns.add(typ);
+		}
+
+		while (typ.endsWith("[]")) { 
+			typ = typ.replaceAll("\\[\\]$", "");
+			tns.add(typ);
+		}
+		
+		return tns.toArray(new String[0]);
 	}
 
 	/**
@@ -546,7 +578,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 		// figure the type if possible - convert to array
 		String et = top.elemType();
-		if (!LangExt.isblank(et, "\\?.*")) // TODO debug: where did this type comes from?
+		if (!LangExt.isblank(et, "\\?.*"))
 			try {
 				Class<?> arrClzz = Class.forName(et);
 				if (arrClzz.isArray())
@@ -844,9 +876,15 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				}
 			}
 			else if (Object.class.isAssignableFrom(ft)) {
-				Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
-						fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
 				String v = ctx.getChild(2).getText();
+				
+				if (!(v.startsWith("\"") && v.endsWith("\"")))
+					Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
+						fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
+				else {
+					v = v.replaceFirst("\"", "");
+					v = v.replaceAll("\"$", "");
+				}
 
 				if (!LangExt.isblank(v, "null"))
 					f.set(enclosing, v);
