@@ -115,8 +115,12 @@ public class Anson implements IJsonable {
 						char c = f.getChar(anson);
 						stream.write(c == 0 ? '0' : c);
 					}
-					else if (f.getType().isPrimitive())
-						stream.write(String.valueOf(f.get(anson)).getBytes(StandardCharsets.UTF_8));
+					else if (f.getType().isPrimitive()) {
+						String str = String.valueOf(f.get(anson));
+						if (!isNull(opts) && opts[0].escape4DB)
+							str.replace("'", "''");
+						stream.write(str.getBytes(StandardCharsets.UTF_8));
+					}
 				}
 			} catch (IllegalArgumentException | IllegalAccessException e1) {
 				throw new AnsonException(0, e1.getMessage());
@@ -432,6 +436,8 @@ public class Anson implements IJsonable {
 
 			else if (c == '\\')
 				b.append("\\\\");
+			else if ( !isNull(opts) && opts[0].escape4DB && c == '\'')
+				b.append("\'\'");
 			else b.append((char)c);
 		});
 		return b.toString().getBytes();

@@ -2,13 +2,13 @@ package io.odysz.anson;
 
 import java.util.ArrayList;
 
-import io.odysz.anson.utils.NV;
+import io.odysz.anson.utils.T_NV;
 
 class T_ListPhoto extends Anson {
 
 	ArrayList<AnsPhoto[]> ansp;
 
-	public NV[][] checkRels;
+	public T_NV[][] checkRels;
 	
 	public T_ListPhoto() {
 	}
