@@ -9,7 +9,7 @@ Primary Data Types
 
 ::
 
-    json value         Java                C++ 2013                Typescript
+    json value         Java                C++ 2014                Typescript
 	STRING        java.lang.String         string                   string
 	NUMBER        int, double              int, double              number
 	obj           HashMap                  map                      object
@@ -26,13 +26,7 @@ Primary Data Types
 Basic development process with Antson plugin
 --------------------------------------------
 
-1. create sample data used for binding with Anclient typescript, @anclient/anreact
-<<<<<<< HEAD
-2. requests & response package, code snipts (or base class) at serverside are generated
-3. load @anclient/anreact application UI components
-4. implement serverside semantier's functions
-=======
-2. requests & response package, code snipts (or base class) at serverside are generated 
-3. load @anclient/anreact application UI components
-4. implement serverside semantier's functions 
->>>>>>> master
+1. Create sample data used for binding with Anclient typescript, @anclient/anreact
+2. Requests & response packages, code snipts (or base class) at serverside in Java, c14/typescript/java at client are generated
+3. Load @anclient/anreact application UI components
+4. Implement serverside semantier's functions
