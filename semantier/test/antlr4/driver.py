@@ -4,6 +4,7 @@ from gen.ExprLexer import ExprLexer
 from gen.ExprParser import ExprParser
 from VisitorInterp import VisitorInterp
 
+
 def main(argv):
     print(argv[1])
     input_stream = FileStream(argv[1])
@@ -16,6 +17,7 @@ def main(argv):
     else:
         vinterp = VisitorInterp()
         vinterp.visit(tree)
+
 
 if __name__ == '__main__':
     main(sys.argv)

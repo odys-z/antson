@@ -1,4 +1,4 @@
-# Generated from Expr.g4 by ANTLR 4.13.1
+# Generated from Expr.parser by ANTLR 4.13.1
 # encoding: utf-8
 from antlr4 import *
 from io import StringIO
@@ -28,7 +28,7 @@ def serializedATN():
 
 class ExprParser ( Parser ):
 
-    grammarFileName = "Expr.g4"
+    grammarFileName = "Expr.parser"
 
     atn = ATNDeserializer().deserialize(serializedATN())
 

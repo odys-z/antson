@@ -1,11 +1,12 @@
 from gen.ExprParser import ExprParser
 from gen.ExprVisitor import ExprVisitor
 
+
 class VisitorInterp(ExprVisitor):
-    def visitAtom(self, ctx:ExprParser.AtomContext):
+    def visitAtom(self, ctx: ExprParser.AtomContext):
         return int(ctx.getText())
 
-    def visitExpr(self, ctx:ExprParser.ExprContext):
+    def visitExpr(self, ctx: ExprParser.ExprContext):
         childcnt = ctx.getChildCount()
         if childcnt == 3:
             if ctx.getChild(0).getText() == "(":
@@ -22,6 +23,8 @@ class VisitorInterp(ExprVisitor):
                 return v1 * v2
             if op == "/":
                 return v1 / v2
+            if op == "**":
+                return v1 ** v2
             return 0
         if childcnt == 2:
             opc = ctx.getChild(0).getText()
@@ -41,7 +44,7 @@ class VisitorInterp(ExprVisitor):
             return self.visit(ctx.getChild(0))
         return 0
 
-    def visitStart_(self, ctx:ExprParser.Start_Context):
+    def visitStart_(self, ctx: ExprParser.Start_Context):
         for i in range(0, ctx.getChildCount(), 2):
             print(self.visit(ctx.getChild(i)))
         return 0

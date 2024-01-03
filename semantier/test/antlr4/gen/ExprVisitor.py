@@ -1,4 +1,4 @@
-# Generated from Expr.g4 by ANTLR 4.13.1
+# Generated from Expr.parser by ANTLR 4.13.1
 from antlr4 import *
 if "." in __name__:
     from .ExprParser import ExprParser
