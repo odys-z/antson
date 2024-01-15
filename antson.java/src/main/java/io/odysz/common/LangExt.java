@@ -131,6 +131,24 @@ public class LangExt {
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
 	}
+	
+	public static boolean bool(String v) {
+		return v == null ? false
+				:  v.equalsIgnoreCase("1")
+				|| v.equalsIgnoreCase("true")
+				|| v.equalsIgnoreCase("t")
+				|| v.equalsIgnoreCase("t")
+				|| v.equalsIgnoreCase("y")
+				|| v.equalsIgnoreCase("yes");
+	}
+
+	public static boolean bool(int v) {
+		return v != 0; 
+	}
+
+	public static boolean bool(float v) {
+		return v != 0.0; 
+	}
 
 	/**Parse formatted string into hash map.
 	 * @param str "k1:v1,k2:v2,..."

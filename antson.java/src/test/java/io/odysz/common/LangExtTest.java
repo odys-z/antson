@@ -1,11 +1,27 @@
 package io.odysz.common;
 
-import static io.odysz.common.LangExt.*;
+import static io.odysz.common.LangExt.bool;
+import static io.odysz.common.LangExt.endWith;
+import static io.odysz.common.LangExt.eq;
+import static io.odysz.common.LangExt.eqs;
+import static io.odysz.common.LangExt.filesize;
+import static io.odysz.common.LangExt.gt;
+import static io.odysz.common.LangExt.imagesize;
+import static io.odysz.common.LangExt.indexOf;
+import static io.odysz.common.LangExt.is;
+import static io.odysz.common.LangExt.isNull;
+import static io.odysz.common.LangExt.isblank;
+import static io.odysz.common.LangExt.ix;
+import static io.odysz.common.LangExt.join;
+import static io.odysz.common.LangExt.joinEsc;
+import static io.odysz.common.LangExt.lt;
+import static io.odysz.common.LangExt.startsOneOf;
+import static io.odysz.common.LangExt.str;
+import static io.odysz.common.LangExt.trim;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +41,28 @@ class LangExtTest {
 		assertTrue (is(new boolean[] {true}));
 		assertTrue (is(new boolean[] {}, true));
 		assertTrue (is(new boolean[] {true}, false));
+	}
+	
+	@Test
+	void testBool() {
+		assertFalse(bool(null));
+		assertTrue (bool("1"));
+		assertFalse (bool("0"));
+		assertTrue (bool("true"));
+		assertTrue (bool("True"));
+		assertTrue (bool("T"));
+		assertFalse (bool("False"));
+		assertTrue (bool("y"));
+		assertTrue (bool("1"));
+		assertTrue (bool("Y"));
+		assertTrue (bool("Yes"));
+		assertFalse (bool("none"));
+		assertFalse (bool("undefined"));
+		assertFalse (bool("null"));
+
+		assertFalse (bool(0));
+		assertTrue (bool(1));
+		assertTrue (bool(0.1f));
 	}
 
 	
