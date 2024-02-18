@@ -63,18 +63,30 @@ public class LangExt {
 
 	/**
 	 * <pre>
-	assertTrue(startsOneOf("v1234w", new String[] { "w1234", "v1234" }));
-	assertFalse(startsOneOf("v1234w", new String[] { "1v", "v1234wx" }));</pre>
+	assertTrue(prefixWith("v1234w", new String[] { "w1234", "v1234" }));
+	assertFalse(prefixWith("v1234w", new String[] { "1v", "v1234wx" }));</pre>
 	 * @param s
 	 * @param prefixes
 	 * @return true if exist a prefix, other wise false
-	 * @since 0.9.39
+	 * @since 0.9.63
 	 */
-	public static boolean startsOneOf(String s, String... prefixes) {
+	public static boolean prefixWith(String s, String... prefixes) {
 		for (String prefix : prefixes)
 			if (s.startsWith(prefix))
 				return true;
 		return false;
+	}
+
+	/**
+	 * See {@link #prefixWith(String, String...)}
+	 * 
+	 * @param s
+	 * @param prefixes
+	 * @return
+	 * @since 0.9.39
+	 */
+	public static boolean startsOneOf(String s, String... prefixes) {
+		return prefixWith(s, prefixes);
 	}
 	
 	/**Get a string array that composed into string by {@link #toString(Object[])}.
@@ -272,6 +284,8 @@ public class LangExt {
     	if (arg.getClass().isArray()) {
 			return Array.getLength(arg) == 0 || Array.get(arg, 0) == null;
     	}
+    	else if (arg instanceof String)
+    		return isblank((String) arg);
     	else return false;
     }
 

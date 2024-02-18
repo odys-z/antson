@@ -357,6 +357,18 @@ class Test_JProtocol {
 		assertEquals("", msg.body(0).postUpds.get(0).postUpds.get(0).nvss.get(0).get(0)[0]);
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Test
+	void test_Resp_with_Exp() {
+		String msg = "{\"type\": \"io.odysz.semantic.jprotocol.test.T_SemanticObject\", "
+				+ "\"props\": {\"code\": 0, "
+				+ "\"reasons\": [\"Found existing file for device & client path.\", \"omni\", \"src/test/res/64x48.png\"]}}\n";
+		
+		T_SemanticObject obj = (T_SemanticObject) Anson.fromJson(msg);
+		assertEquals("0", obj.props().get("code"));
+		assertEquals(3, ((ArrayList<String>)obj.props().get("reasons")).size());
+	}
+	
 	static <U extends T_AnsonResp> T_AnsonMsg<U> ok(T_Port p, U body) {
 		T_AnsonMsg<U> msg = new T_AnsonMsg<U>(p, MsgCode.ok);
 		msg.body(body);

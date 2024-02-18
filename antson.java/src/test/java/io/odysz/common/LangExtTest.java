@@ -98,6 +98,9 @@ class LangExtTest {
 		assertTrue(isNull(new double[] {}));
 		
 		assertTrue(isNull(new String[] {}));
+
+		assertTrue(isNull(""));
+		assertFalse(isNull(0));
 	}
 	
 	@Test
