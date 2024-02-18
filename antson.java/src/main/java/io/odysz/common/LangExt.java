@@ -902,7 +902,7 @@ public class LangExt {
 	 * @return string
 	 */
 	public static String trim(String s) {
-		if (isNull(s)) return null;
+		if (s == null) return null;
 		else return s.trim();
 	}
 
