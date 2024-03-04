@@ -725,6 +725,16 @@ public class LangExt {
 		return -1;
 	}
 	
+	
+	/**
+	 * @param str
+	 * @param s comma separated element list, without space following comma, e.g. "a-1,b-2,..."
+	 * @return the index of the first occurrence of the specified substring,or -1 if there is no such occurrence.
+	 */
+	public static int indexOf(String str, String s) {
+		return ("," + str + ",").indexOf("," + s + ",");
+	}
+	
     /**
      * Using for-loop to find the index.
      * @param arr array
@@ -971,6 +981,34 @@ public class LangExt {
 	 */
 	public static String compoundVal(String... vals) {
 		return joinEsc("\n", "\\n", vals);
+	}
+	
+	/**
+	 * <p>Remove element pattern from string of multiple elements, separated with 'sep'.</p>
+	 * <pre>
+	 * Test
+	 * assertEquals("v1,v3", removele("v1,v2,v3", "v2"));
+	 * assertEquals("v1", removele("v1,v2", "v2"));
+	 * assertEquals("v3", removele("v2,v3", "v2"));
+	 * assertEquals("", removele("v2", "v2"));
+	 * assertEquals("", removele("", "v2"));
+	 * assertEquals("", removele("", ""));
+	 * assertEquals("", removele(null, null));
+	 *
+	 * assertEquals("v1:v2.1,v2.2:v3", removele("v1:v2.1,v2.2:v3", "v2", ":"));
+	 * assertEquals("v1:v2.1,v2.2", removele("v1:v2.1,v2.2:v3", "v3", ":"));
+	 * <pre>
+	 * @param from e.g. "v1,v2,v3"
+	 * @param p e.g. "v2"
+	 * @param sep default ","
+	 * @return new string, e.g. "v1,v3"
+	 * @since 0.9.64
+	 */
+	public static String removele(String from, String p, String... sep) {
+		String s = isNull(sep) ? "," : sep[0];
+
+		return isblank(from) ? ""
+			: (s + from.trim() + s).replaceAll(s + p + s, s).replaceAll("^"+s, "").replaceAll(s+"$", "");
 	}
 }
 

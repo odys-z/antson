@@ -1,23 +1,7 @@
 package io.odysz.common;
 
-import static io.odysz.common.LangExt.bool;
-import static io.odysz.common.LangExt.endWith;
-import static io.odysz.common.LangExt.eq;
-import static io.odysz.common.LangExt.eqs;
-import static io.odysz.common.LangExt.filesize;
-import static io.odysz.common.LangExt.gt;
-import static io.odysz.common.LangExt.imagesize;
-import static io.odysz.common.LangExt.indexOf;
-import static io.odysz.common.LangExt.is;
-import static io.odysz.common.LangExt.isNull;
-import static io.odysz.common.LangExt.isblank;
-import static io.odysz.common.LangExt.ix;
-import static io.odysz.common.LangExt.join;
-import static io.odysz.common.LangExt.joinEsc;
-import static io.odysz.common.LangExt.lt;
-import static io.odysz.common.LangExt.startsOneOf;
-import static io.odysz.common.LangExt.str;
-import static io.odysz.common.LangExt.trim;
+import static io.odysz.common.LangExt.*;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -302,4 +286,18 @@ class LangExtTest {
 		assertEquals("3 / 0, 6 14.3%", str("%d / %d, %s %.1f%%", new Object[] { 3, 0, 6, (float) seq / total * 100 } ));
 	}
 
+	@Test
+	void testRemovele() {
+		assertEquals("v1,v3", removele("v1,v2,v3", "v2"));
+		assertEquals("v1", removele("v1,v2", "v2"));
+		assertEquals("v3", removele("v2,v3", "v2"));
+		assertEquals("", removele("v2", "v2"));
+		assertEquals("", removele("", "v2"));
+		assertEquals("", removele("", ""));
+		assertEquals("", removele(null, null));
+
+		assertEquals("v1:v3", removele("v1:v2:v3", "v2", ":"));
+		assertEquals("v1:v2.1,v2.2:v3", removele("v1:v2.1,v2.2:v3", "v2", ":"));
+		assertEquals("v1:v2.1,v2.2", removele("v1:v2.1,v2.2:v3", "v3", ":"));
+	}
 }
