@@ -286,6 +286,10 @@ public class LangExt {
     	}
     	else if (arg instanceof String)
     		return isblank((String) arg);
+    	else if (arg instanceof Map)
+    		return ((Map<?, ?>) arg).size() == 0;
+    	else if (arg instanceof Set)
+    		return ((Set<?>) arg).size() == 0;
     	else return false;
     }
 
