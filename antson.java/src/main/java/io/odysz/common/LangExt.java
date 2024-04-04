@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LangExt {
-	/**Split and trim elements.
+	/**
+	 * Split and trim elements.
 	 * <p>Empty element won't be ignored if there are 2 consequent separator. <br>
 	 * That means two junctural, succeeding, cascading separators without an element in between, expect white space.
 	 * Sorry for that poor English.</p>
@@ -142,6 +143,20 @@ public class LangExt {
 		else return lst.stream()
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
+	}
+	
+	/**
+	 * Format text into string center.
+	 * @param text e.g. "str"
+	 * @param len e.g. 7
+	 * @return space padded string, e.g. "  str  ".
+	 */
+	public static String strcenter(String text, int len){
+	    String out = String.format("%" + len + "s%s%" + len + "s", "", text, "");
+	    float mid = (out.length()/2);
+	    float start = mid - (len/2);
+	    float end = start + len; 
+	    return out.substring((int)start, (int)end);
 	}
 	
 	public static boolean bool(String v) {
