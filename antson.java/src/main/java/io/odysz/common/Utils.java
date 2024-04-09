@@ -1,5 +1,8 @@
 package io.odysz.common;
 
+import static io.odysz.common.LangExt.isNull;
+import static io.odysz.common.LangExt.isblank;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import io.odysz.anson.Anson;
 
@@ -22,7 +27,9 @@ public class Utils {
 	 * In this way, the java compiler will optimize the code to nothing if the <i>staticBoolean</i> is false.
 	 * This flag is used for find out {@link #logi(String, String...)} calling that's not controlled by the flag.
 	 * */
-	private static boolean printCaller = false;
+	static boolean printCaller = false;
+
+	public static int tabwidth = 4;
 	
 	/**See {@link #printCaller}
 	 * @param printcall
@@ -257,5 +264,56 @@ public class Utils {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	/**
+	 * Print system out with 
+	 * <pre>
+	 * if section &ge 0:
+	 * [section.] fromat
+	 * =================
+	 * 
+	 * else
+	 * fromat
+	 * ======</pre>
+	 * 
+	 * Print "====" if section = 0, or "----" if 1, or "____" if 2, or "++++" if &gt; 3
+	 * 
+	 * <p><a href='https://stackoverflow.com/a/62548488/7362888'>
+	 * This method requires jdk 11</a></p>
+	 * 
+	 * @since 0.9.67
+	 */
+	public static void logrst(String text, int ... subsects) {
+		logrst(new String[] {text}, subsects);
+	}
+
+	/**
+	 * @see #logrst(String, int...)
+	 * @param texts
+	 * @param subsects
+	 */
+	public static void logrst(String[] texts, int ... subsects) {
+		int len = 0;
+		int level = isNull(subsects) ? 0 : subsects.length - 1;
+
+		for (int t : subsects)
+			len += String.valueOf(t).length() + 1;
+
+		for (String t : texts) {
+			if (isblank(t)) continue;
+			len += t.length() + 1;
+			long count = t.chars().filter(ch -> ch == '\t').count();
+			len += count * (tabwidth - 1);
+		}
+
+		logi("\n%s %s\n%s\n",
+			IntStream.of((int[])subsects).mapToObj(n -> String.format("%d", n)).collect(Collectors.joining(".")),
+			Stream.of(texts).collect(Collectors.joining(" ")),
+			( level == 0 ? "=" :
+			  level == 1 ? "-" :
+			  level == 2 ? "_" :
+			  "+").repeat(len - 1));
+
 	}
 }
