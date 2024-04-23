@@ -755,10 +755,10 @@ public class LangExt {
 	}
 	
     /**
-     * Using for-loop to find the index.
+     * Test is {@code target} in {@code arr}? Uses for-loop to find the index.
      * @param arr array
      * @param target
-     * @return index
+     * @return index or -1 if dosen't find
      * @param <T>
 	 * @since 0.9.51
      */
