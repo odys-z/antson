@@ -1,5 +1,7 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt.isblank;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -244,7 +246,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		try {
 			HashMap<String, Field> fmap = stack.size() > 0 ?
 					top.fmap : null;
-			if (fmap == null || !fmap.containsKey(top.parsingProp)) {
+			
+			if (top.isInList() && !isblank(top.valType)) {
+			}
+			else if (fmap == null || !fmap.containsKey(top.parsingProp)) {
 				// In a list, found object, if not type specified with annotation, must failed.
 				// But this is confusing to user. Set some report here.
 				if (top.isInList() || top.isInMap())
@@ -257,7 +262,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 						top.parsingProp, top.enclosing == null ? "null" : top.enclosing.getClass().getName());
 			}
 
-			Class<?> ft = fmap.get(top.parsingProp).getType();
+			Class<?> ft = fmap.containsKey(top.parsingProp) ? fmap.get(top.parsingProp).getType()
+						: Class.forName(top.valType);
 			if (Map.class.isAssignableFrom(ft)) {
 				// entering a map
 				push(ft, null);
@@ -316,7 +322,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			// ignore this type specification, keep consist with java type
 			return;
 
-		// envetype = ctx.qualifiedName().getText();
 		TerminalNode str = ctx.qualifiedName().STRING();
 		String txt = ctx.qualifiedName().getText();
 		envetype = getStringVal(str, txt);
@@ -400,7 +405,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	    	if (valss != null && valss.length > 1)
 	    		return new String[] {eleType, valss[1]};
-	    	else return new String[] {eleType};
+	    	// else return new String[] {eleType};
+	    	else return parseArrSubtypes(eleType);
 	    }
 	    else {
 	    	// not a parameterized, not an array, try annotation
@@ -409,18 +415,39 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			return parseElemType(tn);
 	    }
 	}
+	
+	/**
+	 * Expand array's sub-types 
+	 * @param typ e. g. io.odysz.anson.utils.NV[]
+	 * @return e. g. [ io.odysz.anson.utils.NV[], io.odysz.anson.utils.NV]
+	 */
+	private static String[] parseArrSubtypes(String typ) {
+		if (isblank(typ)) return null;
+		ArrayList<String> tns = new ArrayList<String>();
+		tns.add(typ);
+		while (typ.startsWith("[")) {
+			if (typ.startsWith("[L"))
+				typ = typ.replace("^[L", "");
+			else
+				typ = typ.replace("^[", "");
+			tns.add(typ);
+		}
 
-	/**Parse property name, tolerate enclosing quotes presenting or not.
+		while (typ.endsWith("[]")) { 
+			typ = typ.replaceAll("\\[\\]$", "");
+			tns.add(typ);
+		}
+		
+		return tns.toArray(new String[0]);
+	}
+
+	/**
+	 * Parse property name, tolerate enclosing quotes presenting or not.
 	 * @param ctx
 	 * @return the prop value in string
 	 */
 	private static String getProp(PairContext ctx) {
 		TerminalNode p = ctx.propname().IDENTIFIER();
-		/*
-		return p == null
-				? ctx.propname().STRING().getText().replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "")
-				: p.getText();
-		*/
 
 		String prop = p == null ?
 				ctx.propname().STRING() != null ?
@@ -429,7 +456,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		return prop.replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", "");
 	}
 
-	/**Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
+	/**
+	 * Convert json value : STRING | NUMBER | 'true' | 'false' | 'null' to java.lang.String.<br>
 	 * Can't handle NUMBER | obj | array.
 	 * @param ctx
 	 * @return value in string
@@ -450,7 +478,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				} catch (Exception e) { }
 				return rawTxt;
 		}
-		 else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		// v 0.9.44
+		// else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
+		else return Anson.unescape(str
+				.getText()
+				.replaceAll("(^\\s*\")|(\"\\s*$)", ""));
 	}
 
 	/**
@@ -463,6 +495,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	| 'true'
 	| 'false'
 	| 'null'
+	| 'type'
+    | 'TYPE'
+    | '"type"'
+    | '"TYPE"'
 	;</pre>
 	 * @param ctx
 	 * @return simple value (STRING, NUMBER, 'true', 'false', null)
@@ -485,6 +521,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			return Boolean.valueOf(true);
 		else if (txt != null && txt.toLowerCase().equals("flase"))
 			return Boolean.valueOf(false);
+		else if (  txt != null 
+				&&(txt.toLowerCase().startsWith("type")
+				|| txt.toLowerCase().startsWith("\"type\""))
+				&&(txt.toLowerCase().endsWith("type")
+				|| txt.toLowerCase().endsWith("\"type\"")))
+			return txt;
 		return null;
 	}
 
@@ -536,7 +578,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 		// figure the type if possible - convert to array
 		String et = top.elemType();
-		if (!LangExt.isblank(et, "\\?.*")) // TODO debug: where did this type comes from?
+		if (!LangExt.isblank(et, "\\?.*"))
 			try {
 				Class<?> arrClzz = Class.forName(et);
 				if (arrClzz.isArray())
@@ -834,9 +876,15 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				}
 			}
 			else if (Object.class.isAssignableFrom(ft)) {
-				Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
-						fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
 				String v = ctx.getChild(2).getText();
+				
+				if (!(v.startsWith("\"") && v.endsWith("\"")))
+					Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
+						fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
+				else {
+					v = v.replaceFirst("\"", "");
+					v = v.replaceAll("\"$", "");
+				}
 
 				if (!LangExt.isblank(v, "null"))
 					f.set(enclosing, v);
@@ -872,7 +920,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	}
 }
 
-	/**Set primary type values.
+	/**
+	 * Set primary type values.
 	 * <p>byte short int long float double boolean char</p>
 	 * See <a href='https://docs.oracle.com/javase/tutorial/java/nutsandbolts/datatypes.html'>
 	 * Oracle Java Documentation</a>

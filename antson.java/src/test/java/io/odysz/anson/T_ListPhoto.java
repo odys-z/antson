@@ -2,14 +2,18 @@ package io.odysz.anson;
 
 import java.util.ArrayList;
 
-public class AnsTListPhoto extends Anson {
+import io.odysz.anson.utils.T_NV;
+
+class T_ListPhoto extends Anson {
 
 	ArrayList<AnsPhoto[]> ansp;
+
+	public T_NV[][] checkRels;
 	
-	public AnsTListPhoto() {
+	public T_ListPhoto() {
 	}
 
-	public AnsTListPhoto(String pid) {
+	public T_ListPhoto(String pid) {
 		ansp = new ArrayList<AnsPhoto[]>();
 		ansp.add(new AnsPhoto[] { new AnsPhoto(pid) });
 	}

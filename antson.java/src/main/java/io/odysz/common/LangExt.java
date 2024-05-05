@@ -12,7 +12,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class LangExt {
-	/**Split and trim elements.
+	/**
+	 * Split and trim elements.
 	 * <p>Empty element won't be ignored if there are 2 consequent separator. <br>
 	 * That means two junctural, succeeding, cascading separators without an element in between, expect white space.
 	 * Sorry for that poor English.</p>
@@ -63,18 +64,30 @@ public class LangExt {
 
 	/**
 	 * <pre>
-	assertTrue(startsOneOf("v1234w", new String[] { "w1234", "v1234" }));
-	assertFalse(startsOneOf("v1234w", new String[] { "1v", "v1234wx" }));</pre>
+	assertTrue(prefixWith("v1234w", new String[] { "w1234", "v1234" }));
+	assertFalse(prefixWith("v1234w", new String[] { "1v", "v1234wx" }));</pre>
 	 * @param s
 	 * @param prefixes
 	 * @return true if exist a prefix, other wise false
-	 * @since 0.9.39
+	 * @since 0.9.63
 	 */
-	public static boolean startsOneOf(String s, String... prefixes) {
+	public static boolean prefixWith(String s, String... prefixes) {
 		for (String prefix : prefixes)
 			if (s.startsWith(prefix))
 				return true;
 		return false;
+	}
+
+	/**
+	 * See {@link #prefixWith(String, String...)}
+	 * 
+	 * @param s
+	 * @param prefixes
+	 * @return
+	 * @since 0.9.39
+	 */
+	public static boolean startsOneOf(String s, String... prefixes) {
+		return prefixWith(s, prefixes);
 	}
 	
 	/**Get a string array that composed into string by {@link #toString(Object[])}.
@@ -130,6 +143,38 @@ public class LangExt {
 		else return lst.stream()
 				.map(e -> toString(e))
 				.collect(Collectors.joining(",", "[", "]"));
+	}
+	
+	/**
+	 * Format text into string center.
+	 * @param text e.g. "str"
+	 * @param len e.g. 7
+	 * @return space padded string, e.g. "  str  ".
+	 */
+	public static String strcenter(String text, int len){
+	    String out = String.format("%" + len + "s%s%" + len + "s", "", text, "");
+	    float mid = (out.length()/2);
+	    float start = mid - (len/2);
+	    float end = start + len; 
+	    return out.substring((int)start, (int)end);
+	}
+	
+	public static boolean bool(String v) {
+		return v == null ? false
+				:  v.equalsIgnoreCase("1")
+				|| v.equalsIgnoreCase("true")
+				|| v.equalsIgnoreCase("t")
+				|| v.equalsIgnoreCase("t")
+				|| v.equalsIgnoreCase("y")
+				|| v.equalsIgnoreCase("yes");
+	}
+
+	public static boolean bool(int v) {
+		return v != 0; 
+	}
+
+	public static boolean bool(float v) {
+		return v != 0.0; 
 	}
 
 	/**Parse formatted string into hash map.
@@ -254,6 +299,12 @@ public class LangExt {
     	if (arg.getClass().isArray()) {
 			return Array.getLength(arg) == 0 || Array.get(arg, 0) == null;
     	}
+    	else if (arg instanceof String)
+    		return isblank((String) arg);
+    	else if (arg instanceof Map)
+    		return ((Map<?, ?>) arg).size() == 0;
+    	else if (arg instanceof Set)
+    		return ((Set<?>) arg).size() == 0;
     	else return false;
     }
 
@@ -693,11 +744,21 @@ public class LangExt {
 		return -1;
 	}
 	
+	
+	/**
+	 * @param str
+	 * @param s comma separated element list, without space following comma, e.g. "a-1,b-2,..."
+	 * @return the index of the first occurrence of the specified substring,or -1 if there is no such occurrence.
+	 */
+	public static int indexOf(String str, String s) {
+		return ("," + str + ",").indexOf("," + s + ",");
+	}
+	
     /**
-     * Using for-loop to find the index.
+     * Test is {@code target} in {@code arr}? Uses for-loop to find the index.
      * @param arr array
      * @param target
-     * @return index
+     * @return index or -1 if dosen't find
      * @param <T>
 	 * @since 0.9.51
      */
@@ -870,7 +931,7 @@ public class LangExt {
 	 * @return string
 	 */
 	public static String trim(String s) {
-		if (isNull(s)) return null;
+		if (s == null) return null;
 		else return s.trim();
 	}
 
@@ -939,6 +1000,34 @@ public class LangExt {
 	 */
 	public static String compoundVal(String... vals) {
 		return joinEsc("\n", "\\n", vals);
+	}
+	
+	/**
+	 * <p>Remove element pattern from string of multiple elements, separated with 'sep'.</p>
+	 * <pre>
+	 * Test
+	 * assertEquals("v1,v3", removele("v1,v2,v3", "v2"));
+	 * assertEquals("v1", removele("v1,v2", "v2"));
+	 * assertEquals("v3", removele("v2,v3", "v2"));
+	 * assertEquals("", removele("v2", "v2"));
+	 * assertEquals("", removele("", "v2"));
+	 * assertEquals("", removele("", ""));
+	 * assertEquals("", removele(null, null));
+	 *
+	 * assertEquals("v1:v2.1,v2.2:v3", removele("v1:v2.1,v2.2:v3", "v2", ":"));
+	 * assertEquals("v1:v2.1,v2.2", removele("v1:v2.1,v2.2:v3", "v3", ":"));
+	 * <pre>
+	 * @param from e.g. "v1,v2,v3"
+	 * @param p e.g. "v2"
+	 * @param sep default ","
+	 * @return new string, e.g. "v1,v3"
+	 * @since 0.9.64
+	 */
+	public static String removele(String from, String p, String... sep) {
+		String s = isNull(sep) ? "," : sep[0];
+
+		return isblank(from) ? ""
+			: (s + from.trim() + s).replaceAll(s + p + s, s).replaceAll("^"+s, "").replaceAll(s+"$", "");
 	}
 }
 

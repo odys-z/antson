@@ -1,8 +1,7 @@
 package io.odysz.anson;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static io.odysz.common.LangExt.len;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -13,13 +12,13 @@ import java.util.ArrayList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import io.odysz.anson.T_AnTreeNode.SubTree;
-import io.odysz.anson.utils.IndentFlag;
-import io.odysz.anson.utils.TreeIndenode;
 import io.odysz.anson.AnsT4Enum.MsgCode;
 import io.odysz.anson.AnsT4Enum.T4_Port;
+import io.odysz.anson.T_AnTreeNode.SubTree;
 import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
+import io.odysz.semantic.ext.test.T_IndentFlag;
+import io.odysz.semantic.ext.test.T_TreeIndenode;
 
 class AnsonTest {
 
@@ -29,6 +28,27 @@ class AnsonTest {
 	void setUp() throws Exception {
 	}
 
+	@Test
+	void testEscape() throws AnsonException {
+		String value = "1\t 2\n 3\" 4\\";
+		// 1\\t 2\\n 3\" 4\\
+		// Utils.logi(new String(Anson.escape(value)));
+		assertEquals("1\\t 2\\n 3\\\" 4\\\\", new String(Anson.escape(value)));
+
+		value = "1\\t 2\\n3";
+		// 1	.2
+		// 3"
+		// Utils.logi(Anson.unescape(value));
+		assertEquals("1\t 2\n3", Anson.unescape(value));
+
+		Anson.unescape("1\\t 2\\n 3\\\" 4\\"); // warn in console
+
+		value = "1\\t 2\\n 3\\\" 4\\\\";
+		// 1	 2
+		//  3" 4\
+		assertEquals("1\t 2\n 3\" 4\\", Anson.unescape(value));
+	}
+	
 	@Test
 	void testToJson() throws Exception {
 		AnsT1 anson = new AnsT1();
@@ -40,11 +60,11 @@ class AnsonTest {
  
 		// ESC
 		AnsT2 a2 = new AnsT2();
-		a2.m = new String[] {"e\n0", "e1", "{\"msg\": \"george\"}"};
+		a2.m = new String[] {"e\n0", "e1\r\nvalue", "{\"msg\": \"george\"}"};
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\n0\", \"e1\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
+		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\n0\", \"e1\\r\\nvalue\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
 
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
@@ -229,21 +249,21 @@ class AnsonTest {
 		assertEquals("v0.1", anson.ver);
 		assertEquals(null, anson.m);
 
-		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\n1\", m: null}");
-		assertEquals("v0\\n.\\n1", anson.ver);
+		anson = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"v0\\n.\\r\\n1\", m: null}");
+		assertEquals("v0\n.\r\n1", anson.ver);
 		assertEquals(null, anson.m);
 
-		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\", \"e2\"]}");
+		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\\nvalue\", \"e2\"]}");
 		assertEquals(true, anson2.b);
 		assertEquals('c', anson2.c);
-		assertEquals("e1", anson2.m[0]);
+		assertEquals("e1\nvalue", anson2.m[0]);
 		assertEquals("e2", anson2.m[1]);
 
 		anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: ["
 				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)\", "
 				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)\"]}");
-		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[0]);
-		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\\\n)", anson2.m[1]);
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\n)", anson2.m[0]);
+		assertEquals("Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)", anson2.m[1]);
 	}
 	
 	@Test
@@ -303,14 +323,19 @@ class AnsonTest {
 	 */
 	@Test
 	void testFromJson_list2d() throws AnsonException {
-		AnsTListPhoto cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [["
-				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\", clientpath: \"raw\\res\\\\my.jpg\" },"
-				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\", clientpath: \"raw/res/my.jpg\"} ]]}");
+		T_ListPhoto cll = (T_ListPhoto) Anson.fromJson("{type: io.odysz.anson.T_ListPhoto, ansp: [["
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"1\", clientpath: \"raw\\\\res\\\\my.jpg\" },"
+				+ "{type: io.odysz.anson.AnsPhoto, pid: \"2\", clientpath: \"raw/res/my.jpg\"} ]],"
+				+ "\"checkRels\":[[{\"name\":\"oid\",\"value\":\"ap01\"},{\"name\":\"pid\",\"value\":\"2023_12\"}]]}");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(2, cll.ansp.get(0).length);
 		assertEquals("2", cll.ansp.get(0)[1].pid);
-		assertEquals("raw\\res\\\\my.jpg", cll.ansp.get(0)[0].clientpath);
+		assertEquals("raw\\res\\my.jpg", cll.ansp.get(0)[0].clientpath);
 		assertEquals("raw/res/my.jpg", cll.ansp.get(0)[1].clientpath);
+		assertEquals("oid", cll.checkRels[0][0].name);
+		assertEquals("ap01", cll.checkRels[0][0].value);
+		assertEquals("pid", cll.checkRels[0][1].name);
+		assertEquals("2023_12", cll.checkRels[0][1].value);
 		
 		/* FIXME error report: line 1:47 extraneous input '<EOF>' expecting {',', '}'}
 		 * This should be a grammar error.
@@ -320,7 +345,7 @@ class AnsonTest {
 			| '[' ']'
 			;
 		*/
-		cll = (AnsTListPhoto) Anson.fromJson("{type: io.odysz.anson.AnsTListPhoto, ansp: [[]]");
+		cll = (T_ListPhoto) Anson.fromJson("{type: io.odysz.anson.T_ListPhoto, ansp: [[]]");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(0, cll.ansp.get(0).length);
 
@@ -350,10 +375,6 @@ class AnsonTest {
 		m.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsTMap, map: {A: \"B\", v-null: null}, mapArr: {a: [1, \"s\"]}}\n", s);
-	}
-	
-	void testEscape() throws AnsonException {
-		
 	}
 		
 	@Test
@@ -415,9 +436,9 @@ class AnsonTest {
 	
 	@Test
 	void testSTree2block() throws AnsonException, IOException {
-		TreeIndenode n0  = new TreeIndenode("0");
-		n0 .child(new TreeIndenode("0.1", n0 ));
-		n0 .child(new TreeIndenode("0.2", n0 ).asLastSibling());
+		T_TreeIndenode n0  = new T_TreeIndenode("0");
+		n0 .child(new T_TreeIndenode("0.1", n0 ));
+		n0 .child(new T_TreeIndenode("0.2", n0 ).asLastSibling());
 
 		// Utils.logi(n0.toBlock());
 		n0.toBlock(); // test case for multiple DP visiting
@@ -427,19 +448,19 @@ class AnsonTest {
 		 *  |- 0.1
 		 *  L 0.2
 		 */
-		ArrayList<IndentFlag> ind01 = ((TreeIndenode)n0 .child(0))
+		ArrayList<T_IndentFlag> ind01 = ((T_TreeIndenode)n0 .child(0))
 				.indents();
 		assertEquals(1, len(ind01));
-		assertEquals(IndentFlag.childi, ind01.get(0));
+		assertEquals(T_IndentFlag.childi, ind01.get(0));
 
-		ArrayList<IndentFlag> ind0_2 = ((TreeIndenode)n0 .child(1))
+		ArrayList<T_IndentFlag> ind0_2 = ((T_TreeIndenode)n0 .child(1))
 				.indents();
 		assertEquals(1, len(ind0_2));
-		assertEquals(IndentFlag.childx, ind0_2.get(0));
+		assertEquals(T_IndentFlag.childx, ind0_2.get(0));
 
-		n0  = new TreeIndenode("1");
-		TreeIndenode n11 = new TreeIndenode("1.1", n0 ).asLastSibling();
-		TreeIndenode n111 = new TreeIndenode("1.1.1", n11).asLastSibling();
+		n0  = new T_TreeIndenode("1");
+		T_TreeIndenode n11 = new T_TreeIndenode("1.1", n0 ).asLastSibling();
+		T_TreeIndenode n111 = new T_TreeIndenode("1.1.1", n11).asLastSibling();
 		n0 .child(n11);
 		n11.child(n111);
 		
@@ -450,25 +471,25 @@ class AnsonTest {
 		 *  L  1.1
 		 *    L 1.1.1
 		 * */
-		ArrayList<IndentFlag> ind1_1_1 = n111.indents();
+		ArrayList<T_IndentFlag> ind1_1_1 = n111.indents();
 		assertEquals(2, len(ind1_1_1));
-		assertEquals(IndentFlag.space, ind1_1_1.get(0));
-		assertEquals(IndentFlag.childx, ind1_1_1.get(1));
+		assertEquals(T_IndentFlag.space, ind1_1_1.get(0));
+		assertEquals(T_IndentFlag.childx, ind1_1_1.get(1));
 
-		TreeIndenode n2    = new TreeIndenode("2");
-		TreeIndenode n21   = new TreeIndenode("2.1", n2 );
-		TreeIndenode n211  = new TreeIndenode("2.1.1", n21).asLastSibling();
-		TreeIndenode n2111 = new TreeIndenode("2.1.1.1", n211).asLastSibling();
+		T_TreeIndenode n2    = new T_TreeIndenode("2");
+		T_TreeIndenode n21   = new T_TreeIndenode("2.1", n2 );
+		T_TreeIndenode n211  = new T_TreeIndenode("2.1.1", n21).asLastSibling();
+		T_TreeIndenode n2111 = new T_TreeIndenode("2.1.1.1", n211).asLastSibling();
 
 		n2  .child(n21);
 		n21 .child(n211);
 		n211.child(n2111);
 
-		TreeIndenode n22   = new TreeIndenode("2.2", n2 ).asLastSibling();
+		T_TreeIndenode n22   = new T_TreeIndenode("2.2", n2 ).asLastSibling();
 		n2.child(n22);
 		
-		assertEquals("{\"type\": \"io.odysz.anson.utils.TreeIndenode\", "
-				+ "\"node\": {}, \"parent\": \"io.odysz.anson.utils.TreeIndenode\", "
+		assertEquals("{\"type\": \"io.odysz.semantic.ext.test.T_TreeIndenode\", "
+				+ "\"node\": {}, \"parent\": \"io.odysz.semantic.ext.test.T_TreeIndenode\", "
 				+ "\"indents\": [\"vlink\", \"space\", \"childx\"], "
 				+ "\"lastSibling\": true, \"id\": \"2.1.1.1\", \"parentId\": \"2.1.1\"}\n",
 				n2111.toBlock());
@@ -480,24 +501,24 @@ class AnsonTest {
 		 *  |   L 2.1.1.1 
 		 *  L 2.2
 		 * */
-		ArrayList<IndentFlag> ind21 = n21.indents();
+		ArrayList<T_IndentFlag> ind21 = n21.indents();
 		assertEquals(1, len(ind21));
-		assertEquals(IndentFlag.childi, ind21.get(0));
+		assertEquals(T_IndentFlag.childi, ind21.get(0));
 
-		ArrayList<IndentFlag> ind211 = n211.indents();
+		ArrayList<T_IndentFlag> ind211 = n211.indents();
 		assertEquals(2, len(ind211));
-		assertEquals(IndentFlag.vlink, ind211.get(0));
-		assertEquals(IndentFlag.childx, ind211.get(1));
+		assertEquals(T_IndentFlag.vlink, ind211.get(0));
+		assertEquals(T_IndentFlag.childx, ind211.get(1));
 
-		ArrayList<IndentFlag> ind2111 = n2111.indents();
+		ArrayList<T_IndentFlag> ind2111 = n2111.indents();
 		assertEquals(3, len(ind2111));
-		assertEquals(IndentFlag.vlink, ind2111.get(0));
-		assertEquals(IndentFlag.space, ind2111.get(1));
-		assertEquals(IndentFlag.childx, ind2111.get(2));
+		assertEquals(T_IndentFlag.vlink, ind2111.get(0));
+		assertEquals(T_IndentFlag.space, ind2111.get(1));
+		assertEquals(T_IndentFlag.childx, ind2111.get(2));
 
-		ArrayList<IndentFlag> ind22 = n22.indents();
+		ArrayList<T_IndentFlag> ind22 = n22.indents();
 		assertEquals(1, len(ind22));
-		assertEquals(IndentFlag.childx, ind22.get(0));
+		assertEquals(T_IndentFlag.childx, ind22.get(0));
 	}
 	
 	@Test

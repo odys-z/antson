@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.51</version>
+  <version>0.9.67</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
@@ -44,7 +44,7 @@
     <dependency>
     	<groupId>org.antlr</groupId>
     	<artifactId>antlr4-runtime</artifactId>
-    	<version>4.9.2</version>
+    	<version>4.13.1</version>
     </dependency>
 
 	<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
@@ -58,7 +58,7 @@
 	<dependency>
     	<groupId>org.junit.jupiter</groupId>
     	<artifactId>junit-jupiter-engine</artifactId>
-    	<version>5.9.1</version>
+    	<version>5.7.0</version>
     	<scope>test</scope>
     </dependency>
 

@@ -1,4 +1,4 @@
-package io.odysz.anson.utils;
+package io.odysz.semantic.ext.test;
 
 import static io.odysz.common.LangExt.len;
 import static io.odysz.common.LangExt.isNull;
@@ -17,12 +17,10 @@ import io.odysz.anson.x.AnsonException;
 /**
  * Tree node supporting indent for rendering tree structure.
  * 
- * TODO to be moved to Semantic.DA
- * 
  * @author Ody Z
  *
  */
-public class TreeIndenode extends Anson {
+public class T_TreeIndenode extends Anson {
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
@@ -35,49 +33,49 @@ public class TreeIndenode extends Anson {
 	String parentId;
 	
 	@AnsonField(ref=AnsonField.enclosing)
-	TreeIndenode parent;
+	T_TreeIndenode parent;
 
-	ArrayList<IndentFlag> indents;
+	ArrayList<T_IndentFlag> indents;
 
 	// Only for Anson parser
-	public TreeIndenode() { }
+	public T_TreeIndenode() { }
 
-	public TreeIndenode(String id, TreeIndenode... parent) {
+	public T_TreeIndenode(String id, T_TreeIndenode... parent) {
 		this.id = id;
 		this.parentId = len(parent) > 0 ? parent[0].id : null;
 		this.parent   = len(parent) > 0 ? parent[0] : null;
 		node = new HashMap<String, Object>();
 	}
 	
-	public ArrayList<IndentFlag> getChildIndents() {
-		ArrayList<IndentFlag> indents = indents();
-		ArrayList<IndentFlag> ret = new ArrayList<IndentFlag>(indents);
+	public ArrayList<T_IndentFlag> getChildIndents() {
+		ArrayList<T_IndentFlag> indents = indents();
+		ArrayList<T_IndentFlag> ret = new ArrayList<T_IndentFlag>(indents);
 
 		if (len(ret) > 0) {
 			ret.remove(ret.size() - 1);
 			if (lastSibling)
-				ret.add(IndentFlag.space);
+				ret.add(T_IndentFlag.space);
 			else
-				ret.add(IndentFlag.vlink);
+				ret.add(T_IndentFlag.vlink);
 		}
 		return ret;
 	}
 
-	public ArrayList<IndentFlag> indents() {
+	public ArrayList<T_IndentFlag> indents() {
 		if (indents == null && parent != null) {
 			indents = parent.getChildIndents();
 
 			if (lastSibling) 
-				indents.add(IndentFlag.childx);
+				indents.add(T_IndentFlag.childx);
 			else
-				indents.add(IndentFlag.childi);
+				indents.add(T_IndentFlag.childi);
 		}
 		if (indents == null)
-			indents = new ArrayList<IndentFlag>();
+			indents = new ArrayList<T_IndentFlag>();
 		return indents;
 	}
 
-	public TreeIndenode put(String k, Object v) {
+	public T_TreeIndenode put(String k, Object v) {
 		node.put(k, v);
 		return this;
 	}
@@ -100,11 +98,11 @@ public class TreeIndenode extends Anson {
 		return node == null ? null : ((List<?>) node.get("children")).get(cx);
 	}
 
-	public TreeIndenode child(TreeIndenode ch) {
+	public T_TreeIndenode child(T_TreeIndenode ch) {
 		@SuppressWarnings("unchecked")
-		List<TreeIndenode> children = (List<TreeIndenode>) get("children");
+		List<T_TreeIndenode> children = (List<T_TreeIndenode>) get("children");
 		if (children == null) {
-			children = new ArrayList<TreeIndenode>();
+			children = new ArrayList<T_TreeIndenode>();
 			children_(children);
 		}
 		children.add(ch);
@@ -119,7 +117,7 @@ public class TreeIndenode extends Anson {
 		put("children", arrChildren);
 	}
 
-	public TreeIndenode children_(List<? extends TreeIndenode> childrenArray) {
+	public T_TreeIndenode children_(List<? extends T_TreeIndenode> childrenArray) {
 		put("children", childrenArray);
 		return this;
 	}
@@ -128,16 +126,16 @@ public class TreeIndenode extends Anson {
 	 * Set last child as the last sibling.
 	 * @return this
 	 */
-	public TreeIndenode tagLast() {
+	public T_TreeIndenode tagLast() {
 		@SuppressWarnings("unchecked")
-		ArrayList<TreeIndenode> children = (ArrayList<TreeIndenode>) get("children");
+		ArrayList<T_TreeIndenode> children = (ArrayList<T_TreeIndenode>) get("children");
 		if (!isNull(children))
 			children.get(children.size() - 1).asLastSibling();
 		return this;
 	}
 
 	boolean lastSibling;
-	public TreeIndenode asLastSibling() {
+	public T_TreeIndenode asLastSibling() {
 		lastSibling = true;
 		return this;
 	}

@@ -1,6 +1,5 @@
 package io.odysz.anson;
 
-import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -434,6 +433,7 @@ public class T_AnResultset extends Anson {
 		return getDouble((Integer)colnames.get(colName.toUpperCase())[0]);
 	}
 
+	/*
 	public BigDecimal getBigDecimal(int colIndex) throws SQLException {
 		return BigDecimal.valueOf(getDouble(colIndex));
 	}
@@ -441,6 +441,7 @@ public class T_AnResultset extends Anson {
 	public BigDecimal getBigDecimal(String colName) throws SQLException {
 		return BigDecimal.valueOf(getDouble((Integer)colnames.get(colName.toUpperCase())[0]));
 	}
+	*/
 	
 	public Date getDate(int index)throws SQLException{
 		try {
