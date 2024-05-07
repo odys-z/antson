@@ -310,10 +310,13 @@ public class Utils {
 		logi("\n%s %s\n%s\n",
 			IntStream.of((int[])subsects).mapToObj(n -> String.format("%d", n)).collect(Collectors.joining(".")),
 			Stream.of(texts).collect(Collectors.joining(" ")),
-			( level == 0 ? "=" :
-			  level == 1 ? "-" :
-			  level == 2 ? "_" :
-			  "+").repeat(len - 1));
+			repeat(level == 0 ? "=" :
+				   level == 1 ? "-" :
+				   level == 2 ? "_" :
+				   "+", len - 1));
+	}
 
+	public static String repeat(String object, int repeat) {
+		return null;
 	}
 }
