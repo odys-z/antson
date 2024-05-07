@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -317,50 +318,54 @@ public class Utils {
 	}
 
 	/**
-     * Returns a string whose value is the concatenation of this
-     * string repeated {@code count} times.
-     * <p>
-     * If this string is empty or count is zero then the empty
-     * string is returned.
-     *
-     * @param   count number of times to repeat
-     *
-     * @return  A string composed of this string repeated
-     *          {@code count} times or the empty string if this
-     *          string is empty or count is zero
-     *
-     * @throws  IllegalArgumentException if the {@code count} is
-     *          negative.
-     *
-     * @since 11
-     */
-	public static String repeat(String object, int repeat) {
-	        if (count < 0) {
-	            throw new IllegalArgumentException("count is negative: " + count);
-	        }
-	        if (count == 1) {
-	            return this;
-	        }
-	        final int len = value.length;
-	        if (len == 0 || count == 0) {
-	            return "";
-	        }
-	        if (Integer.MAX_VALUE / count < len) {
-	            throw new OutOfMemoryError("Required length exceeds implementation limit");
-	        }
-	        if (len == 1) {
-	            final byte[] single = new byte[count];
-	            Arrays.fill(single, value[0]);
-	            return new String(single, coder);
-	        }
-	        final int limit = len * count;
-	        final byte[] multiple = new byte[limit];
-	        System.arraycopy(value, 0, multiple, 0, len);
-	        int copied = len;
-	        for (; copied < limit - copied; copied <<= 1) {
-	            System.arraycopy(multiple, 0, multiple, copied, copied);
-	        }
-	        System.arraycopy(multiple, 0, multiple, copied, limit - copied);
-	        return new String(multiple, coder);
-	    }
+	 * Returns a string whose value is the concatenation of {@code s}
+	 * repeated {@code count} times.
+	 * <p>
+	 * If this string is empty or count is zero then the empty
+	 * string is returned.
+	 * </p>
+	 * <p>Please note that this method uses system's default coder.</p>
+	 *
+	 * @param   count number of times to repeat
+	 *
+	 * @return  A string composed of this string repeated
+	 *          {@code count} times or the empty string if this
+	 *          string is empty or count is zero
+	 *
+	 * @throws  IllegalArgumentException if the {@code count} is
+	 *          negative.
+	 *
+	 * @see JDK 11 String.repeat
+	 * 
+	 * @since 0.9.68
+	 */
+	public static String repeat(String s, int count) {
+		if (count < 0) {
+			throw new IllegalArgumentException("count is negative: " + count);
+		}
+		if (count == 1) {
+			return s;
+		}
+		final int len = s.length();
+		if (len == 0 || count == 0) {
+			return "";
+		}
+		if (Integer.MAX_VALUE / count < len) {
+			throw new OutOfMemoryError("Required length exceeds implementation limit");
+		}
+		if (len == 1) {
+			final byte[] single = new byte[count];
+			Arrays.fill(single, (byte)s.charAt(0));
+			return new String(single);
+		}
+		final int limit = len * count;
+		final byte[] multiple = new byte[limit];
+		System.arraycopy(s.getBytes(), 0, multiple, 0, len);
+		int copied = len;
+		for (; copied < limit - copied; copied <<= 1) {
+			System.arraycopy(multiple, 0, multiple, copied, copied);
+		}
+		System.arraycopy(multiple, 0, multiple, copied, limit - copied);
+		return new String(multiple);
+	}
 }

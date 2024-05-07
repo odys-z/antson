@@ -15,4 +15,14 @@ class UtilsTest {
 		assertEquals("line1\nline2", Utils.loadTxt("txt"));
 	}
 
+	@Test
+	void testRepeat() {
+		assertEquals("", Utils.repeat("", 0));
+		assertEquals("", Utils.repeat(".", 0));
+		assertEquals(".", Utils.repeat(".", 1));
+		assertEquals("..", Utils.repeat(".", 2));
+		assertEquals("+ + ", Utils.repeat("+ ", 2));
+		assertEquals("+ + + ", Utils.repeat("+ ", 3));
+		assertEquals("++++++", Utils.repeat("+", 6));
+	}
 }
