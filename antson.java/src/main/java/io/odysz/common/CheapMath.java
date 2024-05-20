@@ -29,12 +29,12 @@ public class CheapMath {
 	}
 	
 	/**
-	 * 
-	 * @param v
+	 * Get total pages / blocks.
+	 * @param vol
 	 * @param size
 	 * @return 1 + (int)(v - 1) / size;
 	 */
-	public static int blocks(int v, int size) {
-		return v <= 0 ? 0 : 1 + (int)(v - 1) / size;
+	public static int blocks(int vol, int size) {
+		return vol <= 0 || size <= 0 ? 0 : 1 + (int)(vol - 1) / size;
 	}
 }
