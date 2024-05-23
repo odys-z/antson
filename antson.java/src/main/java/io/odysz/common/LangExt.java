@@ -361,6 +361,44 @@ public class LangExt {
 				: ((String)a).compareTo((String) b) < 0;
 	}
 	
+	/**
+	 * Is there any element in {@code arr} is greater than {@code b}?
+	 * <pre>
+	 * assertTrue(hasGt(new Long[] {0l, 1l}, 0l));
+	 * assertFalse(hasGt(new Long[] {0l, 0l}, 0l));
+	 * assertFalse(hasGt(new Integer[] {0, 0}, 0));
+	 * assertTrue(hasGt(new Integer[] {0, 0}, -1));</pre>
+	 * @param arr
+	 * @param b
+	 * @return there is at least one
+	 */
+	public static <T> boolean hasGt(List<T> arr, T b) {
+		if (arr == null || isblank(b)) return false;
+		for (T a : arr)
+			if (!isblank(a) && (
+					a instanceof String && Double.valueOf((String)a) > Double.valueOf((String)b) ||
+					a instanceof Number && Double.valueOf(String.valueOf(a)) > Double.valueOf(String.valueOf(b))))
+				return true;  
+		return false;
+
+	}
+
+	/**
+	 * @see #hasGt(List, Object)
+	 * @param arr
+	 * @param b
+	 * @return true if has one 
+	 */
+	public static <T> boolean hasGt(T[] arr, T b) {
+		if (arr == null || isblank(b)) return false;
+		for (T a : arr)
+			if (!isblank(a) && (
+					a instanceof String && Double.valueOf((String)a) > Double.valueOf((String)b) ||
+					a instanceof Number && Double.valueOf(String.valueOf(a)) > Double.valueOf(String.valueOf(b))))
+				return true;  
+		return false;
+	}
+	
     public static String units = "BKMGTPEZY";
 
     public static long filesize(String size) {

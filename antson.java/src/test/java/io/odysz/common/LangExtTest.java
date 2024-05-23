@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -163,6 +164,25 @@ class LangExtTest {
 		assertTrue(lt(11, 12));
 		assertTrue(lt(11.0, 12.0));
 		assertTrue(gt(13.0, 12.0));
+		
+		assertTrue(hasGt(new Long[] {0l, 1l}, 0l));
+		assertFalse(hasGt(new Long[] {0l, 0l}, 0l));
+		assertFalse(hasGt(new Integer[] {0, 0}, 0));
+		assertTrue(hasGt(new Integer[] {0, 0}, -1));
+		
+		ArrayList<Long> lst = new ArrayList<Long>();
+		lst.add(0l);
+		lst.add(-1l);
+		assertFalse(hasGt(lst, 0l));
+		assertFalse(hasGt(lst, 1l));
+		assertTrue(hasGt(lst, -1l));
+
+		lst.add(1l);
+		assertTrue(hasGt(lst, 0l));
+		assertFalse(hasGt(lst, 1l));
+
+		lst.add(2l);
+		assertTrue(hasGt(lst, 1l));
 	}
 	
 	@Test
