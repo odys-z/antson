@@ -138,10 +138,17 @@ public class LangExt {
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 
-	public static String str(List<Object[]> lst) {
+	/**
+	 * @since 0.9.72
+	 * 
+	 * @param lst
+	 * @return string
+	 */
+	public static String str(List<?> lst) {
 		if (lst == null) return null;
 		else return lst.stream()
-				.map(e -> toString(e))
+				.filter(e -> e != null)
+				.map(e -> e.getClass().isArray() ? toString((Object[])e) : e.toString())
 				.collect(Collectors.joining(",", "[", "]"));
 	}
 	
