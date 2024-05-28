@@ -32,6 +32,10 @@ public class Utils {
 
 	public static int tabwidth = 4;
 	
+	public static boolean printag = false;
+
+	// private static ArrayList<Boolean> tagflags;
+
 	/**See {@link #printCaller}
 	 * @param printcall
 	 */
@@ -58,6 +62,11 @@ public class Utils {
 								stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
 
+			if (printag)
+				System.err.print(String.format("[%s.%s] ",
+					new Throwable().getStackTrace()[1].getClassName(),
+					new Throwable().getStackTrace()[1].getMethodName()));
+
 			if (format != null)
 				if (args != null && args.length > 0)
 					System.out.println(String.format(format, args));
@@ -80,8 +89,14 @@ public class Utils {
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
-			if (row != null)
+			if (row != null) {
+				if (printag)
+					System.err.print(String.format("[%s.%s] ",
+						new Throwable().getStackTrace()[1].getClassName(),
+						new Throwable().getStackTrace()[1].getMethodName()));
+
 				System.out.println(LangExt.toString(row));
+			}
 		} catch (Exception ex) {
 			System.err.println("logi(): Can't print. Error:");
 			ex.printStackTrace();
@@ -98,7 +113,12 @@ public class Utils {
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
-			if (list != null)
+			if (list != null) {
+				if (printag)
+					System.err.print(String.format("[%s.%s] ",
+						new Throwable().getStackTrace()[1].getClassName(),
+						new Throwable().getStackTrace()[1].getMethodName()));
+
 				for (T it : list)
 					if (it == null)
 						System.out.println("null");
@@ -106,6 +126,7 @@ public class Utils {
 						System.out.println(String.format(it.toString(), args));
 					else
 						System.out.println(it.toString());
+			}
 
 		} catch (Exception ex) {
 			System.err.println("logi(): Can't print. Error:");
@@ -122,12 +143,18 @@ public class Utils {
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
-			if (list != null)
+			if (list != null) {
+				if (printag)
+					System.err.print(String.format("[%s.%s] ",
+						new Throwable().getStackTrace()[1].getClassName(),
+						new Throwable().getStackTrace()[1].getMethodName()));
+
 				for (String[] it : list)
 					if (args != null && args.length > 0)
 						System.out.println(String.format(LangExt.toString(it), args));
 					else
 						System.out.println(LangExt.toString(it));
+			}
 
 		} catch (Exception ex) {
 			System.err.println("logi(): Can't print. Error:");
@@ -152,9 +179,16 @@ public class Utils {
 
 	public static void logkeys(Map<String, ?> map) {
 		try {
-			if (map != null)
+			if (map != null) {
+				if (printag)
+					System.err.print(String.format("[%s.%s] ",
+						new Throwable().getStackTrace()[1].getClassName(),
+						new Throwable().getStackTrace()[1].getMethodName()));
+
 				for (String mk : map.keySet())
 					System.out.print(mk + ", ");
+			}
+
 			System.out.println();
 		} catch (Exception ex) {
 			StackTraceElement[] x = ex.getStackTrace();
@@ -172,6 +206,11 @@ public class Utils {
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
+			if (printag)
+				System.err.print(String.format("[%s.%s] ",
+					new Throwable().getStackTrace()[1].getClassName(),
+					new Throwable().getStackTrace()[1].getMethodName()));
+
 			if (ans != null)
 				System.out.println(ans.toString());
 		} catch (Exception ex) {
@@ -179,6 +218,20 @@ public class Utils {
 			ex.printStackTrace();
 		}
 	}
+
+	/**
+	 * Print warning with tag.
+	 * @param tagging alwasy new / construct a new Object instance for the parameter,
+	 * which is used for generating log tag. 
+	 * @param format
+	 * @param args
+	public static void warnt(String format, Object... args) {
+			System.err.print(String.format("[%s.%s] ",
+					new Throwable().getStackTrace()[1].getClassName(),
+					new Throwable().getStackTrace()[1].getMethodName()));
+		warn(format, args);
+	}
+	 */
 
 	public static void warn(String format, Object... args) {
 		try {
@@ -192,6 +245,11 @@ public class Utils {
 								stElements[3].getClassName(), stElements[3].getMethodName(),
 								stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
+			
+			if (printag)
+				System.err.print(String.format("[%s.%s] ",
+					new Throwable().getStackTrace()[1].getClassName(),
+					new Throwable().getStackTrace()[1].getMethodName()));
 
 			if (format != null)
 				if (args != null && args.length > 0)
@@ -214,6 +272,12 @@ public class Utils {
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
+
+			if (printag)
+				System.err.print(String.format("[%s.%s] ",
+					new Throwable().getStackTrace()[1].getClassName(),
+					new Throwable().getStackTrace()[1].getMethodName()));
+
 
 			if (list != null)
 				for (Object it : list)
