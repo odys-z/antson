@@ -938,6 +938,39 @@ public class LangExt {
 	}
 	
 	/**
+	 * Convert to string as "v[0] zip[0], v[1] zip[1], ...".
+	 * @param values
+	 * @param zip
+	 * @return formatted string
+	 * 
+	 * @since 0.9.73
+	 */
+	public static String str(Object[] values, String[] zip) {
+		int[] i = new int[] {0};
+		return Stream.of(values)
+				.map(v -> {
+					return String.format("%s %s", v, i[0] < zip.length ? zip[i[0]++] : "");
+				}).collect(Collectors.joining(","));
+	}
+	
+	/**
+	 * 
+	 * Convert to string as "v[0] zip[0], v[1] zip[1], ...".
+	 * @param values
+	 * @param zip
+	 * @return formatted string
+	 * 
+	 * @since 0.9.73
+	 */
+	public static <T> String str(ArrayList<T> values, String[] zip) {
+		int[] i = new int[] {0};
+		return values.stream()
+				.map(v -> {
+					return String.format("%s %s", v, i[0] < zip.length ? zip[i[0]++] : "");
+				}).collect(Collectors.joining(","));
+	}
+	
+	/**
 	 * Find the i-th repeat of match occurrence in f.
 	 * 
 	 * <p>Test:</p><pre>
