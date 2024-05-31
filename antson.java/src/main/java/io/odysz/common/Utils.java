@@ -162,12 +162,12 @@ public class Utils {
 		}
 	}
 
-	public static void logMap(Map<?, ?> map, String indent) {
+	public static void logMap(Map<?, ?> map, String... indent) {
 		try {
 			if (map != null) {
 				System.out.println("Map size: " + map.size());
 				for (Object mk : map.keySet())
-					System.out.println(indent == null ? "" : indent + mk + ",\t" + map.get(mk));
+					System.out.println(isNull(indent) ? "" : indent[0] + mk + ",\t" + map.get(mk));
 			}
 			else System.out.println("Map is null.");
 		} catch (Exception ex) {
