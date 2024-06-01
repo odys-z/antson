@@ -80,7 +80,7 @@ public class Utils {
 		}
 	}
 
-	public static void logi(String[] row) {
+	public static void logi(Object[] row) {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
@@ -161,13 +161,47 @@ public class Utils {
 			ex.printStackTrace();
 		}
 	}
+	public static void logi(Map<?, ?> map, String... indent) {
+		logMap(map, indent);
+	}
 
 	public static void logMap(Map<?, ?> map, String... indent) {
 		try {
 			if (map != null) {
-				System.out.println("Map size: " + map.size());
-				for (Object mk : map.keySet())
-					System.out.println(isNull(indent) ? "" : indent[0] + mk + ",\t" + map.get(mk));
+				if (printCaller) {
+					StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+					System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+									stElements[2].getClassName(), stElements[2].getMethodName(),
+									stElements[2].getFileName(), stElements[2].getLineNumber()));
+				}
+
+				if (map != null) {
+					if (printag)
+						System.err.print(String.format("[%s.%s] ",
+							new Throwable().getStackTrace()[1].getClassName(),
+							new Throwable().getStackTrace()[1].getMethodName()));
+
+					// System.out.println("Map size: " + map.size());
+
+					/*
+					for (Object mk : map.keySet())
+						System.out.println(isNull(indent) ? "" : indent[0] + mk + ",\t" + map.get(mk));
+					*/
+					System.out.print("{");
+					map.forEach((k, v) -> {
+						System.out.print(k);
+						System.out.print(": ");
+						if (v instanceof Map)
+							logMap((Map<?, ?>)v);
+						else if (v instanceof List)
+							logi((List<?>)v);
+						else if (v != null && v.getClass().isArray())
+							logi((Object[])v);
+						else
+							System.out.print(v);
+					});
+					System.out.println("}");
+				}
 			}
 			else System.out.println("Map is null.");
 		} catch (Exception ex) {
