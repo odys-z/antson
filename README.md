@@ -4,6 +4,8 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/)
 [![NuGet version](https://badge.fury.io/nu/Antson.CSharp.svg)](https://badge.fury.io/nu/Antson.CSharp)
 
+[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+
 # What's Antson
 
 Antson is **AN**other **T**ool for j**SON** (de)serializing objects in typed

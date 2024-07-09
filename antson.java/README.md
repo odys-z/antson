@@ -1,3 +1,6 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
+
 # About
 
 Antson java version.

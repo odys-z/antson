@@ -6,6 +6,7 @@ import static io.odysz.common.LangExt.isblank;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -22,12 +23,14 @@ import java.util.stream.Stream;
 import io.odysz.anson.Anson;
 
 public class Utils {
-	/**Used for print out all caller.
+	/**
+	 * Used for print out all caller.
+	 * 
 	 * Calling logi() etc. is recommended add a static final boolean flag before calling:<br>
 	 * if (staticBoolean) Util.logi("messages");<br>
 	 * In this way, the java compiler will optimize the code to nothing if the <i>staticBoolean</i> is false.
 	 * This flag is used for find out {@link #logi(String, String...)} calling that's not controlled by the flag.
-	 * */
+	 */
 	static boolean printCaller = false;
 
 	public static int tabwidth = 4;
@@ -253,29 +256,15 @@ public class Utils {
 		}
 	}
 
-	/**
-	 * Print warning with tag.
-	 * @param tagging alwasy new / construct a new Object instance for the parameter,
-	 * which is used for generating log tag. 
-	 * @param format
-	 * @param args
-	public static void warnt(String format, Object... args) {
-			System.err.print(String.format("[%s.%s] ",
-					new Throwable().getStackTrace()[1].getClassName(),
-					new Throwable().getStackTrace()[1].getMethodName()));
-		warn(format, args);
-	}
-	 */
-
 	public static void warn(String format, Object... args) {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("\nlog by        %s.%s(%s:%s)", 
+				System.err.println(String.format("\nlog by        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 				if (stElements.length > 3)
-				System.out.println(String.format("              %s.%s(%s:%s)", 
+				System.err.println(String.format("              %s.%s(%s:%s)", 
 								stElements[3].getClassName(), stElements[3].getMethodName(),
 								stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
@@ -433,7 +422,7 @@ public class Utils {
 	 * @throws  IllegalArgumentException if the {@code count} is
 	 *          negative.
 	 *
-	 * @see JDK 11 String.repeat
+	 * see JDK 11 String.repeat
 	 * 
 	 * @since 0.9.68
 	 */
@@ -465,5 +454,54 @@ public class Utils {
 		}
 		System.arraycopy(multiple, 0, multiple, copied, limit - copied);
 		return new String(multiple);
+	}
+
+	/**
+	 * @param tag always create as {@code new Object(){}}
+	 */
+	public static void warnT(Object tag, String format, Object ... args) {
+		tag(System.err, tag, format, args);
+	}
+	
+	private static void tag(PrintStream p, Object tag, String format, Object[] args) {
+		try {
+			if (printCaller) {
+				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+				p.println(String.format("\nlog by        %s.%s(%s:%s)", 
+								stElements[2].getClassName(), stElements[2].getMethodName(),
+								stElements[2].getFileName(), stElements[2].getLineNumber()));
+				if (stElements.length > 3)
+				p.println(String.format("              %s.%s(%s:%s)", 
+								stElements[3].getClassName(), stElements[3].getMethodName(),
+								stElements[3].getFileName(), stElements[3].getLineNumber()));
+			}
+			
+//			if (printag)
+//				p.print(String.format("[%s.%s()] ",
+//					new Throwable().getStackTrace()[1].getClassName(),
+//					new Throwable().getStackTrace()[1].getMethodName()));
+
+			p.print(String.format("[%s#%s()] ",
+					tag.getClass().getEnclosingClass().getName(),
+					tag.getClass().getEnclosingMethod().getName()));
+		
+			if (format != null)
+				if (args != null && args.length > 0)
+					p.println(String.format(format, args));
+				else
+					p.println(format);
+
+		} catch (Exception ex) {
+			if (ex instanceof NullPointerException
+				&& tag != null && tag.getClass().getEnclosingClass() == null)
+				System.err.println("The 'tag' object doesn't have any enclosing instance. Is it initializaed like: 'new Object() {}'?");
+			StackTraceElement[] x = ex.getStackTrace();
+			p.println(String.format("warn(): Can't print. Error: %s. called by %s.%s()",
+					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
+		}
+	}
+	
+	public static void logT(Object tag, String format, Object ... args) {
+		tag(System.out, tag, format, args);
 	}
 }

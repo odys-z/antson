@@ -17,11 +17,11 @@ public class LangExt {
 	 * <p>Empty element won't be ignored if there are 2 consequent separator. <br>
 	 * That means two junctural, succeeding, cascading separators without an element in between, expect white space.
 	 * Sorry for that poor English.</p>
-	 * @see https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
+	 * see https://stackoverflow.com/questions/41953388/java-split-and-trim-in-one-shot
 	 * @param s
 	 * @param regex
 	 * @param noTrim
-	 * @return String[]
+	 * @return split result array
 	 */
 	public static String[] split(String s, String regex, boolean... noTrim) {
 		if (s == null)
@@ -68,7 +68,7 @@ public class LangExt {
 	assertFalse(prefixWith("v1234w", new String[] { "1v", "v1234wx" }));</pre>
 	 * @param s
 	 * @param prefixes
-	 * @return true if exist a prefix, other wise false
+	 * @return true if a prefix exists, other wise false
 	 * @since 0.9.63
 	 */
 	public static boolean prefixWith(String s, String... prefixes) {
@@ -83,7 +83,7 @@ public class LangExt {
 	 * 
 	 * @param s
 	 * @param prefixes
-	 * @return
+	 * @return true if a prefix exists, other wise false
 	 * @since 0.9.39
 	 */
 	public static boolean startsOneOf(String s, String... prefixes) {
@@ -221,7 +221,7 @@ public class LangExt {
 	 * </pre>
 	 * @param val
 	 * @param deflt
-	 * @return
+	 * @return matched or not
 	 */
 	public static boolean is(boolean[] val, boolean... deflt) {
 		if (val == null || val.length < 1)
@@ -1017,7 +1017,7 @@ public class LangExt {
 	 * Join strings.
 	 * 
 	 * @since 0.9.33
-	 * @param sep, null as ","
+	 * @param sep null as ","
 	 * @param vi "a", null, "b", ...
 	 * @return "a,b,..."
 	 */
@@ -1034,8 +1034,8 @@ public class LangExt {
 	 * @see #joinEsc(String, String, String...)
 	 * 
 	 * @since 0.9.33
-	 * @param sep, null as ",", e.g. "\n"
-	 * @param esc, replacement, e.g. "\\n"
+	 * @param sep null as ",", e.g. "\n"
+	 * @param esc replacement, e.g. "\\n"
 	 * @param vi "a\nx", null, "bb", ...
 	 * @return "a\\nx\nb\n..."
 	 */
