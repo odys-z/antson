@@ -37,8 +37,6 @@ public class Utils {
 	
 	public static boolean printag = false;
 
-	// private static ArrayList<Boolean> tagflags;
-
 	/**See {@link #printCaller}
 	 * @param printcall
 	 */
@@ -184,12 +182,6 @@ public class Utils {
 							new Throwable().getStackTrace()[1].getClassName(),
 							new Throwable().getStackTrace()[1].getMethodName()));
 
-					// System.out.println("Map size: " + map.size());
-
-					/*
-					for (Object mk : map.keySet())
-						System.out.println(isNull(indent) ? "" : indent[0] + mk + ",\t" + map.get(mk));
-					*/
 					System.out.print("{");
 					map.forEach((k, v) -> {
 						System.out.print(k);
@@ -476,11 +468,6 @@ public class Utils {
 								stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
 			
-//			if (printag)
-//				p.print(String.format("[%s.%s()] ",
-//					new Throwable().getStackTrace()[1].getClassName(),
-//					new Throwable().getStackTrace()[1].getMethodName()));
-
 			p.print(String.format("[%s#%s()] ",
 					tag.getClass().getEnclosingClass().getName(),
 					tag.getClass().getEnclosingMethod().getName()));
