@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -468,9 +469,10 @@ public class Utils {
 								stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
 			
+			Method m = tag.getClass().getEnclosingMethod();
 			p.print(String.format("[%s#%s()] ",
 					tag.getClass().getEnclosingClass().getName(),
-					tag.getClass().getEnclosingMethod().getName()));
+					m == null ? "static?" : m.getName()));
 		
 			if (format != null)
 				if (args != null && args.length > 0)
