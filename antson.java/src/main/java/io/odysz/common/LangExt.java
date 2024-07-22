@@ -78,6 +78,12 @@ public class LangExt {
     }
 	////////// org.apache.commons.lang3 //////////////////////////////
 
+    /**
+     * Is target a primitive object?
+     * @param target
+     * @return yes if target is Long, Integer, ...
+     * @since 0.9.78
+     */
     public static boolean isPrimitive(Object target) {
     	return target != null && isPrimitive(target.getClass()); 
     }
