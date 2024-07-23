@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 import org.apache.commons.text.StringEscapeUtils;
 import org.junit.jupiter.api.Test;
 
+import io.odysz.anson.Anson;
+
 class LangExtTest {
 
 	@Test
@@ -319,5 +321,28 @@ class LangExtTest {
 		assertEquals("v1:v3", removele("v1:v2:v3", "v2", ":"));
 		assertEquals("v1:v2.1,v2.2:v3", removele("v1:v2.1,v2.2:v3", "v2", ":"));
 		assertEquals("v1:v2.1,v2.2", removele("v1:v2.1,v2.2:v3", "v3", ":"));
+	}
+	
+	@Test
+	void testIsPrimitive() {
+        // primitiveWrapperMap.put(Boolean.TYPE, Boolean.class);
+		assertTrue(isPrimitive(true));
+        // primitiveWrapperMap.put(Byte.TYPE, Byte.class);
+        // primitiveWrapperMap.put(Character.TYPE, Character.class);
+		assertTrue(isPrimitive('a'));
+        // primitiveWrapperMap.put(Short.TYPE, Short.class);
+		short v = 3;
+		assertTrue(isPrimitive(v));
+        // primitiveWrapperMap.put(Integer.TYPE, Integer.class);
+		assertTrue(isPrimitive(4));
+        // primitiveWrapperMap.put(Long.TYPE, Long.class);
+		assertTrue(isPrimitive(5L));
+        // primitiveWrapperMap.put(Double.TYPE, Double.class);
+		assertTrue(isPrimitive(5d));
+        // primitiveWrapperMap.put(Float.TYPE, Float.class);
+		assertTrue(isPrimitive(6.0));
+        // primitiveWrapperMap.put(Void.TYPE, Void.TYPE);	
+		assertFalse(isPrimitive(new Object()));
+		assertFalse(isPrimitive(new Anson()));
 	}
 }
