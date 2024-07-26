@@ -445,6 +445,28 @@ public class LangExt {
 	}
 	
 	/**
+	 * equals?
+	 * @param a number
+	 * @param b number
+	 * @return ture if equals
+	 */
+	public static <T> boolean ev(T a, T b) {
+		return (isblank(a) || isblank(b)) ? false
+				: a instanceof String ? b instanceof String && eq((String)a, (String)b)
+				: a instanceof Integer ? b instanceof Integer && (Integer)a == (Integer)b
+				: a instanceof Float ? b instanceof Float && (Float)a == (Float)b
+				: a instanceof Double ? b instanceof Double && (Double)a == (Double)b
+				: a instanceof Long ? b instanceof Long && (Long)a == (Long)b
+				: a instanceof Short ? b instanceof Short && (Short)a == (Short)b
+				: ((String)a).compareTo((String) b) == 0;
+	}
+	
+	public static <T> boolean e(T a, T b) {
+		return a == b
+			|| a instanceof String && b instanceof String && eq((String)a, (String)b)
+			|| isPrimitive(a) && isPrimitive(b) && ev(a, b);
+	}
+	/**
 	 * Is there any element in {@code arr} is greater than {@code b}?
 	 * <pre>
 	 * assertTrue(hasGt(new Long[] {0l, 1l}, 0l));
@@ -1182,6 +1204,17 @@ public class LangExt {
 
 		return isblank(from) ? ""
 			: (s + from.trim() + s).replaceAll(s + p + s, s).replaceAll("^"+s, "").replaceAll(s+"$", "");
+	}
+	
+	public static Object[] replacele(Object[] arr, Object target, Object with) {
+		if (arr != null) {
+			for (int x = 0; x < arr.length; x++)
+				if (e(arr[x], target)) {
+					arr[x] = with;
+					break;
+				}
+		}
+		return arr;
 	}
 }
 

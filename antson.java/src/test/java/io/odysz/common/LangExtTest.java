@@ -345,4 +345,23 @@ class LangExtTest {
 		assertFalse(isPrimitive(new Object()));
 		assertFalse(isPrimitive(new Anson()));
 	}
+	
+	@Test
+	void testReplacele() {
+		assertTrue(ev(2, 2));
+		assertTrue(ev("3", "3"));
+		assertFalse(ev(5, 5.0));
+		assertFalse(ev(5.1, 5.0));
+		
+		Object a = new Object();
+		Object b = new Object();
+		assertFalse(e(a, b));
+		b = a;
+		assertTrue(e(a, b));
+		
+		String[] arr = new String[] {"a", "b", "x", "d"};
+		replacele(arr, "x", "y");
+		
+		assertTrue(e(arr[2], "y"));
+	}
 }
