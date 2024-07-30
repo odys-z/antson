@@ -162,7 +162,7 @@ public class LangExt {
 	 * @return true if a prefix exists, other wise false
 	 * @since 0.9.39
 	 */
-	public static boolean startsOneOf(String s, String... prefixes) {
+	public static boolean prefixOneOf(String s, String... prefixes) {
 		return prefixWith(s, prefixes);
 	}
 	

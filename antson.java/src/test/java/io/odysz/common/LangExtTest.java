@@ -235,8 +235,8 @@ class LangExtTest {
 
 	@Test
 	void testStarts() {
-		assertTrue(startsOneOf("v1234w", new String[] { "w1234", "v1234" }));
-		assertFalse(startsOneOf("v1234w", new String[] { "1v", "v1234wx" }));
+		assertTrue(prefixOneOf("v1234w", new String[] { "w1234", "v1234" }));
+		assertFalse(prefixOneOf("v1234w", new String[] { "1v", "v1234wx" }));
 	}
 	
 	@Test

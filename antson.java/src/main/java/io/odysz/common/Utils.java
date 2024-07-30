@@ -3,9 +3,11 @@ package io.odysz.common;
 import static io.odysz.common.LangExt.isNull;
 import static io.odysz.common.LangExt.isblank;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URISyntaxException;
@@ -493,4 +495,20 @@ public class Utils {
 	public static void logT(Object tag, String format, Object ... args) {
 		tag(System.out, tag, format, args);
 	}
+	
+	/**
+	 * Pause console, waiting for any key input.
+	 * @param msg
+	 */
+	public static void pause(String msg) {
+		Utils.logi(msg);
+		try {
+			BufferedReader reader = new BufferedReader(
+	            new InputStreamReader(System.in));
+			reader.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }
