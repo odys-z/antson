@@ -878,16 +878,30 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			else if (Object.class.isAssignableFrom(ft)) {
 				String v = ctx.getChild(2).getText();
 				
+				/** try 0.9.80
 				if (!(v.startsWith("\"") && v.endsWith("\"")))
 					Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
 						fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
-				else {
-					v = v.replaceFirst("\"", "");
-					v = v.replaceAll("\"$", "");
-				}
-
+					else {
+						v = v.replaceFirst("\"", "");
+						v = v.replaceAll("\"$", "");
+					}
+				
 				if (!LangExt.isblank(v, "null"))
 					f.set(enclosing, v);
+				}
+				*/
+				if (!LangExt.isblank(v, "null")) {
+					if (!(v.startsWith("\"") && v.endsWith("\"")))
+						Utils.warn("\nDeserializing unsupported type, field: %s, type: %s, enclosing type: %s",
+							fn, ft.getName(), enclosing == null ? null : enclosing.getClass().getName());
+					else {
+						v = v.replaceFirst("\"", "");
+						v = v.replaceAll("\"$", "");
+					}
+				
+					f.set(enclosing, v);
+				}
 			}
 			else if (top.parsedVal != null)
 				new AnsonException(0, "sholdn't happen");
