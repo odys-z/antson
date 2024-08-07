@@ -321,6 +321,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		if (envetype != null)
 			// ignore this type specification, keep consist with java type
 			return;
+		
+		if (ctx.qualifiedName() == null)
+			throw new NullPointerException("Expecting type pair, but got: " + ctx.getText());
 
 		TerminalNode str = ctx.qualifiedName().STRING();
 		String txt = ctx.qualifiedName().getText();
