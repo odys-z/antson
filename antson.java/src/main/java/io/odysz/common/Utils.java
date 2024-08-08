@@ -10,13 +10,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -319,8 +323,17 @@ public class Utils {
 	 */
 	public static String loadTxt(Class<?> clzz, String filename) {
 		try {
+			URI uri = clzz.getResource(filename).toURI();
+			try {
+				// https://stackoverflow.com/a/25033217
+				Map<String, String> env = new HashMap<>(); 
+				env.put("create", "true");
+				@SuppressWarnings("unused")
+				FileSystem zipfs = FileSystems.newFileSystem(uri, env);
+			} catch (Exception e){}
+
 			return Files.readAllLines(
-				Paths.get(clzz.getResource(filename).toURI()), Charset.defaultCharset())
+				Paths.get(uri), Charset.defaultCharset())
 				.stream().collect(Collectors.joining("\n"));
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
