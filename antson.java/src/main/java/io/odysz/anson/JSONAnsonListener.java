@@ -110,7 +110,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 
 	private static HashMap<Class<?>, JsonableFactory> factorys;
 
-	/**Merge clazz's field meta up to the IJsonable ancestor.
+	/**
+	 * Merge clazz's field metas up to the IJsonable ancestor.
+	 * 
 	 * @param clazz
 	 * @param fmap
 	 * @return fmap
