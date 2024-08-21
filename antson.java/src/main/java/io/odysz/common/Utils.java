@@ -184,13 +184,21 @@ public class Utils {
 				}
 
 				if (map != null) {
+					if (!isNull(indent))
+						for (String ind : indent)
+							System.out.print(ind);
+
 					if (printag)
 						System.err.print(String.format("[%s.%s] ",
 							new Throwable().getStackTrace()[1].getClassName(),
 							new Throwable().getStackTrace()[1].getMethodName()));
 
+					final boolean[] comma = new boolean[] {false};
 					System.out.print("{");
 					map.forEach((k, v) -> {
+						if (!comma[0]) comma[0] = true;
+						else System.out.print(", ");
+
 						System.out.print(k);
 						System.out.print(": ");
 						if (v instanceof Map)
