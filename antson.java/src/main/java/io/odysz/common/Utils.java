@@ -45,9 +45,9 @@ public class Utils {
 	public static boolean printag = false;
 
 	/**See {@link #printCaller}
-	 * @param printcall
+	 * @param printing
 	 */
-	public static void printCaller(boolean printcall) { printCaller = printcall; }
+	public static void printCaller(boolean printing) { printCaller = printing; }
 
 	/**Print out log with System.out.println().<br>
 	 * Note: this method will print out caller if {@link #printCaller} is true.<br>
