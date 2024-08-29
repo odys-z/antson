@@ -59,6 +59,10 @@ public class T_AnResultset extends Anson {
 
 	private HashMap<Class<?>,String> stringFormats;
 
+	/** row indices, start at 0 */
+	private HashMap<String, Integer> indices0;
+	public HashMap<String, Integer> indices0() { return indices0; }
+
 	/** for deserializing */
 	public T_AnResultset() { }
 
@@ -789,4 +793,6 @@ public class T_AnResultset extends Anson {
 		this.total = total;
 		return this;
 	}
+	
+	String[] flatcols;
 }

@@ -38,8 +38,9 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 						/** dataset extensions<br>
 						 * @see {@link io.odysz.semantic.ext.Dataset}. */
 						dataset("ds.serv11"),
-						/**@deprecated For test only */
-						quiz("quiz.serv");
+						/**For test only */
+						quiz("quiz.serv"),
+						syntier("sync.tier");
 		
 		private String url;
 		@Override public String url() { return url; }
@@ -161,6 +162,16 @@ public class T_AnsonMsg <T extends T_AnsonBody> extends Anson {
 	public JsonOpt opts() {
 		return opts == null ? new JsonOpt() : opts;
 	}
+
+	String addr;
+	public T_AnsonMsg<T> addr(String addr) {
+		this.addr = addr;
+		return this;
+	}
+
+	/**Get remote address if possible
+	 * @return address */
+	public String addr() { return addr; }
 
 	public T_AnsonMsg<T> body(List<T> bodyItems) {
 		this.body = bodyItems;

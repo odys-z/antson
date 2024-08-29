@@ -508,8 +508,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param ctx
 	 * @return simple value (STRING, NUMBER, 'true', 'false', null)
 	 */
-	private static Object figureJsonVal(ValueContext ctx) {
-		String txt = ctx.getText();
+	private static Object figureJsonVal(String txt, ValueContext ctx) {
+		// String txt = ctx.getText();
 		if (txt == null)
 			return null;
 		else if (ctx.NUMBER() != null)
@@ -691,7 +691,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				// for List, ft is not null
 				if (top.parsedVal == null) {
 					// simple value like String or number
-					((List<Object>)enclosLst).add(figureJsonVal(ctx));
+
+					// v 0.9.83
+//					if (top.valType != null)
+//						top.parsedVal = constructVal(top.valType, ctx.getText(), ctx);
+//					else
+						((List<Object>)enclosLst).add(figureJsonVal(ctx.getText(), ctx));
 				}
 				else {
 					// try figure out is element also an array if enclosing object is an array
@@ -773,11 +778,11 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				top.parsedVal = null;
 			}
 			else //if (top.isInMap()) {
-				// parsed Value can already got when exit array
-				if (top.parsedVal == null)
+				// parsed Value can be already gotten when exit array
+				if (top.parsedVal == null) {
 					/** NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
 					 *  When client upload json, it's automatically escaped.
-					 *  This makes DB (or server stored data) are mixed with escaped and un-escaped strings.
+					 *  This makes DB data (or server stored data) is mixed with escaped and un-escaped strings.
 					 *  When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
 					 *  The following is experimental to keep server side data be consists with raw data.
 					 *  
@@ -785,8 +790,38 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					 *  top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
 					 */
 					top.parsedVal = Anson.unescape(getStringVal(ctx.STRING(), ctx.getText()));
+					
+					// v 0.9.83
+					if (top.valType != null && top.parsedVal instanceof String) 
+						top.parsedVal = constructVal(top.valType, (String)top.parsedVal, ctx);
+				}
 			// }
 		}
+	}
+
+	/**
+	 * @since 0.9.83
+	 * @param valType
+	 * @param vstr
+	 * @param ctx
+	 * @return val
+	 */
+	private Object constructVal(String valType, String vstr, ValueContext ctx) {
+		if (vstr == null)
+			return null;
+		if (valType != null) {
+			try {
+				Class<?> clz = Class.forName(valType);
+				if (clz.isAssignableFrom(String.class)) return vstr;
+               	Constructor<?> ctor = clz.getConstructor(new Class<?>[] {String.class});
+				return ctor.newInstance(vstr);
+			} catch (Exception e) {
+				Utils.warnT(new Object() {}, "Can't parse %s, type %s", vstr, valType);
+				return vstr;
+			}
+		}
+		else 
+			return figureJsonVal(vstr, ctx);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -861,8 +896,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (IJsonable.class.isAssignableFrom(ft)) {
                 // By pass for serializing and deserializing a string value by user, e.g. Port() & Port#ToBlock()
-                if (top.parsedVal != null && top.parsedVal.getClass() == String.class)
-                {
+                if (top.parsedVal != null && top.parsedVal.getClass() == String.class) {
                 	Constructor ctor = ft.getConstructor(new Class<?>[] {String.class});
                     if (ctor == null)
                         throw new AnsonException(0,

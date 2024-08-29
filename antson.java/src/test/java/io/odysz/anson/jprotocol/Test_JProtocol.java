@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import io.odysz.anson.Anson;
 import io.odysz.anson.T_AnResultset;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.semantic.T_PhotoCSS;
 import io.odysz.semantic.ext.test.T_AnDatasetResp;
 import io.odysz.semantic.jprotocol.test.T_AnSessionReq;
 import io.odysz.semantic.jprotocol.test.T_AnSessionResp;
@@ -29,6 +30,9 @@ import io.odysz.semantic.jprotocol.test.T_SessionInf;
 import io.odysz.semantic.jprotocol.test.T_TransException;
 import io.odysz.semantic.jprotocol.test.T_UserReq;
 import io.odysz.semantic.jprotocol.test.U.T_AnInsertReq;
+import io.odysz.semantic.syn.T_ExchangeBlock;
+import io.odysz.semantic.syn.T_Nyquence;
+import io.oz.jserv.docs.syn.T_SyncResp;
 
 class Test_JProtocol {
 	static final String iv64 = "iv: I'm base64";
@@ -168,7 +172,7 @@ class Test_JProtocol {
 	void test_js_login() throws AnsonException {
 		String req = "{\"type\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\","
 				+ "\"version\":\"1.1\",\"seq\":421,"
-				+ "\"opts\":{\"noNull\":true,\"noBoolean\":false,\"doubleFormat\":\".2f\"},"
+				+ "\"opts\":{\"doubleFormat\":\".2f\"},"
 				+ "\"port\":\"session\",\"header\":{},"
 				+ "\"body\":[{\"type\":io.odysz.semantic.jprotocol.test.T_AnSessionReq," // identifier as type name
 					+ "\"uid\":\"admin\",\"token\":\"ZfSigOt9vrtWFWHg4c6v0A==\","
@@ -185,7 +189,7 @@ class Test_JProtocol {
 		assertEquals(24, msg.body(0).token().length());
 		
 		req = "{\"type\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\",\"version\":\"1.1\","
-				+ "\"seq\":218,\"opts\":{\"noNull\":true,\"noBoolean\":false,\"doubleFormat\":\".2f\"},"
+				+ "\"seq\":218,\"opts\":{\"doubleFormat\":\".2f\"},"
 				+ "\"port\":\"session\",\"header\":{},"
 				+ "\"body\":[{\"type\":\"io.odysz.semantic.jprotocol.test.T_AnSessionReq\","
 				+ "\"uid\":\"admin\",\"token\":\"OIuFP3XNGXeLK2Yec9WVRw==\",\"iv\":\"FWMLMy5aBBk3GDEFUwMfGA==\","
@@ -367,6 +371,79 @@ class Test_JProtocol {
 		T_SemanticObject obj = (T_SemanticObject) Anson.fromJson(msg);
 		assertEquals("0", obj.props().get("code"));
 		assertEquals(3, ((ArrayList<String>)obj.props().get("reasons")).size());
+	}
+	
+	@Test
+	void test_NestedList() {
+		String jblock = "{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\","
+				+ "\"nvs\":[[\"type\"\"type\",\"type\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.odysz.semantic.T_PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"]],"
+				// grammar error for parsing here:  \"v0-0-1.0\"\"v0-0-1.1\", why?
+				+ "\"nvss\": [[[\"0-0-0.0 0-0-0.1\",\"v0-0-1.0,v0-0-1.1\",\"0-0-2\"],[\"0-1-0\"]]]"
+				+ "}";
+
+		T_AnInsertReq req = (T_AnInsertReq) Anson.fromJson(jblock);
+		assertEquals ("\"type\"\"type\"", req.nvs.get(0)[0]);
+		assertEquals ("\"type\"", req.nvs.get(0)[1]);
+
+		// assertEquals ("\"0-0-0.0\"\"0-0-0.1\"", req.nvss.get(0).get(0)[0]);
+		assertEquals ("0-0-0.0 0-0-0.1", req.nvss.get(0).get(0)[0]);
+		assertEquals ("0-0-2", req.nvss.get(0).get(0)[2]);
+		assertEquals ("0-1-0", req.nvss.get(0).get(1)[0]);
+	}
+	
+	@Test
+	void test_NoSql() {
+		String jblock = "{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\","
+				+ "\"nvs\":[[\"type\"\"type\",\"type\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.odysz.semantic.T_PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"]],"
+				+ "\"nvss\": [[[\"0-0-0.0,0-0-0.1\",\"0-0-1\"],[\"0-1-0\"]]]"
+				+ "}";
+
+		T_AnInsertReq req = (T_AnInsertReq) Anson.fromJson(jblock);
+		T_PhotoCSS css = (T_PhotoCSS)Anson.fromJson((String) req.nvs.get(1)[1]);
+		assertEquals (4, css.size[0]);
+	}
+	
+	@Test
+	void test_Nyquvect() throws AnsonException, IOException {
+		T_ExchangeBlock xb = new T_ExchangeBlock(null, "test");
+		xb.nv = new HashMap<String, T_Nyquence>();
+		xb.nv.put("X", new T_Nyquence(0));
+		String xbs = xb.toBlock();
+		assertEquals("{\"type\": \"io.odysz.semantic.syn.T_ExchangeBlock\", "
+				+ "\"parent\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", "
+				+ "\"a\": null, \"synodes\": null, \"session\": null, "
+				+ "\"nv\": {\"X\": 0}, "
+				+ "\"chpage\": null, \"chpagesize\": 0, \"uri\": \"test\", "
+				+ "\"challengeSeq\": 0, \"anspage\": null, \"answerSeq\": 0, "
+				+ "\"totalChallenges\": 0, \"act\": 0, \"entities\": null, "
+				+ "\"peer\": null, \"srcnode\": null}\n",
+				xbs);
+
+		assertEquals(0, ((T_ExchangeBlock) Anson.fromJson(
+				"{\"type\": \"io.odysz.semantic.syn.T_ExchangeBlock\", \"nv\": {\"X\": 0}}"))
+				.nv.get("X").n);
+
+		T_ExchangeBlock xb2 = (T_ExchangeBlock) Anson.fromJson(xbs);
+		assertEquals(0, T_Nyquence.compareNyq(xb.nv.get("X"), xb2.nv.get("X")));
+		
+		String msg = "{\"type\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\","
+				+ "\"code\":\"ok\",\"opts\":null,\"port\":\"syntier\",\"header\":null,"
+				+ "\"body\":[{\"type\":\"io.oz.jserv.docs.syn.T_SyncResp\",\"rs\":null,\"parent\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\",\"a\":null,\"domain\":\"zsu\","
+				+ "\"exblock\":{\"type\":\"io.odysz.semantic.syn.T_ExchangeBlock\","
+				  + "\"synodes\":{\"type\":\"io.odysz.anson.T_AnResultset\",\"stringFormats\":null,\"total\":2,\"rowCnt\":2,\"colCnt\":10,"
+					+ "\"colnames\":{\"IO_OZ_SYNUID\":[10,\"io_oz_synuid\"],\"DOMAIN\":[5,\"domain\"],\"OPTIME\":[9,\"optime\"],\"ORG\":[1,\"org\"],\"NSTAMP\":[4,\"nstamp\"],\"NYQ\":[3,\"nyq\"],\"SYNID\":[2,\"synid\"],\"REMARKS\":[6,\"remarks\"],\"OPER\":[8,\"oper\"],\"MAC\":[7,\"mac\"]},"
+					+ "\"rowIdx\":0,\"indices0\":null,\"flatcols\":null,"
+					+ "\"results\":[[\"URA\",\"X\",0,0,\"zsu\",null,\"#X\",null,null,\"X\"],[\"URA\",\"Z\",0,0,\"zsu\",null,\"#Z\",null,null,\"X,Z\"]]},"
+				  + "\"session\":null,\"nv\":{\"X\":0,\"Y\":0,\"Z\":0},"
+				  + "\"chpage\":null,\"chpagesize\":0,\"challengeSeq\":0,\"anspage\":null,\"answerSeq\":0,\"totalChallenges\":0,"
+				  + "\"act\":0,\"entities\":null,\"peer\":\"Z\",\"srcnode\":\"X\"},"
+				+ "\"m\":null,\"map\":null,\"uri\":null}],"
+				+ "\"addr\":null,\"version\":\"1.1\",\"seq\":0}";
+
+		@SuppressWarnings("unchecked")
+		T_AnsonMsg<?> req = (T_AnsonMsg<T_SyncResp>) Anson.fromJson(msg);
+		assertEquals(MsgCode.ok, req.code());
+		assertEquals(3, ((T_SyncResp)req.body(0)).exblock.nv.size());
 	}
 	
 	static <U extends T_AnsonResp> T_AnsonMsg<U> ok(T_Port p, U body) {
