@@ -81,7 +81,7 @@ class AnsonTest {
 		assertEquals("{type: io.odysz.anson.AnsTRs, rs: "
 				+ "{type: io.odysz.anson.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {1: [1, \"1\"], 2: [2, \"2\"], 3: [3, \"3\"], 4: [4, \"4\"]},"
-				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
+				+ " rowIdx: 0, indices0: null, flatcols: null, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
 				+ "}\n}\n", s);
 		
 	}
