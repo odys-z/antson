@@ -2,7 +2,6 @@ package io.odysz.common;
 
 import static io.odysz.common.LangExt.isNull;
 import static io.odysz.common.LangExt.isblank;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -555,7 +554,7 @@ public class Utils {
 		}
 		
 		for (boolean g : greenlights)
-			if (!g) fail("Green light");
+			if (!g) throw new InterruptedException("Green light");
 	}
 
 }
