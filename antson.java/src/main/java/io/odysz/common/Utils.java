@@ -534,7 +534,14 @@ public class Utils {
 	}
 
 	/**
-	 * Wait until all lights turn into green (true).
+	 * Wait until all lights turn into green (true), a helper for tests.
+	 * @example <pre>
+	 * boolean[] lights = new boolean[] {true, false, false};
+	 * // running background threads, setting light if succeed.
+	 * joinby(lights, X, Y);
+	 * joinby(lights, X, Z);
+	 * awaitAll(lights);
+	 * </pre>
 	 * @param green lights
 	 * @param x100ms default 100 times
 	 * @throws InterruptedException
