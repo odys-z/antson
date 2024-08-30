@@ -2,6 +2,7 @@ package io.odysz.common;
 
 import static io.odysz.common.LangExt.isNull;
 import static io.odysz.common.LangExt.isblank;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -530,6 +531,24 @@ public class Utils {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Wait until all lights turn into green (true).
+	 * @param green lights
+	 * @param x100ms default 100 times
+	 * @throws InterruptedException
+	 */
+	public static void awaitAll(boolean[] greenlights, int... x100ms) throws InterruptedException {
+		int wait = 0;
+		int times = isNull(x100ms) ? 100 : x100ms[0];
+		while (wait++ < times) {
+			for (boolean g : greenlights)
+				if (!g) Thread.sleep(100);
+		}
+		
+		for (boolean g : greenlights)
+			if (!g) fail("Green light");
 	}
 
 }
