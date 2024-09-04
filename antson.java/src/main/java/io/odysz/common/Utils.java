@@ -4,6 +4,7 @@ import static io.odysz.common.LangExt.isNull;
 import static io.odysz.common.LangExt.isblank;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,6 +45,23 @@ public class Utils {
 	
 	public static boolean printag = false;
 
+	private static PrintStream os;
+	private static PrintStream os() { return os == null ? System.out : os; }
+	private static PrintStream es;
+	private static PrintStream es() { return es == null ? System.err : es; }
+
+	public static void touchDir(String dir) {
+		File f = new File(dir);
+		if (f.isDirectory())
+			return;
+		else if (!f.exists())
+			// create dir
+			f.mkdirs();
+		else
+			// must be a file
+			Utils.warn("FATAL ExtFile can't create a folder, a same named file exists: ", dir);
+	}
+
 	/**See {@link #printCaller}
 	 * @param printing
 	 */
@@ -61,29 +79,29 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("\nlog by        %s.%s(%s:%s)", 
+				os().println(String.format("\nlog by        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 				if (stElements.length > 3)
-				System.out.println(String.format("              %s.%s(%s:%s)", 
+				os().println(String.format("              %s.%s(%s:%s)", 
 								stElements[3].getClassName(), stElements[3].getMethodName(),
 								stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
 
 			if (printag)
-				System.err.print(String.format("[%s.%s] ",
+				es().print(String.format("[%s.%s] ",
 					new Throwable().getStackTrace()[1].getClassName(),
 					new Throwable().getStackTrace()[1].getMethodName()));
 
 			if (format != null)
 				if (args != null && args.length > 0)
-					System.out.println(String.format(format, args));
+					os().println(String.format(format, args));
 				else
-					System.out.println(format);
+					os().println(format);
 
 		} catch (Exception ex) {
 			StackTraceElement[] x = ex.getStackTrace();
-			System.err.println(String.format("logi(): Can't print. Error: %s. called by %s.%s()",
+			es().println(String.format("logi(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
 		}
 	}
@@ -92,21 +110,21 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+				os().println(String.format("logger:        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
 			if (row != null) {
 				if (printag)
-					System.err.print(String.format("[%s.%s] ",
+					es().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
-				System.out.println(LangExt.toString(row));
+				os().println(LangExt.toString(row));
 			}
 		} catch (Exception ex) {
-			System.err.println("logi(): Can't print. Error:");
+			es().println("logi(): Can't print. Error:");
 			ex.printStackTrace();
 		}
 
@@ -116,28 +134,28 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+				os().println(String.format("logger:        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
 			if (list != null) {
 				if (printag)
-					System.err.print(String.format("[%s.%s] ",
+					es().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
 				for (T it : list)
 					if (it == null)
-						System.out.println("null");
+						os().println("null");
 					else if (args != null && args.length > 0)
-						System.out.println(String.format(it.toString(), args));
+						os().println(String.format(it.toString(), args));
 					else
-						System.out.println(it.toString());
+						os().println(it.toString());
 			}
 
 		} catch (Exception ex) {
-			System.err.println("logi(): Can't print. Error:");
+			es().println("logi(): Can't print. Error:");
 			ex.printStackTrace();
 		}
 	}
@@ -146,26 +164,26 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+				os().println(String.format("logger:        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
 			if (list != null) {
 				if (printag)
-					System.err.print(String.format("[%s.%s] ",
+					es().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
 				for (String[] it : list)
 					if (args != null && args.length > 0)
-						System.out.println(String.format(LangExt.toString(it), args));
+						os().println(String.format(LangExt.toString(it), args));
 					else
-						System.out.println(LangExt.toString(it));
+						os().println(LangExt.toString(it));
 			}
 
 		} catch (Exception ex) {
-			System.err.println("logi(): Can't print. Error:");
+			es().println("logi(): Can't print. Error:");
 			ex.printStackTrace();
 		}
 	}
@@ -178,7 +196,7 @@ public class Utils {
 			if (map != null) {
 				if (printCaller) {
 					StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-					System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+					os().println(String.format("logger:        %s.%s(%s:%s)", 
 									stElements[2].getClassName(), stElements[2].getMethodName(),
 									stElements[2].getFileName(), stElements[2].getLineNumber()));
 				}
@@ -186,21 +204,21 @@ public class Utils {
 				if (map != null) {
 					if (!isNull(indent))
 						for (String ind : indent)
-							System.out.print(ind);
+							os().print(ind);
 
 					if (printag)
-						System.err.print(String.format("[%s.%s] ",
+						es().print(String.format("[%s.%s] ",
 							new Throwable().getStackTrace()[1].getClassName(),
 							new Throwable().getStackTrace()[1].getMethodName()));
 
 					final boolean[] comma = new boolean[] {false};
-					System.out.print("{");
+					os().print("{");
 					map.forEach((k, v) -> {
 						if (!comma[0]) comma[0] = true;
-						else System.out.print(", ");
+						else os().print(", ");
 
-						System.out.print(k);
-						System.out.print(": ");
+						os().print(k);
+						os().print(": ");
 						if (v instanceof Map)
 							logMap((Map<?, ?>)v);
 						else if (v instanceof List)
@@ -208,15 +226,15 @@ public class Utils {
 						else if (v != null && v.getClass().isArray())
 							logi((Object[])v);
 						else
-							System.out.print(v);
+							os().print(v);
 					});
-					System.out.println("}");
+					os().println("}");
 				}
 			}
-			else System.out.println("Map is null.");
+			else os().println("Map is null.");
 		} catch (Exception ex) {
 			StackTraceElement[] x = ex.getStackTrace();
-			System.err.println(String.format("logMap(): Can't print. Error: %s. called by %s.%s()",
+			es().println(String.format("logMap(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
 		}
 	}
@@ -225,18 +243,18 @@ public class Utils {
 		try {
 			if (map != null) {
 				if (printag)
-					System.err.print(String.format("[%s.%s] ",
+					es().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
 				for (String mk : map.keySet())
-					System.out.print(mk + ", ");
+					os().print(mk + ", ");
 			}
 
-			System.out.println();
+			os().println();
 		} catch (Exception ex) {
 			StackTraceElement[] x = ex.getStackTrace();
-			System.err.println(String.format("logkeys(): Can't print. Error: %s. called by %s.%s()",
+			es().println(String.format("logkeys(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
 		}
 	}
@@ -245,20 +263,20 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+				os().println(String.format("logger:        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
 			if (printag)
-				System.err.print(String.format("[%s.%s] ",
+				es().print(String.format("[%s.%s] ",
 					new Throwable().getStackTrace()[1].getClassName(),
 					new Throwable().getStackTrace()[1].getMethodName()));
 
 			if (ans != null)
-				System.out.println(ans.toString());
+				os().println(ans.toString());
 		} catch (Exception ex) {
-			System.err.println("logAnson(): Can't print. Error:");
+			es().println("logAnson(): Can't print. Error:");
 			ex.printStackTrace();
 		}
 	}
@@ -267,29 +285,29 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.err.println(String.format("\nlog by        %s.%s(%s:%s)", 
+				es().println(String.format("\nlog by        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 				if (stElements.length > 3)
-				System.err.println(String.format("              %s.%s(%s:%s)", 
+				es().println(String.format("              %s.%s(%s:%s)", 
 								stElements[3].getClassName(), stElements[3].getMethodName(),
 								stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
 			
 			if (printag)
-				System.err.print(String.format("[%s.%s] ",
+				es().print(String.format("[%s.%s] ",
 					new Throwable().getStackTrace()[1].getClassName(),
 					new Throwable().getStackTrace()[1].getMethodName()));
 
 			if (format != null)
 				if (args != null && args.length > 0)
-					System.err.println(String.format(format, args));
+					es().println(String.format(format, args));
 				else
-					System.err.println(format);
+					es().println(format);
 
 		} catch (Exception ex) {
 			StackTraceElement[] x = ex.getStackTrace();
-			System.err.println(String.format("logi(): Can't print. Error: %s. called by %s.%s()",
+			es().println(String.format("logi(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
 		}
 	}
@@ -298,13 +316,13 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				System.out.println(String.format("logger:        %s.%s(%s:%s)", 
+				os().println(String.format("logger:        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
 
 			if (printag)
-				System.err.print(String.format("[%s.%s] ",
+				es().print(String.format("[%s.%s] ",
 					new Throwable().getStackTrace()[1].getClassName(),
 					new Throwable().getStackTrace()[1].getMethodName()));
 
@@ -312,12 +330,12 @@ public class Utils {
 			if (list != null)
 				for (Object it : list)
 					if (args != null && args.length > 0)
-						System.err.println(String.format(it.toString(), args));
+						es().println(String.format(it.toString(), args));
 					else
-						System.err.println(it);
+						es().println(it);
 
 		} catch (Exception ex) {
-			System.err.println("logi(): Can't print. Error:");
+			es().println("logi(): Can't print. Error:");
 			ex.printStackTrace();
 		}
 	}
@@ -476,7 +494,7 @@ public class Utils {
 	 * @param tag always create as {@code new Object(){}}
 	 */
 	public static void warnT(Object tag, String format, Object ... args) {
-		tag(System.err, tag, format, args);
+		tag(es(), tag, format, args);
 	}
 	
 	private static void tag(PrintStream p, Object tag, String format, Object[] args) {
@@ -506,7 +524,7 @@ public class Utils {
 		} catch (Exception ex) {
 			if (ex instanceof NullPointerException
 				&& tag != null && tag.getClass().getEnclosingClass() == null)
-				System.err.println("The 'tag' object doesn't have any enclosing instance. Is it initializaed like: 'new Object() {}'?");
+				es().println("The 'tag' object doesn't have any enclosing instance. Is it initializaed like: 'new Object() {}'?");
 			StackTraceElement[] x = ex.getStackTrace();
 			p.println(String.format("warn(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
@@ -514,7 +532,7 @@ public class Utils {
 	}
 	
 	public static void logT(Object tag, String format, Object ... args) {
-		tag(System.out, tag, format, args);
+		tag(os(), tag, format, args);
 	}
 	
 	/**
@@ -555,6 +573,14 @@ public class Utils {
 		
 		for (boolean g : greenlights)
 			if (!g) throw new InterruptedException("Green light");
+	}
+
+	public static void logOut(PrintStream logStream) {
+		os = logStream;
+	}
+
+	public static void logErr(PrintStream logStream) {
+		es = logStream;
 	}
 
 }
