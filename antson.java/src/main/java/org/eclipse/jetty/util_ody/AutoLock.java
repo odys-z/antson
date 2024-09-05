@@ -13,7 +13,6 @@
 
 package org.eclipse.jetty.util_ody;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -31,7 +30,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class AutoLock implements AutoCloseable, Serializable
 {
-    @Serial
     private static final long serialVersionUID = 3300696774541816341L;
 
     private final ReentrantLock _lock = new ReentrantLock();
@@ -110,35 +108,31 @@ public class AutoLock implements AutoCloseable, Serializable
      * }
      * </pre>
      */
-    public static class WithCondition extends AutoLock
-    {
-        private final Condition _condition = newCondition();
+    public static class WithCondition extends AutoLock {
+		private static final long serialVersionUID = 1L;
+		private final Condition _condition = newCondition();
 
         @Override
-        public AutoLock.WithCondition lock()
-        {
+        public AutoLock.WithCondition lock() {
             return (WithCondition)super.lock();
         }
 
         @Override
-        public AutoLock.WithCondition tryLock()
-        {
+        public AutoLock.WithCondition tryLock() {
             return (WithCondition)super.tryLock();
         }
 
         /**
          * @see Condition#signal()
          */
-        public void signal()
-        {
+        public void signal() {
             _condition.signal();
         }
 
         /**
          * @see Condition#signalAll()
          */
-        public void signalAll()
-        {
+        public void signalAll() {
             _condition.signalAll();
         }
 
@@ -146,8 +140,7 @@ public class AutoLock implements AutoCloseable, Serializable
          * @throws InterruptedException if the current thread is interrupted
          * @see Condition#await()
          */
-        public void await() throws InterruptedException
-        {
+        public void await() throws InterruptedException {
             _condition.await();
         }
 
@@ -158,8 +151,7 @@ public class AutoLock implements AutoCloseable, Serializable
          * @throws InterruptedException if the current thread is interrupted
          * @see Condition#await(long, TimeUnit)
          */
-        public boolean await(long time, TimeUnit unit) throws InterruptedException
-        {
+        public boolean await(long time, TimeUnit unit) throws InterruptedException {
             return _condition.await(time, unit);
         }
     }
