@@ -821,7 +821,7 @@ public class LangExt {
     }
 
 	/**
-	 * see {@link LangExtTest#testEndwith()}
+	 * see test/LangExtTest#testEndwith().
 	 * 
 	 * @param uri
 	 * @param postfix
