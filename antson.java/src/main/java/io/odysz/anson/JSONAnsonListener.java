@@ -792,7 +792,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					top.parsedVal = Anson.unescape(getStringVal(ctx.STRING(), ctx.getText()));
 					
 					// v 0.9.83
-					if (top.valType != null && top.parsedVal instanceof String) 
+					if (top.valType == null && top.enclosing instanceof HashMap<?, ?>
+						&& ((HashMap<?, ?>)top.enclosing).size() == 0
+						&& top.parsedVal instanceof String)
+						// v 0.9.85: try figure out numbers for missing @AnsonField annotation.
+						top.parsedVal = figureJsonVal((String) top.parsedVal, ctx);
+					else if (top.valType != null && top.parsedVal instanceof String) 
 						top.parsedVal = constructVal(top.valType, (String)top.parsedVal, ctx);
 				}
 			// }

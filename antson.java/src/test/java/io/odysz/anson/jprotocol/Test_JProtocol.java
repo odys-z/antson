@@ -369,7 +369,7 @@ class Test_JProtocol {
 				+ "\"reasons\": [\"Found existing file for device & client path.\", \"omni\", \"src/test/res/64x48.png\"]}}\n";
 		
 		T_SemanticObject obj = (T_SemanticObject) Anson.fromJson(msg);
-		assertEquals("0", obj.props().get("code"));
+		assertEquals(0, obj.props().get("code"));
 		assertEquals(3, ((ArrayList<String>)obj.props().get("reasons")).size());
 	}
 	
