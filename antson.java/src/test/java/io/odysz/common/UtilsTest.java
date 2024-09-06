@@ -86,5 +86,8 @@ class UtilsTest {
 	        assertEquals(line, data);
 	      }
 	   freader.close();
+	   
+	   Utils.logOut(null);
+	   Utils.logErr(null);
 	}
 }

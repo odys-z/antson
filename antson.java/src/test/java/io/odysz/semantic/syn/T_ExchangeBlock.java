@@ -3,7 +3,7 @@ package io.odysz.semantic.syn;
 import java.util.HashMap;
 
 import io.odysz.anson.AnsonField;
-import io.odysz.anson.T_AnResultset;
+import io.odysz.semantic.T_AnResultset;
 import io.odysz.semantic.jprotocol.test.T_AnsonBody;
 import io.odysz.semantic.jprotocol.test.T_AnsonMsg;
 

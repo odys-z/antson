@@ -3,7 +3,7 @@ package io.odysz.semantic.syn;
 import java.sql.SQLException;
 import java.util.HashMap;
 
-import io.odysz.anson.T_AnResultset;
+import io.odysz.semantic.T_AnResultset;
 
 public class T_Nyquence {
 

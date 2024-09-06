@@ -15,8 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.odysz.anson.Anson;
-import io.odysz.anson.T_AnResultset;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.semantic.T_AnResultset;
 import io.odysz.semantic.T_PhotoCSS;
 import io.odysz.semantic.ext.test.T_AnDatasetResp;
 import io.odysz.semantic.jprotocol.test.T_AnSessionReq;
@@ -430,7 +430,7 @@ class Test_JProtocol {
 				+ "\"code\":\"ok\",\"opts\":null,\"port\":\"syntier\",\"header\":null,"
 				+ "\"body\":[{\"type\":\"io.oz.jserv.docs.syn.T_SyncResp\",\"rs\":null,\"parent\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\",\"a\":null,\"domain\":\"zsu\","
 				+ "\"exblock\":{\"type\":\"io.odysz.semantic.syn.T_ExchangeBlock\","
-				  + "\"synodes\":{\"type\":\"io.odysz.anson.T_AnResultset\",\"stringFormats\":null,\"total\":2,\"rowCnt\":2,\"colCnt\":10,"
+				  + "\"synodes\":{\"type\":\"io.odysz.semantic.T_AnResultset\",\"stringFormats\":null,\"total\":2,\"rowCnt\":2,\"colCnt\":10,"
 					+ "\"colnames\":{\"IO_OZ_SYNUID\":[10,\"io_oz_synuid\"],\"DOMAIN\":[5,\"domain\"],\"OPTIME\":[9,\"optime\"],\"ORG\":[1,\"org\"],\"NSTAMP\":[4,\"nstamp\"],\"NYQ\":[3,\"nyq\"],\"SYNID\":[2,\"synid\"],\"REMARKS\":[6,\"remarks\"],\"OPER\":[8,\"oper\"],\"MAC\":[7,\"mac\"]},"
 					+ "\"rowIdx\":0,\"indices0\":null,\"flatcols\":null,"
 					+ "\"results\":[[\"URA\",\"X\",0,0,\"zsu\",null,\"#X\",null,null,\"X\"],[\"URA\",\"Z\",0,0,\"zsu\",null,\"#Z\",null,null,\"X,Z\"]]},"

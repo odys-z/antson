@@ -1,4 +1,4 @@
-package io.odysz.anson;
+package io.odysz.semantic;
 
 import java.sql.Blob;
 import java.sql.Connection;
@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import io.odysz.anson.Anson;
+import io.odysz.anson.AnsonField;
 import io.odysz.common.LangExt;
 import io.odysz.common.Regex;
 
@@ -62,6 +64,15 @@ public class T_AnResultset extends Anson {
 	/** row indices, start at 0 */
 	private HashMap<String, Integer> indices0;
 	public HashMap<String, Integer> indices0() { return indices0; }
+	/**
+	 * Get row index, starting at 0.
+	 * @param k
+	 * @return index starting at 0
+	 */
+	public int rowIndex0(String k) {
+		return indices0 == null || !indices0.containsKey(k)
+			? -1 : indices0.get(k);
+	}
 
 	/** for deserializing */
 	public T_AnResultset() { }
@@ -316,10 +327,10 @@ public class T_AnResultset extends Anson {
 	}
 	
 	public String getString(int colIndex) throws SQLException {
+		/* 2024-04-02
 		try {
 			if (rowIdx <= 0 || results == null || results.get(rowIdx - 1) == null) return null;
 			if (results.get(rowIdx - 1).get(colIndex - 1) == null) return null;
-			// else return results.get(rowIdx - 1).get(colIndex - 1).toString();
 			else {
 				Object v = results.get(rowIdx - 1).get(colIndex - 1);
 				return stringFormats != null && stringFormats.containsKey(v.getClass()) ?
@@ -328,6 +339,8 @@ public class T_AnResultset extends Anson {
 		} catch (Exception e) {
 			throw new SQLException(e.getMessage() + " Empty Results?");
 		}
+		*/
+		return getStringAtRow(colIndex - 1, rowIdx);
 	}
 	
 	public String getString(String colName) throws SQLException {
@@ -380,6 +393,29 @@ public class T_AnResultset extends Anson {
 		if (colName == null) return "";
 		String s = getString((Integer)colnames.get(colName.toUpperCase())[0]);
 		return s == null? "" : s;
+	}
+	
+	/**
+	 * Get row's field value
+	 * @param colName field name
+	 * @param row row index, start at 1. (If get from {@link #rowIndex0(String)}, add 1.)
+	 * @return string value
+	 * @throws NumberFormatException
+	 * @throws SQLException
+	 */
+	public String getStringAtRow(String colName, int row) throws NumberFormatException, SQLException {
+		return getStringAtRow(getColumex(colName)-1, row);
+	}
+
+	public String getStringAtRow(int col, int row) throws NumberFormatException, SQLException {
+		Object v = getRowAt(row - 1).get(col);
+		return v == null ? null : String.valueOf(v);
+	}
+
+	public String getStringByIndex(String colName, String entityId) throws SQLException {
+		if (indices0 == null || !indices0.containsKey(entityId))
+			throw new SQLException("No index for entity %s found", entityId);
+		return getStringAtRow(getColumex(colName)-1, rowIndex0(entityId) + 1);
 	}
 	
 	/**if value is equals case insensitive to 1,true, yes, y, t, decimal > 0.001 return true, else return false;
@@ -600,6 +636,14 @@ public class T_AnResultset extends Anson {
 		}
 	}
 	
+	/**Get col index
+	 * @param colName
+	 * @return col index
+	 */
+	public int getColumex(String colName) {
+		return (int) colnames.get(colName.toUpperCase())[0];
+	}
+
 	/**
 	 * @param upper_bumps [key: UPPER-CASE, value: bumpCase]
 	 * @return this (with column names updated)
@@ -663,7 +707,25 @@ public class T_AnResultset extends Anson {
 		return set((Integer)colnames.get(colName.toUpperCase())[0], v);
 	}
 
-	/**find the first row that contain a matched value in field <i>col</i>. Matching are done by <i>regex</i>.
+	/**
+	 * Generate row indices, start at 0.
+	 * FIXME move this method to Query and be called before rs construction.
+	 * @param pk
+	 * @return this
+	 */
+	public T_AnResultset index0(String pk) {
+		if (indices0 == null)
+			indices0 = new HashMap<String, Integer>();
+		for (int i = 0; i < results.size(); i++) {
+			indices0.put((String) results.get(i).get(getColumex(pk)-1), i);
+		}
+		return this;
+	}
+	
+	/**
+	 * find the first row that contain a matched value in field <i>col</i>.
+	 * Matching are done by <i>regex</i>.
+	 * 
 	 * @param col
 	 * @param regex
 	 * @return row index or 0

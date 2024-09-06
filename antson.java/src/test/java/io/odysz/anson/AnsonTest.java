@@ -79,7 +79,7 @@ class AnsonTest {
 		anrs.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
 		assertEquals("{type: io.odysz.anson.AnsTRs, rs: "
-				+ "{type: io.odysz.anson.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+				+ "{type: io.odysz.semantic.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {1: [1, \"1\"], 2: [2, \"2\"], 3: [3, \"3\"], 4: [4, \"4\"]},"
 				+ " rowIdx: 0, indices0: null, flatcols: null, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
 				+ "}\n}\n", s);
@@ -352,7 +352,7 @@ class AnsonTest {
 	}
 
 	@Test
-	void testFromJson_map() throws IllegalArgumentException, ReflectiveOperationException, AnsonException, IOException {
+	void testFromJson_map() throws ReflectiveOperationException, AnsonException, IOException {
 		AnsTMap m = (AnsTMap) Anson.fromJson("{type: io.odysz.anson.AnsTMap, ver: null, map: {\"A\": \"B\"}}");
 		assertEquals("B", m.map.get("A"));
 
@@ -380,7 +380,7 @@ class AnsonTest {
 	@Test
 	void testFromJson_rs() throws IllegalArgumentException, ReflectiveOperationException, SQLException, AnsonException {
 		AnsTRs rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
-				+ "{type: io.odysz.anson.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+				+ "{type: io.odysz.semantic.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0 1\", \"0 2\", \"0 3\", \"0 4\"], [\"1 1\", \"1 2\", \"1 3\", \"1 4\"], [\"2 1\", \"2 2\", \"2 3\", \"2 4\"]]"
 				+ "}}");
@@ -390,7 +390,7 @@ class AnsonTest {
 		assertEquals("0 1", rs.rs.getString("1"));
 
 		rs = (AnsTRs) Anson.fromJson("{type: io.odysz.anson.AnsTRs, rs: "
-				+ "{type: io.odysz.anson.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
+				+ "{type: io.odysz.semantic.T_AnResultset, stringFormats: null, total: 0, rowCnt: 3, colCnt: 4,"
 				+ " colnames: {\"1\": [1, \"1\"], \"2\": [2, \"2\"], \"3\": [3, \"3\"], \"4\": [4, \"4\"]},"
 				+ " rowIdx: 0, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
 				+ "}}");

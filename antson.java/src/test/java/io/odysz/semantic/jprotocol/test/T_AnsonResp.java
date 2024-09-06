@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import io.odysz.anson.Anson;
-import io.odysz.anson.T_AnResultset;
 import io.odysz.anson.x.AnsonException;
+import io.odysz.semantic.T_AnResultset;
 
 /**
  * Test Only -
