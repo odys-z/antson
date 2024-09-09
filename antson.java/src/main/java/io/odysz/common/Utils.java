@@ -61,6 +61,22 @@ public class Utils {
 			// must be a file
 			Utils.warn("FATAL ExtFile can't create a folder, a same named file exists: ", dir);
 	}
+	
+	/**
+	 * @since 0.9.86
+	 * @param logStream e.g. System.out stream
+	 */
+	public static void logOut(PrintStream logStream) {
+		os = logStream;
+	}
+
+	/**
+	 * @since 0.9.86
+	 * @param logStream e.g. System.err stream
+	 */
+	public static void logErr(PrintStream logStream) {
+		es = logStream;
+	}
 
 	/**See {@link #printCaller}
 	 * @param printing
@@ -502,12 +518,12 @@ public class Utils {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
 				p.println(String.format("\nlog by        %s.%s(%s:%s)", 
-								stElements[2].getClassName(), stElements[2].getMethodName(),
-								stElements[2].getFileName(), stElements[2].getLineNumber()));
+						stElements[2].getClassName(), stElements[2].getMethodName(),
+						stElements[2].getFileName(), stElements[2].getLineNumber()));
 				if (stElements.length > 3)
 				p.println(String.format("              %s.%s(%s:%s)", 
-								stElements[3].getClassName(), stElements[3].getMethodName(),
-								stElements[3].getFileName(), stElements[3].getLineNumber()));
+						stElements[3].getClassName(), stElements[3].getMethodName(),
+						stElements[3].getFileName(), stElements[3].getLineNumber()));
 			}
 			
 			Method m = tag.getClass().getEnclosingMethod();
@@ -560,27 +576,47 @@ public class Utils {
 	 * awaitAll(lights);
 	 * </pre>
 	 * @param green lights
-	 * @param x100ms default 100 times
+	 * @param x100ms default 100 times, -1 for infinitive waiting
 	 * @throws InterruptedException
 	 */
 	public static void awaitAll(boolean[] greenlights, int... x100ms) throws InterruptedException {
 		int wait = 0;
 		int times = isNull(x100ms) ? 100 : x100ms[0];
-		while (wait++ < times) {
-			for (boolean g : greenlights)
+		while (times < 0 || wait++ < times) {
+			boolean green = true;
+			for (boolean g : greenlights) {
 				if (!g) Thread.sleep(100);
+				green &= g;
+			}
+			if (green)
+				return;
 		}
 		
 		for (boolean g : greenlights)
 			if (!g) throw new InterruptedException("Green light");
 	}
-
-	public static void logOut(PrintStream logStream) {
-		os = logStream;
+	
+	/**
+	 * Wait on n-th light only.
+	 * @see #awaitAll(boolean[], int...)
+	 * @param signals
+	 * @param n_th
+	 */
+	public static void waiting(boolean[] signals, int n_th) {
+		for (int i = 0; i < signals.length; i++)
+			if (i != n_th)
+				signals[i] = true;
+			else signals[i] = false;
 	}
-
-	public static void logErr(PrintStream logStream) {
-		es = logStream;
+	
+	/**
+	 * Turn lights to red,
+	 * @see #awaitAll(boolean[], int...)
+	 * @param signals
+	 */
+	public static void turnred(boolean[] signals) {
+		for (int i = 0; i < signals.length; i++)
+			signals[i] = false;
 	}
-
+	
 }

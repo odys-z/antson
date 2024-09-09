@@ -1,5 +1,7 @@
 package io.odysz.common;
 
+import static io.odysz.common.Utils.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
@@ -89,5 +91,29 @@ class UtilsTest {
 	   
 	   Utils.logOut(null);
 	   Utils.logErr(null);
+	}
+	
+	@Test
+	void testWait() throws InterruptedException {
+		boolean[] lights = new boolean[] {false, false, false};
+		
+		new Thread(() -> {
+			for (int i = 0; i < lights.length; i++)
+				lights[i] = true;
+		}).start();
+
+		awaitAll(lights, -1);
+
+		for (boolean light : lights)
+			assertTrue(light);
+		
+		waiting(lights, 1);
+
+		new Thread(() -> {
+			lights[1] = true;
+		}).start();
+
+		awaitAll(lights);
+		assertTrue(lights[1]);
 	}
 }
