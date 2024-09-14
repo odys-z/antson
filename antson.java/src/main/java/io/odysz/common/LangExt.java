@@ -959,6 +959,16 @@ public class LangExt {
 	}
 
 	/**
+	 * For shorten line.
+	 * @param template
+	 * @param args
+	 * @return
+	 */
+	public static String f(String template, Object ... args) {
+		return String.format(template, args);
+	}
+
+	/**
 	 * Get array item, null if not exists.
 	 * @param <T>
 	 * @param arr
