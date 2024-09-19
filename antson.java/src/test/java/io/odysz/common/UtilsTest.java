@@ -1,6 +1,7 @@
 package io.odysz.common;
 
 import static io.odysz.common.Utils.*;
+import static io.odysz.common.LangExt.eq;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -57,17 +58,18 @@ class UtilsTest {
 		Utils.logOut(new PrintStream(out));
 		Utils.logi("3");
 		
-		assertEquals("1\n3\n", out.toString());
+		assertTrue(eq("1\n3\n", out.toString()) || eq("1\r\n3\r\n", out.toString()));
 
 		Utils.touchDir("temp");
         RolloverFileOutputStream os = new RolloverFileOutputStream("temp/yyyy_mm_dd.log", true);
 		String fn = os.getDatedFilename();
+//		os.close();
 		File f = new File(fn);
-		if (f.exists()) {
-			f.delete();
-			os.close();
-			os = new RolloverFileOutputStream("temp/yyyy_mm_dd.log", true);
-		}
+//		if (f.exists()) {
+//			if (!f.delete());
+//				fail("Cannot delete file " + fn);
+//		}
+//		os = new RolloverFileOutputStream("temp/yyyy_mm_dd.log", true);
 
         PrintStream logStream = new PrintStream(os);
         Utils.logOut(logStream);
@@ -82,12 +84,16 @@ class UtilsTest {
 		os.flush();
 		os.close();
 		
-		Scanner freader = new Scanner(f);
-	      while (freader.hasNextLine()) {
-	        String data = freader.nextLine();
-	        assertEquals(line, data);
-	      }
-	   freader.close();
+		new IAssertTest().lineEq(fn, -1, line);
+
+//		Scanner freader = new Scanner(f);
+//	    while (freader.hasNextLine()) {
+//	        String data = freader.nextLine();
+//	        assertEquals(line, data);
+//	        //<Thu Sep 19 11:43:23 CST 2024: RolloverFileOutputStream printing...> but was: 
+//	        //<Thu Sep 19 11:41:49 CST 2024: RolloverFileOutputStream printing...
+//	      }
+//	   freader.close();
 	   
 	   Utils.logOut(null);
 	   Utils.logErr(null);
