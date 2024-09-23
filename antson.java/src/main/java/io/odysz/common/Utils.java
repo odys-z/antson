@@ -528,7 +528,9 @@ public class Utils {
 			
 			Method m = tag.getClass().getEnclosingMethod();
 			p.print(String.format("[%s#%s()] ",
-					tag.getClass().getEnclosingClass().getName(),
+					tag.getClass().getEnclosingClass() == null
+						? "??"
+						: tag.getClass().getEnclosingClass().getName(),
 					m == null ? "static?" : m.getName()));
 		
 			if (format != null)

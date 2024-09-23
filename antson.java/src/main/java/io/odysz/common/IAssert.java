@@ -52,7 +52,7 @@ public interface IAssert {
 	 * @since 0.9.86
 	 * @param fn
 	 * @param n_th n-th, start from 0, -1 for last line
-	 * @param str
+	 * @param str regex to be matched
 	 * @throws FileNotFoundException
 	 */
 	default void lineEq(String fn, int n_th, String str)
@@ -69,7 +69,7 @@ public interface IAssert {
 				if (linebuf.size() > -n_th)
 					linebuf.remove(0);
 			}
-			equals(linebuf.get(0), str);
+			equals(str, linebuf.get(0));
 		}
 
 		else {

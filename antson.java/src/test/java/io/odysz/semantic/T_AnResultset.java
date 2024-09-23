@@ -15,6 +15,7 @@ import io.odysz.anson.Anson;
 import io.odysz.anson.AnsonField;
 import io.odysz.common.LangExt;
 import io.odysz.common.Regex;
+import io.odysz.common.Utils;
 
 /**
  * Test structure. Don't use this in application.
@@ -101,7 +102,7 @@ public class T_AnResultset extends Anson {
 			String colName = rsMeta.getColumnLabel(i).toUpperCase();
 			if (colnames.containsKey(colName)) {
 				if (debug)
-					System.err.println("WARN: As duplicated col name been found, only the last one's index is reserved: " + colName);
+					Utils.warnT(new Object() {}, "WARN: As duplicated col name been found, only the last one's index is reserved: " + colName);
 			}
 			colnames.put(colName, new Object[] {i, rsMeta.getColumnLabel(i)});
 		}
