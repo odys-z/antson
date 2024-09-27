@@ -31,6 +31,8 @@ class AnResultsetTest {
 		
 		T_AnResultset rs2 = (T_AnResultset) Anson.fromJson(msg);
 
+		assertEquals("0, 1", rs2.getStringByIndex("1", "0, 1"));
+		assertEquals("0, 2", rs2.getStringByIndex("2", "0, 1"));
 		assertEquals("1, 2", rs2.getStringByIndex("2", "1, 1"));
 	}
 

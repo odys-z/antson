@@ -505,27 +505,41 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
     | '"type"'
     | '"TYPE"'
 	;</pre>
+	 * @param top parsing context. Since 0.9.90, this method also set value type into it.
 	 * @param ctx
 	 * @return simple value (STRING, NUMBER, 'true', 'false', null)
 	 */
-	private static Object figureJsonVal(String txt, ValueContext ctx) {
+	private static Object figureJsonVal(ParsingCtx top, String txt, ValueContext ctx) {
 		// String txt = ctx.getText();
 		if (txt == null)
 			return null;
 		else if (ctx.NUMBER() != null)
-			try { return Integer.valueOf(txt); }
+			try {
+				top.valType = Integer.class.getName();
+				return Integer.valueOf(txt);
+			}
 			catch (Exception e) {
-				try { return Float.valueOf(txt); }
+				try {
+					top.valType = Float.class.getName();
+					return Float.valueOf(txt);
+				}
 				catch (Exception e1) {
+					top.valType = Double.class.getName();
 					return Double.valueOf(txt);
 				}
 			}
-		else if (ctx.STRING() != null)
+		else if (ctx.STRING() != null) {
+			top.valType = String.class.getName();
 			return getStringVal(ctx.STRING(), txt);
-		else if (txt != null && txt.toLowerCase().equals("true"))
+		}
+		else if (txt != null && txt.toLowerCase().equals("true")) {
+			top.valType = Boolean.class.getName();
 			return Boolean.valueOf(true);
-		else if (txt != null && txt.toLowerCase().equals("flase"))
+		}
+		else if (txt != null && txt.toLowerCase().equals("flase")) {
+			top.valType = Boolean.class.getName();
 			return Boolean.valueOf(false);
+		}
 		else if (  txt != null 
 				&&(txt.toLowerCase().startsWith("type")
 				|| txt.toLowerCase().startsWith("\"type\""))
@@ -696,7 +710,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 //					if (top.valType != null)
 //						top.parsedVal = constructVal(top.valType, ctx.getText(), ctx);
 //					else
-						((List<Object>)enclosLst).add(figureJsonVal(ctx.getText(), ctx));
+						((List<Object>)enclosLst).add(figureJsonVal(top, ctx.getText(), ctx));
 				}
 				else {
 					// try figure out is element also an array if enclosing object is an array
@@ -780,7 +794,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			else //if (top.isInMap()) {
 				// parsed Value can be already gotten when exit array
 				if (top.parsedVal == null) {
-					/** NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
+					/** NOTE semantic-transact v1.3.0 25 Aug 2021 - Doc Task # 001
 					 *  When client upload json, it's automatically escaped.
 					 *  This makes DB data (or server stored data) is mixed with escaped and un-escaped strings.
 					 *  When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
@@ -796,9 +810,10 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 						&& ((HashMap<?, ?>)top.enclosing).size() == 0
 						&& top.parsedVal instanceof String)
 						// v 0.9.85: try figure out numbers for missing @AnsonField annotation.
-						top.parsedVal = figureJsonVal((String) top.parsedVal, ctx);
-					else if (top.valType != null && top.parsedVal instanceof String) 
-						top.parsedVal = constructVal(top.valType, (String)top.parsedVal, ctx);
+						top.parsedVal = figureJsonVal(top, (String) top.parsedVal, ctx);
+					else // if (top.valType != null && top.parsedVal instanceof String) 
+						// top.parsedVal = constructVal(top.valType, (String)top.parsedVal, ctx);
+						top.parsedVal = constructVal(top, (String)top.parsedVal, ctx);
 				}
 			// }
 		}
@@ -811,22 +826,22 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param ctx
 	 * @return val
 	 */
-	private Object constructVal(String valType, String vstr, ValueContext ctx) {
+	private Object constructVal(ParsingCtx top, String vstr, ValueContext ctx) {
 		if (vstr == null)
 			return null;
-		if (valType != null) {
+		if (top != null && top.valType != null) {
 			try {
-				Class<?> clz = Class.forName(valType);
+				Class<?> clz = Class.forName(top.valType);
 				if (clz.isAssignableFrom(String.class)) return vstr;
                	Constructor<?> ctor = clz.getConstructor(new Class<?>[] {String.class});
 				return ctor.newInstance(vstr);
 			} catch (Exception e) {
-				Utils.warnT(new Object() {}, "Can't parse %s, type %s", vstr, valType);
+				Utils.warnT(new Object() {}, "Can't parse %s, type %s", vstr, top.valType);
 				return vstr;
 			}
 		}
 		else 
-			return figureJsonVal(vstr, ctx);
+			return figureJsonVal(top, vstr, ctx);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
