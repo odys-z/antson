@@ -364,4 +364,14 @@ class LangExtTest {
 		
 		assertTrue(e(arr[2], "y"));
 	}
+
+	@Test
+	void testf() {
+		assertEquals(String.format("abc %s, 123", "xyz"),
+					f("abc %s, 123", "xyz"));
+		
+		String[] tas = prefix(new String[] { "123", "abc" }, "xyz-");
+		assertEquals("xyz-123", tas[0]);
+		assertEquals("xyz-abc", tas[1]);
+	}
 }

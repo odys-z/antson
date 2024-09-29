@@ -139,9 +139,10 @@ public class LangExt {
 	}
 
 	/**
-	 * <pre>
-	assertTrue(prefixWith("v1234w", new String[] { "w1234", "v1234" }));
-	assertFalse(prefixWith("v1234w", new String[] { "1v", "v1234wx" }));</pre>
+	 * Find is {@code s} start with one the {@code prefixes}.
+	 * 
+	 * For adding a prefix to each element, see {@link #prefix(String[], String)}
+	 * 
 	 * @param s
 	 * @param prefixes
 	 * @return true if a prefix exists, other wise false
@@ -966,6 +967,22 @@ public class LangExt {
 	 */
 	public static String f(String template, Object ... args) {
 		return String.format(template, args);
+	}
+
+	/**
+	 * Add prefix to each element.
+	 * 
+	 * For parsing / find prefix, see {@link #prefixWith(String, String...)}.
+	 * 
+	 * @param targets will be modified with prefix, e. g. [string-0, string-1]
+	 * @param prefix
+	 * @return targets, e. g. [prefix-string-0, prefix-string-1]
+	 */
+	public static String[] prefix(String[] targets, String prefix) {
+		if (!isNull(targets))
+			for (int x = 0; x < targets.length; x++)
+				targets[x] = prefix + targets[x];
+		return targets;
 	}
 
 	/**
