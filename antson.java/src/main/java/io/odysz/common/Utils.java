@@ -579,7 +579,7 @@ public class Utils {
 	 * </pre>
 	 * @param green lights
 	 * @param x100ms default 100 times, -1 for infinitive waiting
-	 * @throws InterruptedException
+	 * @throws InterruptedException time limit reached while some lights are red.
 	 */
 	public static void awaitAll(boolean[] greenlights, int... x100ms) throws InterruptedException {
 		int wait = 0;
