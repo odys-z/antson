@@ -487,7 +487,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		// else return str.getText().replaceAll("(^\\s*\")|(\"\\s*$)", "");
 		else return Anson.unescape(str
 				.getText()
-				.replaceAll("(^\\s*\")|(\"\\s*$)", ""));
+				// .replaceAll("(^\\s*\")|(\"\\s*$)", ""));
+				.replaceAll("(^\\s*\"\\s*)|(\\s*\"\\s*$)", ""));
 	}
 
 	/**
