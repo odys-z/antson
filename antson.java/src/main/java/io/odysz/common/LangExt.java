@@ -1243,5 +1243,11 @@ public class LangExt {
 		}
 		return arr;
 	}
+	
+//	public static <T> T clone(T src) {
+//		// T dst = new HashMap();
+//		
+//		return src;
+//	}
 }
 
