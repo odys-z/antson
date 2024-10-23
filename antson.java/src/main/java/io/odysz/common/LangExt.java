@@ -1249,5 +1249,25 @@ public class LangExt {
 //		
 //		return src;
 //	}
+	
+	/**
+	 * Throw exception if obj is null;
+	 * @param <T>
+	 * @param obj
+	 * @return
+	 */
+
+	public static <T> T notNull (T obj) {
+		if (obj == null)
+			throw new NullPointerException("Not Null Exception");
+		return obj;
+	}
+
+	public static String notBlank (String str) {
+		if (isblank(str))
+			throw new NullPointerException("Not Blank Exception");
+		return str;
+	}
+
 }
 
