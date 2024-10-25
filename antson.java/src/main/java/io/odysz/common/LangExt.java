@@ -1269,5 +1269,9 @@ public class LangExt {
 		return str;
 	}
 
+	public static void musteq (String a, String b) {
+		if (!eq(a, b))
+			throw new NullPointerException("a != b");
+	}
 }
 
