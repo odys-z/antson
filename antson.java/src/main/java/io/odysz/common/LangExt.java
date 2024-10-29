@@ -1269,9 +1269,43 @@ public class LangExt {
 		return str;
 	}
 
-	public static void musteq (String a, String b) {
+	public static <T> void musteq (T a, T b) {
+		if (a != b)
+			throw new NullPointerException(f("a, %s != b, %s", a, b));
+	}
+
+	public static void musteqs (String a, String b) {
 		if (!eq(a, b))
-			throw new NullPointerException("a != b");
+			throw new NullPointerException(f("a, %s != b, %s", a, b));
+	}
+
+	public static <T> void shouldeq (Object tag, T a, T b) {
+		if (a != b)
+			Utils.warnT(tag, "%s != %s", a, b);
+	}
+
+	public static void shouldeqs (Object tag, String a, String b) {
+		if (!eq(a, b))
+			Utils.warnT(tag, "String %s != %s", a, b);
+	}
+
+	/**
+	 * 
+	 * @param <T>
+	 * @param tag alwasy created as "new Object() {}".
+	 * @param a
+	 * @return
+	 */
+	public static <T> T shouldnull(Object tag, T a) {
+		if (a != null)
+			Utils.warnT(tag, "Object should be null: %s", a);
+		return a;
+	}
+	
+	public static <T> T mustnull(T a) {
+		if (a != null)
+			throw new NullPointerException("Must be Null Exception");
+		return a;
 	}
 }
 
