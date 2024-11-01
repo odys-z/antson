@@ -1257,15 +1257,19 @@ public class LangExt {
 	 * @return
 	 */
 
-	public static <T> T notNull (T obj) {
+	public static <T> T notNull (T obj, String ... msg) {
 		if (obj == null)
-			throw new NullPointerException("Not Null Exception");
+			throw new NullPointerException(isNull(msg)
+					? "Not Null Exception"
+					: msg[0]);
 		return obj;
 	}
 
-	public static String notBlank (String str) {
+	public static String notBlank (String str, String ... msg) {
 		if (isblank(str))
-			throw new NullPointerException("Not Blank Exception");
+			throw new NullPointerException(isNull(msg)
+					? "Not Blank Exception"
+					: msg[0]);
 		return str;
 	}
 
@@ -1296,9 +1300,9 @@ public class LangExt {
 	 * @param a
 	 * @return
 	 */
-	public static <T> T shouldnull(Object tag, T a) {
+	public static <T> T shouldnull(Object tag, T a, String ... msg) {
 		if (a != null)
-			Utils.warnT(tag, "Object should be null: %s", a);
+			Utils.warnT(tag, isNull(msg) ? "Object should be null: %s" : msg[0], a);
 		return a;
 	}
 	
