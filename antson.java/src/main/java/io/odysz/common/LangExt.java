@@ -1278,9 +1278,11 @@ public class LangExt {
 			throw new NullPointerException(f("a, %s != b, %s", a, b));
 	}
 
-	public static void musteqs (String a, String b) {
+	public static void musteqs (String a, String b, String... msg) {
 		if (!eq(a, b))
-			throw new NullPointerException(f("a, %s != b, %s", a, b));
+			throw new NullPointerException(isNull(msg)
+					? f("a, %s != b, %s", a, b)
+					: msg[0]);
 	}
 
 	public static <T> void shouldeq (Object tag, T a, T b) {
