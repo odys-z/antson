@@ -1273,9 +1273,11 @@ public class LangExt {
 		return str;
 	}
 
-	public static <T> void musteq (T a, T b) {
+	public static <T> void musteq (T a, T b, String ...msg) {
 		if (a != b)
-			throw new NullPointerException(f("a, %s != b, %s", a, b));
+			throw new NullPointerException(isNull(msg)
+					? f("a, %s != b, %s", a, b)
+					: msg[0]);
 	}
 
 	public static void musteqs (String a, String b, String... msg) {
@@ -1311,6 +1313,14 @@ public class LangExt {
 	public static <T> T mustnull(T a) {
 		if (a != null)
 			throw new NullPointerException("Must be Null Exception");
+		return a;
+	}
+
+	public static <T> T mustnonull(T a, String... msg) {
+		if (a == null)
+			throw new NullPointerException(isNull(msg)
+					? f("Object must not be null: %s", a)
+					: msg[0]);
 		return a;
 	}
 }
