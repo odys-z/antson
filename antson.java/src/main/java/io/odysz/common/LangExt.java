@@ -1287,14 +1287,20 @@ public class LangExt {
 					: msg[0]);
 	}
 
-	public static <T> void shouldeq (Object tag, T a, T b) {
+	public static <T> void shouldeq (Object tag, T a, T b, String ...msg) {
 		if (a != b)
-			Utils.warnT(tag, "%s != %s", a, b);
+			Utils.warnT(tag, isNull(msg)
+					? f("a, %s != b, %s", a, b)
+					: msg[0], 
+					a, b);
 	}
 
-	public static void shouldeqs (Object tag, String a, String b) {
+	public static void shouldeqs (Object tag, String a, String b, String...msg) {
 		if (!eq(a, b))
-			Utils.warnT(tag, "String %s != %s", a, b);
+			Utils.warnT(tag, isNull(msg)
+					? f("a, %s != b, %s", a, b)
+					: msg[0],
+					a, b);
 	}
 
 	/**
@@ -1310,9 +1316,9 @@ public class LangExt {
 		return a;
 	}
 	
-	public static <T> T mustnull(T a) {
+	public static <T> T mustnull(T a, String...msg) {
 		if (a != null)
-			throw new NullPointerException("Must be Null Exception");
+			throw new NullPointerException(isNull(msg) ? f("Object must be null: %s", a) : msg[0]);
 		return a;
 	}
 
