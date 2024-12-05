@@ -374,4 +374,18 @@ class LangExtTest {
 		assertEquals("xyz-123", tas[0]);
 		assertEquals("xyz-abc", tas[1]);
 	}
+	
+	@Test
+	void testrof() {
+		assertEquals("", strof(0, "x"));
+		assertEquals("x", strof(1, "x"));
+		assertEquals("**", strof(2, "*"));
+		assertEquals("*.*.", strof(2, "*."));
+
+		assertEquals("", strof("", "x"));
+		assertEquals("x", strof("a", "x"));
+		assertEquals("**", strof("00", "*"));
+		assertEquals("", strof("  ", "*"));
+		assertEquals("*.*.", strof("00", "*."));
+	}
 }
