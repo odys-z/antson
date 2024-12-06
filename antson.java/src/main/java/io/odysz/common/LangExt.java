@@ -243,6 +243,37 @@ public class LangExt {
 	    return out.substring((int)start, (int)end);
 	}
 	
+	/**
+	 * <pre>
+	 * assertEquals("",     strof(0, "x"));
+	 * assertEquals("x",    strof(1, "x"));
+	 * assertEquals("**",   strof(2, "*"));
+	 * assertEquals("*.*.", strof(2, "*."));<pre>
+	 * @param repeat
+	 * @param c
+	 * @return "ccc..." of length len.
+	 */
+	public static String strof(int repeat, String c) {
+		return repeat > 0
+			? f(f("%%%ss", repeat), " ").replaceAll(" ", String.valueOf(c))
+			: "";
+	}
+
+	/**
+	 * <pre> 
+	 * assertEquals("",     strof("", "x"));
+	 * assertEquals("x",    strof("a", "x"));
+	 * assertEquals("**",   strof("00", "*"));
+	 * assertEquals("",     strof("  ", "*"));
+	 * assertEquals("*.*.", strof("00", "*."));</pre>
+	 * @param of
+	 * @param c
+	 * @return
+	 */
+	public static String strof(String of, String c) {
+		return strof(len(of), c);
+	}
+	
 	public static boolean bool(String v) {
 		return v == null ? false
 				:  v.equalsIgnoreCase("1")
