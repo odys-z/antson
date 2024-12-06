@@ -1,3 +1,7 @@
 /target/
 temp
 .settings
+.classpath
+bin
+build
+target
