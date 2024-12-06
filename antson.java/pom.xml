@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.99</version>
+  <version>0.9.100</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
@@ -207,6 +207,22 @@
 	  </plugin>
 
 	  <plugin>
+	    <!--
+		For Ubuntu 22.0.4, GPG 2.4.4, replace == with '- -'
+		gpg ==full-generate-key
+		$ gpg ==list-secret-keys ==keyid-format=long
+		/Users/hubot/.gnupg/secring.gpg
+        ============================================
+		sec   4096R/your-key-id 2016-03-10 [expires: 2017-03-10]
+		uid                          Hubot <hubot@example.com>
+		ssb   4096R/4BB6D45482678BE3 2016-03-10
+		
+		gpg ==keyserver keyserver.ubuntu.com ==send-keys yourkeyID
+
+		see
+		https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
+		https://askubuntu.com/questions/220063/how-do-i-publish-a-gpg-key
+		-->
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-gpg-plugin</artifactId>
 		<version>1.5</version>
