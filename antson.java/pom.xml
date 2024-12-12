@@ -219,9 +219,12 @@
 		
 		gpg ==keyserver keyserver.ubuntu.com ==send-keys yourkeyID
 
+		Also check .m2/settings.xml, with server id = ossrh 
+
 		see
 		https://docs.github.com/en/authentication/managing-commit-signature-verification/generating-a-new-gpg-key
 		https://askubuntu.com/questions/220063/how-do-i-publish-a-gpg-key
+		https://stackoverflow.com/questions/61223916/maven-authentication-failed
 		-->
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-gpg-plugin</artifactId>
