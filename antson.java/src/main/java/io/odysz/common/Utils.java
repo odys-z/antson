@@ -370,9 +370,13 @@ public class Utils {
 				// https://stackoverflow.com/a/25033217
 				Map<String, String> env = new HashMap<>(); 
 				env.put("create", "true");
-				@SuppressWarnings("unused")
+
+				// TODO use static field and only create once.
 				FileSystem zipfs = FileSystems.newFileSystem(uri, env);
-			} catch (Exception e){}
+
+			} catch (Exception e){
+				warn("\n\n\nWon't work in Android");
+			}
 
 			return Files.readAllLines(
 				Paths.get(uri), Charset.defaultCharset())
