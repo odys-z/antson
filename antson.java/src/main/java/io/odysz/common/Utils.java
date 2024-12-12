@@ -358,6 +358,12 @@ public class Utils {
 
 	/**
 	 * Load text in the file located within the package path.
+	 * 
+	 * <p>This method cannot used in Android:</p>
+	 * <p>TL;NR: https://source.android.com/docs/core/storage/fuse-passthrough</p>
+	 * 
+	 * Temporary decision (issue): avoid loading ddl and sql scripts with this method in Android.
+	 * 
 	 * @since 0.9.26
 	 * @param clzz
 	 * @param filename
