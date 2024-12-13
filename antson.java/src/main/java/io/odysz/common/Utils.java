@@ -14,14 +14,11 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,6 +45,7 @@ public class Utils {
 	private static PrintStream os;
 	private static PrintStream os() { return os == null ? System.out : os; }
 	private static PrintStream es;
+
 	private static PrintStream es() { return es == null ? System.err : es; }
 
 	public static void touchDir(String dir) {
@@ -356,6 +354,9 @@ public class Utils {
 		}
 	}
 
+	/** For getting the zip file system. **/
+	// private static FileSystem zipfs;
+
 	/**
 	 * Load text in the file located within the package path.
 	 * 
@@ -371,18 +372,19 @@ public class Utils {
 	 */
 	public static String loadTxt(Class<?> clzz, String filename) {
 		try {
-			URI uri = clzz.getResource(filename).toURI();
-			try {
-				// https://stackoverflow.com/a/25033217
-				Map<String, String> env = new HashMap<>(); 
-				env.put("create", "true");
-
-				// TODO use static field and only create once.
-				FileSystem zipfs = FileSystems.newFileSystem(uri, env);
-
-			} catch (Exception e){
-				warn("\n\n\nWon't work in Android");
-			}
+			// https://stackoverflow.com/a/46468788/7362888
+			// URI uri = clzz.getResource(filename).toURI();
+			URI uri = Paths.get(clzz.getResource(filename).toURI()).toUri();
+//			if (zipfs == null) 
+//			try {
+//				// https://stackoverflow.com/a/25033217
+//				Map<String, String> env = new HashMap<>(); 
+//				env.put("create", "true");
+//
+//				zipfs = FileSystems.newFileSystem(uri, env);
+//
+//			} catch (Exception e){
+//			}
 
 			return Files.readAllLines(
 				Paths.get(uri), Charset.defaultCharset())
