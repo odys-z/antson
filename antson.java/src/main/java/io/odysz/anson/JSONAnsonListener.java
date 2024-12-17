@@ -336,6 +336,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			push(clazz, null);
 		} catch (ReflectiveOperationException | SecurityException | AnsonException e) {
 			e.printStackTrace();
+			throw new AnsonException(0, "Envelope cannot be understood:\n%s\n%s",
+					e.getClass().getName(), e.getMessage());
 		}
 	}
 
@@ -588,7 +590,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	@Override
 	public void exitArray(ArrayContext ctx) {
 		if (!top().isInList())
-			throw new NullPointerException("existing not from an eclosing list. txt:\n" + ctx.getText());
+			throw new NullPointerException("existing not from an enclosing list. txt:\n" + ctx.getText());
 
 		ParsingCtx top = pop();
 		List<?> arr = (List<?>) top.enclosing;
