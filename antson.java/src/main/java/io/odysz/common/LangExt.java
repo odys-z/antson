@@ -125,7 +125,7 @@ public class LangExt {
 	}
 	
 	/**
-	 * Reverse of {@link #compoundVal(String...).
+	 * Reverse of {@link #compoundVal(String...)}.
 	 * 
 	 * @since 0.9.41
 	 * @param v
@@ -992,12 +992,12 @@ public class LangExt {
 
 	/**
 	 * For shorten line.
-	 * @param template
+	 * @param templ
 	 * @param args
 	 * @return
 	 */
-	public static String f(String template, Object ... args) {
-		return String.format(template, args);
+	public static String f(String templ, Object ... args) {
+		return String.format(templ == null ? "" : templ, args);
 	}
 
 	/**

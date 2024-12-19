@@ -589,7 +589,7 @@ public class Utils {
 	 * joinby(lights, X, Z);
 	 * awaitAll(lights);
 	 * </pre>
-	 * @param green lights
+	 * @param greenlights lights
 	 * @param x100ms default 100 times, -1 for infinitive waiting
 	 * @throws InterruptedException time limit reached while some lights are red.
 	 */
