@@ -125,7 +125,7 @@ public class LangExt {
 	}
 	
 	/**
-	 * Reverse of {@link #compoundVal(String...).
+	 * Reverse of  {@link #compoundVal(String...)}.
 	 * 
 	 * @since 0.9.41
 	 * @param v
