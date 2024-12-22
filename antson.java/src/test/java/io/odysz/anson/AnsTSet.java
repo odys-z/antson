@@ -5,7 +5,7 @@ import java.util.HashSet;
 /**This can't be serialized.
  * 
  * <p>According to <a href='https://www.json.org/json-en.html'>json.org</a>
- * there is no set type in json?
+ * there is no set types in json?
  * 
  * @author ody
  *
