@@ -63,4 +63,26 @@ public class Regex {
         else return -1;
 	}
 	
+	/////////// utils
+	static Regex httpregex;
+	static Regex httpsregex;
+	/**
+	 * Is the arg an HTTPS protocol address?
+	 * @param p
+	 */
+	public static boolean isHttps(String p) {
+		if (httpsregex == null)
+			httpsregex = new Regex("^https://");
+		return httpsregex.match(p);
+	}
+	
+	/**
+	 * Is the arg an HTTPS protocol address?
+	 * @param p
+	 */
+	public static boolean isHttp(String p) {
+		if (httpregex == null)
+			httpregex = new Regex("^http://");
+		return httpregex.match(p);
+	}
 }
