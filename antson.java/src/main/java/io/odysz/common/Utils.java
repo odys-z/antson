@@ -2,6 +2,7 @@ package io.odysz.common;
 
 import static io.odysz.common.LangExt.isNull;
 import static io.odysz.common.LangExt.isblank;
+import static io.odysz.common.LangExt.f;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -631,6 +632,45 @@ public class Utils {
 	public static void turnred(boolean[] signals) {
 		for (int i = 0; i < signals.length; i++)
 			signals[i] = false;
+	}
+
+	public static <T> void logix(ArrayList<T> list) {
+		try {
+			if (printCaller) {
+				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
+				os().println(String.format("logger:        %s.%s(%s:%s)", 
+								stElements[2].getClassName(), stElements[2].getMethodName(),
+								stElements[2].getFileName(), stElements[2].getLineNumber()));
+			}
+
+			if (list != null) {
+				if (printag)
+					es().print(String.format("[%s.%s] ",
+						new Throwable().getStackTrace()[1].getClassName(),
+						new Throwable().getStackTrace()[1].getMethodName()));
+
+				for (int ix = 0; ix < list.size(); ix++) {
+					T it = list.get(ix);
+					if (it == null)
+						os().println(f("[%2s] null", ix));
+					else
+						os().println(f("[%2s] %s", ix, it));
+				}
+			}
+
+		} catch (Exception ex) {
+			es().println("logi(): Can't print. Error:");
+			ex.printStackTrace();
+		}
+	
+	}
+
+	public static void logix(Object[] host_port) {
+		ArrayList<String> lst = new ArrayList<String>();
+		for (Object o : host_port)
+			lst.add(o.toString());
+		
+		logix(lst);
 	}
 	
 }
