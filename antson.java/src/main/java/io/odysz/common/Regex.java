@@ -114,9 +114,14 @@ public class Regex {
 		ArrayList<String> grps = reg3986.findGroups(url);
 		if (LangExt.isblank(grps.get(3)))
 			return null;
-		String[] iportss = grps.get(3).split(":");
-		if (LangExt.len(iportss) == 2)
-			return new Object[] {iportss[0], Integer.valueOf(iportss[1])};
-		else return new Object[] {grps.get(3), null};
+		try {
+			String[] iportss = grps.get(3).split(":");
+			if (LangExt.len(iportss) == 2)
+				return new Object[] {iportss[0], Integer.valueOf(iportss[1])};
+			else return new Object[] {grps.get(3), null};
+		}
+		catch (Exception e) {
+			return new Object[] {url, null};
+		}
 	}
 }

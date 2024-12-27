@@ -19,6 +19,7 @@ class RegexTest {
 	@Test
 	void testUrls() {
 		// https://www.rfc-editor.org/rfc/rfc3986#appendix-B
+		@SuppressWarnings("unused")
 		Regex reg = new Regex("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
 
 		Object[][] urls = new Object[][] {
@@ -53,8 +54,8 @@ class RegexTest {
 		
 		for (Object[] url : urls) {
 			String uri = (String)url[0];
-			Utils.logi(uri);
-			Utils.logix(reg.findGroups(uri));
+			// Utils.logi(uri);
+			// Utils.logix(reg.findGroups(uri));
 			Object[] domport = getHostPort(uri);
 			assertTrue(eq((String)url[1], domport[0].toString()), uri);
 			assertEquals(url[2], domport[1], uri);
