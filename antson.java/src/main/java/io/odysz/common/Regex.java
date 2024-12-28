@@ -63,4 +63,65 @@ public class Regex {
         else return -1;
 	}
 	
+	///////////////// utils //////////////////
+	///
+	static Regex httpregex;
+
+	static Regex httpsregex;
+
+	/** https://www.rfc-editor.org/rfc/rfc3986#appendix-B */
+	static Regex rfc3986;
+
+	/**
+	 * Is the arg an HTTPS protocol address?
+	 * @param p
+	 */
+	public static boolean isHttps(String p) {
+		if (httpsregex == null)
+			httpsregex = new Regex("^https://");
+		return httpsregex.match(p);
+	}
+	
+	/**
+	 * Is the arg an HTTPS or HTTP protocol address?
+	 * @param p
+	 */
+	public static boolean isHttp(String p) {
+		if (httpregex == null)
+			httpregex = new Regex("^https?://");
+		return httpregex.match(p);
+	}
+	
+	/**
+	 * groups[3]: ip[:port]
+	 * groups[4]: path
+	 * https://www.rfc-editor.org/rfc/rfc3986#appendix-B
+	 * */
+	static Regex reg3986 = new Regex("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
+	
+	static Regex protocolPrefix = new Regex("^(\\w+:)?//");
+
+	/**
+	 * Add "http://" to url if it's not begin with, and match it with
+	 * <a href='https://www.rfc-editor.org/rfc/rfc3986#appendix-B'>rfc 3986 regex</a>.
+	 * @param url, e.g. 127.0.0.1/index.html
+	 * @return [(String)doamin/ip, (Integer)port], e.g. 127.0.0.1, null
+	 */
+	public static Object[] getHostPort(String url) {
+		if (!protocolPrefix.match(url))
+			url = "http://" + url;
+
+		ArrayList<String> grps = reg3986.findGroups(url);
+		if (LangExt.isblank(grps.get(3)))
+			return null;
+		try {
+			String[] iportss = grps.get(3).split(":");
+			if (LangExt.len(iportss) == 2)
+				return new Object[] {iportss[0], Integer.valueOf(iportss[1])};
+			else return new Object[] {grps.get(3), null};
+		}
+		catch (Exception e) {
+			return new Object[] {url, null};
+		}
+	}
 }
