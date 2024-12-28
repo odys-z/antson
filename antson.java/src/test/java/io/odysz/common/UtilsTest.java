@@ -5,14 +5,11 @@ import static io.odysz.common.LangExt.eq;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.Scanner;
-
 import org.eclipse.jetty.util_ody.RolloverFileOutputStream;
 import org.junit.jupiter.api.Test;
 
@@ -64,7 +61,9 @@ class UtilsTest {
         RolloverFileOutputStream os = new RolloverFileOutputStream("temp/yyyy_mm_dd.log", true);
 		String fn = os.getDatedFilename();
 //		os.close();
-		File f = new File(fn);
+
+		// File f = new File(fn);
+
 //		if (f.exists()) {
 //			if (!f.delete());
 //				fail("Cannot delete file " + fn);
