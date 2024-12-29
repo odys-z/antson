@@ -1264,6 +1264,13 @@ public class LangExt {
 			: (s + from.trim() + s).replaceAll(s + p + s, s).replaceAll("^"+s, "").replaceAll(s+"$", "");
 	}
 	
+	/**
+	 * Replace an element in array.
+	 * @param arr
+	 * @param target
+	 * @param with
+	 * @return replaced array
+	 */
 	public static Object[] replacele(Object[] arr, Object target, Object with) {
 		if (arr != null) {
 			for (int x = 0; x < arr.length; x++)
@@ -1274,12 +1281,6 @@ public class LangExt {
 		}
 		return arr;
 	}
-	
-//	public static <T> T clone(T src) {
-//		// T dst = new HashMap();
-//		
-//		return src;
-//	}
 	
 	/**
 	 * Throw exception if obj is null;
