@@ -1001,6 +1001,16 @@ public class LangExt {
 	}
 
 	/**
+	 * Get the first element in {@link args}. Typically used to forward optional args.
+	 * @param <T>
+	 * @param args
+	 * @return arg[0] or null
+	 */
+	public static <T> T _0(T[] args) {
+		return args == null || args.length < 1 ? null : args[0];
+	}
+
+	/**
 	 * Add prefix to each element.
 	 * 
 	 * For parsing / find prefix, see {@link #prefixWith(String, String...)}.

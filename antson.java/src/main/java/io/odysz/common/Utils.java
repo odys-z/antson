@@ -322,7 +322,7 @@ public class Utils {
 
 		} catch (Exception ex) {
 			StackTraceElement[] x = ex.getStackTrace();
-			es().println(String.format("logi(): Can't print. Error: %s. called by %s.%s()",
+			es().println(f("logi(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
 		}
 	}
