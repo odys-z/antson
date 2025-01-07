@@ -993,8 +993,8 @@ public class LangExt {
 	/**
 	 * For shorten line.
 	 * @param templ
-	 * @param args
-	 * @return
+	 * @param args 
+	 * @return string 
 	 */
 	public static String f(String templ, Object ... args) {
 		return String.format(templ == null ? "" : templ, args);
@@ -1007,7 +1007,9 @@ public class LangExt {
 	 * @return arg[0] or null
 	 */
 	public static <T> T _0(T[] args) {
-		return args == null || args.length < 1 ? null : args[0];
+		return args == null || args.length < 1
+				? null
+				: args[0];
 	}
 
 	/**
@@ -1071,7 +1073,9 @@ public class LangExt {
 	 * @return string
 	 */
 	public static String str(Object[] v) {
-		return Arrays.stream(v).map(o -> o.toString()).collect(Collectors.joining(","));
+		return Arrays.stream(v)
+				.filter(o -> o != null)
+				.map(o -> o.toString()).collect(Collectors.joining(","));
 	}
 
 	/**

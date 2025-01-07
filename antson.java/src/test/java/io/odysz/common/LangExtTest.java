@@ -364,6 +364,13 @@ class LangExtTest {
 		
 		assertTrue(e(arr[2], "y"));
 	}
+	
+	String ignore1(String t, Object... args) {
+		return f(t, args);
+	}
+	String ignore2(String t, Object... args) {
+		return ignore1(t, args);
+	}
 
 	@Test
 	void testf() {
@@ -373,6 +380,13 @@ class LangExtTest {
 		String[] tas = prefix(new String[] { "123", "abc" }, "xyz-");
 		assertEquals("xyz-123", tas[0]);
 		assertEquals("xyz-abc", tas[1]);
+		
+		assertEquals("xyz-123", ignore1("xyz-%s", 123));
+		assertEquals("xyz-123", ignore2("xyz-%s", 123));
+		
+		String[] args = new String[] {"123", null, "abc"};
+
+		assertEquals("xyz-123, 123,abc", f("xyz-%s, %s", 123, str(args)));
 	}
 	
 	@Test
