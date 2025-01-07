@@ -373,6 +373,12 @@ class LangExtTest {
 		String[] tas = prefix(new String[] { "123", "abc" }, "xyz-");
 		assertEquals("xyz-123", tas[0]);
 		assertEquals("xyz-abc", tas[1]);
+		
+		assertEquals("1 2 3 4 5", f6(new String[] {"%s %s %s %s %s", "1", "2", "3", "4", "5"}));
+		assertEquals("1 2 3 4", f6(new String[] {"%s %s %s %s", "1", "2", "3", "4"}));
+		assertEquals("1", f6(new String[] {"%s", "1"}));
+		assertEquals(null, f6(new String[] {}));
+		assertEquals(null, f6(null));
 	}
 	
 	@Test

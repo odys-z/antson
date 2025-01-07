@@ -1303,10 +1303,36 @@ public class LangExt {
 		if (obj == null)
 			throw new NullPointerException(isNull(msg)
 					? "Not Null Exception"
+					: len(msg) > 0
+					? f6(msg)
 					: msg[0]);
 		return obj;
 	}
 
+	/**
+	 * <pre>
+	 * assertEquals("1 2 3 4 5", f6(new String[] {"%s %s %s %s %s", "1", "2", "3", "4", "5"}));
+	 * assertEquals("1 2 3 4", f6(new String[] {"%s %s %s %s", "1", "2", "3", "4"}));
+	 * assertEquals("1", f6(new String[] {"%s", "1"}));
+	 * assertEquals(null, f6(new String[] {}));
+	 * assertEquals(null, f6(null));</pre>
+	 * 
+	 * @param msg, max length of 6
+	 * @return f(msg[0], msg[1], ...)
+	 */
+	public static String f6(String[] msg) {
+		return len(msg) > 5
+			? f(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5])
+			: len(msg) > 4
+			? f(msg[0], msg[1], msg[2], msg[3], msg[4])
+			: len(msg) > 3
+			? f(msg[0], msg[1], msg[2], msg[3])
+			: len(msg) > 2
+			? f(msg[0], msg[1], msg[2])
+			: len(msg) > 1
+			? f(msg[0], msg[1])
+			: _0(msg);
+	}
 	public static String notBlank (String str, String ... msg) {
 		if (isblank(str))
 			throw new NullPointerException(isNull(msg)
