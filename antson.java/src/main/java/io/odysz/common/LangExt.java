@@ -1012,6 +1012,12 @@ public class LangExt {
 				: args[0];
 	}
 	
+	public static <T> T _0(List<T> args) {
+		return args == null || args.size() < 1
+				? null
+				: args.get(0);
+	}
+
 	public static <T> T _0(T[] args, T deflt) {
 		return isNull(args) ? deflt : args[0]; 
 	}
