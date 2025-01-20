@@ -1011,6 +1011,13 @@ public class LangExt {
 				? null
 				: args[0];
 	}
+	
+	
+	public static <T> T _0(List<T> args) {
+		return args == null || args.size() < 1
+				? null
+				: args.get(0);
+	}
 
 	/**
 	 * Add prefix to each element.
