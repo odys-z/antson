@@ -1011,6 +1011,10 @@ public class LangExt {
 				? null
 				: args[0];
 	}
+	
+	public static <T> T _0(T[] args, T deflt) {
+		return isNull(args) ? deflt : args[0]; 
+	}
 
 	/**
 	 * Add prefix to each element.
