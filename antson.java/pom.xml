@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.111</version>
+  <version>0.9.113-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>antson</name>
@@ -108,6 +108,17 @@
 	  </testResource>
 	</testResources>
 
+    <resources>
+      <resource>
+        <directory>${project.basedir}/src/main/java</directory>
+        <includes>
+          <include>**/*.ddl</include>
+          <include>**/*.sql</include>
+          <include>**/*.txt</include>
+        </includes>
+      </resource>
+    </resources>
+    
     <plugins>
       <plugin>
       	<groupId>org.apache.maven.plugins</groupId>

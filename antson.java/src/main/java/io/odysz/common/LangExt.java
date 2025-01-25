@@ -1310,16 +1310,18 @@ public class LangExt {
 	 * Throw exception if obj is null;
 	 * @param <T>
 	 * @param obj
+	 * @param msgMax6 message string or template with args, max in total 6.
+	 * see {@link #f6(String[])}
 	 * @return
 	 */
 
-	public static <T> T notNull (T obj, String ... msg) {
+	public static <T> T notNull (T obj, String ... msgMax6) {
 		if (obj == null)
-			throw new NullPointerException(isNull(msg)
+			throw new NullPointerException(isNull(msgMax6)
 					? "Not Null Exception"
-					: len(msg) > 0
-					? f6(msg)
-					: msg[0]);
+					: len(msgMax6) > 0
+					? f6(msgMax6)
+					: msgMax6[0]);
 		return obj;
 	}
 
@@ -1347,6 +1349,7 @@ public class LangExt {
 			? f(msg[0], msg[1])
 			: _0(msg);
 	}
+
 	public static String notBlank (String str, String ... msg) {
 		if (isblank(str))
 			throw new NullPointerException(isNull(msg)

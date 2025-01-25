@@ -14,12 +14,16 @@ import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -356,7 +360,7 @@ public class Utils {
 	}
 
 	/** For getting the zip file system. **/
-	// private static FileSystem zipfs;
+	private static FileSystem zipfs;
 
 	/**
 	 * Load text in the file located within the package path.
@@ -375,21 +379,82 @@ public class Utils {
 		try {
 			// https://stackoverflow.com/a/46468788/7362888
 			// URI uri = clzz.getResource(filename).toURI();
-			URI uri = Paths.get(clzz.getResource(filename).toURI()).toUri();
-//			if (zipfs == null) 
-//			try {
-//				// https://stackoverflow.com/a/25033217
-//				Map<String, String> env = new HashMap<>(); 
-//				env.put("create", "true");
-//
-//				zipfs = FileSystems.newFileSystem(uri, env);
-//
-//			} catch (Exception e){
-//			}
+			
+			logi("0.9.113-SNAPSHOT 8");
+			logi("Load text: %s", filename);
+			
+			URL res = clzz.getResource(filename);
+			logi("getResource: %s", res);
 
-			return Files.readAllLines(
-				Paths.get(uri), Charset.defaultCharset())
+			URI uri = res.toURI();
+			logi("to uri: %s", uri.toString());
+			logi("to uri schema: %s", uri.getScheme());
+
+			if (LangExt.prefixWith(uri.getScheme(), "jar", "zip", "7z")) {
+				try {
+					logi("[Antson.java [0.9.113,)] load text on schema '%s'.", uri.getScheme());
+					// https://stackoverflow.com/a/25033217
+					Map<String, String> env = new HashMap<>(); 
+					env.put("create", "true");
+
+					// zipfs = FileSystems.newFileSystem(uri, env);
+					String[] pthparts = res.getFile().toString().split("!");
+					pthparts[0] = pthparts[0].replaceAll("^.*:/", "/");
+					pthparts[1] = pthparts[1].replaceAll(".*:/", "");
+					logi("2 parts:\n%s\n%s", pthparts[0], pthparts[1]);
+					zipfs = FileSystems.newFileSystem(Paths.get(pthparts[0]), env);
+					logi("[Antson.java [0.9.113,)] zip file system provider created: %s.", zipfs.getClass().getName());
+					
+					try { logi("zipfs.getPath(filename) %s -> %s", filename, zipfs.getPath(filename));
+					} catch (Exception e) { warn("Error 1"); }
+					try { logi("zipfs.getPath(pthparts[1]) %s -> %s", filename, zipfs.getPath(pthparts[1]));
+					} catch (Exception e) { warn("Error 1"); }
+					try { logi("zipfs.getPath(res.getPath()) %s -> %s", res.getPath(), zipfs.getPath(res.getPath()));
+					} catch (Exception e) { warn("Error 2"); }
+					try { logi("zipfs.getPath(res.getFile()) %s -> %s", res.getFile(), zipfs.getPath(res.getFile()));
+					} catch (Exception e) { warn("Error 3"); }
+					
+					String lines = Files.readAllLines(
+					// zipfs.getPath(res.getPath()) : Paths.get(uri),
+					/*
+				java.nio.file.NoSuchFileException: /file:/C:/Users/Alice/github/semantic-jserv/jserv-album/bin/bin/jserv-album-0.7.0.jar!/io/oz/jserv/docs/syn/singleton/oz_autoseq.ddl
+				at jdk.zipfs/jdk.nio.zipfs.ZipFileSystem.newInputStream(ZipFileSystem.java:871)
+				at jdk.zipfs/jdk.nio.zipfs.ZipPath.newInputStream(ZipPath.java:749)
+				at jdk.zipfs/jdk.nio.zipfs.ZipFileSystemProvider.newInputStream(ZipFileSystemProvider.java:278)
+				at java.base/java.nio.file.Files.newInputStream(Files.java:160)
+				at java.base/java.nio.file.Files.newBufferedReader(Files.java:2922)
+				at java.base/java.nio.file.Files.readAllLines(Files.java:3412)
+				at io.odysz.common.Utils.loadTxt(Utils.java:419)
+				at io.oz.jserv.docs.syn.singleton.Syngleton.setupSysRecords(Syngleton.java:361)
+				at io.oz.jserv.docs.syn.singleton.AppSettings.rebootdb(AppSettings.java:104)
+				at io.oz.syntier.serv.SynotierJettyApp.boot(SynotierJettyApp.java:146)
+				at io.oz.syntier.serv.SynotierJettyApp.boot(SynotierJettyApp.java:116)
+				at io.oz.syntier.serv.SynotierJettyApp.main(SynotierJettyApp.java:88)
+					 */
+					zipfs.getPath(pthparts[1]),
+					Charset.defaultCharset())
+					.stream().collect(Collectors.joining("\n"));
+					
+					logi(lines);
+					return lines;
+			
+				} catch (Exception e){
+					e.printStackTrace();
+					return null;
+				}
+			}
+			else {
+			Path uripth = Paths.get(uri).getFileName();
+			logi("to path name: %s", uripth.getFileName());
+			logi("to path system: %s", uripth.getFileSystem());
+
+			uri = Paths.get(clzz.getResource(filename).toURI()).toUri();
+			logi("%s: %s: %s", filename, uri.getScheme(), uri.toString());
+
+			return Files.readAllLines(Paths.get(uri),
+				Charset.defaultCharset())
 				.stream().collect(Collectors.joining("\n"));
+			}
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
 			return null;

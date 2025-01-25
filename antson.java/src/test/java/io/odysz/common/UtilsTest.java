@@ -19,6 +19,9 @@ class UtilsTest {
 	void testLoadTxt() throws IOException, URISyntaxException, ClassNotFoundException {
 		assertEquals("line1\nline2", Utils.loadTxt(UtilsTest.class, "txt"));
 		assertEquals("line1\nline2", Utils.loadTxt("txt"));
+
+		assertEquals("drop table if exists test;\ncreate table if not exists test (id: varchar(2));",
+			Utils.loadTxt("test.sqlite.ddl"));
 	}
 
 	@Test
