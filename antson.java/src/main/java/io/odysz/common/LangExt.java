@@ -1350,6 +1350,7 @@ public class LangExt {
 			: _0(msg);
 	}
 
+	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static String notBlank (String str, String ... msg) {
 		if (isblank(str))
 			throw new NullPointerException(isNull(msg)
@@ -1358,6 +1359,7 @@ public class LangExt {
 		return str;
 	}
 
+	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> void musteq (T a, T b, String ...msg) {
 		if (a != b)
 			throw new NullPointerException(isNull(msg)
@@ -1365,6 +1367,7 @@ public class LangExt {
 					: msg[0]);
 	}
 
+	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static void musteqs (String a, String b, String... msg) {
 		if (!eq(a, b))
 			throw new NullPointerException(isNull(msg)
@@ -1372,6 +1375,7 @@ public class LangExt {
 					: msg[0]);
 	}
 
+	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> void shouldeq (Object tag, T a, T b, String ...msg) {
 		if (a != b)
 			Utils.warnT(tag, isNull(msg)
@@ -1380,6 +1384,7 @@ public class LangExt {
 					a, b);
 	}
 
+	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static void shouldeqs (Object tag, String a, String b, String...msg) {
 		if (!eq(a, b))
 			Utils.warnT(tag, isNull(msg)
@@ -1389,7 +1394,7 @@ public class LangExt {
 	}
 
 	/**
-	 * 
+	 * TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	 * @param <T>
 	 * @param tag alwasy created as "new Object() {}".
 	 * @param a
@@ -1401,12 +1406,14 @@ public class LangExt {
 		return a;
 	}
 	
+	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> T mustnull(T a, String...msg) {
 		if (a != null)
 			throw new NullPointerException(isNull(msg) ? f("Object must be null: %s", a) : msg[0]);
 		return a;
 	}
 
+	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> T mustnonull(T a, String... msg) {
 		if (a == null)
 			throw new NullPointerException(isNull(msg)

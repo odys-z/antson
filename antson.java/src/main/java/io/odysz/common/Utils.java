@@ -380,15 +380,15 @@ public class Utils {
 			// https://stackoverflow.com/a/46468788/7362888
 			// URI uri = clzz.getResource(filename).toURI();
 			
-			logi("0.9.113-SNAPSHOT 8");
-			logi("Load text: %s", filename);
+			// logi("0.9.113-SNAPSHOT 8");
+			// logi("Load text: %s", filename);
 			
 			URL res = clzz.getResource(filename);
-			logi("getResource: %s", res);
+			// logi("getResource: %s", res);
 
 			URI uri = res.toURI();
-			logi("to uri: %s", uri.toString());
-			logi("to uri schema: %s", uri.getScheme());
+			// logi("to uri: %s", uri.toString());
+			// logi("to uri schema: %s", uri.getScheme());
 
 			if (LangExt.prefixWith(uri.getScheme(), "jar", "zip", "7z")) {
 				try {
@@ -401,18 +401,18 @@ public class Utils {
 					String[] pthparts = res.getFile().toString().split("!");
 					pthparts[0] = pthparts[0].replaceAll("^.*:/", "/");
 					pthparts[1] = pthparts[1].replaceAll(".*:/", "");
-					logi("2 parts:\n%s\n%s", pthparts[0], pthparts[1]);
+					// logi("2 parts:\n%s\n%s", pthparts[0], pthparts[1]);
 					zipfs = FileSystems.newFileSystem(Paths.get(pthparts[0]), env);
-					logi("[Antson.java [0.9.113,)] zip file system provider created: %s.", zipfs.getClass().getName());
+					// logi("[Antson.java [0.9.113,)] zip file system provider created: %s.", zipfs.getClass().getName());
 					
-					try { logi("zipfs.getPath(filename) %s -> %s", filename, zipfs.getPath(filename));
-					} catch (Exception e) { warn("Error 1"); }
-					try { logi("zipfs.getPath(pthparts[1]) %s -> %s", filename, zipfs.getPath(pthparts[1]));
-					} catch (Exception e) { warn("Error 1"); }
-					try { logi("zipfs.getPath(res.getPath()) %s -> %s", res.getPath(), zipfs.getPath(res.getPath()));
-					} catch (Exception e) { warn("Error 2"); }
-					try { logi("zipfs.getPath(res.getFile()) %s -> %s", res.getFile(), zipfs.getPath(res.getFile()));
-					} catch (Exception e) { warn("Error 3"); }
+//					try { logi("zipfs.getPath(filename) %s -> %s", filename, zipfs.getPath(filename));
+//					} catch (Exception e) { warn("Error 1"); }
+//					try { logi("zipfs.getPath(pthparts[1]) %s -> %s", filename, zipfs.getPath(pthparts[1]));
+//					} catch (Exception e) { warn("Error 1"); }
+//					try { logi("zipfs.getPath(res.getPath()) %s -> %s", res.getPath(), zipfs.getPath(res.getPath()));
+//					} catch (Exception e) { warn("Error 2"); }
+//					try { logi("zipfs.getPath(res.getFile()) %s -> %s", res.getFile(), zipfs.getPath(res.getFile()));
+//					} catch (Exception e) { warn("Error 3"); }
 					
 					String lines = Files.readAllLines(
 					// zipfs.getPath(res.getPath()) : Paths.get(uri),
@@ -435,7 +435,7 @@ public class Utils {
 					Charset.defaultCharset())
 					.stream().collect(Collectors.joining("\n"));
 					
-					logi(lines);
+					// logi(lines);
 					return lines;
 			
 				} catch (Exception e){
@@ -444,16 +444,16 @@ public class Utils {
 				}
 			}
 			else {
-			Path uripth = Paths.get(uri).getFileName();
-			logi("to path name: %s", uripth.getFileName());
-			logi("to path system: %s", uripth.getFileSystem());
+				// Path uripth = Paths.get(uri).getFileName();
+				// logi("to path name: %s", uripth.getFileName());
+				// logi("to path system: %s", uripth.getFileSystem());
 
-			uri = Paths.get(clzz.getResource(filename).toURI()).toUri();
-			logi("%s: %s: %s", filename, uri.getScheme(), uri.toString());
+				uri = Paths.get(clzz.getResource(filename).toURI()).toUri();
+				// logi("%s: %s: %s", filename, uri.getScheme(), uri.toString());
 
-			return Files.readAllLines(Paths.get(uri),
-				Charset.defaultCharset())
-				.stream().collect(Collectors.joining("\n"));
+				return Files.readAllLines(Paths.get(uri),
+					Charset.defaultCharset())
+					.stream().collect(Collectors.joining("\n"));
 			}
 		} catch (IOException | URISyntaxException e) {
 			e.printStackTrace();
