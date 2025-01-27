@@ -34,4 +34,7 @@ public class JsonOpt extends Anson {
 		this.shortenOnAnnotation = yes;
 		return this;
 	}
+	
+	/** @since 0.1.115 */
+	public EnvelopeBuitifier beautifier;
 }

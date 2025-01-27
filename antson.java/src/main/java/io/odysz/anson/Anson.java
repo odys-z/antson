@@ -1,5 +1,6 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt._0;
 import static io.odysz.common.LangExt.isNull;
 
 import java.io.ByteArrayOutputStream;
@@ -146,7 +147,9 @@ public class Anson implements IJsonable {
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
-		return (Anson) toEnvelope(this, stream, opts);
+		return !isNull(opts) && _0(opts).beautifier == null
+				? (Anson) toEnvelope(this, stream, opts)
+				: _0(opts).beautifier.toEnvelope(this, stream, opts);
 	}
 
 	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
