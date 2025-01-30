@@ -147,9 +147,9 @@ public class Anson implements IJsonable {
 	@Override
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
-		return !isNull(opts) && _0(opts).beautifier == null
-				? (Anson) toEnvelope(this, stream, opts)
-				: _0(opts).beautifier.toEnvelope(this, stream, opts);
+		return !isNull(opts) && _0(opts).beautifier != null
+				? _0(opts).beautifier.toEnvelope(this, stream, opts)
+				: (Anson) toEnvelope(this, stream, opts);
 	}
 
 	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
