@@ -38,10 +38,10 @@ def writeVal(outstream, v):
     else:
         outstream.write(str(v))
 
-
+@dataclass
 class Anson(IJsonable):
-    to_del = "some vale"
-    to_del_int = 5
+    to_del: str = "some vale"
+    to_del_int: int = 5
 
     def toBlock(self, outstream, opts):
         quotK = opts == None or opts.length == 0 or opts[0] == None or opts[0].quotKey();
