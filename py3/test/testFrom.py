@@ -28,12 +28,12 @@ class test(TestCase):
     def test2AnsonMsg(self):
         # an = Anson();
 
-        # s = "{\"type\": \"io.odysz.anson.Anson\", \"to_del\": \"some vale\", \"to_del_int\": 5}"
+        # s = "{\"type\": \"io.odysz.ansons.Anson\", \"to_del\": \"some vale\", \"to_del_int\": 5}"
         f = "json/01.json"
         an = parse(FileStream(f))
-        self.assertEqual("io.odysz.anson.Anson", an.type)
+        self.assertEqual("io.odysz.ansons.Anson", an.type)
 
-        s = "{\"type\": \"io.odysz.anson.AnsonMsg\", \"body\": [], \"port\": Port.session, \"to_del\": \"some vale\", \"to_del_int\": 5}"
+        s = "{\"type\": \"io.odysz.ansons.AnsonMsg\", \"body\": [], \"port\": Port.session, \"to_del\": \"some vale\", \"to_del_int\": 5}"
         an = parse(s)
-        self.assertEqual("io.odysz.anson.AnsonMsg", an.type)
+        self.assertEqual("io.odysz.ansons.AnsonMsg", an.type)
 

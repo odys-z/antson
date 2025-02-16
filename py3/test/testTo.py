@@ -53,7 +53,7 @@ class test(TestCase):
         s = StringIO()
         an.toBlock(s, None)
         # print("------- json -------\n", s.getvalue())
-        self.assertEqual("{\"type\": \"io.odysz.anson.Anson\", \"to_del\": \"some vale\", \"to_del_int\": 5}", 
+        self.assertEqual("{\"type\": \"io.odysz.ansons.Anson\", \"to_del\": \"some vale\", \"to_del_int\": 5}",
                          s.getvalue(), "deserializing AnsonMsg failed.")
 
         msg = AnsonMsg();
@@ -61,5 +61,5 @@ class test(TestCase):
         msg.toBlock(s, None)
         # print("------- json -------\n", s.getvalue())
 
-        self.assertEqual("{\"type\": \"io.odysz.anson.AnsonMsg\", \"body\": [], \"port\": Port.session, \"to_del\": \"some vale\", \"to_del_int\": 5}", 
+        self.assertEqual("{\"type\": \"io.odysz.ansons.AnsonMsg\", \"body\": [], \"port\": Port.session, \"to_del\": \"some vale\", \"to_del_int\": 5}",
                          s.getvalue(), "deserializing AnsonMsg failed.")
