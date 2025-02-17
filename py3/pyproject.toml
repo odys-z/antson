@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build" 
+
+[project]
+name = "Anson.py3"
+version = "0.0.1"
+authors = [
+  { name="Ody Z", email="odys.zhou@gmail.com" },
+]
+description = "Anson for Python3"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = ["MIT"]
+license-files = [LICEN[CS]E*"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ansons"]
+
+[project.urls]
+Homepage = "https://github.com/odys-z/antson"
+Issues = "https://github.com/odys-z/antson/issues"
+

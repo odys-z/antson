@@ -1,3 +1,4 @@
+import importlib
 from dataclasses import dataclass, fields, MISSING, Field
 
 import json
@@ -51,7 +52,9 @@ class Anson(dict):
 
     def __init__(self):
         super().__init__()
-        self.__type__ = 'ansons.anson.Anson'
+        # self.__type__ = type(self) #'ansons.anson.Anson'
+        t = type(self)
+        self.__type__ = f'{t.__module__}.{t.__name__}'
 
     def __setitem__(self, key, value):
         self.__dict__[key] = value
@@ -71,7 +74,8 @@ class Anson(dict):
         antype: str
         factory: any
 
-    def fields(self) -> dict[str, Trumpfield]:
+    @staticmethod
+    def fields(instance) -> dict[str, Trumpfield]:
         # for it in fields(type(self)):
         #     ot = get_origin(it.type)
         #     print(it.name, ot)
@@ -79,20 +83,23 @@ class Anson(dict):
         #     print(it.type)
         #     print(it)
 
-        fields(type(self))
+        # fields(type(self))
         _FIELDS = '__dataclass_fields__' # see dataclasses.fields()
-        fds = getattr(type(self), _FIELDS)
+        fds = getattr(type(instance), _FIELDS)
         def toTrump(fn: Field):
             f = fds[fn]
             ot = get_origin(f.type)
+            isAnson = issubclass(f.type, Anson) or isinstance(f.type, Anson)
             return Anson.Trumpfield(
                 f.name, f.type,
                 ot,
-                issubclass(f.type, Anson) or isinstance(f.type, Anson),
+                isAnson,
                 'str' if f.type == str
                       else 'lst' if ot == list
                       else 'dic' if ot == dict
-                      else 'num' if ot is None and issubclass(f.type, Number) else 'obj',
+                      else 'num' if ot is None and issubclass(f.type, Number)
+                      else f'{f.type.__module__}.{f.type.__name__}' if isAnson
+                      else 'obj',
                 None if f.default_factory is MISSING else f.default_factory)
 
         return {it: toTrump(it) for it in fds}
@@ -111,27 +118,45 @@ class Anson(dict):
         '''
 
     def toBlock(self, ind=0) -> str:
-        myfields = self.fields()
+        myfields = self.fields(self)
         s = '{\n'
         lx = len(self.__dict__) - 1
         for x, k in enumerate(self.__dict__):
-            s += ' ' * (ind * 2) + f'"{k:<}": '
+            s += ' ' * (ind * 2 + 2) + f'"{k:<}": '
             v = self[k]
             s += 'null' if v is None \
                 else f'"{v}"' if isinstance(v, str) \
                 else self[k].toBlock(ind + 1) if myfields[k].isAnson \
                 else str(self[k])
-            s += ',\n' if x == lx else '\n'
+            s += ',\n' if x != lx else '\n'
         return s + '}'
 
     @staticmethod
-    def from_obj(obj: dict) -> TAnson:
-        anson = Anson()
+    def from_obj(obj: dict, typename: str = None) -> TAnson:
+        def getClass(_typ_: str):
+            parts = _typ_.split('.')
+            module = ".".join(parts[:-1])
+            m = __import__(module if module is not None else '__main__')
+            for comp in parts[1:]:
+                m = getattr(m, comp)
+            return m
+
+        # module3 = __import__('__main__')
+        # module2 = importlib.import_module('__main__')
+        # class_ = getattr(module2, 'MyDataClass')
+        # anson = class_()
+
+        anson = getClass(typename if typename is not None else obj['__type__'])()
+
+        thefields = Anson.fields(anson)
+
         for k in obj:
-            anson[k] = obj[k]
+            anson[k] = Anson.from_obj(obj[k], thefields[k].antype) if thefields[k].isAnson else obj[k]
         return anson
 
     @staticmethod
     def from_json(jsonstr: str) -> TAnson:
         obj = json.loads(jsonstr)
-        return Anson.from_obj(obj)
+        v = Anson.from_obj(obj)
+        print(v, type(v))
+        return v

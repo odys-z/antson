@@ -26,7 +26,7 @@ class MyDataClass(Anson):
     extra: ExtraData
     items: list[Any]  # = field(default_factory=list)
 
-    def __init__(self, name: str, age: int):
+    def __init__(self, name: str = '', age: int = '0'):
         super().__init__()
         self.extra = ExtraData()
         self.name = name
@@ -38,7 +38,7 @@ foo = MyDataClass('Trump', 78)
 foo.extra.l = ['']
 print(f'{foo.extra.__module__}.{foo.__class__.__name__}')
 
-print(foo.fields())
+print(Anson.fields(foo))
 
 my = MyDataClass('zz', 12)
 mytype = type(my)
@@ -47,6 +47,24 @@ print(my.toBlock())
 your = mytype('yy', 13)
 print(your.toBlock())
 
-jsonstr = '{"name": "zzz", "extra": {"s": "sss", "i": 1, "l": 2, "d": {"u": "uuu"}}}'
+jsonstr = '{"__type__": "__main__.MyDataClass", "name": "Trump", "age": 78, "extra": {"s": "sss", "i": 1, "l": 2, "d": {"u": "uuu"}}}'
 his = Anson.from_json(jsonstr)
 print(his.name)
+print(his)
+
+jsonstr = '{\
+  "__type__": "__main__.MyDataClass",\
+  "extra": {\
+    "__type__": "testier.extra.ExtraData",\
+    "s": null,\
+    "i": 0,\
+    "l": ["a", 2],\
+    "d": {}\
+  },\
+  "name": "zz",\
+  "age": 12,\
+  "items": ['']\
+}'
+her = Anson.from_json(jsonstr)
+print(her.name, type(her))
+print(her.toBlock())
