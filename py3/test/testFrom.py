@@ -2,10 +2,10 @@
 # https://stackoverflow.com/questions/2112715/how-do-i-fix-pydev-undefined-variable-from-import-errors
 from antlr4 import *  #@UnusedWildImport
 
-from ansonpy.JSONLexer import JSONLexer
-from ansonpy.JSONParser import JSONParser
+from src.ansonpy_del.JSONLexer import JSONLexer
+from src.ansonpy_del.JSONParser import JSONParser
 
-from ansonpy.anson import * #@UnusedWildImport
+from src.ansonpy_del.anson import * #@UnusedWildImport
 from unittest.case import TestCase
 
 def parse(s):

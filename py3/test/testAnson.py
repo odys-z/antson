@@ -9,10 +9,10 @@ unless the stream mode is critical.
 - No need for generating Python3 source code from JSON ?
 
 '''
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
-from src.ansons.anson import Anson
+from src.io.odysz.anson import Anson
 from testier.extra import ExtraData
 
 
@@ -47,15 +47,14 @@ print(my.toBlock())
 your = mytype('yy', 13)
 print(your.toBlock())
 
-jsonstr = '{"__type__": "__main__.MyDataClass", "name": "Trump", "age": 78, "extra": {"s": "sss", "i": 1, "l": 2, "d": {"u": "uuu"}}}'
+jsonstr = '{"type": "__main__.MyDataClass", "name": "Trump", "age": 78, "extra": {"s": "sss", "i": 1, "l": 2, "d": {"u": "uuu"}}}'
 his = Anson.from_json(jsonstr)
 print(his.name)
 print(his)
 
 jsonstr = '{\
-  "__type__": "__main__.MyDataClass",\
+  "type": "__main__.MyDataClass",\
   "extra": {\
-    "__type__": "testier.extra.ExtraData",\
     "s": null,\
     "i": 0,\
     "l": ["a", 2],\

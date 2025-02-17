@@ -3,7 +3,9 @@ Created on 25 Oct 2019
 
 @author: odys-z@github.com
 '''
-from nis import match
+import sys
+from re import match
+
 
 class LangExt():
     '''
@@ -38,7 +40,8 @@ class Utils():
         pass
     
     @staticmethod
-    def warn (self, templt, args):
+    def warn (templt, args = None):
+        print(templt, file=sys.stderr)
         pass
     
         

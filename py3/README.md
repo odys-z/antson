@@ -12,6 +12,44 @@ from ansons.anson import Anson
 pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple Anson.py3
 ```
 
+# Guide
+
+- Java vs Python package structure
+
+Python packages tree:
+
+```
+├── io
+│   └── oz
+│       ├── jserv
+│       │   └── docs
+│       │       └── syn
+│       │           └── singleton.py
+│       └── syn.py
+
+.
+└── io
+    └── oz
+        └── jserv
+            └── docs
+                └── syn
+                    ├── singleton
+                    │   └── AppSettings.java
+'''
+
+Java packages tree:
+
+'''
+.
+└── io
+    └── oz
+        └── syn
+            ├── AnRegistry.java
+            ├── SynodeConfig.java
+            ├── SynOrg.java
+            └── YellowPages.java
+```
+
 # References
 
 - https://packaging.python.org/en/latest/tutorials/packaging-projects/

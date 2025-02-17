@@ -5,6 +5,8 @@ import json
 from numbers import Number
 from typing import TypeVar, List, Dict, get_origin
 
+from src.io.odysz.common import Utils
+
 TAnson = TypeVar('TAnson', bound='Anson')
 
 
@@ -122,7 +124,7 @@ class Anson(dict):
         s = '{\n'
         lx = len(self.__dict__) - 1
         for x, k in enumerate(self.__dict__):
-            s += ' ' * (ind * 2 + 2) + f'"{k:<}": '
+            s += ' ' * (ind * 2 + 2) + f'"{('type' if k == '__type__' else k):<}": '
             v = self[k]
             s += 'null' if v is None \
                 else f'"{v}"' if isinstance(v, str) \
@@ -146,12 +148,19 @@ class Anson(dict):
         # class_ = getattr(module2, 'MyDataClass')
         # anson = class_()
 
-        anson = getClass(typename if typename is not None else obj['__type__'])()
+        anson = getClass(typename if typename is not None else obj['type'])()
 
         thefields = Anson.fields(anson)
+        # if thefields['__type__'] is None:
+        if '__type__' not in thefields:
+                raise Exception(f'Class {type(anson)} has no field "__type__". Is it a subclass of Anson?')
 
-        for k in obj:
-            anson[k] = Anson.from_obj(obj[k], thefields[k].antype) if thefields[k].isAnson else obj[k]
+        for jsonk in obj:
+            k = '__type__' if jsonk == 'type' else jsonk
+            if k != '__type__' and k not in thefields:
+                Utils.warn(f'Field ignored: {k}: {obj[k]}')
+                continue
+            anson[k] = Anson.from_obj(obj[jsonk], thefields[k].antype) if thefields[k].isAnson else obj[jsonk]
         return anson
 
     @staticmethod
@@ -160,3 +169,9 @@ class Anson(dict):
         v = Anson.from_obj(obj)
         print(v, type(v))
         return v
+
+    @staticmethod
+    def from_file(fp: str) -> TAnson:
+        with open(fp, 'r') as file:
+            obj = json.load(file)
+            return Anson.from_obj(obj)
