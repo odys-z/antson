@@ -4,6 +4,7 @@ Created on 25 Oct 2019
 @author: odys-z@github.com
 '''
 
+from dataclasses import dataclass
 import inspect
 from enum import Enum
 from ansonpy.JSONListener import JSONListener
