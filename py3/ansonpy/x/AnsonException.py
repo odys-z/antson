@@ -1,6 +1,6 @@
 
 class AnsonException(BaseException):
-    type = "io.odysz.anson.x.AnsonException"
+    type = "io.odysz.ansons.x.AnsonException"
     excode = 0
     err = ""
     
