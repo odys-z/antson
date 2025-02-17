@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "Anson.py3"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
@@ -15,8 +15,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-license = ["MIT"]
-license-files = [LICEN[CS]E*"]
+license = {file = "LICENSE" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ansons"]
