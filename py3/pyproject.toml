@@ -15,7 +15,10 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-license = {file = "LICENSE" }
+license = {text = """Copyright (c) 2025 Ody Z. All rights reserved.
+
+This work is licensed under the terms of the MIT license.
+For a copy, see <https://opensource.org/licenses/MIT>.""" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ansons"]

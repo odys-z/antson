@@ -29,6 +29,9 @@ password = pypi-zzz
 ```
 
 ```
+python3 -m twine --version
+twine version 6.1.0 (keyring: 25.6.0, packaging: 24.2, requests: 2.31.0, requests-toolbelt: 1.0.0,
+urllib3: 2.0.7, id: 1.5.0)
 python3 -m build
 python3 -m twine upload --repository testpypi dist/*
 ```
