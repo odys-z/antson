@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from ansons.anson import Anson
+from src.ansons.anson import Anson
 
 
 @dataclass

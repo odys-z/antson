@@ -12,7 +12,7 @@ unless the stream mode is critical.
 from dataclasses import dataclass, field
 from typing import Any
 
-from ansons.anson import Anson
+from src.ansons.anson import Anson
 from testier.extra import ExtraData
 
 

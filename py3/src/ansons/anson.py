@@ -90,9 +90,9 @@ class Anson(dict):
                 ot,
                 issubclass(f.type, Anson) or isinstance(f.type, Anson),
                 'str' if f.type == str
-                        else 'lst' if ot == list
-                        else 'dic' if ot == dict
-                        else 'num' if ot is None and issubclass(f.type, Number) else 'obj',
+                      else 'lst' if ot == list
+                      else 'dic' if ot == dict
+                      else 'num' if ot is None and issubclass(f.type, Number) else 'obj',
                 None if f.default_factory is MISSING else f.default_factory)
 
         return {it: toTrump(it) for it in fds}
