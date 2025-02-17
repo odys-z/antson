@@ -19,6 +19,20 @@ pip install --index-url https://test.pypi.org/simple --extra-index-url https://p
 
 # Troubleshootings
 
+.pypirc
+
+```
+[testpypi]
+repository: https://test.pypi.org/legacy/
+username = __token__
+password = pypi-zzz
+```
+
+```
+python3 -m build
+python3 -m twine upload --repository testpypi dist/*
+```
+
 ```
 ERROR   InvalidDistribution: Invalid distribution metadata: unrecognized or malformed field
         'license-file'; unrecognized or malformed field 'license-expression'  
