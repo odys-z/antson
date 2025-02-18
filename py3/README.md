@@ -14,9 +14,9 @@ pip install --index-url https://test.pypi.org/simple --extra-index-url https://p
 
 # Guide
 
-- Java vs Python package structure
+- Mapping Java vs Python package structure
 
-Python packages tree:
+Python packages tree is in format of *path/to/module/class*, while java has no node of *module*:
 
 ```
 ├── io
@@ -50,6 +50,41 @@ Java packages tree:
             ├── SynodeConfig.java
             ├── SynOrg.java
             └── YellowPages.java
+```
+
+Anson.py3 is using package name path with a top level path. Say, if the json envelope
+define as
+
+```
+{ type: io.oz.syn.AnRegistry,
+  ...
+}
+```
+
+and the user's project tree is:
+
+```
+src
+├── io
+│   └── oz
+│       ├── jserv
+│       │   └── docs
+│       │       └── syn
+│       │           └── singleton.py "class AppSettings"
+│       └── syn.py "class AnRegistry, SynodeConfig, SynOrg, YellowPages"
+main.py
+```
+
+In main.py, call
+
+```code
+Anson.java_src('src')
+```
+
+before
+
+```code
+AnRegistry.from_file(path)
 ```
 
 # Issues
