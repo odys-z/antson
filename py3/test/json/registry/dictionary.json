@@ -1,4 +1,4 @@
-{"type": "test.io.oz.syn.AnRegistry",
+{"type": "io.oz.syn.AnRegistry",
  "config": {
    "synid": "SAMPLE-X",
    "domain": "zsu",

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "Anson.py3"
-version = "0.0.2"
+version = "0.0.5"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
@@ -21,7 +21,7 @@ This work is licensed under the terms of the MIT license.
 For a copy, see <https://opensource.org/licenses/MIT>.""" }
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/ansons"]
+packages = ["src/anson"]
 
 [project.urls]
 Homepage = "https://github.com/odys-z/antson"

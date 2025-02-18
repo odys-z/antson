@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import overload, Self
 
-from src.io.odysz.anson import Anson
+from src.anson.io.odysz.ansons import Anson
 
 jserv_sep = ' '
 synode_sep = ':'
