@@ -2,10 +2,8 @@
 # https://stackoverflow.com/questions/2112715/how-do-i-fix-pydev-undefined-variable-from-import-errors
 from antlr4 import * #@UnusedWildImport
 
-from ansonpy.JSONLexer import JSONLexer
-from ansonpy.JSONListener import JSONListener
-from ansonpy.JSONParser import JSONParser
-import sys #@UnusedImport
+from src.ansonpy_del.JSONListener import JSONListener
+
 
 class JSONPrintListener(JSONListener):
     def enterJson(self, ctx):

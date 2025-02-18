@@ -1,4 +1,4 @@
-{ "type"      : "test.io.oz.jserv.docs.syn.singleton.AppSettings",
+{ "type"      : "io.oz.jserv.docs.syn.singleton.AppSettings",
   "vol_name"  : "VOLUME_HOME",
   "volume"    : "/home/`$USER`/volume/",
   "port"      : 8964,

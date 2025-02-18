@@ -14,9 +14,9 @@ pip install --index-url https://test.pypi.org/simple --extra-index-url https://p
 
 # Guide
 
-- Java vs Python package structure
+- Mapping Java vs Python package structure
 
-Python packages tree:
+Python packages tree is in format of *path/to/module/class*, while java has no node of *module*:
 
 ```
 ├── io
@@ -24,9 +24,13 @@ Python packages tree:
 │       ├── jserv
 │       │   └── docs
 │       │       └── syn
-│       │           └── singleton.py
-│       └── syn.py
+│       │           └── singleton.py "class AppSettings"
+│       └── syn.py "class AnRegistry, SynodeConfig, SynOrg, YellowPages"
+```
 
+Java packages tree:
+
+```
 .
 └── io
     └── oz
@@ -35,11 +39,9 @@ Python packages tree:
                 └── syn
                     ├── singleton
                     │   └── AppSettings.java
-'''
+```
 
-Java packages tree:
-
-'''
+```
 .
 └── io
     └── oz
@@ -48,6 +50,79 @@ Java packages tree:
             ├── SynodeConfig.java
             ├── SynOrg.java
             └── YellowPages.java
+```
+
+Anson.py3 is using package name path with a top level path. Say, if the json envelope
+define as
+
+```
+{ type: io.oz.syn.AnRegistry,
+  ...
+}
+```
+
+and the user's project tree is:
+
+```
+src
+├── io
+│   └── oz
+│       ├── jserv
+│       │   └── docs
+│       │       └── syn
+│       │           └── singleton.py "class AppSettings"
+│       └── syn.py "class AnRegistry, SynodeConfig, SynOrg, YellowPages"
+main.py
+```
+
+In main.py, call
+
+```code
+Anson.java_src('src')
+```
+
+before
+
+```code
+AnRegistry.from_file(path)
+```
+
+# Issues
+
+- Printing Anson subclasses with non-default field without value initialization will result in errors
+
+If SynOrg.parent is defined as
+
+```
+class SynOrg(Anson)
+    parent: str
+
+    def __init__(self):
+        super().__init__()
+
+```
+
+```
+org = Anson.from_file(...)
+print (org)
+
+Error
+Traceback (most recent call last):
+  File "/home/antson/py3/test/testYellowPages.py", line 18, in testAnregistry
+    print(diction)
+  File "/usr/lib/python3.12/dataclasses.py", line 262, in wrapper
+    result = user_function(self)
+             ^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 3, in __repr__
+  File "/usr/lib/python3.12/dataclasses.py", line 262, in wrapper
+    result = user_function(self)
+             ^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 3, in __repr__
+  File "/usr/lib/python3.12/dataclasses.py", line 262, in wrapper
+    result = user_function(self)
+             ^^^^^^^^^^^^^^^^^^^
+  File "<string>", line 3, in __repr__
+AttributeError: 'SynOrg' object has no attribute 'parent'
 ```
 
 # References

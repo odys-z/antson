@@ -3,7 +3,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Self, TypeVar
 
-from ansons.anson import Anson
+from src.anson.io.odysz.ansons import Anson
+
 
 @dataclass
 class SynOrg(Anson):
@@ -25,6 +26,9 @@ class SynOrg(Anson):
     # The default resources collection, usually a group / tree of documents.
     album0: str
 
+    def __init__(self):
+        super().__init__()
+
 
 @dataclass
 class Synode(Anson):
@@ -34,6 +38,9 @@ class Synode(Anson):
     domain: str
     nyquence: int
     syn_uid: str
+
+    def __init__(self):
+        super().__init__()
 
 
 @dataclass
@@ -61,7 +68,6 @@ class SynodeConfig(Anson):
 
     def __init__(self):
         super().__init__()
-        pass
 
 
 @dataclass()
@@ -73,6 +79,10 @@ class SyncUser(Anson):
     domain: str
     org: str
 
+    def __init__(self):
+        super().__init__()
+
+TAnRegistry = TypeVar('TAnRegistry', bound='AnRegistry')
 
 @dataclass()
 class AnRegistry(Anson):
@@ -84,18 +94,18 @@ class AnRegistry(Anson):
         self.config = None # SynodeConfig()
         self.synusers = []
 
-    def load(self, path) -> Self:
+    @staticmethod
+    def load(path) -> TAnRegistry:
         if Path(path).is_file():
             with open(path, 'r') as file:
                 # registry = json.load(file)
                 # self.config = SynodeConfig.from_obj(registry['config'])
                 obj = json.load(file)
                 obj['__type__'] = AnRegistry().__type__
-                registry = Anson.from_obj(obj)
+                return Anson.from_envelope(obj)
 
         else:
             raise Exception(f"File doesn't exist: {path}")
-        return self
 
 
 def loadYellowPages():
