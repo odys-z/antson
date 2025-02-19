@@ -40,8 +40,7 @@ class Utils():
         pass
     
     @staticmethod
-    def warn (templt, args = None):
-        print(templt, file=sys.stderr)
-        pass
-    
+    def warn (templt, *args):
+        print(templt if args is None else templt.format(*args), file=sys.stderr)
+
         

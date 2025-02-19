@@ -3,9 +3,9 @@ from dataclasses import dataclass, fields, MISSING, Field
 
 import json
 from numbers import Number
-from typing import TypeVar, List, Dict, get_origin, get_args
+from typing import TypeVar, List, Dict, get_origin, get_args, ForwardRef, Type, Any
 
-from anson.io.odysz.common import Utils
+from .common import Utils
 
 TAnson = TypeVar('TAnson', bound='Anson')
 
@@ -13,6 +13,8 @@ java_src_path: str = ''
 
 @dataclass
 class Anson(dict):
+    enclosinguardtypes = set()
+    
     __type__: str  # = 'ansons.antson.Anson'
 
     def __init__(self):
@@ -43,10 +45,46 @@ class Anson(dict):
     def fields(instance) -> dict[str, Trumpfield]:
         _FIELDS = '__dataclass_fields__' # see dataclasses.fields()
         fds = getattr(type(instance), _FIELDS)
+
+        def figureNormalType(f: Field) -> tuple:
+            try: isAnson = issubclass(f.type, Anson) or isinstance(f.type, Anson)
+            except: isAnson = False
+            return f, get_origin(f.type), get_args(f.type), isAnson
+
+        def figure_list(f: Field, guardTypes: set[Anson]):
+            if not isinstance(f.type, list):
+                raise Exception("Not here")
+
+            ot = list
+
+            try:
+                et = f.type[0].__bound__ if len(f.type[0]) > 0 and isinstance(f.type[0], TypeVar) else get_args(f.type)
+                et = et.__evaluate(globals(), locals(), recursive_guard=guardTypes) if isinstance(et, ForwardRef) else et
+                et = (et)
+            except: et = ()
+            return f, ot, et, False
+
+        def figure_dict(f: Field, envType: set[Anson]) -> tuple:
+            pass
+
         def toTrump(fn: Field):
+            """
+            Simply & brutally figuring types. We only care about Anson types, the exceptional.
+            :param fn:
+            :return: TrumpField
+            """
             f = fds[fn]
-            ot, et = get_origin(f.type), get_args(f.type)
-            isAnson = issubclass(f.type, Anson) or isinstance(f.type, Anson)
+            if isinstance(f.type, List):
+                f, ot, et, isAnson = figure_list(f, Anson.enclosinguardtypes)
+            elif isinstance(f.type, Dict):
+                f, ot, et, isAnson = figure_dict(f, Anson.enclosinguardtypes)
+            else:
+                f, ot, et, isAnson = figureNormalType(f)
+            # ot, et = get_origin(f.type), get_args(f.type)
+            #
+            # try: isAnson = issubclass(f.type, Anson) or isinstance(f.type, Anson)
+            # except: isAnson = False
+
             return Anson.Trumpfield(
                 f.name, f.type,
                 ot, isAnson,
@@ -85,6 +123,9 @@ class Anson(dict):
                     s += f'  "type": "{tp}"'
                 else: continue # later can figure out type by field's type
             else:
+                if k not in myfds:
+                    Utils.warn("Field {0} not defined in Anson presents in data object, value ignored: {1}.", k, self[k])
+                    continue
                 s += f'{' ' * (ind * 2 + 2)}"{k}": '
                 v = self[k]
                 s += 'null' if v is None or isinstance(v, Field) \

@@ -11,9 +11,9 @@ synode_sep = ':'
 # def parseJservs(jservstr: str) -> dict:
 #     jss = split(jserv_sep, jservstr)
 #     jservs = {}
-#     for jserv in jss:
-#         n_j = split(synode_sep, jserv)
-#         n, j = n_j[0], re.sub("^{0}\s*{1}\s*".format(n_j[0], synode_sep), "", jserv)
+#     for jserv.py-sample in jss:
+#         n_j = split(synode_sep, jserv.py-sample)
+#         n, j = n_j[0], re.sub("^{0}\s*{1}\s*".format(n_j[0], synode_sep), "", jserv.py-sample)
 #         jservs[n] = j
 #
 #     print(jservs)

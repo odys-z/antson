@@ -8,9 +8,9 @@ from dataclasses import dataclass
 import inspect
 from dataclasses import dataclass
 from enum import Enum
-from ansonpy.JSONListener import JSONListener
-from odysz.common import LangExt, Utils
-from ansonpy.x import AnsonException
+from src.ansonpy_del.JSONListener import JSONListener
+from src.anson.io.odysz.common import LangExt, Utils
+from src.ansonpy_del.x import AnsonException
 import abc
 import decimal
 from typing import List
