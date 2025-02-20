@@ -3,7 +3,7 @@ from dataclasses import dataclass, fields, MISSING, Field
 
 import json
 from numbers import Number
-from typing import TypeVar, List, Dict, get_origin, get_args, ForwardRef, Type, Any
+from typing import TypeVar, List, Dict, get_origin, get_args, ForwardRef, Type, Any, Union
 
 from .common import Utils
 
@@ -106,15 +106,15 @@ class Anson(dict):
 
     @staticmethod
     def toDict_(dic: dict, elemtype: type, ind: int):
-        if elemtype is None or not issubclass(elemtype, Anson): return str(dic)
+        if elemtype is None or not issubclass(elemtype, Anson): return json.dumps(dic)
         return '{\n' + ',\n'.join(' ' * (ind * 2 + 2) + Anson.toBlock_(dic[k], ind + 1) for k in dic) + ']'
 
     def toBlock(self) -> str:
         return self.toBlock_(0)
 
     def toFile(self, path: str):
-        with open(path, 'w') as jf:
-            jf.write(toBlock())
+        with open(path, 'w+') as jf:
+            jf.write(self.toBlock())
 
     def toBlock_(self, ind: int) -> str:
         myfds = self.fields(self)
@@ -130,7 +130,7 @@ class Anson(dict):
                 if k not in myfds:
                     Utils.warn("Field {0} not defined in Anson presents in data object, value ignored: {1}.", k, self[k])
                     continue
-                s += f'{' ' * (ind * 2 + 2)}"{k}": '
+                s += f'{" " * (ind * 2 + 2)}"{k}": '
                 v = self[k]
                 s += 'null' if v is None or isinstance(v, Field) \
                     else f'"{v}"' if isinstance(v, str) \
@@ -156,7 +156,7 @@ class Anson(dict):
         return [Anson.from_obj(x, eletype) for x in v]
 
     @staticmethod
-    def from_obj(obj: dict, typename: str | type) -> TAnson:
+    def from_obj(obj: dict, typename: Union[str, type]) -> TAnson:
         def getClass(_typ_: str):
             parts = _typ_.split('.')
             # if len(java_src_path) > 0:

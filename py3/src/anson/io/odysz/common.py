@@ -5,9 +5,12 @@ Created on 25 Oct 2019
 '''
 import sys
 from re import match
-from typing import TextIO
+from typing import TextIO, Optional, TypeVar
 
-class LangExt():
+T = TypeVar('T')
+
+
+class LangExt:
     '''
     classdocs
     '''
@@ -21,25 +24,30 @@ class LangExt():
     def isblank(s, regex=None):
         if (s == None):
             return True
-        if (isinstance(s, str)):
-            if (regex == None or s == ""):
-                return True
+        if isinstance(s, str):
+            if regex == None or s == "":
+                return len(s) == 0
             else:
                 return match(s, regex)
         return False
 
     @staticmethod
-    def ifnull[T](a: T, b: T) -> T:
+    def ifnull(a: T, b: T) -> T:
         return b if a is None else a
 
-def log(out: TextIO | None, templt: str, *args):
+    @classmethod
+    def len(cls, obj):
+        return 0 if obj is None else len(obj)
+
+
+def log(out: Optional[TextIO], templt: str, *args):
     try:
         print(templt if LangExt.isblank(args) else templt.format(*args), file=out)
     except Exception as e:
         print(templt, args, e)
 
 
-class Utils():
+class Utils:
     def __init__(self, params):
         '''
         Constructor
