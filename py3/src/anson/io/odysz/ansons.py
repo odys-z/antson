@@ -112,6 +112,10 @@ class Anson(dict):
     def toBlock(self) -> str:
         return self.toBlock_(0)
 
+    def toFile(self, path: str):
+        with open(path, 'w') as jf:
+            jf.write(toBlock())
+
     def toBlock_(self, ind: int) -> str:
         myfds = self.fields(self)
         s = ' ' * (ind * 2) + '{\n'
