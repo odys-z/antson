@@ -55,8 +55,8 @@ class Utils:
 
     @staticmethod
     def logi(templt, *args):
-        log(sys.stdout, templt, args)
+        log(sys.stdout, templt, *args)
 
     @staticmethod
     def warn(templt, *args):
-        log(sys.stderr, templt, args)
+        log(sys.stderr, templt, *args)

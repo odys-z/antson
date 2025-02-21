@@ -131,17 +131,22 @@ class Anson(dict):
     def toBlock_(self, ind: int) -> str:
         myfds = self.fields(self)
         s = ' ' * (ind * 2) + '{\n'
-        lx = len(self.__dict__) - 1
+        # incorrect if there is a ignored: lx = len(self.__dict__) - 1
+        has_prvious = False
         for x, k in enumerate(self.__dict__):
             if '__type__' == k:
                 if ind == 0:
                     tp = str(self['__type__']).removeprefix(java_src_path+'.')
+                    if has_prvious: s += ',\n'
                     s += f'  "type": "{tp}"'
+                    has_prvious = True
                 else: continue # later can figure out type by field's type
             else:
                 if k not in myfds:
-                    Utils.warn("Field {0} not defined in Anson presents in data object, value ignored: {1}.", k, self[k])
+                    Utils.warn("Field {0}{1} is not defined in Anson, which is presenting in data object. Value ignored: {1}.",
+                               str(self['__type__']), k, self[k])
                     continue
+                if has_prvious: s += ',\n'
                 s += f'{" " * (ind * 2 + 2)}"{k}": '
                 v = self[k]
                 s += 'null' if v is None or isinstance(v, Field) \
@@ -150,8 +155,10 @@ class Anson(dict):
                     else Anson.toList_(v, myfds[k].elemtype, ind + 1) if myfds[k].antype == 'lst' \
                     else Anson.toDict_(v, myfds[k].elemtype, ind + 1) if myfds[k].antype == 'obj' \
                     else str(v)
-            s += ',\n' if x != lx else '\n'
-        return s + ' ' * (ind * 2) + '}'
+
+                has_prvious = True
+            # s += ',\n' if x != lx else '\n'
+        return s + ('\n' if has_prvious else '') + ' ' * (ind * 2) + '}'
 
     @staticmethod
     def from_dict(v: dict, eletype: type) -> dict:
