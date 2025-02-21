@@ -3,7 +3,7 @@ from dataclasses import dataclass, fields, MISSING, Field
 
 import json
 from numbers import Number
-from typing import TypeVar, List, Dict, get_origin, get_args, ForwardRef, Type, Any, Union
+from typing import TypeVar, List, Dict, get_origin, get_args, ForwardRef, Type, Any, Union, Optional
 
 from .common import Utils
 
@@ -46,6 +46,16 @@ class Anson(dict):
         _FIELDS = '__dataclass_fields__' # see dataclasses.fields()
         fds = getattr(type(instance), _FIELDS)
 
+        def get_mandatype(t: TypeVar):
+            if isinstance(t, type(Optional[Any])):
+                return get_args(t)[0]
+            elif isinstance(t, type(Any | None)):
+                print(get_args(t))
+                for m in get_args(t):
+                    if m is not type(None):
+                        return m
+            return t
+
         def figureNormalType(f: Field) -> tuple:
             try: isAnson = issubclass(f.type, Anson) or isinstance(f.type, Anson)
             except: isAnson = False
@@ -74,6 +84,8 @@ class Anson(dict):
             :return: TrumpField
             """
             f = fds[fn]
+            f.type = get_mandatype(f.type)
+
             if isinstance(f.type, List):
                 f, ot, et, isAnson = figure_list(f, Anson.enclosinguardtypes)
             elif isinstance(f.type, Dict):
