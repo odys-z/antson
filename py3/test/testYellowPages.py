@@ -17,7 +17,6 @@ class YellowPagesTests(unittest.TestCase):
         diction = Anson.from_file('json/registry/dictionary.json')
         self.assertEqual(type(diction), AnRegistry)
         self.assertEqual(type(diction.config), SynodeConfig)
-        # print(diction)
         print(diction.toBlock())
 
 

@@ -1,4 +1,5 @@
 import importlib
+import sys
 from dataclasses import dataclass, fields, MISSING, Field
 
 import json
@@ -15,7 +16,8 @@ java_src_path: str = ''
 class Anson(dict):
     enclosinguardtypes = set()
     
-    __type__: str  # = 'ansons.antson.Anson'
+    __type__: str
+    '''ansons.antson.Anson'''
 
     def __init__(self):
         super().__init__()
@@ -49,7 +51,7 @@ class Anson(dict):
         def get_mandatype(t: TypeVar):
             if isinstance(t, type(Optional[Any])):
                 return get_args(t)[0]
-            elif isinstance(t, type(Any | None)):
+            elif sys.version_info > (3,10,0) and isinstance(t, type(Any | None)):
                 print(get_args(t))
                 for m in get_args(t):
                     if m is not type(None):
@@ -92,21 +94,17 @@ class Anson(dict):
                 f, ot, et, isAnson = figure_dict(f, Anson.enclosinguardtypes)
             else:
                 f, ot, et, isAnson = figureNormalType(f)
-            # ot, et = get_origin(f.type), get_args(f.type)
-            #
-            # try: isAnson = issubclass(f.type, Anson) or isinstance(f.type, Anson)
-            # except: isAnson = False
 
             return Anson.Trumpfield(
                 f.name, f.type,
                 ot, isAnson,
                 None if et is None or len(et) == 0 else et[0],
-                'str' if f.type == str
-                      else 'lst' if ot == list
-                      else 'dic' if ot == dict
-                      else 'num' if ot is None and issubclass(f.type, Number)
-                      else f.type if isAnson
-                      else 'obj',
+                    'str' if f.type == str else
+                    'lst' if ot == list else
+                    'dic' if ot == dict else
+                    'num' if ot is None and issubclass(f.type, Number) else
+                    f.type if isAnson else
+                    'obj',
                 None if f.default_factory is MISSING else f.default_factory)
 
         return {it: toTrump(it) for it in fds}

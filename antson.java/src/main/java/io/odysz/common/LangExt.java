@@ -999,6 +999,14 @@ public class LangExt {
 	public static String f(String templ, Object ... args) {
 		return String.format(templ == null ? "" : templ, args);
 	}
+	
+	public static String f(String... msg) {
+		return msg != null
+			? len(msg) > 1
+			? f(msg[0], (Object[])Arrays.copyOfRange(msg, 1, msg.length))
+			: _0(msg)
+			: null;
+	}
 
 	/**
 	 * Get the first element in {@link args}. Typically used to forward optional args.
@@ -1312,7 +1320,7 @@ public class LangExt {
 	 * @param obj
 	 * @param msgMax6 message string or template with args, max in total 6.
 	 * see {@link #f6(String[])}
-	 * @return
+	 * @return obj if no exceptions
 	 */
 
 	public static <T> T notNull (T obj, String ... msgMax6) {
@@ -1333,37 +1341,48 @@ public class LangExt {
 	 * assertEquals(null, f6(new String[] {}));
 	 * assertEquals(null, f6(null));</pre>
 	 * 
-	 * @param msg, max length of 6
+	 * @param msg,
 	 * @return f(msg[0], msg[1], ...)
 	 */
 	public static String f6(String[] msg) {
-		return len(msg) > 5
-			? f(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5])
-			: len(msg) > 4
-			? f(msg[0], msg[1], msg[2], msg[3], msg[4])
-			: len(msg) > 3
-			? f(msg[0], msg[1], msg[2], msg[3])
-			: len(msg) > 2
-			? f(msg[0], msg[1], msg[2])
-			: len(msg) > 1
-			? f(msg[0], msg[1])
+//		return len(msg) > 5
+//			? f(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5])
+//			: len(msg) > 4
+//			? f(msg[0], msg[1], msg[2], msg[3], msg[4])
+//			: len(msg) > 3
+//			? f(msg[0], msg[1], msg[2], msg[3])
+//			: len(msg) > 2
+//			? f(msg[0], msg[1], msg[2])
+//			: len(msg) > 1
+//			? f(msg[0], msg[1])
+//			: _0(msg);
+		return len(msg) > 1
+			? f(msg[0], (Object[])Arrays.copyOfRange(msg, 1, msg.length))
 			: _0(msg);
 	}
 
-	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
+	/**
+	 * 
+	 * @param str
+	 * @param msg
+	 * @return str if no exceptions
+	 */
 	public static String notBlank (String str, String ... msg) {
 		if (isblank(str))
 			throw new NullPointerException(isNull(msg)
 					? "Not Blank Exception"
+					: len(msg) > 0
+					? f6(msg)
 					: msg[0]);
 		return str;
 	}
 
-	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> void musteq (T a, T b, String ...msg) {
 		if (a != b)
 			throw new NullPointerException(isNull(msg)
 					? f("a, %s != b, %s", a, b)
+					: len(msg) > 0
+					? f6(msg)
 					: msg[0]);
 	}
 
@@ -1372,6 +1391,8 @@ public class LangExt {
 		if (!eq(a, b))
 			throw new NullPointerException(isNull(msg)
 					? f("a, %s != b, %s", a, b)
+					: len(msg) > 0
+					? f6(msg)
 					: msg[0]);
 	}
 
@@ -1413,12 +1434,18 @@ public class LangExt {
 		return a;
 	}
 
-	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
+	/**
+	 * Check a is not null.
+	 * @param <T>
+	 * @param a
+	 * @param msg template with args, see {@link #f(String[])}
+	 * @return a if no exceptions
+	 */
 	public static <T> T mustnonull(T a, String... msg) {
 		if (a == null)
 			throw new NullPointerException(isNull(msg)
 					? f("Object must not be null: %s", a)
-					: msg[0]);
+					: f(msg));
 		return a;
 	}
 }
