@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Self, TypeVar
+from typing import TypeVar
 
 from src.anson.io.odysz.ansons import Anson
 
@@ -46,6 +46,9 @@ class Synode(Anson):
 @dataclass
 class SynodeConfig(Anson):
     synid: str
+    domain: str
+
+    admin: str
 
     sysconn: str
     synconn: str
@@ -53,18 +56,16 @@ class SynodeConfig(Anson):
     org: SynOrg
     ''' Market, organization or so? '''
 
-    peers: list[Synode]
-
-    # mode: SynodeMode
-    https: bool
-
-    admin: str
-
     syncIns: float
     '''
      * Synchronization interval, initially, in secends.
      * No worker thread started if less or equals 0.
     '''
+
+    peers: list[Synode]
+
+    # mode: SynodeMode
+    https: bool
 
     def __init__(self):
         super().__init__()
@@ -82,7 +83,9 @@ class SyncUser(Anson):
     def __init__(self):
         super().__init__()
 
+
 TAnRegistry = TypeVar('TAnRegistry', bound='AnRegistry')
+
 
 @dataclass()
 class AnRegistry(Anson):
@@ -103,9 +106,16 @@ class AnRegistry(Anson):
                 obj = json.load(file)
                 obj['__type__'] = AnRegistry().__type__
                 return Anson.from_envelope(obj)
-
         else:
-            raise Exception(f"File doesn't exist: {path}")
+            raise FileNotFoundError(f"File doesn't exist: {path}")
+
+    @classmethod
+    def find_synode(cls, synodes: list[Synode], id):
+        if synodes is not None:
+            for peer in synodes:
+                if peer.synid == id:
+                    return peer
+        return None
 
 
 def loadYellowPages():

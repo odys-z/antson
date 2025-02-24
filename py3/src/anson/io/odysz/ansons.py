@@ -141,7 +141,7 @@ class Anson(dict):
                 else: continue # later can figure out type by field's type
             else:
                 if k not in myfds:
-                    Utils.warn("Field {0}{1} is not defined in Anson, which is presenting in data object. Value ignored: {1}.",
+                    Utils.warn("Field {0}.{1} is not defined in Anson, which is presenting in data object. Value ignored: {1}.",
                                str(self['__type__']), k, self[k])
                     continue
                 if has_prvious: s += ',\n'

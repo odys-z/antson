@@ -1,30 +1,46 @@
 # This Python file uses the following encoding: utf-8
+import os
 from dataclasses import dataclass
-from typing import overload, Self
+from typing import overload, Optional
 
 from src.anson.io.odysz.ansons import Anson
+from src.anson.io.odysz.common import LangExt
 
 jserv_sep = ' '
 synode_sep = ':'
 
 
-# def parseJservs(jservstr: str) -> dict:
-#     jss = split(jserv_sep, jservstr)
-#     jservs = {}
-#     for jserv.py-sample in jss:
-#         n_j = split(synode_sep, jserv.py-sample)
-#         n, j = n_j[0], re.sub("^{0}\s*{1}\s*".format(n_j[0], synode_sep), "", jserv.py-sample)
-#         jservs[n] = j
-#
-#     print(jservs)
-#     return jservs
+class PortfolioException(Exception):
+    """
+    As upto Portfolio 0.7, there is no such equivalent in Java.
+    date
+    Thu 20 Feb 2025 11:52:06 AM AWST
+    mvn dependency:tree
+    [INFO] io.github.odys-z:jserv-album:jar:0.7.0
+    [INFO] +- io.github.odys-z:docsync.jserv:jar:0.2.2-SNAPSHOT:compile
+    [INFO] |  +- io.github.odys-z:semantic.DA:jar:1.5.18-SNAPSHOT:compile (version selected from constraint [1.5.18-SNAPSHOT,2.0.0-SNAPSHOT))
+    [INFO] |  |  +- io.github.odys-z:semantics.transact:jar:1.5.58:compile (version selected from constraint [1.5.58,))
+    [INFO] |  |  |  \- io.github.odys-z:antson:jar:0.9.114:compile (version selected from constraint [0.9.111,))
+    [INFO] |  +- io.github.odys-z:anclient.java:jar:0.5.16:compile (version selected from constraint [0.5.16,))
+    [INFO] |  \- io.github.odys-z:synodict-jclient:jar:0.1.6:compile (version selected from constraint [0.1.6,))
+    [INFO] +- io.github.odys-z:syndoc-lib:jar:0.5.18-SNAPSHOT:compile
+    [INFO] |  \- io.github.odys-z:semantic.jserv:jar:1.5.16-SNAPSHOT:compile (version selected from constraint [1.5.16-SNAPSHOT,2.0.0-SNAPSHOT))
+    [INFO] +- io.github.odys-z:albumtier:jar:0.5.0-SNAPSHOT:test
+    """
+    msg: str
+    cause: object
+
+    def __init__(self, msg: str, *args: object):
+        super().__init__(args)
+        self.msg = msg
+        self.cause = None if args is None or len(args) == 0 else args[0]
 
 
 @dataclass
 class AppSettings(Anson):
     envars: dict
-    installkey: str
-    rootkey: str
+    rootkey: str    # | None # test 3.12
+    installkey: Optional[str] # test 3.9
 
     volume: str
     vol_name: str
@@ -35,22 +51,28 @@ class AppSettings(Anson):
         super().__init__()
         self.envars = {}
 
-    def load(self, data: dict):
-        self.vol_name = data['vol_name']
-        self.volume = data['volume']
-        self.port = data['port']
-        self.envars = data['envars']
-        self.rootkey = data['rootkey']
-        self.installkey = data['installkey']
-        self.jservs = data['jservs']
-
-        if isinstance(self.jservs, str):
-            raise Exception("Jservs is a string, while expecting a dict. This is a guarded error to prevent old version's convention.")
-
-        return self
+    @overload
+    def Volume(self):
+        """
+        return self.volume
+        """
 
     @overload
-    def Jservs(self, jservs: str) -> Self:
+    def Volume(self, v: str):
+        """
+        set volume
+        return self
+        """
+
+    def Volume(self, v: str = None):
+        if v is None:
+            return self.volume
+        else:
+            self.volume = os.path.normpath(v).replace("\\", "/")
+            return self
+
+    @overload
+    def Jservs(self, jservs: dict):
         ...
         # self.jservs = parseJservs(jservs)
         # return self
@@ -58,16 +80,14 @@ class AppSettings(Anson):
     @overload
     def Jservs(self) -> str:
         ...
-        # return Utils.join(self.jservs)
 
     def Jservs(self, urldict: dict = None):
         '''
         :param urldict:
-            E. g. {x: 'http://127.0.0.1:8964/jserv-album'}
+            E.g. {x: 'http://127.0.0.1:8964/jserv-album'}
         :return: self when setting, jservs lines, [['x', 'http://127.0.0.1:8964/jserv-album']], when getting.
         '''
         if urldict is None:
-            # return self.formatJservLines(self.jservs)
             return [[k, self.jservs[k]] for k in self.jservs]
         else:
             self.jservs = urldict
@@ -76,9 +96,6 @@ class AppSettings(Anson):
     def jservLines(self):
         return [':\t'.join([k, self.jservs[k]]) for k in self.jservs]
 
-    def movekey(self):
-        self.json.rootkey, self.json.installkey = self.json.installkey, None
-
-    def toBlock(self) -> str:
-        return f"{{ jservs: {self.jservs} }}"
-
+    # def movekey(self):
+    #     if LangExt.len(self.rootkey) == 0 and LangExt.len(self.installkey) > 0:
+    #         self.rootkey, self.installkey = self.installkey, None
