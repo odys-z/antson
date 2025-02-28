@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "Anson.py3"
-version = "0.0.5"
+version = "0.0.6"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
 description = "Anson for Python3"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
