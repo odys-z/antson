@@ -590,21 +590,6 @@ public class LangExt {
 	 * 
 	 * package org.apache.commons.lang3;
 	 */
-    // Performance testing notes (JDK 1.4, Jul03, scolebourne)
-    // Whitespace:
-    // Character.isWhitespace() is faster than WHITESPACE.indexOf()
-    // where WHITESPACE is a string of all whitespace characters
-    //
-    // Character access:
-    // String.charAt(n) versus toCharArray(), then array[n]
-    // String.charAt(n) is about 15% worse for a 10K string
-    // They are about equal for a length 50 string
-    // String.charAt(n) is about 4 times better for a length 3 string
-    // String.charAt(n) is best bet overall
-    //
-    // Append:
-    // String.concat about twice as fast as StringBuffer.append
-    // (not sure who tested this)
 
     /**
      * A String for a space character.
@@ -1343,6 +1328,7 @@ public class LangExt {
 	 * 
 	 * @param msg,
 	 * @return f(msg[0], msg[1], ...)
+	 * @since 0.9.115 msg length is not limited to 6 anymore.
 	 */
 	public static String f6(String[] msg) {
 //		return len(msg) > 5
