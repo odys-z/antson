@@ -118,19 +118,32 @@ class AnsonTest {
 		// should trigger parent: io.odysz.anson.AnsT3
 		AnsT3son son = new AnsT3son(parent);
 	
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
-		parent.toBlock(bos, opt);
-		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
-					+ "m: [{type: io.odysz.anson.AnsT3Child}\n"
-					+ ", {type: io.odysz.anson.AnsT3son, parent: \"io.odysz.anson.AnsT3\", gendre: \"male\"}\n]}\n";
-		assertEquals(expect, s);
-	
-		// should resolve parent ref with a type guess
-		AnsT3 p = (AnsT3) Anson.fromJson(s);
-		assertEquals(((AnsT3son)p.m[1]).gendre, "male");
-		assertEquals(null, ((AnsT3Child)p.m[0]).parent);
-		assertEquals(p, ((AnsT3son)p.m[1]).parent);
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			parent.toBlock(bos, opt);
+			String s = bos.toString(StandardCharsets.UTF_8.name());
+			String expect = "{type: io.odysz.anson.AnsT3, ms: null, "
+						+ "m: [{type: io.odysz.anson.AnsT3Child}\n"
+						+ ", {type: io.odysz.anson.AnsT3son, parent: \"io.odysz.anson.AnsT3\", gendre: \"male\"}\n]}\n";
+			assertEquals(expect, s);
+		
+			// should resolve parent ref with a type guess
+			AnsT3 p = (AnsT3) Anson.fromJson(s);
+			assertEquals(((AnsT3son)p.m[1]).gendre, "male");
+			assertEquals(null, ((AnsT3Child)p.m[0]).parent);
+			assertEquals(p, ((AnsT3son)p.m[1]).parent);
+		}
+		
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			parent.toBlock(bos, JsonOpt.beautify());
+			String s = bos.toString(StandardCharsets.UTF_8.name());
+			String expect = "{ \"type\": \"io.odysz.anson.AnsT3\",\n"
+					+ "  \"ms\": null,\n"
+					+ "  \"m\": [{ \"type\": \"io.odysz.anson.AnsT3Child\"}, { \"type\": \"io.odysz.anson.AnsT3son\",\n"
+					+ "      \"parent\": \"io.odysz.anson.AnsT3\",\n"
+					+ "      \"gendre\": \"male\"}]\n"
+					+ "}";
+			assertEquals(expect, s);
+		}
 	}
 	
 	@Test
@@ -204,39 +217,65 @@ class AnsonTest {
 			.set4dcell(0, 0, 0, 1, new AnsT2("0 0 0 1"))
 			.set4dcell(1, 1, 1, 1, new AnsT2("1 1 1 1"));
 	
-		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
-		lst.toBlock(bos, opt);
-		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.AnsTStrsList, "
-				+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 0\"]}\n"
-				+ ", {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 1\"]}\n], "
-				+ "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
-				+ "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"1 1 1 1\"]}\n"
-				+ "]]]], lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
-				+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}\n";
-		assertEquals(expect, s);
-	
-		AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
-		try { assertEquals(0, l.row(0).length);
-		} catch (ClassCastException e) {
-			// issue:
-			// If first element is null, can't figure out what's the component type.
-			Utils.warn("Testing 0 length array as first sub-array, should get type conversion error message...");
-			Utils.warn(e.getMessage());
-		}
-		assertEquals("0,0", l.cell(1, 0));	
-		assertEquals("1,1", l.cell(2, 1));
-		assertEquals(null, l.row(3));
-		assertEquals(0, l.row(4).length);
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			lst.toBlock(bos, opt);
+			String s = bos.toString(StandardCharsets.UTF_8.name());
+			String expect = "{type: io.odysz.anson.AnsTStrsList, "
+					+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 0\"]}\n"
+					+ ", {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 1\"]}\n], "
+					+ "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
+					+ "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"1 1 1 1\"]}\n"
+					+ "]]]], lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
+					+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}\n";
+			assertEquals(expect, s);
+		
+			AnsTStrsList l = (AnsTStrsList) Anson.fromJson(s);
+			try { assertEquals(0, l.row(0).length);
+			} catch (ClassCastException e) {
+				// issue:
+				// If first element is null, can't figure out what's the component type.
+				Utils.warn("Testing 0 length array as first sub-array, should get type conversion error message...");
+				Utils.warn(e.getMessage());
+			}
+			assertEquals("0,0", l.cell(1, 0));	
+			assertEquals("1,1", l.cell(2, 1));
+			assertEquals(null, l.row(3));
+			assertEquals(0, l.row(4).length);
 
-		assertEquals("0-0-0", l.cell(0, 0, 0));
-		assertEquals("0-1-0", l.cell(0, 1, 0));
-		assertEquals("1-0-0", l.cell(1, 0, 0));
-		assertEquals(1.5f, l.cell(1, 0, 1));
+			assertEquals("0-0-0", l.cell(0, 0, 0));
+			assertEquals("0-1-0", l.cell(0, 1, 0));
+			assertEquals("1-0-0", l.cell(1, 0, 0));
+			assertEquals(1.5f, l.cell(1, 0, 1));
 	
-		assertEquals("0 0 0 0", ((AnsT2)l.cell(0, 0, 0, 0)).m[0]);
-		assertEquals("0 0 0 1", ((AnsT2)l.cell(0, 0, 0, 1)).m[0]);
-		assertEquals("1 1 1 1", ((AnsT2)l.cell(1, 1, 1, 1)).m[0]);
+			assertEquals("0 0 0 0", ((AnsT2)l.cell(0, 0, 0, 0)).m[0]);
+			assertEquals("0 0 0 1", ((AnsT2)l.cell(0, 0, 0, 1)).m[0]);
+			assertEquals("1 1 1 1", ((AnsT2)l.cell(1, 1, 1, 1)).m[0]);
+		}
+		
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			lst.toBlock(bos, JsonOpt.beautify());
+			String s = bos.toString(StandardCharsets.UTF_8.name());
+			String expect =
+					  "{ \"type\": \"io.odysz.anson.AnsTStrsList\",\n"
+					+ "  \"dim4\": [[[[{ \"type\": \"io.odysz.anson.AnsT2\",\n"
+					+ "          \"b\": false,\n"
+					+ "          \"s\": 0,\n"
+					+ "          \"c\": 0,\n"
+					+ "          \"m\": [\"0 0 0 0\"]}, { \"type\": \"io.odysz.anson.AnsT2\",\n"
+					+ "          \"b\": false,\n"
+					+ "          \"s\": 0,\n"
+					+ "          \"c\": 0,\n"
+					+ "          \"m\": [\"0 0 0 1\"]}], [null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], [null, { \"type\": \"io.odysz.anson.AnsT2\",\n"
+					+ "          \"b\": false,\n"
+					+ "          \"s\": 0,\n"
+					+ "          \"c\": 0,\n"
+					+ "          \"m\": [\"1 1 1 1\"]}]]]],\n"
+					+ "  \"lst3d\": [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]],\n"
+					+ "  \"lst\": [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]\n"
+					+ "}";
+
+			assertEquals(expect, s);
+		}
 	}
 
 	@Test
@@ -401,7 +440,7 @@ class AnsonTest {
 	}
 	
 	@Test
-	void testFromJson_tree() throws AnsonException {
+	void testFromJson_tree() throws AnsonException, IOException {
 		T_AnTreeNode tr = (T_AnTreeNode) Anson.fromJson(
 			  "{type:io.odysz.anson.T_AnTreeNode,"
 				+ "node:{\"fullpath\":\"1 sys.1 domain\","
@@ -432,6 +471,22 @@ class AnsonTest {
 
 		// only last node here?
 		assertEquals(6, tr.node.size());
+		
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			tr.toBlock(bos, JsonOpt.beautify());
+			String s = bos.toString(StandardCharsets.UTF_8.name());
+			String expect =
+					    "{ \"type\": \"io.odysz.anson.T_AnTreeNode\",\n"
+					  + "  \"node\": {\"fullpath\": \"1 sys.1 domain\",\n"
+					  + "      \"id\": \"sys-domain\",\n"
+					  + "      \"text\": \"Domain Settings\",\n"
+					  + "      \"sort\": \"1\",\n"
+					  + "      \"parentId\": \"sys\",\n"
+					  + "      \"url\": \"views/sys/domain/domain.html\"}\n"
+					  + "}";
+
+			assertEquals(expect, s);
+		}
 	}
 	
 	@Test
@@ -440,7 +495,6 @@ class AnsonTest {
 		n0 .child(new T_TreeIndenode("0.1", n0 ));
 		n0 .child(new T_TreeIndenode("0.2", n0 ).asLastSibling());
 
-		// Utils.logi(n0.toBlock());
 		n0.toBlock(); // test case for multiple DP visiting
 
 		/*
@@ -464,7 +518,6 @@ class AnsonTest {
 		n0 .child(n11);
 		n11.child(n111);
 		
-		// Utils.logi(root.toBlock());
 		n111.toBlock();
 		/**
 		 * (+)1
@@ -519,6 +572,34 @@ class AnsonTest {
 		ArrayList<T_IndentFlag> ind22 = n22.indents();
 		assertEquals(1, len(ind22));
 		assertEquals(T_IndentFlag.childx, ind22.get(0));
+		
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+			n0.toBlock(bos, JsonOpt.beautify());
+			String s = bos.toString(StandardCharsets.UTF_8.name());
+			String expect =
+					      "{ \"type\": \"io.odysz.semantic.ext.test.T_TreeIndenode\",\n"
+					    + "  \"node\": {\"children\": [{ \"type\": \"io.odysz.semantic.ext.test.T_TreeIndenode\",\n"
+					    + "          \"node\": {\"children\": [{ \"type\": \"io.odysz.semantic.ext.test.T_TreeIndenode\",\n"
+					    + "                  \"node\": {},\n"
+					    + "                  \"parent\": \"io.odysz.semantic.ext.test.T_TreeIndenode\",\n"
+					    + "                  \"indents\": [\"space\", \"childx\"],\n"
+					    + "                  \"lastSibling\": true,\n"
+					    + "                  \"id\": \"1.1.1\",\n"
+					    + "                  \"parentId\": \"1.1\"}]},\n"
+					    + "          \"parent\": \"io.odysz.semantic.ext.test.T_TreeIndenode\",\n"
+					    + "          \"indents\": [\"childx\"],\n"
+					    + "          \"lastSibling\": true,\n"
+					    + "          \"id\": \"1.1\",\n"
+					    + "          \"parentId\": \"1\"}]},\n"
+					    + "  \"parent\": \"io.odysz.semantic.ext.test.T_TreeIndenode\",\n"
+					    + "  \"indents\": [],\n"
+					    + "  \"lastSibling\": false,\n"
+					    + "  \"id\": \"1\",\n"
+					    + "  \"parentId\": null\n"
+					    + "}";
+
+			assertEquals(expect, s);
+		}
 	}
 	
 	@Test
