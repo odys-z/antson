@@ -4,6 +4,9 @@ import static io.odysz.common.LangExt._0;
 import static io.odysz.common.LangExt.isNull;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotSerializableException;
@@ -11,6 +14,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.AbstractCollection;
 import java.util.HashMap;
 import java.util.List;
@@ -148,8 +152,14 @@ public class Anson implements IJsonable {
 	public Anson toBlock(OutputStream stream, JsonOpt... opts)
 			throws AnsonException, IOException {
 		return !isNull(opts) && _0(opts).beautifier != null
-				? _0(opts).beautifier.toEnvelope(this, stream, opts)
+				? (Anson) EnvelopeBeautifier.toEnvelope(this, stream, _0(opts))
 				: (Anson) toEnvelope(this, stream, opts);
+	}
+	
+	public Anson toFile(String path, JsonOpt... opts) throws IOException {
+		try (FileOutputStream os = new FileOutputStream(path)) {
+			return toBlock(os, opts);
+		}
 	}
 
 	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
@@ -260,7 +270,7 @@ public class Anson implements IJsonable {
 		stream.write('}');
 	}
 
-	private static void toListBlock(OutputStream stream, AbstractCollection<?> list, JsonOpt opt)
+	static void toListBlock(OutputStream stream, AbstractCollection<?> list, JsonOpt opt)
 			throws AnsonException, IOException {
 		stream.write('[');
 		boolean is1st = true;
