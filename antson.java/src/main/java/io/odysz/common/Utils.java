@@ -94,7 +94,7 @@ public class Utils {
 	 * @param format
 	 * @param args
 	 */
-	public static void logi(String format, Object... args) {
+	public static String logi(String format, Object... args) {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
@@ -112,16 +112,18 @@ public class Utils {
 					new Throwable().getStackTrace()[1].getClassName(),
 					new Throwable().getStackTrace()[1].getMethodName()));
 
+			String msg = null;
 			if (format != null)
 				if (args != null && args.length > 0)
-					os().println(String.format(format, args));
+					os().println(msg = String.format(format, args));
 				else
-					os().println(format);
-
+					os().println(msg = format);
+			return msg;
 		} catch (Exception ex) {
 			StackTraceElement[] x = ex.getStackTrace();
 			es().println(String.format("logi(): Can't print. Error: %s. called by %s.%s()",
 					ex.getMessage(), x[0].getClassName(), x[0].getMethodName()));
+			return format;
 		}
 	}
 
