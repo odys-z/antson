@@ -18,6 +18,10 @@ public abstract class T_AnsonBody extends Anson {
 
 	protected String uri;
 	public String uri() { return uri; }
+	public T_AnsonBody uri(String uri) {
+		this.uri = uri;
+		return this;
+	}
 
 	/** Action: login | C | R | U | D | any serv extension */
 	String a;
