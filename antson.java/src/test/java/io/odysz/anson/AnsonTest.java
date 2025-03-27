@@ -19,6 +19,8 @@ import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
 import io.odysz.semantic.ext.test.T_IndentFlag;
 import io.odysz.semantic.ext.test.T_TreeIndenode;
+import io.oz.jserv.docs.syn.T_DocsReq;
+import io.oz.jserv.docs.syn.T_ExpSyncDoc;
 
 class AnsonTest {
 
@@ -84,6 +86,63 @@ class AnsonTest {
 				+ " rowIdx: 0, indices0: null, flatcols: null, results: [[\"0, 1\", \"0, 2\", \"0, 3\", \"0, 4\"], [\"1, 1\", \"1, 2\", \"1, 3\", \"1, 4\"], [\"2, 1\", \"2, 2\", \"2, 3\", \"2, 4\"]]"
 				+ "}\n}\n", s);
 		
+		
+		
+		// {"type": "io.odysz.semantic.tier.docs.DocsReq", "tabl": null, "a": "c/b/start", "parent": "io.odysz.semantic.jprotocol.AnsonMsg", "data": null, "org": null, "pageInf": null, "stamp": null, "deletings": null, "nextBlock": null, "uri": "/album/syn", "blockSeq": 0, "syncingPage": null, "limit": -1, "syncQueries": null, "doc": {"type": "io.odysz.semantic.tier.docs.ExpSyncDoc", "synoder": null, "org": "", "subs": null, "pname": "成都市社会保险个人参保证明20240828210710.pdf", "shareby": "ody", "mime": "application/pdf", "shareMsg": null, "uri64": null, "clientpath": "/storage/emulated/0/Download/成都市社会保险个人参保证明20240828210710.pdf", "synode": null, "folder": "2025-03", "size": 42177, "uids": null, "sharedate": "2025-03-26", "shareflag": "prv", "device": "0003", "nyquence": null, "recId": null, "createDate": "2024-08-28"} , "reset": true, "docTabl": "h_photos", "device": {"type": "io.odysz.semantic.tier.docs.Device", "tofolder": null, "synode0": null, "devname": null, "id": "0003"} , "synuri": null}
+		T_DocsReq req = (T_DocsReq) new T_DocsReq()
+				.doc(new T_ExpSyncDoc()
+						.device("0003")
+						.fullpath("/storage/emulated/0/Download/成都市社会保险个人参保证明20240828210710.pdf")
+						.clientname("成都市社会保险个人参保证明20240828210710.pdf")
+						.folder("2025-03")
+						.size(42177)
+						.mime("application/pdf")
+						.createDate("2024-08-28")
+						.share("ody", "prv", "2025-03-26"))
+				.docTabl("h_photos")
+				.uri("/album/syn")
+				.a(T_DocsReq.A.blockStart);
+		
+		opt = new JsonOpt().quotKey(true);
+		bos = new ByteArrayOutputStream(); 
+		req.toBlock(bos, opt);
+		s = bos.toString(StandardCharsets.UTF_8.name());
+		assertEquals("{\"type\": \"io.oz.jserv.docs.syn.T_DocsReq\", \"tabl\": null, "
+				+ "\"parent\": \"io.odysz.semantic.jprotocol.test.T_AnsonMsg\", "
+				+ "\"a\": \"c/b/start\", "
+				+ "\"code\": null, "
+				+ "\"data\": null, "
+				+ "\"org\": null, "
+				+ "\"pageInf\": null, \"stamp\": null, \"deletings\": null, \"nextBlock\": null, "
+				+ "\"uri\": \"/album/syn\", "
+				+ "\"blockSeq\": -1, "
+				// + "\"syncingPage\": null, "
+				+ "\"limit\": -1, "
+				// + "\"syncQueries\": null, "
+				+ "\"doc\": {\"type\": \"io.oz.jserv.docs.syn.T_ExpSyncDoc\", "
+					+ "\"clientpath\": \"/storage/emulated/0/Download/成都市社会保险个人参保证明20240828210710.pdf\", "
+					+ "\"folder\": \"2025-03\", "
+					+ "\"size\": 42177, "
+					+ "\"pname\": \"成都市社会保险个人参保证明20240828210710.pdf\", "
+					+ "\"shareby\": \"ody\", "
+					+ "\"sharedate\": \"2025-03-26\", "
+					+ "\"shareflag\": \"prv\", "
+					+ "\"mime\": \"application/pdf\", "
+					+ "\"uri64\": null, "
+					+ "\"device\": \"0003\", "
+					// + "\"nyquence\": null,"
+					+ "\"recId\": null, "
+					// + "\"shareMsg\": null, "
+					// + "\"synoder\": null, "
+					// + "\"org\": \"\", \"subs\": null, "
+					// + "\"synode\": null, "
+					// + "\"uids\": null, "
+					+ "\"createDate\": \"2024-08-28\"}\n, "
+				// "reset": false, "docTabl": null, "device": {"type": "io.oz.jserv.docs.syn.T_Device"} , "synuri": null}
+				+ "\"reset\": false, \"docTabl\": \"h_photos\", "
+				+ "\"device\": {\"type\": \"io.oz.jserv.docs.syn.T_Device\", \"tofolder\": null, \"synode0\": null, \"devname\": \"0003\", \"id\": \"0003\"}\n, "
+				+ "\"synuri\": null}\n",
+				s);
 	}
 	
 	@Test
