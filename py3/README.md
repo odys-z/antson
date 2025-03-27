@@ -129,6 +129,7 @@ AttributeError: 'SynOrg' object has no attribute 'parent'
 
 - https://packaging.python.org/en/latest/tutorials/packaging-projects/
 
+```python3 -m twine upload --repository testpypi dist/*```
 
 # Troubleshootings
 
