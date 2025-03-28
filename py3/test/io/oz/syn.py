@@ -80,8 +80,11 @@ class SyncUser(Anson):
     domain: str
     org: str
 
-    def __init__(self):
+    def __init__(self, userId=None, userName=None, pswd=None):
         super().__init__()
+        self.userId = userId
+        self.userName = userName
+        self.pswd = pswd
 
 
 TAnRegistry = TypeVar('TAnRegistry', bound='AnRegistry')
