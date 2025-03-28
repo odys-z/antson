@@ -700,7 +700,16 @@ public class Utils {
 		for (int i = 0; i < signals.length; i++)
 			signals[i] = false;
 	}
-
+	
+	public static void turngreen(boolean[] signals, int... indx) {
+		if (isNull(indx))
+			for (int i = 0; i < signals.length; i++)
+				signals[i] = true;
+		
+		else for (int x : indx)
+			signals[x] = true;
+	}
+	
 	public static <T> void logix(ArrayList<T> list) {
 		try {
 			if (printCaller) {
