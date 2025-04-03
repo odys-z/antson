@@ -4,6 +4,9 @@ import static io.odysz.common.LangExt._0;
 import static io.odysz.common.LangExt.isNull;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +15,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.AbstractCollection;
 import java.util.HashMap;
 import java.util.List;
@@ -604,5 +608,19 @@ public class Anson implements IJsonable {
 
 		walker.walk(lstner, ctx);
 		return lstner.parsedEnvelope(verbose);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Anson> T fromPath(String absPath) throws FileNotFoundException, IOException {
+		try (FileInputStream inf = new FileInputStream(new File(absPath))) {
+			return (T) Anson.fromJson(inf); 
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Anson> T fromPath(Path webcfg) throws FileNotFoundException, IOException {
+		try (FileInputStream inf = new FileInputStream(webcfg.toFile())) {
+			return (T) Anson.fromJson(inf); 
+		}
 	}
 }

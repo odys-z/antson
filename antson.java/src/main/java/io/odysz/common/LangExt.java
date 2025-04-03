@@ -347,6 +347,7 @@ public class LangExt {
 	 * @return true: empty
 	 */
 	public static boolean isblank(String s, String... takeAsNull) {
+		// if (s == null || s.isBlank()) only since jdk 11
 		if (s == null || s.trim().length() == 0)
 			return true;
 		else if (takeAsNull == null || takeAsNull.length == 0)
@@ -361,7 +362,7 @@ public class LangExt {
 	}
 
 	public static boolean isblank(Object bid, String... takeAsNull) {
-		return bid instanceof String ? isblank(bid.toString(), takeAsNull)
+		return bid instanceof String ? isblank((String)bid, takeAsNull)
 				: bid == null;
 	}
 
@@ -1433,6 +1434,11 @@ public class LangExt {
 					? f("Object must not be null: %s", a)
 					: f(msg));
 		return a;
+	}
+
+	public static void mustgt(Number a, Number b, String...msg) {
+		if (a.floatValue() <= b.floatValue())
+			throw new NullPointerException(f6(msg));
 	}
 }
 
