@@ -1068,7 +1068,10 @@ public class LangExt {
 	 * @return string
 	 */
 	public static String str(int[] v) {
-		return Arrays.stream(v).mapToObj(String::valueOf).collect(Collectors.joining(","));
+		return v == null ? null : Arrays
+				.stream(v)
+				.mapToObj(String::valueOf)
+				.collect(Collectors.joining(","));
 	}
 
 	/**
@@ -1077,7 +1080,8 @@ public class LangExt {
 	 * @return string
 	 */
 	public static String str(Object[] v) {
-		return Arrays.stream(v)
+		return v == null ? null : Arrays
+				.stream(v)
 				.filter(o -> o != null)
 				.map(o -> o.toString()).collect(Collectors.joining(","));
 	}
