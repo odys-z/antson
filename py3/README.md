@@ -8,8 +8,9 @@ from ansons.anson import Anson
 
 # Install from testpypi
 
+[//]: # (pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple anson.py3)
 ```
-pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple anson.py3
+pip install anson.py3
 ```
 
 # Guide
