@@ -20,11 +20,11 @@ class PortfolioException(Exception):
     [INFO] +- io.github.odys-z:docsync.jserv:jar:0.2.2-SNAPSHOT:compile
     [INFO] |  +- io.github.odys-z:semantic.DA:jar:1.5.18-SNAPSHOT:compile (version selected from constraint [1.5.18-SNAPSHOT,2.0.0-SNAPSHOT))
     [INFO] |  |  +- io.github.odys-z:semantics.transact:jar:1.5.58:compile (version selected from constraint [1.5.58,))
-    [INFO] |  |  |  \- io.github.odys-z:antson:jar:0.9.114:compile (version selected from constraint [0.9.111,))
+    [INFO] |  |  |  \\- io.github.odys-z:antson:jar:0.9.114:compile (version selected from constraint [0.9.111,))
     [INFO] |  +- io.github.odys-z:anclient.java:jar:0.5.16:compile (version selected from constraint [0.5.16,))
-    [INFO] |  \- io.github.odys-z:synodict-jclient:jar:0.1.6:compile (version selected from constraint [0.1.6,))
+    [INFO] |  \\- io.github.odys-z:synodict-jclient:jar:0.1.6:compile (version selected from constraint [0.1.6,))
     [INFO] +- io.github.odys-z:syndoc-lib:jar:0.5.18-SNAPSHOT:compile
-    [INFO] |  \- io.github.odys-z:semantic.jserv:jar:1.5.16-SNAPSHOT:compile (version selected from constraint [1.5.16-SNAPSHOT,2.0.0-SNAPSHOT))
+    [INFO] |  \\- io.github.odys-z:semantic.jserv:jar:1.5.16-SNAPSHOT:compile (version selected from constraint [1.5.16-SNAPSHOT,2.0.0-SNAPSHOT))
     [INFO] +- io.github.odys-z:albumtier:jar:0.5.0-SNAPSHOT:test
     """
     msg: str

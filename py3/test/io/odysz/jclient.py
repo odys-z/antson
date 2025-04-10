@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from types import LambdaType
+from sys import stderr
 from typing import Protocol, Any
 
 import requests
@@ -44,6 +44,14 @@ class SessionClient:
     header: AnsonHeader
 
     def __init__(self, jserv: str, ssInf: SessionInf):
+        self.proxies = {
+            "http": None,
+            "https": None,
+        }
+        '''
+        https://stackoverflow.com/a/40470853/7362888
+        '''
+
         self.myservRt = jserv
         self.ssInf = ssInf
         self.header = None
@@ -55,14 +63,15 @@ class SessionClient:
 
     def commit(self, req: AnsonMsg, err: OnError) -> AnsonResp | None:
         try:
-            resp = requests.post(self.myservRt, data = req.toBlock())
+            print(f'{self.myservRt}/{req.port.value}')
+            print(req.toBlock(False))
+            resp = requests.post(f'{self.myservRt}/{req.port.value}', proxies=self.proxies, data=req.toBlock(False))
             if resp.status_code == 200:
                 data = resp.json()  # If the response is JSON
-                # data = response.text  # If the response is plain text
                 return AnsonResp.from_envelope(data)
             else:
-                print(f"Error: {resp.status_code}")
-                res = f'{resp.status_code}\n{self.myservRt}\n'
+                print(f"Error: {resp.status_code}", file=stderr)
+                res = f'{resp.status_code}\n{self.myservRt}\n{'' if req is None else req.toBlock()}'
                 err.err(MsgCode.exIo, res, resp.text)
                 return None
         except Exception as e:

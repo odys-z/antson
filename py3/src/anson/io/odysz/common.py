@@ -3,6 +3,7 @@ Created on 25 Oct 2019
 
 @author: odys-z@github.com
 '''
+import os
 import sys
 from re import match
 from typing import TextIO, Optional, TypeVar
@@ -43,7 +44,7 @@ class LangExt:
     def str(obj: dict | list):
         def quot(v) -> str:
             return f'"{v}"' if type(v) == str else f'"{v.toBlock()}"' if isinstance(v, Anson) else LangExt.str(v)
-        from src.anson.io.odysz.ansons import Anson
+        from .ansons import Anson
         if type(obj) == dict:
             s = '{'
             for k, v in obj.items():
@@ -81,3 +82,21 @@ class Utils:
     @staticmethod
     def warn(templt, *args):
         log(sys.stderr, templt, *args)
+
+    @staticmethod
+    def get_os():
+        """
+        :return: Windows | Linux | macOS
+        """
+        if os.name == 'nt':
+            return 'Windows'
+        elif os.name == 'posix':
+            if sys.platform.startswith('linux') or sys.platform.startswith('freebsd'):
+              return 'Linux'
+            elif sys.platform.startswith('darwin'):
+                return 'macOS'
+        return 'Unknown'
+
+    @staticmethod
+    def iswindows():
+        return Utils.get_os() == 'Windows'

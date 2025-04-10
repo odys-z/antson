@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Self, TypeVar
+from typing import Self, TypeVar, ForwardRef
 
 from src.anson.io.odysz.ansons import Anson
 
@@ -19,11 +19,9 @@ class MsgCode(Enum):
 
 
 class Port(Enum):
-    echo = 'ping.serv'
+    echo = 'echo.less'
     session = "login.serv"
     r = "r.serv"
-
-
 
 
 @dataclass
@@ -34,17 +32,25 @@ class AnsonHeader(Anson):
     usrAct: [str]
     ssToken: str
 
-    def __init__(self, ssid, uid, token):
+    def __init__(self, ssid = None, uid = None, token = None):
         super().__init__()
+        self.ssid = ssid
+        self.uid = uid
+        self.ssToken = token
 
-TAnsonBody = TypeVar('TAnsonBody', bound='AnsonBody')
+# TAnsonBody = TypeVar('TAnsonBody', bound='AnsonBody')
+# class AnTypeRef(object):
+#     bref: str
+#     def __init__(self, bound: str):
+#         self.bref = bound
 
 @dataclass
 class AnsonMsg(Anson):
-    body: [TAnsonBody]
+    # body: [TAnsonBody]
+    body: ['AnsonBody']
     header: AnsonHeader
     port: Port
-    code = MsgCode.ok
+    code: MsgCode
 
     def __init__(self, p: Port = None):
         super().__init__()
@@ -55,10 +61,10 @@ class AnsonMsg(Anson):
         self.header = h
         return self
 
-    def Body(self, bodyItem: TAnsonBody) -> Self:
+    # def Body(self, bodyItem: TAnsonBody) -> Self:
+    def Body(self, bodyItem: 'AnsonBody') -> Self:
         self.body.append(bodyItem)
         return self
-
 
 
 @dataclass
@@ -68,6 +74,7 @@ class AnsonBody(Anson):
 
     def __init__(self, parent: AnsonMsg = None):
         super().__init__()
+        self.uri = None
         self.parent = parent
         Anson.enclosinguardtypes.add(AnsonMsg)
 
