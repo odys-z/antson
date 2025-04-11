@@ -5,6 +5,8 @@ from enum import Enum
 from numbers import Number
 from typing import Union
 
+from typing_extensions import get_args, get_origin
+
 from .common import Utils
 
 java_src_path: str = ''
@@ -96,9 +98,16 @@ def instanceof(clsname: str | type, props: dict):
     return obj
 
 
-def parsetype(obj) -> Union[str, None]:
+def parse_type_(obj) -> Union[str, None]:
     return obj['__type__'] if isinstance(obj, Anson) and hasattr(obj, '__type__') \
         else f'{java_src_path}{'.' if len(java_src_path) else ''}{obj['type']}' if isinstance(obj, dict) and 'type' in obj.keys() else None
+
+
+def parse_forward(ref: type | str):
+    return ref[0] if type(ref) == list else \
+        get_args(ref)[0] if get_origin(ref) == list else \
+        getClass(ref) if type(ref) == str else \
+        ref
 
 
 @dataclass
@@ -119,18 +128,18 @@ class Anson(dict):
     def __getitem__(self, key):
         return self.__dict__[key]
 
-    @dataclass()
-    class Trumpfield():
-        '''
-        {name, type, isAnson, antype, factory}
-        '''
-        name: str
-        fieldtype: type
-        origintype: type
-        isAnson: bool
-        elemtype: type
-        antype: str
-        factory: any
+    # @dataclass()
+    # class Trumpfield():
+    #     '''
+    #     {name, type, isAnson, antype, factory}
+    #     '''
+    #     name: str
+    #     fieldtype: type
+    #     origintype: type
+    #     isAnson: bool
+    #     elemtype: type
+    #     antype: str
+    #     factory: any
 
     @staticmethod
     def toList_(lst: list, ind: int, beautify):
@@ -193,7 +202,7 @@ class Anson(dict):
         if v is None: return None
         vt = value_type(v)
 
-        objtype = parsetype(v)
+        objtype = parse_type_(v)
         antype = objtype if objtype is not None else antype
 
         if type(antype) == str:
@@ -201,17 +210,32 @@ class Anson(dict):
             except: pass
 
         # return Anson.from_obj(v, anf.antype) if vt.isAnson \
-        return instanceof(antype, v) if vt.isAnson or type(antype) == type and issubclass(antype, Anson) \
-            else Anson.from_dict(v, antype) if vt.isObj \
-            else Anson.from_list(v, antype[0] if type(antype) == list else antype) if vt.isLst \
-            else v
+        # return instanceof(antype, v) if vt.isAnson or type(antype) == type and issubclass(antype, Anson) \
+        #     else Anson.from_dict(v, antype) if vt.isObj \
+        #     else Anson.from_list(v, parse_forward(antype)) if vt.isLst \
+        #     else v
+        antype = parse_forward(antype)
+        return \
+            Anson.from_list(v, antype) if vt.isLst else \
+            instanceof(antype, v) if vt.isAnson or type(antype) == type and issubclass(antype, Anson) else \
+            Anson.from_dict(v, antype) if vt.isObj else \
+            v
 
     @staticmethod
-    def from_dict(v: dict, eletype: str) -> dict:
+    def from_dict(v: dict, eletype: type | str | None) -> dict:
         if eletype is None: return v
 
         d = {}
+        # d, fds = {}, None
+        # if eletype is str and issubclass(getClass(eletype), Anson):
+        #     d = getClass(eletype)()
+        #     fds = _fields(d, None)
+        # elif eletype is type and issubclass(eletype, Anson):
+        #     d = eletype()
+        #     fds = _fields(d, None)
+
         for k in v:
+            # d[k] = Anson.from_value(None if fds is None else fds[k].antype, v[k])
             d[k] = Anson.from_value(eletype, v[k])
         return d
 
@@ -223,7 +247,8 @@ class Anson(dict):
             return [v]
 
         if len(v) > 0:
-            eletype = parsetype(v[0])
+            _type_ = parse_type_(v[0])
+            eletype = _type_ if _type_ is not None and len(_type_) > 0 else eletype
             # eletype = f'{java_src_path}.{eletype}'
 
         return 'null' if v is None else [Anson.from_value(eletype, x) for x in v]
@@ -240,7 +265,7 @@ class Anson(dict):
             # antype = getClass(ansontype) if vt.ansoname is None else getClass(vt.ansoname)
             # return instanceof(antype, obj)
         elif vt.isObj:
-            _t = parsetype(obj)
+            _t = parse_type_(obj)
 
             return instanceof(_t, obj) if _t is not None else instanceof(ansontype, obj) if ansontype is not None else obj
 

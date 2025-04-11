@@ -36,7 +36,7 @@ class Synode(Anson):
     synid: str
     mac: str
     domain: str
-    nyquence: int
+    nyq: int
     syn_uid: str
 
     def __init__(self):
@@ -87,7 +87,7 @@ class SyncUser(Anson):
         self.pswd = pswd
 
 
-TAnRegistry = TypeVar('TAnRegistry', bound='AnRegistry')
+# TAnRegistry = TypeVar('TAnRegistry', bound='AnRegistry')
 
 
 @dataclass()
@@ -101,7 +101,7 @@ class AnRegistry(Anson):
         self.synusers = []
 
     @staticmethod
-    def load(path) -> TAnRegistry:
+    def load(path) -> 'AnRegistry':
         if Path(path).is_file():
             with open(path, 'r') as file:
                 # registry = json.load(file)
