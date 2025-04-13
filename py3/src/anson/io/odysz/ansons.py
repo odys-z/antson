@@ -148,9 +148,28 @@ class Anson(dict):
                else str(e) for e in lst]) + ']'
 
     @staticmethod
+    def toValue_(v, ind: int, beautify: bool):
+        vt = value_type(v)
+        return 'null' if v is None \
+            else f'"{v}"' if vt.isStr \
+            else v.toBlock_(ind + 1, beautify, vt.ansoname) if vt.isAnson \
+            else f'"{v.name}"' if vt.isEnm \
+            else Anson.toList_(v, ind + 1, beautify) if vt.isLst \
+            else Anson.toDict_(v, ind + 1, beautify) if vt.isObj \
+            else str(v)
+
+    @staticmethod
     def toDict_(dic: dict, ind: int, beautify):
-        return '{\n' if len(dic) > 0 else '{' + ',\n'.join(' ' * (ind * 2 + 2) + dic[k].toBlock_(ind + 1, beautify) if isinstance(dic[k], Anson) else str(dic[k]) for k in dic) + '}' if beautify \
-            else '{' + ','.join(dic[k].toBlock_(ind + 1, beautify) if isinstance(dic[k], Anson) else str(dic[k]) for k in dic) + '}'
+        # return '{}' if len(dic) == 0 else \
+        #     '{\n' + ',\n'.join(' ' * (ind * 2 + 2) + f'"{k}": ' + \
+        #                         dic[k].toBlock_(ind + 1, beautify) if \
+        #                         isinstance(dic[k], Anson) else str(dic[k]) for k in dic) + \
+        #     '}' if beautify \
+        #     else '{' + ','.join(f'"{k}": ' + dic[k].toBlock_(ind + 1, beautify) if isinstance(dic[k], Anson) else str(dic[k]) for k in dic) + '}'
+
+        return '{}' if len(dic) == 0 else \
+            f'{'{\n' if len(dic) > 1 else '{'}' + ',\n'.join(f'{' ' * (ind * 2 + 2) if len(dic) > 1 else ''}' + f'"{k}": ' + Anson.toValue_(dic[k], ind, beautify) for k in dic) + '}' if beautify else \
+            '{' + ','.join(f'"{k}": ' + Anson.toValue_(dic[k], ind + 1, beautify) for k in dic) + '}'
 
     def toBlock(self, beautify=True) -> str:
         return self.toBlock_(0, beautify)
@@ -174,10 +193,12 @@ class Anson(dict):
                 has_prvious = True
 
             else:
-                v, vt = self[k], value_type(self[k])
+                # v, vt = self[k], value_type(self[k])
+                v = self[k]
 
                 if k not in myfds:
-                    Utils.warn("Field {0}.{1} is not defined in Anson, which is presenting in data object. Value ignored: {2}.",
+                    if k != 'type':
+                        Utils.warn("Field {0}.{1} is not defined in Anson, which is presenting in data object. Value ignored: {2}.",
                                str(self['__type__']), k, self[k])
                     continue
 
@@ -186,13 +207,13 @@ class Anson(dict):
                 s += f'{" " * (ind * 2 + 2)}"{k}": ' if beautify else f'"{k}": '
 
                 s += 'null' if v is None or isinstance(v, Field) \
-                    else f'"{v}"' if vt.isStr \
-                    else v.toBlock_(ind + 1, beautify, myfds[k].antype) if vt.isAnson \
-                    else f'"{v.name}"' if vt.isEnm \
-                    else Anson.toList_(v, ind + 1, beautify) if vt.isLst \
-                    else Anson.toDict_(v, ind + 1, beautify) if vt.isObj \
-                    else str(v)
-                    # else v.toBlock_(ind + 1, beautify, myfds[k].antype) if myfds[k].isAnson() \
+                    else Anson.toValue_(v, ind, beautify)
+                    # else f'"{v}"' if vt.isStr \
+                    # else v.toBlock_(ind + 1, beautify, myfds[k].antype) if vt.isAnson \
+                    # else f'"{v.name}"' if vt.isEnm \
+                    # else Anson.toList_(v, ind + 1, beautify) if vt.isLst \
+                    # else Anson.toDict_(v, ind + 1, beautify) if vt.isObj \
+                    # else str(v)
 
                 has_prvious = True
         return s + ('\n' if has_prvious and beautify else '') + (' ' * (ind * 2) + '}' if beautify else '}')
@@ -294,7 +315,7 @@ class Anson(dict):
 
     @staticmethod
     def from_file(fp: str) -> 'Anson':
-        with open(fp, 'r') as file:
+        with open(fp, 'r', encoding='utf-8') as file:
             obj = json.load(file)
             return Anson.from_envelope(obj)
 

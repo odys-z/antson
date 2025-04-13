@@ -1,9 +1,9 @@
 { "type"      : "io.oz.jserv.docs.syn.singleton.AppSettings",
   "vol_name"  : "VOLUME_HOME",
-  "volume"    : "/home/`$USER`/volume/",
+  "volume"    : "~/github/semantic-jserv/jserv-album/vol",
   "port"      : 8964,
   "jservs"    : {"X": "http://192.168.0.0:8964/jserv-album", "Y": "http://192.168.0.0:8965/jserv-album"},
   "envars"    : {"WEBROOT_Album-web": "example.com"},
-  "installkey": "0123456789ABCDEF",
-  "rootkey"   : ""
+  "installkey": null,
+  "rootkey"   : "0123456789ABCDEF"
 }

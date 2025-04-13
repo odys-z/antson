@@ -12,7 +12,7 @@ description = "Anson for Python3"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "typing_extensions>=4.0.0",
+    "typing_extensions>=4.0.0", "requests"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -22,6 +22,12 @@ license = {text = """Copyright (c) 2025 Ody Z. All rights reserved.
 
 This work is licensed under the terms of the MIT license.
 For a copy, see <https://opensource.org/licenses/MIT>.""" }
+
+[project.optional-dependencies]
+testing = [
+    "pytest",
+    "requests"
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/anson"]
