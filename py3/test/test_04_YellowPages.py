@@ -61,7 +61,7 @@ class YellowPagesTests(unittest.TestCase):
     },
     "syncIns": 20,
     "peers": [{
-      "type": "io.oz.syn.Synode",
+      "type": "io.odysz.semantic.syn.Synode",
       "synid": "X",
       "org": "ura",
       "mac": "#URA.X",
@@ -69,7 +69,7 @@ class YellowPagesTests(unittest.TestCase):
       "domain": "zsu",
       "syn_uid": "X,X"
     }, {
-      "type": "io.oz.syn.Synode",
+      "type": "io.odysz.semantic.syn.Synode",
       "synid": "Y",
       "org": "ura",
       "mac": "#URA.Y",
@@ -79,7 +79,7 @@ class YellowPagesTests(unittest.TestCase):
     }]
   },
   "synusers": [{
-    "type": "io.oz.syn.SyncUser",
+    "type": "io.odysz.semantic.syn.SyncUser",
     "userId": "ody",
     "userName": null,
     "pswd": "8964",
@@ -87,7 +87,7 @@ class YellowPagesTests(unittest.TestCase):
     "org": "ura",
     "domain": "zsu"
   }, {
-    "type": "io.oz.syn.SyncUser",
+    "type": "io.odysz.semantic.syn.SyncUser",
     "userId": "syrskyi",
     "userName": null,
     "pswd": "слава україні",

@@ -19,7 +19,7 @@ class LangExtTest(unittest.TestCase):
 
         usr = SyncUser(userId='1', userName='ody', pswd='8964')
         self.assertEqual('''{
-  "type": "io.oz.syn.SyncUser",
+  "type": "io.odysz.semantic.syn.SyncUser",
   "userId": "1",
   "userName": "ody",
   "pswd": "8964"
@@ -28,7 +28,7 @@ class LangExtTest(unittest.TestCase):
         usr = {'a': 1, 'b': usr}
         self.assertEqual('''{"a": 1,
 "b": "{
-  "type": "io.oz.syn.SyncUser",
+  "type": "io.odysz.semantic.syn.SyncUser",
   "userId": "1",
   "userName": "ody",
   "pswd": "8964"
@@ -36,7 +36,7 @@ class LangExtTest(unittest.TestCase):
 
         self.assertEqual('''[2, {"a": 1,
 "b": "{
-  "type": "io.oz.syn.SyncUser",
+  "type": "io.odysz.semantic.syn.SyncUser",
   "userId": "1",
   "userName": "ody",
   "pswd": "8964"
