@@ -128,19 +128,6 @@ class Anson(dict):
     def __getitem__(self, key):
         return self.__dict__[key]
 
-    # @dataclass()
-    # class Trumpfield():
-    #     '''
-    #     {name, type, isAnson, antype, factory}
-    #     '''
-    #     name: str
-    #     fieldtype: type
-    #     origintype: type
-    #     isAnson: bool
-    #     elemtype: type
-    #     antype: str
-    #     factory: any
-
     @staticmethod
     def toList_(lst: list, ind: int, beautify):
         return  '[' + ', '.join([e.toBlock_(ind + 0, beautify) if isinstance(e, Anson) \
@@ -160,13 +147,6 @@ class Anson(dict):
 
     @staticmethod
     def toDict_(dic: dict, ind: int, beautify):
-        # return '{}' if len(dic) == 0 else \
-        #     '{\n' + ',\n'.join(' ' * (ind * 2 + 2) + f'"{k}": ' + \
-        #                         dic[k].toBlock_(ind + 1, beautify) if \
-        #                         isinstance(dic[k], Anson) else str(dic[k]) for k in dic) + \
-        #     '}' if beautify \
-        #     else '{' + ','.join(f'"{k}": ' + dic[k].toBlock_(ind + 1, beautify) if isinstance(dic[k], Anson) else str(dic[k]) for k in dic) + '}'
-
         return '{}' if len(dic) == 0 else \
             f'{'{\n' if len(dic) > 1 else '{'}' + ',\n'.join(f'{' ' * (ind * 2 + 2) if len(dic) > 1 else ''}' + f'"{k}": ' + Anson.toValue_(dic[k], ind, beautify) for k in dic) + '}' if beautify else \
             '{' + ','.join(f'"{k}": ' + Anson.toValue_(dic[k], ind + 1, beautify) for k in dic) + '}'
