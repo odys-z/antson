@@ -66,6 +66,7 @@ class DataStruct:
         self.isObj = kwargs.get('obj', False)
         self.isStr = kwargs.get('str', False)
         self.isNum = kwargs.get('num', False)
+        self.isBool= kwargs.get('bool', False)
         self.isAnson = kwargs.get('anson', False)
         self.ansoname = kwargs.get('ansontype', f'{__name__}.Anson')
 
@@ -74,6 +75,7 @@ def value_type(v):
     if v is None: return DataStruct()
     t = type(v)
     return DataStruct(anson = issubclass(t, Anson),
+                      bool= t==bool,
                       lst = t==list,
                       obj = t==dict or t == object,
                       num = isinstance(v, Number),
@@ -141,6 +143,7 @@ class Anson(dict):
             else f'"{v}"' if vt.isStr \
             else v.toBlock_(ind + 1, beautify, vt.ansoname) if vt.isAnson \
             else f'"{v.name}"' if vt.isEnm \
+            else ('true' if v == True else 'false') if vt.isBool \
             else Anson.toList_(v, ind + 1, beautify) if vt.isLst \
             else Anson.toDict_(v, ind + 1, beautify) if vt.isObj \
             else str(v)

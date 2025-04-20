@@ -43,6 +43,7 @@ class YellowPagesTests(unittest.TestCase):
   "type": "io.oz.syn.AnRegistry",
   "config": {
     "type": "io.oz.syn.SynodeConfig",
+    "https": false,
     "synid": "SAMPLE-X",
     "domain": "zsu",
     "admin": "ody",

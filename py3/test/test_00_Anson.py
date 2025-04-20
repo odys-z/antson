@@ -24,6 +24,7 @@ from test.testier.extra import ExtraData
 class MyDataClass(Anson):
     name: str
     age: int
+    incumbent: bool
     extra: ExtraData
     items: list[Any]  # = field(default_factory=list)
 
@@ -32,6 +33,7 @@ class MyDataClass(Anson):
         self.extra = ExtraData()
         self.name = name
         self.age = age
+        self.incumbent = False
         self.items = ['']  # field(default_factory=list)
 
 class DataClassTest(unittest.TestCase):
@@ -48,6 +50,7 @@ class DataClassTest(unittest.TestCase):
         # self.assertEqual(_fields(foo, None)['age'].type, int)
 
         my = MyDataClass('zz', 12)
+        my.incumbent = True
         mytype = type(my)
         print(my.toBlock())
         self.assertEqual(MyDataClass, mytype)
@@ -62,6 +65,7 @@ class DataClassTest(unittest.TestCase):
   },
   "name": "zz",
   "age": 12,
+  "incumbent": true,
   "items": [""]
 }''', my.toBlock(beautify=True))
 
@@ -78,13 +82,15 @@ class DataClassTest(unittest.TestCase):
   },
   "name": "yy",
   "age": 13,
+  "incumbent": false,
   "items": [""]
 }''', your.toBlock(beautify=True))
 
-        jsonstr = '{"type": "test.test_00_Anson.MyDataClass", "name": "Trump", "age": 78, "extra": {"s": "sss", "i": 1, "l": 2, "d": {"u": "uuu"}}}'
+        jsonstr = '{"type": "test.test_00_Anson.MyDataClass", "name": "Trump", "age": 78, "incumbent": true, "extra": {"s": "sss", "i": 1, "l": 2, "d": {"u": "uuu"}}}'
         his = Anson.from_json(jsonstr)
         # print(his.name)
         self.assertEqual('Trump', his.name)
+        self.assertTrue(his.incumbent)
         print(his)
 
         jsonstr = '{\
@@ -103,6 +109,7 @@ class DataClassTest(unittest.TestCase):
         # print(her.name, type(her))
         self.assertEqual('zz', her.name)
         self.assertEqual(MyDataClass, type(her))
+        self.assertFalse(her.incumbent)
         # print(her.toBlock())
         self.assertEqual('''{
   "type": "test.test_00_Anson.MyDataClass",
@@ -115,6 +122,7 @@ class DataClassTest(unittest.TestCase):
   },
   "name": "zz",
   "age": 12,
+  "incumbent": false,
   "items": []
 }''', her.toBlock(beautify=True))
 
