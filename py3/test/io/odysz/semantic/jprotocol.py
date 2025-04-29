@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Self, TypeVar, ForwardRef
+from typing import Self
 
 from src.anson.io.odysz.ansons import Anson
+from src.anson.io.odysz.anson import JsonOpt
 
 class MsgCode(Enum):
     """
@@ -71,6 +72,14 @@ class AnsonMsg(Anson):
 class AnsonBody(Anson):
     uri: str
     a: str
+    rs: dict
+    m: str
+    map: dict
+    opts: JsonOpt
+    addr: str
+    version: str
+    seq: int
+
 
     def __init__(self, parent: AnsonMsg = None):
         super().__init__()
@@ -92,6 +101,7 @@ class AnsonReq(AnsonBody):
 @dataclass
 class AnsonResp(AnsonBody):
     code: MsgCode
+    parent: str
 
     def __init__(self):
         super().__init__()
