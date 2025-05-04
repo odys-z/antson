@@ -9,7 +9,7 @@
 # What's Antson
 
 Antson is **AN**other **T**ool for j**SON** (de)serializing objects in typed
-language such as java or c# to / from json.
+language such as Java or Python3 to / from json.
 
 A java object of type
 
