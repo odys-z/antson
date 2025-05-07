@@ -3,16 +3,22 @@ import unittest
 
 from src.anson.io.odysz.ansons import Anson
 from test.io.odysz.jclient import OnError, Clients
-from test.io.odysz.semantic.jprotocol import AnsonResp
+from test.io.odysz.semantic.jprotocol import AnsonResp, MsgCode
 
 
 class AnclientTest(unittest.TestCase):
     def testPing(self):
         Anson.java_src('test')
-        err = OnError(lambda c, e, args: print(c, e.format(args), file=sys.stderr) and self.fail(e))
+
+        # only for 3.11
+        # err = OnError(lambda c, e, args: print(c, e.format(args), file=sys.stderr) and self.fail(e))
+
+        def err_ctx (c: MsgCode, e: str, *args: str) -> None:
+            print(c, e.format(args), file=sys.stderr)
+            self.fail(e)
 
         Clients.servRt = 'http://127.0.0.1:8964/jserv-album'
-        resp = Clients.pingLess('Anson.py3/test', err)
+        resp = Clients.pingLess('Anson.py3/test', err_ctx)
         self.assertIsNotNone(resp)
 
         print(Clients.servRt, '<echo>', resp.toBlock())

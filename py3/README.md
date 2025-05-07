@@ -1,6 +1,6 @@
 # Anson.py3
 
-A testing package ...
+Json (de)serialize module in Python 3.
 
 ```code
 from ansons.anson import Anson

@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from sys import stderr
-from typing import Protocol, Any
+from typing import Optional, Protocol, Any
 
 import requests
 
@@ -61,17 +61,19 @@ class SessionClient:
             self.header = AnsonHeader(ssid=self.ssInf.ssid, uid=self.ssInf.uid, token=self.ssInf.ssToken)
         return self.header
 
-    def commit(self, req: AnsonMsg, err: OnError) -> AnsonResp | None:
+    def commit(self, req: AnsonMsg, err: OnError) -> Optional[AnsonResp]:
         try:
             print(f'{self.myservRt}/{req.port.value}')
             print(req.toBlock(False))
-            resp = requests.post(f'{self.myservRt}/{req.port.value}', proxies=self.proxies, data=req.toBlock(False))
+            resp = requests.post(f'{self.myservRt}/{req.port.value}',
+                                 proxies=self.proxies,
+                                 data=req.toBlock(False))
             if resp.status_code == 200:
                 data = resp.json()  # If the response is JSON
                 return AnsonResp.from_envelope(data)
             else:
                 print(f"Error: {resp.status_code}", file=stderr)
-                res = f'{resp.status_code}\n{self.myservRt}\n{'' if req is None else req.toBlock()}'
+                res = f'{resp.status_code}\n{self.myservRt}\n{"" if req is None else req.toBlock()}'
                 err.err(MsgCode.exIo, res, resp.text)
                 return None
         except Exception as e:

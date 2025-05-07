@@ -6,7 +6,7 @@ Created on 25 Oct 2019
 import os
 import sys
 from re import match
-from typing import TextIO, Optional, TypeVar
+from typing import TextIO, Optional, TypeVar, Union
 
 T = TypeVar('T')
 
@@ -41,7 +41,7 @@ class LangExt:
         return 0 if obj is None else len(obj)
 
     @staticmethod
-    def str(obj: dict | list):
+    def str(obj: Union[dict, list]):
         def quot(v) -> str:
             return f'"{v}"' if type(v) == str else f'"{v.toBlock()}"' if isinstance(v, Anson) else LangExt.str(v)
         from .ansons import Anson
@@ -49,7 +49,8 @@ class LangExt:
             s = '{'
             for k, v in obj.items():
                 # s += f'{"" if len(s) == 1 else ",\n"}"{k}": "{LangExt.str(v)}"'
-                s += f'{"" if len(s) == 1 else ",\n"}"{k}": {quot(v)}'
+                SEP = ",\n"
+                s += f'{"" if len(s) == 1 else SEP}"{k}": {quot(v)}'
             s += '}'
             return s
         elif type(obj) == list:

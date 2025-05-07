@@ -3,7 +3,7 @@ from dataclasses import dataclass, Field
 import json
 from enum import Enum
 from numbers import Number
-from typing import Union
+from typing import Union, Optional
 
 from typing_extensions import get_args, get_origin
 
@@ -25,7 +25,7 @@ def class4Name(m, clssn: str) -> type:
     cls.__type__=f'{m}.{clssn}'
     return cls
 
-def getClass(_typ_: str | None):
+def getClass(_typ_: Optional[str]):
     if _typ_ is None:
         return None
     parts = _typ_.split('.')
@@ -84,7 +84,7 @@ def value_type(v):
                       ansontype=f'{t.__module__}.{t.__name__}')
 
 
-def instanceof(clsname: str | type, props: dict):
+def instanceof(clsname: Union[str, type], props: dict):
     obj = getClass(clsname)() if type(clsname) == str else clsname()
     fds = _fields(obj, None)
     missingAttrs = []
@@ -102,10 +102,10 @@ def instanceof(clsname: str | type, props: dict):
 
 def parse_type_(obj) -> Union[str, None]:
     return obj['__type__'] if isinstance(obj, Anson) and hasattr(obj, '__type__') \
-        else f'{java_src_path}{'.' if len(java_src_path) else ''}{obj['type']}' if isinstance(obj, dict) and 'type' in obj.keys() else None
+        else f'{java_src_path}{"." if len(java_src_path) else ""}{obj["type"]}' if isinstance(obj, dict) and 'type' in obj.keys() else None
 
 
-def parse_forward(ref: type | str):
+def parse_forward(ref: Union[type, str]):
     return ref[0] if type(ref) == list else \
         get_args(ref)[0] if get_origin(ref) == list else \
         getClass(ref) if type(ref) == str else \
@@ -150,8 +150,9 @@ class Anson(dict):
 
     @staticmethod
     def toDict_(dic: dict, ind: int, beautify):
+        nl = '\n'
         return '{}' if len(dic) == 0 else \
-            f'{'{\n' if len(dic) > 1 else '{'}' + ',\n'.join(f'{' ' * (ind * 2 + 2) if len(dic) > 1 else ''}' + f'"{k}": ' + Anson.toValue_(dic[k], ind, beautify) for k in dic) + '}' if beautify else \
+            f'{"{" + nl if len(dic) > 1 else "{"}' + ',\n'.join(f'{" " * (ind * 2 + 2) if len(dic) > 1 else ""}' + f'"{k}": ' + Anson.toValue_(dic[k], ind, beautify) for k in dic) + '}' if beautify else \
             '{' + ','.join(f'"{k}": ' + Anson.toValue_(dic[k], ind + 1, beautify) for k in dic) + '}'
 
     def toBlock(self, beautify=True) -> str:
@@ -172,7 +173,7 @@ class Anson(dict):
             if '__type__' == k:
                 tp = str(self['__type__']).removeprefix(java_src_path+'.')
                 if has_prvious: s += ',\n' if beautify else ', '
-                s += f'{' ' * (ind * 2 + 2) if beautify else ''}"type": "{tp}"'
+                s += f'{" " * (ind * 2 + 2) if beautify else ""}"type": "{tp}"'
                 has_prvious = True
 
             else:
@@ -202,7 +203,7 @@ class Anson(dict):
         return s + ('\n' if has_prvious and beautify else '') + (' ' * (ind * 2) + '}' if beautify else '}')
 
     @staticmethod
-    def from_value(antype: str | type | None, v):
+    def from_value(antype: Union[str, type, None], v):
         if v is None: return None
         vt = value_type(v)
 
@@ -226,7 +227,7 @@ class Anson(dict):
             v
 
     @staticmethod
-    def from_dict(v: dict, eletype: type | str | None) -> dict:
+    def from_dict(v: dict, eletype: Union[type, str, None]) -> dict:
         if eletype is None: return v
 
         d = {}
