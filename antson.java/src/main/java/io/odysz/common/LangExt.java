@@ -1016,6 +1016,14 @@ public class LangExt {
 		return isNull(args) ? deflt : args[0]; 
 	}
 
+	public static int _0(int[] args, int deflt) {
+		return isNull(args) ? deflt : args[0]; 
+	}
+
+	public static float _0(float[] args, float deflt) {
+		return isNull(args) ? deflt : args[0]; 
+	}
+
 	/**
 	 * Add prefix to each element.
 	 * 

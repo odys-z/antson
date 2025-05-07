@@ -395,6 +395,31 @@ class LangExtTest {
 	}
 	
 	@Test
+	void test_0() {
+
+		String[] args = new String[] {"123", null, "abc"};
+		assertEquals("123", _0(args, "abc"));
+
+		args = new String[] {};
+		assertEquals("abc", _0(args, "abc"));
+
+		args = null;
+		assertEquals(null, _0(args));
+		assertEquals("abc", _0(args, "abc"));
+
+		int[] argi = new int[] {1, 23, 3};
+		assertEquals(1, _0(argi, 0));
+		assertEquals(1, _0(argi, -1));
+		
+		argi = new int[] {};
+		assertEquals(0, _0(argi, 0));
+		argi = null;
+		assertEquals(0, _0(argi, 0));
+		
+		assertEquals(0.0, _0(null, 0.0));
+	}
+	
+	@Test
 	void testrof() {
 		assertEquals("", strof(0, "x"));
 		assertEquals("x", strof(1, "x"));
