@@ -29,6 +29,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	<maven.compiler.source>1.8</maven.compiler.source>
 	<maven.compiler.target>1.8</maven.compiler.target>
   </properties>
@@ -128,6 +129,9 @@
       		otherwise name convention filter will fail
       	-->
       	<version>2.22.0</version>
+      	<configuration>
+      		<argLine>-Dfile.encoding=UTF-8</argLine>
+        </configuration>
       </plugin>
 
       <plugin>
