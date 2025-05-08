@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.odysz.anson.Anson;
-import io.odysz.anson.x.AnsonException;
+import io.odysz.anson.AnsonException;
 import io.odysz.semantic.jprotocol.test.T_AnsonBody;
 import io.odysz.semantic.jprotocol.test.T_AnsonHeader;
 import io.odysz.semantic.jprotocol.test.T_IPort;

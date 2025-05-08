@@ -1,4 +1,4 @@
-package io.odysz.anson.x;
+package io.odysz.anson;
 
 public class AnsonException extends RuntimeException {
 	/** * */

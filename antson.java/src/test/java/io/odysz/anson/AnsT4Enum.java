@@ -3,8 +3,6 @@ package io.odysz.anson;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import io.odysz.anson.x.AnsonException;
-
 public class AnsT4Enum extends Anson {
 	public interface IPort extends IJsonable {
 			default public String url() { return "echo.jserv"; }

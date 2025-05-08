@@ -28,7 +28,6 @@ import gen.antlr.json.JSONParser.PairContext;
 import gen.antlr.json.JSONParser.Type_pairContext;
 import gen.antlr.json.JSONParser.ValueContext;
 import io.odysz.anson.IJsonable.JsonableFactory;
-import io.odysz.anson.x.AnsonException;
 import io.odysz.common.LangExt;
 import io.odysz.common.Utils;
 

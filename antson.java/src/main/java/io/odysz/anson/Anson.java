@@ -29,7 +29,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
-import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
 
 /**

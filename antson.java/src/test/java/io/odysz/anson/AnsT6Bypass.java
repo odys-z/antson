@@ -3,8 +3,6 @@ package io.odysz.anson;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import io.odysz.anson.x.AnsonException;
-
 public class AnsT6Bypass extends Anson {
 	static {
 		JSONAnsonListener.registFactory(T6_Port.class, (s) -> {

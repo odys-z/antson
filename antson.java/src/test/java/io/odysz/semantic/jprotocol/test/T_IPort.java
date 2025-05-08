@@ -1,7 +1,7 @@
 package io.odysz.semantic.jprotocol.test;
 
+import io.odysz.anson.AnsonException;
 import io.odysz.anson.IJsonable;
-import io.odysz.anson.x.AnsonException;
 
  public interface T_IPort extends IJsonable {
 

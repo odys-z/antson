@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.odysz.anson.x.AnsonException;
 import io.odysz.common.Utils;
 
 /**

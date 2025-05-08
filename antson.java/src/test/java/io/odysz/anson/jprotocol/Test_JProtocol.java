@@ -15,7 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.odysz.anson.Anson;
-import io.odysz.anson.x.AnsonException;
+import io.odysz.anson.AnsonException;
 import io.odysz.semantic.T_AnResultset;
 import io.odysz.semantic.T_PhotoCSS;
 import io.odysz.semantic.ext.test.T_AnDatasetResp;

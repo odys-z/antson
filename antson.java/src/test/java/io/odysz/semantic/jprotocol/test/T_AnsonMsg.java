@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.odysz.anson.Anson;
+import io.odysz.anson.AnsonException;
 import io.odysz.anson.IJsonable;
 import io.odysz.anson.JsonOpt;
-import io.odysz.anson.x.AnsonException;
 
 /**<p>Base class of message used by {@link io.odysz.semantic.jserv.ServHandler serv11}.</p>
  * 1. A incoming json message is parsed by *.serv into JMessage,

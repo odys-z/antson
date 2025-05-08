@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-import io.odysz.anson.x.AnsonException;
-
 public interface IJsonable {
 
 	/**
