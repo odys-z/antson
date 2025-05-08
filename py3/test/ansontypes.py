@@ -5,7 +5,7 @@ Data types for test cases.
 
 @author: odys-z@github.com
 '''
-from src.anson.io.odysz.ansons import Anson
+from anson.io.odysz import Anson
 
 
 class AnsT1(Anson):

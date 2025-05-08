@@ -44,7 +44,7 @@ class LangExt:
     def str(obj: Union[dict, list]):
         def quot(v) -> str:
             return f'"{v}"' if type(v) == str else f'"{v.toBlock()}"' if isinstance(v, Anson) else LangExt.str(v)
-        from .ansons import Anson
+        from anson.io.odysz.anson import Anson
         if type(obj) == dict:
             s = '{'
             for k, v in obj.items():

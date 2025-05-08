@@ -7,7 +7,7 @@ from typing import Union, Optional
 
 from typing_extensions import get_args, get_origin
 
-from .common import Utils
+from src.anson.io.odysz.common import Utils
 
 java_src_path: str = ''
 
@@ -110,6 +110,13 @@ def parse_forward(ref: Union[type, str]):
         get_args(ref)[0] if get_origin(ref) == list else \
         getClass(ref) if type(ref) == str else \
         ref
+
+
+class JsonOpt:
+    quotekey = True;
+
+    def quoteK(self):
+        return self.quotekey;
 
 
 @dataclass
@@ -315,3 +322,15 @@ class Anson(dict):
     def from_envelope(cls, obj: dict):
         return Anson.from_obj(obj,
                 '.'.join([java_src_path, obj['type']]) if len(java_src_path) > 0 else obj['type'])
+
+
+
+class AnsonException:
+    type = "io.odysz.ansons.x.AnsonException"
+    excode = 0
+    err = ""
+
+    def __init__(self, excode: int, template: str, *param: object):
+        super().__init__()
+        self.excode = excode
+        self.err = template if param is None else template.format(param)
