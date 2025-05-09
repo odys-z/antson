@@ -7,7 +7,7 @@ from typing import Union, Optional
 
 from typing_extensions import get_args, get_origin
 
-from src.anson.io.odysz.common import Utils
+from .common import Utils
 
 java_src_path: str = ''
 
@@ -322,7 +322,6 @@ class Anson(dict):
     def from_envelope(cls, obj: dict):
         return Anson.from_obj(obj,
                 '.'.join([java_src_path, obj['type']]) if len(java_src_path) > 0 else obj['type'])
-
 
 
 class AnsonException:
