@@ -101,3 +101,53 @@ class Utils:
     @staticmethod
     def iswindows():
         return Utils.get_os() == 'Windows'
+
+    @staticmethod
+    def update_patterns(file, patterns: dict):
+        """
+        Update the version in a text file.
+
+        Example
+        -------
+        ::
+
+            Utils.update_patterns(version_file,
+                {'@set jar_ver=[0-9\\.]+': f'@set jar_ver={jar_ver}',
+                 '@REM set version=[0-9\\.]+': f'@set version={version}',
+                 '@set html_ver=[0-9\\.]+': f'@set html_ver={html_ver}'})
+
+        Args:
+            file (str): Path to the JAR file.
+            patterns (dict): Regular expression pattern, key, to replace with value.
+        """
+        import re
+        print('Updating JAR version...', file)
+
+        with open(file, 'r') as f:
+            lines = f.readlines()
+
+        # updated_content = re.sub(pattern, repl, content)
+        for i, line in enumerate(lines):
+            updated = set()
+            for k, v in patterns.items():
+                if re.search(k, line):
+                    lines[i] = re.sub(k, v, line)
+                    updated.add(k)
+                    print('Updated line:', lines[i])
+
+                if len(updated) == len(patterns):
+                    break
+
+        with open(file, 'w') as f:
+            f.writelines(lines)
+
+        print('JAR version updated successfully.', file)
+
+        return None
+
+    @classmethod
+    def writeline_nl(cls, file: int | str | bytes | os.PathLike[str] | os.PathLike[bytes], lines: [str]):
+        with open(file, 'w+') as f:
+            for l in lines:
+                f.write(l)
+                f.write('\n')
