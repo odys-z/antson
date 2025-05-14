@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from anson.io.odysz.anson import Anson
+from src.anson.io.odysz.anson import Anson
 from test.io.odysz.jclient import Clients
 from test.io.odysz.semantic.jprotocol import AnsonResp, MsgCode
 

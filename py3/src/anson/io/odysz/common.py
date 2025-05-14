@@ -44,7 +44,7 @@ class LangExt:
     def str(obj: Union[dict, list]):
         def quot(v) -> str:
             return f'"{v}"' if type(v) == str else f'"{v.toBlock()}"' if isinstance(v, Anson) else LangExt.str(v)
-        from anson.io.odysz.anson import Anson
+        from .anson import Anson
         if type(obj) == dict:
             s = '{'
             for k, v in obj.items():
@@ -146,7 +146,7 @@ class Utils:
         return None
 
     @classmethod
-    def writeline_nl(cls, file: int | str | bytes | os.PathLike[str] | os.PathLike[bytes], lines: [str]):
+    def writeline_nl(cls, file: str, lines: list[str]):
         with open(file, 'w+') as f:
             for l in lines:
                 f.write(l)

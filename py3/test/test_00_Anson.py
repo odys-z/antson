@@ -13,7 +13,7 @@ import unittest
 from dataclasses import dataclass
 from typing import Any
 
-from anson.io.odysz.anson import Anson, _fields
+from src.anson.io.odysz.anson import Anson, _fields
 from test.testier.extra import ExtraData
 
 

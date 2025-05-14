@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Self
 
-from anson.io.odysz.anson import Anson, JsonOpt
+from src.anson.io.odysz.anson import Anson, JsonOpt
 
 class MsgCode(Enum):
     """
@@ -29,7 +28,7 @@ class AnsonHeader(Anson):
     uid: str
     ssid: str
     iv64: str
-    usrAct: [str]
+    usrAct: list[str]
     ssToken: str
 
     def __init__(self, ssid = None, uid = None, token = None):
@@ -38,16 +37,10 @@ class AnsonHeader(Anson):
         self.uid = uid
         self.ssToken = token
 
-# TAnsonBody = TypeVar('TAnsonBody', bound='AnsonBody')
-# class AnTypeRef(object):
-#     bref: str
-#     def __init__(self, bound: str):
-#         self.bref = bound
 
 @dataclass
 class AnsonMsg(Anson):
-    # body: [TAnsonBody]
-    body: ['AnsonBody']
+    body: list['AnsonBody']
     header: AnsonHeader
     port: Port
     code: MsgCode
@@ -57,12 +50,12 @@ class AnsonMsg(Anson):
         self.port = p
         self.body = []
 
-    def Header(self, h: AnsonHeader) -> Self:
+    def Header(self, h: AnsonHeader) -> 'AnsonMsg':
         self.header = h
         return self
 
     # def Body(self, bodyItem: TAnsonBody) -> Self:
-    def Body(self, bodyItem: 'AnsonBody') -> Self:
+    def Body(self, bodyItem: 'AnsonBody') -> 'AnsonMsg':
         self.body.append(bodyItem)
         return self
 
@@ -86,7 +79,7 @@ class AnsonBody(Anson):
         self.parent = parent
         Anson.enclosinguardtypes.add(AnsonMsg)
 
-    def A(self, a: str) -> Self:
+    def A(self, a: str) -> 'AnsonBody':
         self.a = a
         return self
 

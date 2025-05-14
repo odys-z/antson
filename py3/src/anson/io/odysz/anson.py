@@ -7,7 +7,7 @@ from typing import Union, Optional
 
 from typing_extensions import get_args, get_origin
 
-from .common import Utils
+from .common import LangExt, Utils
 
 java_src_path: str = ''
 
@@ -311,10 +311,22 @@ class Anson(dict):
             return Anson.from_envelope(obj)
 
     @classmethod
-    def java_src(cls, src_root: str = ''):
+    def java_src(cls, src_root: str = '', requires: list = None):
         """
-        :param src_root: e. g. 'src'
+        Example
+        -------
+        To deserialize type: io.oz.syn.AppSettings for Python class src.io.oz.syn.AppSetting
+        from synode.py3, call::
+            Anson.java_src('src', ['synode.py3']
+
+        :param src_root: e. g. 'src',
+        :param requires
         """
+        if LangExt.len(requires) > 0:
+            from pkg_resources import require
+            for req in requires:
+                require(req)
+
         global java_src_path
         java_src_path = src_root
 

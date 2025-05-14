@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from anson.io.odysz.anson import Anson
+from src.anson.io.odysz.anson import Anson
 from test.io.odysz.semantic.syn import Synode, SyncUser
 
 

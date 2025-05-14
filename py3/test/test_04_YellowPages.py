@@ -1,7 +1,7 @@
 import unittest
 from typing import cast
 
-from anson.io.odysz import anson
+from src.anson.io.odysz import anson
 from test.io.oz.jserv.docs.syn.singleton import AppSettings
 from test.io.oz.syn import SynodeConfig, AnRegistry, Synode, SynOrg
 

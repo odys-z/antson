@@ -1,6 +1,6 @@
 import unittest
 
-from anson.io.odysz.anson import class4Name, instanceof
+from src.anson.io.odysz.anson import class4Name, instanceof
 
 
 class Instance4Test(unittest.TestCase):
