@@ -317,15 +317,15 @@ class Anson(dict):
         -------
         To deserialize type: io.oz.syn.AppSettings for Python class src.io.oz.syn.AppSetting
         from synode.py3, call::
-            Anson.java_src('src', ['synode.py3']
+            Anson.java_src('src', ['synode_py3']
 
         :param src_root: e. g. 'src',
         :param requires
         """
         if LangExt.len(requires) > 0:
-            from pkg_resources import require
+            from importlib.metadata import distribution
             for req in requires:
-                require(req)
+                distribution(req)
 
         global java_src_path
         java_src_path = src_root
