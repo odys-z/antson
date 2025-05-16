@@ -126,6 +126,7 @@ class Utils:
         with open(file, 'r') as f:
             lines = f.readlines()
 
+        cnt = 0
         # updated_content = re.sub(pattern, repl, content)
         for i, line in enumerate(lines):
             updated = set()
@@ -134,6 +135,7 @@ class Utils:
                     lines[i] = re.sub(k, v, line)
                     updated.add(k)
                     print('Updated line:', lines[i])
+                    cnt += 1
 
                 if len(updated) == len(patterns):
                     break
@@ -141,7 +143,7 @@ class Utils:
         with open(file, 'w') as f:
             f.writelines(lines)
 
-        print('JAR version updated successfully.', file)
+        print(f'[{cnt / len(patterns)}] lines updated. Patterns updating finsiedh.', file)
 
         return None
 
