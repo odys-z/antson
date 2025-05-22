@@ -657,13 +657,15 @@ public class Utils {
 	 * joinby(lights, X, Z);
 	 * awaitAll(lights);
 	 * </pre>
-	 * @param greenlights lights
+	 * @param greenlights lights, if null, will return immediately
 	 * @param x100ms default 100 times, -1 for infinitive waiting
 	 * @throws InterruptedException time limit reached while some lights are red.
 	 */
 	public static void awaitAll(boolean[] greenlights, int... x100ms) throws InterruptedException {
 		int wait = 0;
 		int times = isNull(x100ms) ? 100 : x100ms[0];
+
+		if (greenlights != null)
 		while (times < 0 || wait++ < times) {
 			boolean green = true;
 			for (boolean g : greenlights) {
