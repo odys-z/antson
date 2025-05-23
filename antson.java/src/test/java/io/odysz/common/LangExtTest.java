@@ -5,6 +5,7 @@ import static io.odysz.common.LangExt.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -392,6 +393,26 @@ class LangExtTest {
 		String[] args = new String[] {"123", null, "abc"};
 
 		assertEquals("xyz-123, 123,abc", f("xyz-%s, %s", 123, str(args)));
+
+		assertEquals("1 2 3 4 5 6 null", f6(new String[] {"%s %s %s %s %s %s %s", "1", "2", "3", "4", "5", "6", null}));
+	}
+	
+	@Test
+	void testMusts() {
+		try {
+			assertEquals(0, mustGe(0, 1, "0 >= 1"));
+			fail("Expecting an exception.");
+		} catch (NullPointerException e) {}
+
+		assertEquals(1, mustGe(1, 1, "1 >= 1"));
+		assertEquals(2, mustGe(2, 1, "2 >= 1"));
+
+		try {
+			assertEquals(-1, mustGe(-1, 0, "-1 >= 0"));
+			fail("Expecting an exception.");
+		} catch (NullPointerException e) {}
+
+		assertEquals(-1, mustGe(-1, -2, "-1 >= -2"));
 	}
 	
 	@Test

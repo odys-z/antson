@@ -396,13 +396,14 @@ public class Anson implements IJsonable {
      * 
      * See <a href='https://www.json.org/json-en.html'>JSON Introduction</a>
      * 
+	 * Issue found in 0.9.118, that will result in OutOfMemoryError for serializing MP4 files.
      * TODO using stream as output
      * 
 	 * @param v
 	 * @param opts use opts.escape_singlquot = true for db writing.
 	 * @return escaped bytes
 	 * @since 0.9.43
-	 * @since 0.9.55 This method scan through the string an will create a new for return 
+	 * @since 0.9.55 This method scan through the string and will create a new string for return 
 	 */
 	public static byte[] escape(Object v, JsonOpt... opts) {
 		if (v == null)

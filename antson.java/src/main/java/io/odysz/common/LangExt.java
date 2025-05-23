@@ -1394,6 +1394,12 @@ public class LangExt {
 					? f6(msg)
 					: msg[0]);
 	}
+	
+	public static int mustGe (int v, int must, String... msg) {
+		if (v < must)
+			throw new NullPointerException(f6(msg));
+		return v;
+	}
 
 	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> void shouldeq (Object tag, T a, T b, String ...msg) {
