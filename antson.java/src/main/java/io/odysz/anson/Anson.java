@@ -623,4 +623,8 @@ public class Anson implements IJsonable {
 			return (T) Anson.fromJson(inf); 
 		}
 	}
+
+	public static boolean startEnvelope(String str) {
+		return str != null && str.startsWith("{\\s*\"type\":");
+	}
 }
