@@ -93,6 +93,7 @@ public class Utils {
 	 * In this way, the java compiler will optimize the code to nothing if the <i>staticBoolean</i> is false.
 	 * @param format
 	 * @param args
+	 * @return formatted string
 	 */
 	public static String logi(String format, Object... args) {
 		try {
