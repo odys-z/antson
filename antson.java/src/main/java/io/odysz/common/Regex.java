@@ -72,6 +72,8 @@ public class Regex {
 	/** https://www.rfc-editor.org/rfc/rfc3986#appendix-B */
 	static Regex rfc3986;
 
+	static Regex envlregex;
+
 	/**
 	 * Is the arg an HTTPS protocol address?
 	 * @param p
@@ -90,6 +92,12 @@ public class Regex {
 		if (httpregex == null)
 			httpregex = new Regex("^https?://");
 		return httpregex.match(p);
+	}
+	
+	public static boolean startsEvelope(String envl) {
+		if (envlregex == null)
+			envlregex = new Regex("'?\\{\\s*[\"\']type[\"\']:");
+		return envlregex.match(envl);
 	}
 	
 	/**

@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -865,6 +866,10 @@ public class LangExt {
 	 * @return len
 	 */
 	public static int len(Set<?> s) {
+		return isNull(s) ? 0 : s.size();
+	}
+
+	public static int len(Collection<?> s) {
 		return isNull(s) ? 0 : s.size();
 	}
 

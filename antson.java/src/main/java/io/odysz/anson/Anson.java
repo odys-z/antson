@@ -29,6 +29,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import gen.antlr.json.JSONLexer;
 import gen.antlr.json.JSONParser;
 import gen.antlr.json.JSONParser.JsonContext;
+import io.odysz.common.Regex;
 import io.odysz.common.Utils;
 
 /**
@@ -625,6 +626,6 @@ public class Anson implements IJsonable {
 	}
 
 	public static boolean startEnvelope(String str) {
-		return str != null && str.startsWith("{\\s*\"type\":");
+		return str != null && Regex.startsEvelope(str); // str.startsWith("{\\s*\"type\":");
 	}
 }

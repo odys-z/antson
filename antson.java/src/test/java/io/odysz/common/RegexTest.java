@@ -7,6 +7,8 @@ import static io.odysz.common.Regex.*;
 
 import org.junit.jupiter.api.Test;
 
+import io.odysz.anson.Anson;
+
 class RegexTest {
 
 	@Test
@@ -61,7 +63,22 @@ class RegexTest {
 			assertEquals(url[2], domport[1], uri);
 			assertEquals(url[3], isHttps(uri), uri);
 		}
+	}
+	
+	@Test
+	void testIsEnvelope() {
+		assertTrue(Anson.startEnvelope("'{\"type\": \"com.examples.test\"}"));
+		assertTrue(Anson.startEnvelope("'{ \"type\": \"com.examples.test\"}"));
+		assertTrue(Anson.startEnvelope("'{\t\"type\": \"com.examples.test\"}"));
+		assertTrue(Anson.startEnvelope("'{\n\"type\": \"com.examples.test\"}"));
 
+		assertTrue(Anson.startEnvelope("{\"type\": \"com.examples.test\"}"));
+		assertTrue(Anson.startEnvelope("{\n\"type\": \"com.examples.test\"}"));
 
+		assertFalse(Anson.startEnvelope("{type: \"com.examples.test\"}"));
+		assertFalse(Anson.startEnvelope("'{type: \"com.examples.test\"}"));
+		assertFalse(Anson.startEnvelope("{type, \"com.examples.test\"}"));
+
+		assertTrue(Anson.startEnvelope("{'type': \"com.examples.test\"}"));
 	}
 }
