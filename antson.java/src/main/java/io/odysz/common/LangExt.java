@@ -1364,6 +1364,16 @@ public class LangExt {
 			? f(msg[0], (Object[])Arrays.copyOfRange(msg, 1, msg.length))
 			: _0(msg);
 	}
+	
+	/**
+	 * @param fn
+	 * @param args
+	 * @return "fn(args[0], args[1], ...)"
+	 */
+	public static String f_funcall(String fn, String... args) {
+		return isNull(args) ? fn + "()" :
+			Stream.of(args).collect(Collectors.joining(", ", fn + "(", ")"));
+	}
 
 	/**
 	 * 
