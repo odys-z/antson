@@ -95,5 +95,8 @@ class RegexTest {
 		assertEquals(reluri, FilenameUtils.removePrefixVolume(upload, "upload"));
 
 		assertEquals(reluri, FilenameUtils.removePrefixVolume(upload, "upload"));
+		
+		assertEquals(reluri, FilenameUtils.removePrefixVolume(vol_1));
+		assertEquals(upload, FilenameUtils.removePrefixVolume(vol_2));
 	}
 }
