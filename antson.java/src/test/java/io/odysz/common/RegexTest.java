@@ -81,4 +81,19 @@ class RegexTest {
 
 		assertTrue(Anson.startEnvelope("{'type': \"com.examples.test\"}"));
 	}
+	
+	@Test
+	void testRmVolume() {
+		String reluri = FilenameUtils.concat("move", "0001 1.pdf");
+		String upload = FilenameUtils.concat("upload", reluri);
+		String vol_1 = FilenameUtils.concat("$VOLUME_1", reluri);
+		String vol_2 = FilenameUtils.concat("$VOLUME_2", upload);
+
+		assertEquals(reluri, FilenameUtils.removePrefixVolume(reluri));
+		assertEquals(upload, FilenameUtils.removePrefixVolume(upload));
+		assertEquals(reluri, FilenameUtils.removePrefixVolume(reluri, "upload"));
+		assertEquals(reluri, FilenameUtils.removePrefixVolume(upload, "upload"));
+
+		assertEquals(reluri, FilenameUtils.removePrefixVolume(upload, "upload"));
+	}
 }

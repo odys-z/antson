@@ -72,8 +72,6 @@ public class Regex {
 	/** https://www.rfc-editor.org/rfc/rfc3986#appendix-B */
 	static Regex rfc3986;
 
-	static Regex envlregex;
-
 	/**
 	 * Is the arg an HTTPS protocol address?
 	 * @param p
@@ -84,6 +82,7 @@ public class Regex {
 		return httpsregex.match(p);
 	}
 	
+	static Regex envlregex;
 	/**
 	 * Is the arg an HTTPS or HTTP protocol address?
 	 * @param p
@@ -94,12 +93,23 @@ public class Regex {
 		return httpregex.match(p);
 	}
 	
+	static Regex volumeregex;
 	public static boolean startsEvelope(String envl) {
 		if (envlregex == null)
 			envlregex = new Regex("'?\\{\\s*[\"\']type[\"\']:");
 		return envlregex.match(envl);
 	}
 	
+	public static boolean startsVolume(String isvol) {
+		if (volumeregex == null)
+			volumeregex = new Regex("\\$\\w\\s*$|[\\/\\\\]+");
+		return volumeregex.match(isvol);
+	}
+
+	public static String removeVolumePrefix(String isvol) {
+		return isvol.replaceAll("\\$\\w+((\\s*$)|[\\/\\\\]+)", "");
+	}
+
 	/**
 	 * groups[3]: ip[:port]
 	 * groups[4]: path

@@ -16,6 +16,11 @@
  */
 package io.odysz.common;
 
+import static io.odysz.common.LangExt.eq;
+import static io.odysz.common.LangExt.isblank;
+import static io.odysz.common.LangExt.isNull;
+import static io.odysz.common.LangExt.f;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -489,7 +494,7 @@ public class FilenameUtils {
      * @param fullFileNameToAdd  the fileName (or path) to attach to the base
      * @return the concatenated path, or null if invalid.  Null bytes inside string will be removed
      */
-    public static String concat(final String basePath, final String fullFileNameToAdd) {
+    public static String concat(String basePath, final String fullFileNameToAdd) {
         final int prefix = getPrefixLength(fullFileNameToAdd);
         if (prefix < 0) {
             return null;
@@ -498,7 +503,9 @@ public class FilenameUtils {
             return normalize(fullFileNameToAdd);
         }
         if (basePath == null) {
-            return null;
+            // 2025.06.06
+        	// return null;
+            basePath = "";
         }
         final int len = basePath.length();
         if (len == 0) {
@@ -1496,6 +1503,45 @@ public class FilenameUtils {
         return list.toArray( new String[ list.size() ] );
     }
 
+   	/**Concatenates a fileName to a base path using normal command line style rules.
+	 * @see #concat(String, String)
+	 * @param basePath
+	 * @param sub
+	 * @return the concatenated path, or null if invalid. Null bytes inside string will be removed
+	 */
+	public static String concat(final String basePath, String... sub) {
+		String p = basePath;
+		if (sub != null && sub.length > 0)
+			for (String s : sub)
+				p = concat(p, s);
+		return p;
+	}
+
+	public static String winpath2unix(String win) {
+		return win == null ? null :
+			// 2025-06-06
+			// win.replaceAll("\\\\", "/");
+			separatorsToWindows(win);
+	}
+	
+	public static String removePrefixVolume(String p, String... extroot) {
+		String ret = p;
+
+		if (isblank(p))
+			return p;
+
+		if (!isNull(extroot)) {
+			if (eq(p.trim(), extroot[0].trim()))
+				return "";
+			String extrootReg = extroot[0].replaceAll(f("[\\%s\\%s]$\\s*", UNIX_SEPARATOR, WINDOWS_SEPARATOR), "");
+			ret = p.replaceFirst(extrootReg + f("[\\%s\\%s]+", UNIX_SEPARATOR, WINDOWS_SEPARATOR), "");
+		}
+		
+		return Regex.removeVolumePrefix(ret);
+	}
+
+	/////////////////////////////// helpers for IP and Host //////////////////////////////////
+	
     /**
      * Checks whether a given string is a valid host name according to
      * RFC 3986.
@@ -1645,22 +1691,4 @@ public class FilenameUtils {
         return true;
     }
 
-	/**Concatenates a fileName to a base path using normal command line style rules.
-	 * @see #concat(String, String)
-	 * @param basePath
-	 * @param sub
-	 * @return the concatenated path, or null if invalid. Null bytes inside string will be removed
-	 */
-	public static String concat(final String basePath, String... sub) {
-		String p = basePath;
-		if (sub != null && sub.length > 0)
-			for (String s : sub)
-				p = concat(p, s);
-		return p;
-	}
-
-	public static String winpath2unix(String win) {
-		return win == null ? null :
-			win.replaceAll("\\\\", "/");
-	}
 }
