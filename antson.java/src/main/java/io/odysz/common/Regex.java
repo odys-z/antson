@@ -105,9 +105,14 @@ public class Regex {
 			volumeregex = new Regex("\\$\\w\\s*$|[\\/\\\\]+");
 		return volumeregex.match(isvol);
 	}
-
-	public static String removeVolumePrefix(String isvol) {
-		return isvol.replaceAll("\\$\\w+((\\s*$)|[\\/\\\\]+)", "");
+	/** Remove volume tag ($.../) from exturi */
+	public static String removeVolumePrefix(String exturi, String... removePrefix) {
+		String relative = exturi.replaceAll("\\$\\w+((\\s*$)|[\\/\\\\]+)", "");
+		if (removePrefix != null)
+			for (String prefix : removePrefix)
+				if (prefix != null)
+					relative = relative.replaceFirst("^" + prefix + "((\\s*$)|[\\/\\\\]*)" , "");
+		return relative;
 	}
 
 	/**

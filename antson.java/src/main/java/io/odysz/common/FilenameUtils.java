@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * General file name and file path manipulation utilities.
@@ -110,16 +112,21 @@ public class FilenameUtils {
      * The Unix separator character.
      */
     private static final char UNIX_SEPARATOR = '/';
+    private static final String UNIX_SEPARATOR_str = String.valueOf(UNIX_SEPARATOR);
 
     /**
      * The Windows separator character.
      */
     private static final char WINDOWS_SEPARATOR = '\\';
+    @SuppressWarnings("unused")
+	private static final String WINDOWS_SEPARATOR_str = String.valueOf(WINDOWS_SEPARATOR);
 
     /**
      * The system separator character.
      */
     private static final char SYSTEM_SEPARATOR = File.separatorChar;
+    private static final String SYSTEM_SEPARATOR_str = String.valueOf(File.separatorChar);
+
 
     /**
      * The separator character that is the opposite of the system separator.
@@ -494,7 +501,7 @@ public class FilenameUtils {
      * @param fullFileNameToAdd  the fileName (or path) to attach to the base
      * @return the concatenated path, or null if invalid.  Null bytes inside string will be removed
      */
-    public static String concat(String basePath, final String fullFileNameToAdd) {
+    public static String concat_del(String basePath, final String fullFileNameToAdd) {
         final int prefix = getPrefixLength(fullFileNameToAdd);
         if (prefix < 0) {
             return null;
@@ -516,6 +523,76 @@ public class FilenameUtils {
             return normalize(basePath + fullFileNameToAdd);
         }
         return normalize(basePath + '/' + fullFileNameToAdd);
+    }
+
+    /**
+     * <pre>
+     	assertPathEquals("foo/bar", concat("foo", "bar"));
+        assertPathEquals("/foo/bar", concat("/foo", "bar"));
+        assertPathEquals("/foo/bar", concat("/foo/", "bar"));
+        assertPathEquals("/bar", concat("/foo", "/bar"));
+        assertPathEquals("C:/bar", concat("/foo", "C:/bar"));
+        assertPathEquals("C:bar", concat("/foo", "C:bar"));
+        assertPathEquals("/foo/bar", concat("/foo/a/", "../bar"));  // new behavior since 0.9.118
+        assertPathEquals("../bar", concat("/foo/", "../../bar"));   // new behavior since 0.9.118
+        assertPathEquals("/bar", concat("/foo/", "/bar"));
+        assertPathEquals("/bar", concat("/foo/..", "/bar"));
+        assertPathEquals("/foo/bar/c.txt", concat("/foo", "bar/c.txt"));
+        assertPathEquals("/foo/c.txt/bar", concat("/foo/c.txt", "bar"));
+
+        assertPathEquals("src/test/res/lines.txt", concat("src/test/java/", "../res/lines.txt"));
+        assertPathEquals("/foo/../bar", concat("/foo/..", "bar"));
+     * </pre>
+     * @param basePath
+     * @param fullFileNameToAdd
+     * @return new path
+     * @since 0.9.118, 
+     */
+    public static String concat(String basePath, final String fullFileNameToAdd) {
+        final int prefix = getPrefixLength(fullFileNameToAdd);
+        if (prefix < 0) {
+            return null;
+        }
+        if (prefix > 0) {
+            return normalize(fullFileNameToAdd);
+        }
+        if (basePath == null) {
+            basePath = "";
+        }
+        final int len = basePath.length();
+        if (len == 0) {
+            return normalize(fullFileNameToAdd);
+        }
+
+        String rightSubstr = fullFileNameToAdd.replaceAll("\\" + WINDOWS_SEPARATOR, UNIX_SEPARATOR_str);
+        if (rightSubstr.startsWith(UNIX_SEPARATOR_str))
+        	return fullFileNameToAdd;
+
+        // changed since 0.9.118
+        String[] leftSubs = isblank(basePath) ?
+        		new String[0] : 
+        		basePath.replaceAll("\\" + WINDOWS_SEPARATOR, UNIX_SEPARATOR_str).split(UNIX_SEPARATOR_str); 
+        	
+        String[] rightSubs = isblank(fullFileNameToAdd) ?
+        		new String[0] : 
+        		rightSubstr.split(UNIX_SEPARATOR_str); 
+
+        int rightx = 0;
+        int leftx = leftSubs.length;
+
+        while (0 < leftx && rightx < rightSubs.length - 1 && eq(rightSubs[rightx], "..")) {
+        	leftx--;
+        	rightx++;
+        	while (0 < leftx && isblank(leftSubs[leftx-1])) leftx--;
+        	while (rightx < rightSubs.length - 1 && isblank(rightSubs[rightx])) rightx++;
+        }
+
+        return Stream.concat(Stream.concat(
+        		leftx > 0 && isblank(leftSubs[0]) ? Stream.of("") : Stream.empty(), 
+        		Arrays.stream(leftSubs).limit(leftx).filter(s -> !isblank(s))),
+        		Arrays.stream(rightSubs).skip(rightx).filter(s -> !isblank(s)))
+        		.collect(Collectors.joining(SYSTEM_SEPARATOR_str)) 
+        		;
     }
 
     /**
@@ -1521,7 +1598,7 @@ public class FilenameUtils {
 		return win == null ? null :
 			// 2025-06-06
 			// win.replaceAll("\\\\", "/");
-			separatorsToWindows(win);
+			separatorsToUnix(win);
 	}
 	
 	public static String removePrefixVolume(String p, String... extroot) {
