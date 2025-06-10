@@ -48,7 +48,7 @@ class FilenameUtilsTest extends FilenameUtils {
 		
 		assertPathEquals("../foo", normalize("../foo"));
 		assertPathEquals("~/../bar", normalize("~/../bar"));
-		assertPathEquals("C:\\..\\bar", normalize("C:\\..\\bar"));
+		assertPathEquals("C:/../bar", normalize("C:\\..\\bar"));
 		assertPathEquals("~/../bar", normalize("~/../bar"));
 
 		// same as before 0.9.118
@@ -63,7 +63,7 @@ class FilenameUtilsTest extends FilenameUtils {
 		assertPathEquals("../foo/", normalize("../foo/"));
 		assertPathEquals("../foo/bar", normalize("../foo/bar"));
 		assertPathEquals("//server/bar", normalize("//server/foo/../bar"));
-		assertPathEquals("C:\\bar", normalize("C:\\foo\\..\\bar"));
+		assertPathEquals("C:/bar", normalize("C:\\foo\\..\\bar"));
 		assertPathEquals("~/bar", normalize("~/foo/../bar"));
 
 		/*
