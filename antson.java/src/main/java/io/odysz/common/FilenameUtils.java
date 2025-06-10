@@ -618,8 +618,8 @@ public class FilenameUtils {
 
         return Stream.concat(Stream.concat(
         		leftx > 0 && isblank(leftSubs[0]) ? Stream.of("") : Stream.empty(), 
-        		Arrays.stream(leftSubs).limit(leftx).filter(s -> !isblank(s))),
-        		Arrays.stream(rightSubs).skip(rightx).filter(s -> !isblank(s)))
+        		Arrays.stream(leftSubs).limit(leftx).filter(s -> !isblank(s, "."))),
+        		Arrays.stream(rightSubs).skip(rightx).filter(s -> !isblank(s, ".")))
         		.collect(Collectors.joining(SYSTEM_SEPARATOR_str)) 
         		;
     }
