@@ -174,18 +174,19 @@ public class FilenameUtils {
      * <p>
      * This method normalizes a path to a standard format.
      * The input may contain separators in either Unix or Windows format.
-     * The output will contain separators in the format of the system.
+     * The output will contain separators in the format of the system.</p>
      * <p>
      * A trailing slash will be retained.
      * A double slash will be merged to a single slash (but UNC names are handled).
      * A single dot path segment will be removed.
      * A double dot will cause that path segment and the one before to be removed.
      * If the double dot has no parent path segment to work with, {@code null}
-     * is returned.
+     * is returned.</p>
      * <p>
      * The output will be the same on both Unix and Windows except
-     * for the separator character.
-     * <pre>
+     * for the separator character.</p>
+     * 
+     * <p>Since 0.9.118, the following convertion,</p><pre>
      * /foo//               --&gt;   /foo/
      * /foo/./              --&gt;   /foo/
      * /foo/../bar          --&gt;   /bar
@@ -203,6 +204,32 @@ public class FilenameUtils {
      * C:\..\bar            --&gt;   null
      * ~/foo/../bar/        --&gt;   ~/bar/
      * ~/../bar             --&gt;   null
+     * </pre>
+     * is changed to <pre>
+     * assertPathEquals("src/test/res/lines.txt", normalize("src/test/java/../res/lines.txt"));
+     * assertPathEquals("src/res/lines.txt", normalize("src/test/java/../../res/lines.txt"));
+     * assertPathEquals("res/lines.txt", normalize("src/test/java/../../../res/lines.txt"));
+     * assertPathEquals("../res/lines.txt", normalize("src/test/java/../../../../res/lines.txt"));
+		
+     * assertPathEquals("../foo", normalize("../foo"));
+     * assertPathEquals("~/../bar", normalize("~/../bar"));
+     * assertPathEquals("C:\\..\\bar", normalize("C:\\..\\bar"));
+     * assertPathEquals("~/../bar", normalize("~/../bar"));
+
+     * // same as before 0.9.118
+     * assertPathEquals("/foo/", normalize("/foo//"));
+     * assertPathEquals("/foo/", normalize("/foo//"));
+     * assertPathEquals("/foo/", normalize("/foo/./"));
+     * assertPathEquals("/bar", normalize("/foo/../bar"));
+     * assertPathEquals("/baz", normalize("/foo/../bar/../baz"));
+     * assertPathEquals("/foo/bar", normalize("/foo//./bar"));
+     * assertPathEquals("/../", normalize("/../"));
+     * assertPathEquals("../foo", normalize("../foo"));
+     * assertPathEquals("../foo/", normalize("../foo/"));
+     * assertPathEquals("../foo/bar", normalize("../foo/bar"));
+     * assertPathEquals("//server/bar", normalize("//server/foo/../bar"));
+     * assertPathEquals("C:\\bar", normalize("C:\\foo\\..\\bar"));
+     * assertPathEquals("~/bar", normalize("~/foo/../bar"));
      * </pre>
      * (Note the file separator returned will be correct for Windows/Unix)
      *
@@ -425,8 +452,10 @@ public class FilenameUtils {
             if (array[i] == separator && array[i - 1] == '.' && array[i - 2] == '.' &&
                     (i == prefix + 2 || array[i - 3] == separator)) {
                 if (i == prefix + 2) {
-                	Utils.warnT(new Object() {}, "Cannot resolve %s, e. g. for unknown parent folder.", fileName);
-                    return null;
+                	// Utils.warnT(new Object() {}, "Cannot resolve %s, e. g. for unknown parent folder.", fileName);
+                    // return null;
+                	// 2025-06-09 v0.9.118: tolerate starting "../"
+                	continue; 
                 }
                 if (i == size - 1) {
                     lastIsDirectory = true;
