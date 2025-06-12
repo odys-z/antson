@@ -53,6 +53,10 @@ public class Utils {
 
 	private static PrintStream es() { return es == null ? System.err : es; }
 
+	public static void touchDir(Path fp) {
+		touchDir(fp.toString());
+	}
+
 	public static void touchDir(String dir) {
 		File f = new File(dir);
 		if (f.isDirectory())

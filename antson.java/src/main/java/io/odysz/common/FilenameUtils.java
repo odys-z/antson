@@ -23,6 +23,8 @@ import static io.odysz.common.LangExt.f;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -112,20 +114,20 @@ public class FilenameUtils {
      * The Unix separator character.
      */
     private static final char UNIX_SEPARATOR = '/';
-    private static final String UNIX_SEPARATOR_str = String.valueOf(UNIX_SEPARATOR);
+    public static final String UNIX_SEPARATOR_str = String.valueOf(UNIX_SEPARATOR);
 
     /**
      * The Windows separator character.
      */
     private static final char WINDOWS_SEPARATOR = '\\';
     @SuppressWarnings("unused")
-	private static final String WINDOWS_SEPARATOR_str = String.valueOf(WINDOWS_SEPARATOR);
+	public static final String WINDOWS_SEPARATOR_str = String.valueOf(WINDOWS_SEPARATOR);
 
     /**
      * The system separator character.
      */
     private static final char SYSTEM_SEPARATOR = File.separatorChar;
-    private static final String SYSTEM_SEPARATOR_str = String.valueOf(File.separatorChar);
+    public static final String SYSTEM_SEPARATOR_str = String.valueOf(File.separatorChar);
 
 
     /**
@@ -1015,6 +1017,10 @@ public class FilenameUtils {
     public static String getFullPath(final String fileName) {
         return doGetFullPath(fileName, true);
     }
+
+	public static Path getFullPath(Path p) {
+        return Paths.get(doGetFullPath(p.toString(), true));
+	}
 
     /**
      * Gets the full path from a full fileName, which is the prefix + path,
