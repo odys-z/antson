@@ -1029,6 +1029,11 @@ public class LangExt {
 		return isNull(args) ? deflt : args[0]; 
 	}
 
+	public static boolean _0(boolean[] args, boolean deflt) {
+		return isNull(args) ? deflt : args[0]; 
+	}
+
+
 	/**
 	 * Add prefix to each element.
 	 * 
