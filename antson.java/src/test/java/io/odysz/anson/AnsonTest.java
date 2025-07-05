@@ -21,6 +21,11 @@ import io.odysz.semantic.ext.test.T_TreeIndenode;
 import io.oz.jserv.docs.syn.T_DocsReq;
 import io.oz.jserv.docs.syn.T_ExpSyncDoc;
 
+/**
+ * ISSUE/BUG 0.9.118 HashSet cannot be (de)serialized properly, and no
+ * exception has been thrown.
+ */
+@SuppressWarnings("deprecation")
 class AnsonTest {
 
 	private JsonOpt opt = new JsonOpt().quotKey(false);

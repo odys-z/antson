@@ -938,6 +938,16 @@ public class LangExt {
         return -1;
     }
 
+    public static <T> int indexOf(List<T> arr, T target) {
+        for (int index = 0; index < arr.size(); index++) {
+            if (arr.get(index) == target
+                    || target instanceof String && eq((String)arr.get(index), (String) target)) {
+                return index;
+            }
+        }
+        return -1;
+    }
+
     /**
      * swap array elemetns 
      * @param <T>

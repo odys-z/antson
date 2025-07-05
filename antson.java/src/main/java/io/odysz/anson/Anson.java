@@ -507,7 +507,10 @@ public class Anson implements IJsonable {
 	public static void appendPair(StringBuffer sbuf, String n, Object v, Class<?> parentCls, JsonOpt opt)
 			throws IOException, AnsonException {
 		boolean forceQuote = opt == null || opt.quotKey();
-		if (v instanceof IJsonable)
+		if (v == null)
+			sbuf.append( forceQuote ? "\"" + n + "\"" : n)
+				.append(": null");
+		else if (v instanceof IJsonable)
 			((Anson)v).toJson(sbuf);
 		else if (!v.getClass().isPrimitive() && (parentCls == null || !parentCls.equals(v.getClass())))
 			sbuf.append( forceQuote ? "\"" + n + "\"" : n)

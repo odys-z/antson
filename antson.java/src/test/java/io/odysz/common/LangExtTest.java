@@ -52,7 +52,6 @@ class LangExtTest {
 		assertTrue (bool(1));
 		assertTrue (bool(0.1f));
 	}
-
 	
 	@Test
 	void testIndexOf() {
@@ -61,8 +60,10 @@ class LangExtTest {
 
 		assertEquals(-1, indexOf(new Integer[] {}, 0));
 		assertEquals(1, indexOf(new Integer[] {1, 0}, 0));
-	}
 
+		assertEquals(1, indexOf(new ArrayList<String>() {{add("a");}; {add("b");}; {add("c");};}, "b"));
+		assertEquals(-1, indexOf(new ArrayList<String>() {}, "b"));
+	}
 
 	@Test
 	void testIsNull() {

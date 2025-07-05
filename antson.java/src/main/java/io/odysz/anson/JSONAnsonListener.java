@@ -992,8 +992,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				"Field Type: %2$s,\nCause: %3$s\tMessage: %4$s\n",
 				v, f.getType().getName(),
 				cause == null ? "null" : cause.getClass().getName(), cause == null ? t.getMessage() : "null");
+		}
 	}
-}
 
 	/**
 	 * Set primary type values.
@@ -1043,5 +1043,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		if (factorys == null)
 			factorys = new HashMap<Class<?>, JsonableFactory>();
 		factorys.put(jsonable, factory);
+	}
+	
+	public static boolean hasFactory(Class<?> jsonable) {
+		return factorys != null && factorys.containsKey(jsonable);
 	}
 }
