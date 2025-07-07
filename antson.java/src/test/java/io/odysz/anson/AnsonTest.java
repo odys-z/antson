@@ -1,5 +1,6 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt.f;
 import static io.odysz.common.LangExt.len;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -70,7 +71,7 @@ class AnsonTest {
 		bos = new ByteArrayOutputStream(); 
 		a2.toBlock(bos, opt);
 		s = bos.toString(StandardCharsets.UTF_8.name());
-		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"e\\n0\", \"e1\\r\\nvalue\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
+		assertEquals("{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, d: 0.0, f: 0.0, l: 0, m: [\"e\\n0\", \"e1\\r\\nvalue\", \"{\\\"msg\\\": \\\"george\\\"}\"]}\n", s);
 
 		AnsTList cll = new AnsTList();
 		cll.lst.add("A");
@@ -158,10 +159,11 @@ class AnsonTest {
 			new String[] {"2.0"},
 			new String[] {"3.0", "3.1"},
 			new String[] {} };
+		a2d.range = new long[] {0, 99};
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(); 
 		a2d.toBlock(bos, opt);
 		String s = bos.toString(StandardCharsets.UTF_8.name());
-		String expect = "{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []]}\n";
+		String expect = "{type: io.odysz.anson.Ans2dArr, strs: [[\"0.0\", \"0.1\"], [\"1.0\", \"1.1\", \"1.2\"], [\"2.0\"], [\"3.0\", \"3.1\"], []], range: [0, 99]}\n";
 		assertEquals(expect, s);
 		
 		a2d = (Ans2dArr) Anson.fromJson(expect);
@@ -170,6 +172,9 @@ class AnsonTest {
 		assertEquals("1.1", a2d.strs[1][1]);
 		assertEquals("2.0", a2d.strs[2][0]);
 		assertEquals("3.1", a2d.strs[3][1]);
+
+		assertEquals(0,   a2d.range[0]);
+		assertEquals(99,  a2d.range[1]);
 	}
 
 	@SuppressWarnings("unused")
@@ -284,10 +289,10 @@ class AnsonTest {
 			lst.toBlock(bos, opt);
 			String s = bos.toString(StandardCharsets.UTF_8.name());
 			String expect = "{type: io.odysz.anson.AnsTStrsList, "
-					+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 0\"]}\n"
-					+ ", {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"0 0 0 1\"]}\n], "
+					+ "dim4: [[[[{type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, d: 0.0, f: 0.0, l: 0, m: [\"0 0 0 0\"]}\n"
+					+ ", {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, d: 0.0, f: 0.0, l: 0, m: [\"0 0 0 1\"]}\n], "
 					+ "[null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], "
-					+ "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, m: [\"1 1 1 1\"]}\n"
+					+ "[null, {type: io.odysz.anson.AnsT2, b: false, s: 0, c: 0, d: 0.0, f: 0.0, l: 0, m: [\"1 1 1 1\"]}\n"
 					+ "]]]], lst3d: [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]], "
 					+ "lst: [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]}\n";
 			assertEquals(expect, s);
@@ -308,7 +313,7 @@ class AnsonTest {
 			assertEquals("0-0-0", l.cell(0, 0, 0));
 			assertEquals("0-1-0", l.cell(0, 1, 0));
 			assertEquals("1-0-0", l.cell(1, 0, 0));
-			assertEquals(1.5f, l.cell(1, 0, 1));
+			assertEquals(1.5d, l.cell(1, 0, 1));
 	
 			assertEquals("0 0 0 0", ((AnsT2)l.cell(0, 0, 0, 0)).m[0]);
 			assertEquals("0 0 0 1", ((AnsT2)l.cell(0, 0, 0, 1)).m[0]);
@@ -324,14 +329,23 @@ class AnsonTest {
 					+ "          \"b\": false,\n"
 					+ "          \"s\": 0,\n"
 					+ "          \"c\": 0,\n"
+			        + "          \"d\": 0.0,\n"
+			        + "          \"f\": 0.0,\n"
+			        + "          \"l\": 0,\n"
 					+ "          \"m\": [\"0 0 0 0\"]}, { \"type\": \"io.odysz.anson.AnsT2\",\n"
 					+ "          \"b\": false,\n"
 					+ "          \"s\": 0,\n"
 					+ "          \"c\": 0,\n"
+			        + "          \"d\": 0.0,\n"
+			        + "          \"f\": 0.0,\n"
+			        + "          \"l\": 0,\n"
 					+ "          \"m\": [\"0 0 0 1\"]}], [null, null]], [[null, null], [null, null]]], [[[null, null], [null, null]], [[null, null], [null, { \"type\": \"io.odysz.anson.AnsT2\",\n"
 					+ "          \"b\": false,\n"
 					+ "          \"s\": 0,\n"
 					+ "          \"c\": 0,\n"
+			        + "          \"d\": 0.0,\n"
+			        + "          \"f\": 0.0,\n"
+			        + "          \"l\": 0,\n"
 					+ "          \"m\": [\"1 1 1 1\"]}]]]],\n"
 					+ "  \"lst3d\": [[[\"0-0-0\", \"\"], [\"0-1-0\"]], [[\"1-0-0\", 1.5], []]],\n"
 					+ "  \"lst\": [[], [\"0,0\", \"0,1\", \"0,2\"], [\"1,0\", \"1,1\", \"1,2\"], null, []]\n"
@@ -355,11 +369,16 @@ class AnsonTest {
 		assertEquals("v0\n.\r\n1", anson.ver);
 		assertEquals(null, anson.m);
 
-		AnsT2 anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\\nvalue\", \"e2\"]}");
+		AnsT2 anson2 = (AnsT2) Anson.fromJson(
+				"{type:io.odysz.anson.AnsT2, b: true, c: \"c\", m: [\"e1\\nvalue\", \"e2\"]," + 
+				f("d: %s, f: %s, l: %s}", Double.MAX_VALUE, Float.MIN_VALUE, Long.MAX_VALUE));
 		assertEquals(true, anson2.b);
 		assertEquals('c', anson2.c);
 		assertEquals("e1\nvalue", anson2.m[0]);
 		assertEquals("e2", anson2.m[1]);
+		assertEquals(Double.MAX_VALUE, anson2.d);
+		assertEquals(Float.MIN_VALUE, anson2.f);
+		assertEquals(Long.MAX_VALUE, anson2.l);
 
 		anson2 = (AnsT2) Anson.fromJson("{type:io.odysz.anson.AnsT2, m: ["
 				+ "\"Cannot create PoolableConnectionFactory (ORA-28001: xxx\\n)\", "

@@ -1,6 +1,8 @@
 package io.odysz.anson;
 
+import static io.odysz.common.LangExt.eq;
 import static io.odysz.common.LangExt.isblank;
+import static io.odysz.common.LangExt.indexIn;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -510,26 +512,38 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param top parsing context. Since 0.9.90, this method also set value type into it.
 	 * @param ctx
 	 * @return simple value (STRING, NUMBER, 'true', 'false', null)
+	 * @throws ReflectiveOperationException 
 	 */
 	private static Object figureJsonVal(ParsingCtx top, String txt, ValueContext ctx) {
 		// String txt = ctx.getText();
 		if (txt == null)
 			return null;
-		else if (ctx.NUMBER() != null)
+		else if (ctx.NUMBER() != null) {
 			try {
+				// 0.9.120 create the value by top.valType,
+				// because type is more accurate if figured out by field type, when entering a pair. This happens when enter an array.
+				if (top.valType != null)
+					return createPrimitiveValue(top.valType, txt);
+
 				top.valType = Integer.class.getName();
 				return Integer.valueOf(txt);
 			}
 			catch (Exception e) {
+				// Tolerate multiple value types in a list / array 
+				// Figure value type from string format
+				// number -> long & double, then round to int/short and float by user
 				try {
-					top.valType = Float.class.getName();
-					return Float.valueOf(txt);
+//					top.valType = Float.class.getName();
+//					return Float.valueOf(txt);
+					top.valType = Long.class.getName();
+					return Long.valueOf(txt);
 				}
 				catch (Exception e1) {
 					top.valType = Double.class.getName();
 					return Double.valueOf(txt);
 				}
 			}
+		}
 		else if (ctx.STRING() != null) {
 			top.valType = String.class.getName();
 			return getStringVal(ctx.STRING(), txt);
@@ -549,6 +563,31 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				|| txt.toLowerCase().endsWith("\"type\"")))
 			return txt;
 		return null;
+	}
+
+	/**
+	 * @since 0.9.83
+	 * @param valType
+	 * @param vstr
+	 * @param ctx
+	 * @return val
+	 */
+	private Object constructVal(ParsingCtx top, String vstr, ValueContext ctx) {
+		if (vstr == null)
+			return null;
+		if (top != null && top.valType != null) {
+			try {
+				Class<?> clz = Class.forName(top.valType);
+				if (clz.isAssignableFrom(String.class)) return vstr;
+               	Constructor<?> ctor = clz.getConstructor(new Class<?>[] {String.class});
+				return ctor.newInstance(vstr);
+			} catch (Exception e) {
+				Utils.warnT(new Object() {}, "Can't parse %s, type %s", vstr, top.valType);
+				return vstr;
+			}
+		}
+		else 
+			return figureJsonVal(top, vstr, ctx);
 	}
 
 	@Override
@@ -793,57 +832,30 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				}
 				top.parsedVal = null;
 			}
-			else //if (top.isInMap()) {
-				// parsed Value can be already gotten when exit array
-				if (top.parsedVal == null) {
-					/** NOTE semantic-transact v1.3.0 25 Aug 2021 - Doc Task # 001
-					 *  When client upload json, it's automatically escaped.
-					 *  This makes DB data (or server stored data) is mixed with escaped and un-escaped strings.
-					 *  When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
-					 *  The following is experimental to keep server side data be consists with raw data.
-					 *  
-					 *  befor change:
-					 *  top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
-					 */
-					top.parsedVal = Anson.unescape(getStringVal(ctx.STRING(), ctx.getText()));
-					
-					// v 0.9.83
-					if (top.valType == null && top.enclosing instanceof HashMap<?, ?>
-						&& ((HashMap<?, ?>)top.enclosing).size() == 0
-						&& top.parsedVal instanceof String)
-						// v 0.9.85: try figure out numbers for missing @AnsonField annotation.
-						top.parsedVal = figureJsonVal(top, (String) top.parsedVal, ctx);
-					else // if (top.valType != null && top.parsedVal instanceof String) 
-						// top.parsedVal = constructVal(top.valType, (String)top.parsedVal, ctx);
-						top.parsedVal = constructVal(top, (String)top.parsedVal, ctx);
-				}
-			// }
-		}
-	}
 
-	/**
-	 * @since 0.9.83
-	 * @param valType
-	 * @param vstr
-	 * @param ctx
-	 * @return val
-	 */
-	private Object constructVal(ParsingCtx top, String vstr, ValueContext ctx) {
-		if (vstr == null)
-			return null;
-		if (top != null && top.valType != null) {
-			try {
-				Class<?> clz = Class.forName(top.valType);
-				if (clz.isAssignableFrom(String.class)) return vstr;
-               	Constructor<?> ctor = clz.getConstructor(new Class<?>[] {String.class});
-				return ctor.newInstance(vstr);
-			} catch (Exception e) {
-				Utils.warnT(new Object() {}, "Can't parse %s, type %s", vstr, top.valType);
-				return vstr;
+			// parsed Value can be already gotten when exit array
+			else if (top.parsedVal == null) {
+				/** NOTE semantic-transact v1.3.0 25 Aug 2021 - Doc Task # 001
+				 *  When client upload json, it's automatically escaped.
+				 *  This makes DB data (or server stored data) is mixed with escaped and un-escaped strings.
+				 *  When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
+				 *  The following is experimental to keep server side data be consists with raw data.
+				 *  
+				 *  befor change:
+				 *  top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
+				 */
+				top.parsedVal = Anson.unescape(getStringVal(ctx.STRING(), ctx.getText()));
+				
+				// v 0.9.83
+				if (top.valType == null && top.enclosing instanceof HashMap<?, ?>
+					&& ((HashMap<?, ?>)top.enclosing).size() == 0
+					&& top.parsedVal instanceof String)
+					// v 0.9.85: try figure out numbers for missing @AnsonField annotation.
+					top.parsedVal = figureJsonVal(top, (String) top.parsedVal, ctx);
+				else
+					top.parsedVal = constructVal(top, (String)top.parsedVal, ctx);
 			}
 		}
-		else 
-			return figureJsonVal(top, vstr, ctx);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -1003,31 +1015,35 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param obj
 	 * @param f
 	 * @param v
-	 * @throws RuntimeException
 	 * @throws ReflectiveOperationException
-	 * @throws AnsonException
+	 * @throws AnsonException unsupported primitive type
 	 */
 	private static void setPrimitive(IJsonable obj, Field f, String v)
-			throws RuntimeException, ReflectiveOperationException, AnsonException {
+			throws ReflectiveOperationException {
+			f.set(obj, createPrimitiveValue(f, v));
+	}
+
+	private static Object createPrimitiveValue(Field f, String v)
+			throws ReflectiveOperationException {
 		if (f.getType() == int.class || f.getType() == Integer.class)
-			f.set(obj, Integer.valueOf(v));
+			return Integer.valueOf(v);
 		else if (f.getType() == float.class || f.getType() == Float.class)
-			f.set(obj, Float.valueOf(v));
+			return Float.valueOf(v);
 		else if (f.getType() == double.class || f.getType() == Double.class)
-			f.set(obj, Double.valueOf(v));
+			return Double.valueOf(v);
 		else if (f.getType() == long.class || f.getType() == Long.class)
-			f.set(obj, Long.valueOf(v));
+			return Long.valueOf(v);
 		else if (f.getType() == short.class || f.getType() == Short.class)
-			f.set(obj, Short.valueOf(v));
+			return Short.valueOf(v);
 		else if (f.getType() == byte.class || f.getType() == Byte.class)
-			f.set(obj, Byte.valueOf(v));
+			return Byte.valueOf(v);
 		else if (f.getType() == boolean.class || f.getType() == Boolean.class)
-			f.set(obj, Boolean.valueOf(v));
+			return Boolean.valueOf(v);
 		else if (f.getType() == char.class) {
 			char c = v != null && v.length() > 0 ? v.charAt(0) == '"' ? v.charAt(1) : v.charAt(0) : '0';
 			if (verbose)
 				Utils.warn("Guessing json string (%s) as a char: %s", v, c);
-			f.set(obj, c);
+			return c;
 		}
 		else
 			// what's else?
@@ -1035,6 +1051,34 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					f.getType().getName(), f.getName());
 	}
 
+	private static Object createPrimitiveValue(String ftype, String v)
+			throws ReflectiveOperationException {
+		if (indexIn(ftype, "int", "Integer", "java.lang.Integer") >= 0)
+			return Integer.valueOf(v);
+		else if (indexIn(ftype, "float", "Float", "java.lang.Float") >= 0)
+			return Float.valueOf(v);
+		else if (indexIn(ftype, "double", "Double", "java.lang.Double") >= 0)
+			return Double.valueOf(v);
+		else if (indexIn(ftype, "long", "Long", "java.lang.Long") >= 0)
+			return Long.valueOf(v);
+		else if (indexIn(ftype, "short", "Short", "java.lang.Short") >= 0)
+			return Short.valueOf(v);
+		else if (indexIn(ftype, "byte", "Byte", "java.lang.Byte") >= 0)
+			return Byte.valueOf(v);
+		else if (indexIn(ftype, "boolean", "Boolean", "java.lang.Boolean") >= 0)
+			return Boolean.valueOf(v);
+		else if (eq(ftype, "char")) {
+			char c = v != null && v.length() > 0 ? v.charAt(0) == '"' ? v.charAt(1) : v.charAt(0) : '0';
+			if (verbose)
+				Utils.warn("Guessing json string (%s) as a char: %s", v, c);
+			return c;
+		}
+		else
+			// what's else?
+			throw new AnsonException(0, "Unsupported field type: %s (value %s)", ftype, v);
+	}
+
+	
 	/**Register a factory of IJsonable implementation.
 	 * @param jsonable
 	 * @param factory

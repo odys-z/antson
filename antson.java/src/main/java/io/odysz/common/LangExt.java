@@ -920,6 +920,10 @@ public class LangExt {
 		return ("," + str + ",").indexOf("," + s + ",");
 	}
 	
+	public static int indexIn(String target, String...ins) {
+		return isNull(ins) ? -1: indexOf(ins, target);
+	}
+	
     /**
      * Test is {@code target} in {@code arr}? Uses for-loop to find the index.
      * @param arr array
@@ -1406,7 +1410,43 @@ public class LangExt {
 		return str;
 	}
 
-	public static <T> void musteq (T a, T b, String ...msg) {
+	/**
+	 * @since 0.9.120
+	 * @param a
+	 * @param b
+	 * @param msg
+	 */
+	public static void musteq (long a, long b, String ...msg) {
+		if (a != b)
+			throw new NullPointerException(isNull(msg)
+					? f("a, %s != b, %s", a, b)
+					: len(msg) > 0
+					? f6(msg)
+					: msg[0]);
+	}
+	
+	/**
+	 * @since 0.9.120
+	 * @param a
+	 * @param b
+	 * @param msg
+	 */
+	public static void musteq (int a, int b, String ...msg) {
+		if (a != b)
+			throw new NullPointerException(isNull(msg)
+					? f("a, %s != b, %s", a, b)
+					: len(msg) > 0
+					? f6(msg)
+					: msg[0]);
+	}
+
+	/**
+	 * @since 0.9.120
+	 * @param a
+	 * @param b
+	 * @param msg
+	 */
+	public static void musteq (float a, float b, String ...msg) {
 		if (a != b)
 			throw new NullPointerException(isNull(msg)
 					? f("a, %s != b, %s", a, b)
@@ -1425,6 +1465,22 @@ public class LangExt {
 					: msg[0]);
 	}
 	
+	/**
+	 * @since 0.9.116
+	 * @param <T>
+	 * @param a
+	 * @param b
+	 * @param msg
+	 */
+	public static <T> void musteq (T a, T b, String ...msg) {
+		if (a != b)
+			throw new NullPointerException(isNull(msg)
+					? f("a, %s != b, %s", a, b)
+					: len(msg) > 0
+					? f6(msg)
+					: msg[0]);
+	}
+
 	public static int mustGe (int v, int must, String... msg) {
 		if (v < must)
 			throw new NullPointerException(f6(msg));
@@ -1488,5 +1544,11 @@ public class LangExt {
 		if (a.floatValue() <= b.floatValue())
 			throw new NullPointerException(f6(msg));
 	}
+
+	public static void mustge(Number a, Number b, String...msg) {
+		if (a.floatValue() < b.floatValue())
+			throw new NullPointerException(f6(msg));
+	}
+
 }
 
