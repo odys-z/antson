@@ -239,6 +239,14 @@ class LangExtTest {
 	void testStarts() {
 		assertTrue(prefixOneOf("v1234w", new String[] { "w1234", "v1234" }));
 		assertFalse(prefixOneOf("v1234w", new String[] { "1v", "v1234wx" }));
+		
+		assertFalse(startWith("", "1"));
+		assertFalse(startWith("abc", "1"));
+		assertTrue(startWith("1abc", "1"));
+		assertFalse(startWith(" 1abc", "1"));
+		assertFalse(startWith(" 1", "1"));
+		assertTrue(startWith(" ", ""));
+		assertTrue(startWith(" ", " "));
 	}
 	
 	@Test

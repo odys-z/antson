@@ -570,6 +570,17 @@ public class LangExt {
 
 		return prefix + dest;
 	}
+	
+	/**
+	 * Is s starts with 'with'?
+	 * @param s
+	 * @param with
+	 * @return yes or no
+	 * @since 0.9.121
+	 */
+	public static boolean startWith(String s, String with) {
+		return isblank(with) || !isblank(s) && s.startsWith(with);
+	}
 
 	///////////////////        copyright Apache.org       ////////////////////////////////
 	// https://github.com/apache/commons-lang/blob/master/src/main/java/org/apache/commons/lang3/StringUtils.java
@@ -1431,7 +1442,7 @@ public class LangExt {
 	 * @param b
 	 * @param msg
 	 */
-	public static void musteq (int a, int b, String ...msg) {
+	public static void musteqi (int a, int b, String ...msg) {
 		if (a != b)
 			throw new NullPointerException(isNull(msg)
 					? f("a, %s != b, %s", a, b)
@@ -1446,7 +1457,7 @@ public class LangExt {
 	 * @param b
 	 * @param msg
 	 */
-	public static void musteq (float a, float b, String ...msg) {
+	public static void musteqf (float a, float b, String ...msg) {
 		if (a != b)
 			throw new NullPointerException(isNull(msg)
 					? f("a, %s != b, %s", a, b)
