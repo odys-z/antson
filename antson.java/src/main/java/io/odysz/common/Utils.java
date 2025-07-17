@@ -755,5 +755,14 @@ public class Utils {
 		
 		logix(lst);
 	}
+
+	public static void logArr2d(int[][]... arrs) {
+		for (int[][] arr2d : arrs) 
+			logi(Stream.of(arr2d)
+				.map(arr -> IntStream.of(arr)
+						.mapToObj(String::valueOf)
+						.collect(Collectors.joining(", ", "[", "]")))
+				.collect(Collectors.joining(", ", "[", "]")));
+	}
 	
 }
