@@ -1379,17 +1379,6 @@ public class LangExt {
 	 * @since 0.9.115 msg length is not limited to 6 anymore.
 	 */
 	public static String f6(String[] msg) {
-//		return len(msg) > 5
-//			? f(msg[0], msg[1], msg[2], msg[3], msg[4], msg[5])
-//			: len(msg) > 4
-//			? f(msg[0], msg[1], msg[2], msg[3], msg[4])
-//			: len(msg) > 3
-//			? f(msg[0], msg[1], msg[2], msg[3])
-//			: len(msg) > 2
-//			? f(msg[0], msg[1], msg[2])
-//			: len(msg) > 1
-//			? f(msg[0], msg[1])
-//			: _0(msg);
 		return len(msg) > 1
 			? f(msg[0], (Object[])Arrays.copyOfRange(msg, 1, msg.length))
 			: _0(msg);

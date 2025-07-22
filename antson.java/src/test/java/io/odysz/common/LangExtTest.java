@@ -422,6 +422,13 @@ class LangExtTest {
 		} catch (NullPointerException e) {}
 
 		assertEquals(-1, mustGe(-1, -2, "-1 >= -2"));
+		
+		String a = "a";
+		musteq("a", a);
+		try {
+			musteq("ab", a);
+			fail("Expecting an exception.");
+		} catch (NullPointerException e) {}
 	}
 	
 	@Test
