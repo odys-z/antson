@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.124</version>
+  <version>0.9.126</version>
   <packaging>jar</packaging>
   <name>antson</name>
 
@@ -139,7 +139,7 @@
 	  <plugin>
 		  <groupId>org.sonatype.central</groupId>
 		  <artifactId>central-publishing-maven-plugin</artifactId>
-		  <version>0.7.0</version>
+		  <version>0.8.0</version>
 		  <extensions>true</extensions>
 		  <configuration>
 			<publishingServerId>central</publishingServerId>

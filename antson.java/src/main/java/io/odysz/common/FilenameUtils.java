@@ -1803,4 +1803,14 @@ public class FilenameUtils {
         return true;
     }
 
+    /**
+     * Convert the path relative to current working path to an absolute path.
+     * @param relpath
+     * @return the absolute path
+     * @since 0.9.126
+     */
+	public static String rel2abs(String... relpath) {
+		return normalize(concat(new File(".").getAbsolutePath(), relpath));
+	}
+
 }

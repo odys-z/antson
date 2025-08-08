@@ -1023,7 +1023,7 @@ public class LangExt {
 			: _0(msg)
 			: null;
 	}
-
+	
 	/**
 	 * Get the first element in {@link args}. Typically used to forward optional args.
 	 * @param <T>
@@ -1289,6 +1289,17 @@ public class LangExt {
 						.replaceAll("\\\\", "\\\\\\\\")
 						.replaceAll(sap, esc))
 				.collect(Collectors.joining(sep));
+	}
+
+	public static String joinUrl(boolean https, String ip, int port, String... subpaths) {
+		return f("%s://%s:%s%s",
+				https ? "https" : "http", ip, port == 0 ? 80 : port, 
+				isNull(subpaths) ? "" :
+				// jserv_album.startsWith("/") ? jserv_album : "/" + jserv_album);
+				Stream.of(subpaths)
+					.filter(sub -> !isblank(sub))
+					.map(sub -> sub.replaceAll("^\\/", "").replaceAll("\\/$", ""))
+					.collect(Collectors.joining("/", "/", "")));
 	}
 
 	/**

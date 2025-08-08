@@ -3,6 +3,7 @@ package io.odysz.common;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static io.odysz.common.LangExt.isblank;
+import static io.odysz.common.Utils.logi;
 
 import java.io.File;
 import org.junit.jupiter.api.Test;
@@ -87,4 +88,32 @@ class FilenameUtilsTest extends FilenameUtils {
 		 */
 	}
 
+	@Test
+	void testRelative2Abs() {
+		String dot = new File(".").getAbsolutePath();
+
+		String test = FilenameUtils.concat(dot, "testRelative2Abs");
+		logi(test);
+		assertPathEquals(test, rel2abs("testRelative2Abs"));
+
+		String test2 = FilenameUtils.concat(dot, "test", "2test.json");
+		logi(test2);
+		assertPathEquals(test2, rel2abs("test", "2test.json"));
+		
+		
+		String src_test = new File("src/test").getAbsolutePath();
+		logi("[%s]", src_test);
+
+		test = FilenameUtils.concat(src_test, "../../testRelative2Abs");
+		logi(test);
+		assertPathEquals(test, rel2abs("src/test", "../../testRelative2Abs"));
+		assertPathEquals(test, rel2abs("src/test", "..", "..", "testRelative2Abs"));
+
+		src_test = new File("src").getAbsolutePath();
+		logi("[%s]", src_test);
+		test2 = FilenameUtils.concat(src_test, "2test.json");
+		logi(test2);
+		assertPathEquals(test2, rel2abs("src/test", "../2test.json"));
+		assertPathEquals(test2, rel2abs("src/test", "..", "2test.json"));
+	}
 }

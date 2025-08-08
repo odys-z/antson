@@ -407,6 +407,18 @@ class LangExtTest {
 	}
 	
 	@Test
+	void testJoinUrl() {
+		assertEquals("https://127.0.0.1:8964", joinUrl(true, "127.0.0.1", 8964));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "jserv_album/"));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "/jserv_album"));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "/jserv_album/"));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "jserv_album"));
+
+		assertEquals("https://127.0.0.1:8964/jserv/album", joinUrl(true, "127.0.0.1", 8964, "jserv", "album"));
+		assertEquals("https://127.0.0.1:8964/jserv/album", joinUrl(true, "127.0.0.1", 8964, "jserv/", "/album"));
+	}
+
+	@Test
 	void testMusts() {
 		try {
 			assertEquals(0, mustGe(0, 1, "0 >= 1"));
