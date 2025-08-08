@@ -74,7 +74,7 @@
   <scm>
   	<connection>scm:git:git://github.com/odys-z/antson.git</connection>
   	<developerConnection>scm:git:odys-z@github.com:odys-z/antson.git</developerConnection>
-  	<url>https://github.com/odys-zgpg-plugin/antson</url>
+  	<url>https://github.com/odys-z/antson</url>
   	<tag>HEAD</tag>
   </scm>
 
@@ -201,7 +201,7 @@
 		-->
 		<groupId>org.apache.maven.plugins</groupId>
 		<artifactId>maven-gpg-plugin</artifactId>
-		<version>1.5</version>
+		<version>3.2.8</version>
 		<executions>
 			<execution>
 			  <id>antson</id>
@@ -209,14 +209,17 @@
 			  <goals>
 			  <goal>sign</goal>
 			  </goals>
-              <!--
 			  <configuration>
+			  <gpgArguments>
+				<arg>--pinentry-mode=loopback</arg>
+			  </gpgArguments>
+              <!--
 				  <gpgArguments>
 					  <arg>- -pinentry-mode</arg>
 					  <arg>loopback</arg>
 			  	  </gpgArguments>
-		  	  </configuration>
               -->
+		  	  </configuration>
 			</execution>
 		</executions>
 	  </plugin>
