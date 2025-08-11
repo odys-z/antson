@@ -143,6 +143,7 @@
 		  <extensions>true</extensions>
 		  <configuration>
 			<publishingServerId>central</publishingServerId>
+			<autoPublish>true</autoPublish>
 		  </configuration>
 	  </plugin>
 
@@ -212,6 +213,7 @@
 			  <configuration>
 			  <gpgArguments>
 				<arg>--pinentry-mode=loopback</arg>
+				<arg>--passphrase=${gpg.passphrase}</arg>
 			  </gpgArguments>
               <!--
 				  <gpgArguments>
