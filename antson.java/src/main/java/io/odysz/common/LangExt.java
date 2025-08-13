@@ -1291,15 +1291,43 @@ public class LangExt {
 				.collect(Collectors.joining(sep));
 	}
 
-	public static String joinUrl(boolean https, String ip, int port, String... subpaths) {
-		return f("%s://%s:%s%s",
-				https ? "https" : "http", ip, port == 0 ? 80 : port, 
-				isNull(subpaths) ? "" :
-				// jserv_album.startsWith("/") ? jserv_album : "/" + jserv_album);
-				Stream.of(subpaths)
-					.filter(sub -> !isblank(sub))
-					.map(sub -> sub.replaceAll("^\\/", "").replaceAll("\\/$", ""))
-					.collect(Collectors.joining("/", "/", "")));
+	/**
+	 * @since 0.9.127
+	 * @param https
+	 * @param ip
+	 * @param port
+	 * @param subpaths
+	 * @return http(s)://ip:port/subpath-1/...
+	 */
+	public static String joinurl_(boolean https, String ip, int port, String... subpaths) {
+//		return f("%s://%s:%s%s",
+//				https ? "https" : "http", ip, port == 0 ? 80 : port, 
+//				isNull(subpaths) ? "" :
+//				// jserv_album.startsWith("/") ? jserv_album : "/" + jserv_album);
+//				Stream.of(subpaths)
+//					.filter(sub -> !isblank(sub))
+//					.map(sub -> sub.replaceAll("^\\/", "").replaceAll("\\/$", ""))
+//					.collect(Collectors.joining("/", "/", "")));
+		return joinurl(https, ip, port, "", subpaths);
+	}
+
+	/**
+	 * @since 0.9.127
+	 * @param https
+	 * @param ip
+	 * @param port
+	 * @param rootpath
+	 * @param subpaths
+	 * @return http(s)://ip:port/rootpath/subpath-1/...
+	 */
+	public static String joinurl(boolean https, String ip, int port, String rootpath, String... subpaths) {
+		return Stream.concat(
+					Stream.of(f("%s://%s:%s", https ? "https" : "http", ip, port == 0 ? 80 : port), rootpath),
+					Stream.of(isNull(subpaths) ? new String[0] :subpaths))
+					// isNull(subpaths) ? null : Stream.of(subpaths))
+				.filter(sub -> !isblank(sub))
+				.map(sub -> sub.replaceAll("^\\/", "").replaceAll("\\/$", ""))
+				.collect(Collectors.joining("/"));
 	}
 
 	/**
@@ -1310,6 +1338,15 @@ public class LangExt {
 	 */
 	public static String compoundVal(String... vals) {
 		return joinEsc("\n", "\\n", vals);
+	}
+	
+	public static String[] concatArr(String[] moi, String[] toi) {
+		int ma  = len(moi);
+		int ton = len(toi);
+		String[] ils = new String[ma + ton];
+		if (moi != null) System.arraycopy(moi, 0, ils, 0, ma);
+		if (toi != null) System.arraycopy(toi, 0, ils, ma, ton);
+		return ils;
 	}
 	
 	/**

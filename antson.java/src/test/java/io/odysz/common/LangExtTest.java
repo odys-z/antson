@@ -1,7 +1,7 @@
 package io.odysz.common;
 
 import static io.odysz.common.LangExt.*;
-
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -153,6 +153,16 @@ class LangExtTest {
 		assertFalse(eqs("a", "a", "a"));
 		assertFalse(eqs("a", "a", "a", "b"));
 		assertTrue(eqs("a", "a", "a", "a"));
+	}
+	
+	@Test
+	void testConcatArr() {
+		assertArrayEquals(new String[] {"a", "b"}, concatArr(new String[] {"a"}, new String[] {"b"}));
+		assertArrayEquals(new String[] {"a", "b"}, concatArr(new String[] {}, new String[] {"a", "b"}));
+		assertArrayEquals(new String[] {"a", "b"}, concatArr(null, new String[] {"a", "b"}));
+		assertArrayEquals(new String[] {"a"}, concatArr(new String[] {"a"}, null));
+		assertArrayEquals(new String[] {}, concatArr(null, null));
+		assertArrayEquals(new String[] {}, concatArr(new String[] {}, new String[] {}));
 	}
 
 	@Test
@@ -408,14 +418,14 @@ class LangExtTest {
 	
 	@Test
 	void testJoinUrl() {
-		assertEquals("https://127.0.0.1:8964", joinUrl(true, "127.0.0.1", 8964));
-		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "jserv_album/"));
-		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "/jserv_album"));
-		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "/jserv_album/"));
-		assertEquals("https://127.0.0.1:8964/jserv_album", joinUrl(true, "127.0.0.1", 8964, "jserv_album"));
+		assertEquals("https://127.0.0.1:8964", joinurl_(true, "127.0.0.1", 8964));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinurl(true, "127.0.0.1", 8964, "jserv_album/"));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinurl(true, "127.0.0.1", 8964, "/jserv_album"));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinurl(true, "127.0.0.1", 8964, "/jserv_album/"));
+		assertEquals("https://127.0.0.1:8964/jserv_album", joinurl(true, "127.0.0.1", 8964, "jserv_album"));
 
-		assertEquals("https://127.0.0.1:8964/jserv/album", joinUrl(true, "127.0.0.1", 8964, "jserv", "album"));
-		assertEquals("https://127.0.0.1:8964/jserv/album", joinUrl(true, "127.0.0.1", 8964, "jserv/", "/album"));
+		assertEquals("https://127.0.0.1:8964/jserv/album", joinurl(true, "127.0.0.1", 8964, "jserv", "album"));
+		assertEquals("https://127.0.0.1:8964/jserv/album", joinurl(true, "127.0.0.1", 8964, "jserv/", "/album"));
 	}
 
 	@Test

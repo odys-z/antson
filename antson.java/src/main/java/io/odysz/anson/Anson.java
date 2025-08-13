@@ -254,7 +254,7 @@ public class Anson implements IJsonable {
 
 			if (quote)
 				stream.write('\"');
-			stream.write(escape(k.toString(), opts));
+			stream.write(escape(k == null ? "null" : k.toString(), opts));
 			if (quote)
 				stream.write(new byte[] {'\"', ':', ' '});
 			else
