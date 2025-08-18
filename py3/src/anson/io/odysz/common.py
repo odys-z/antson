@@ -8,8 +8,13 @@ import sys
 from re import match
 from typing import TextIO, Optional, TypeVar, Union
 
+
 T = TypeVar('T')
 
+passwd_allow_ext = ' @#!$%^&*()_+-='
+'''
+    allowed chars in addition to alpha numerics for password.
+'''
 
 class LangExt:
     '''
@@ -35,6 +40,10 @@ class LangExt:
     @staticmethod
     def ifnull(a: T, b: T) -> T:
         return b if a is None else a
+
+    @staticmethod
+    def ifblank(a: str, b: str) -> str:
+        return b if len(a) == 0 else a
 
     @classmethod
     def len(cls, obj):
@@ -62,6 +71,45 @@ class LangExt:
             return obj.toBlock()
         else:
             return str(obj)
+
+    @staticmethod
+    def musteqs(a: str, b: str, msg = None):
+        if a != b:
+            from .anson import AnsonException
+            raise AnsonException(f'{a} != {b}' if msg == None else msg)
+
+    @staticmethod
+    def only_wordextlen(likely: str, ext={}, minlen = 0, maxlen = -1):
+        if maxlen >= 0 and len(likely) > maxlen:
+            from .anson import AnsonException
+            raise AnsonException(f'len {likely[0: 10]} > {maxlen}')
+
+        if minlen > 0 and len(likely) < minlen:
+            from .anson import AnsonException
+            raise AnsonException(0, f'len {likely[0:10]} < {minlen}')
+
+        for c in likely:
+            if not c.isalnum() and c not in ext:
+                from .anson import AnsonException
+                raise AnsonException(0, f'Not allowed char: {c}')
+        return True
+
+
+    @staticmethod
+    def only_wordtlen(likely: str, minlen=0, maxlen=-1):
+        return LangExt.only_wordextlen(likely, minlen=minlen, maxlen=maxlen)
+
+    @staticmethod
+    def only_passwdlen(likely: str, minlen=0, maxlen=-1):
+        '''
+        String likely mus only an alphanumeric word and with length in between [minlen, maxlen].
+        :param likely:
+        :param minlen:
+        :param maxlen:
+        :return: likely
+        '''
+        return LangExt.only_wordextlen(likely, ext=passwd_allow_ext, minlen=minlen, maxlen=maxlen)
+
 
 def log(out: Optional[TextIO], templt: str, *args):
     try:
