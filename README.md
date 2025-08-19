@@ -3,7 +3,6 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/)
 [![PyPI version](https://img.shields.io/pypi/v/anson.py3.svg)](https://pypi.org/project/anson.py3)
-[![NuGet version](https://badge.fury.io/nu/Antson.CSharp.svg)](https://badge.fury.io/nu/Antson.CSharp)
 [![License](https://img.shields.io/badge/license-MIT-blue)](./LICENSE)
 
 # What's Antson

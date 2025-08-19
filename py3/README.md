@@ -1,9 +1,12 @@
+
+[![PyPI version](https://img.shields.io/pypi/v/anson.py3.svg)](https://pypi.org/project/anson.py3)
+
 # Anson.py3
 
 Json (de)serialize module in Python 3.
 
 ```code
-from ansons.anson import Anson
+from anson.io.odysz.anson import Anson
 ```
 
 # Install from testpypi
