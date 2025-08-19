@@ -4,7 +4,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
-  <version>0.9.126</version>
+  <version>0.9.127</version>
   <packaging>jar</packaging>
   <name>antson</name>
 
@@ -212,15 +212,9 @@
 			  </goals>
 			  <configuration>
 			  <gpgArguments>
-				<arg>--pinentry-mode=loopback</arg>
-				<arg>--passphrase=${gpg.passphrase}</arg>
+				  <arg>--pinentry-mode=loopback</arg>
+				  <arg>--passphrase=${gpg.passphrase}</arg>
 			  </gpgArguments>
-              <!--
-				  <gpgArguments>
-					  <arg>- -pinentry-mode</arg>
-					  <arg>loopback</arg>
-			  	  </gpgArguments>
-              -->
 		  	  </configuration>
 			</execution>
 		</executions>

@@ -336,7 +336,7 @@ class Anson(dict):
                 '.'.join([java_src_path, obj['type']]) if len(java_src_path) > 0 else obj['type'])
 
 
-class AnsonException:
+class AnsonException(Exception):
     type = "io.odysz.ansons.x.AnsonException"
     excode = 0
     err = ""
