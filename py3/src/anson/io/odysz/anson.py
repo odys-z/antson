@@ -1,15 +1,17 @@
+import importlib.util
 from dataclasses import dataclass, Field
 
 import json
 from enum import Enum
+from importlib.util import find_spec
 from numbers import Number
 from typing import Union, Optional
 
 from typing_extensions import get_args, get_origin
 
-from .common import LangExt, Utils
+from .common import Utils
 
-java_src_path: str = ''
+java_src_path: str = 'semanticshare'
 
 def class4Name(m, clssn: str) -> type:
     """
@@ -20,7 +22,20 @@ def class4Name(m, clssn: str) -> type:
     :param clssn:
     :return class type:
     """
-    module = __import__(m, fromlist=[clssn])
+    
+    def adjustMoudlename(m: str):
+        def has_module(name: str):
+            try:
+                return find_spec(name) is not None
+            except Exception as exp:
+                print(exp)
+            
+        if len(m) == 0:
+            return java_src_path if has_module(java_src_path) else ''
+        
+        return m if has_module(m) else f'{java_src_path}.{m}'
+    
+    module = __import__(adjustMoudlename(m), fromlist=[clssn])
     cls = getattr(module, clssn)
     cls.__type__=f'{m}.{clssn}'
     return cls
@@ -101,8 +116,10 @@ def instanceof(clsname: Union[str, type], props: dict):
 
 
 def parse_type_(obj) -> Union[str, None]:
+    # return obj['__type__'] if isinstance(obj, Anson) and hasattr(obj, '__type__') \
+    #     else f'{java_src_path}{"." if len(java_src_path) else ""}{obj["type"]}' if isinstance(obj, dict) and 'type' in obj.keys() else None
     return obj['__type__'] if isinstance(obj, Anson) and hasattr(obj, '__type__') \
-        else f'{java_src_path}{"." if len(java_src_path) else ""}{obj["type"]}' if isinstance(obj, dict) and 'type' in obj.keys() else None
+        else obj["type"] if isinstance(obj, dict) and 'type' in obj.keys() else None
 
 
 def parse_forward(ref: Union[type, str]):
@@ -311,29 +328,30 @@ class Anson(dict):
             return Anson.from_envelope(obj)
 
     @classmethod
-    def java_src(cls, src_root: str = '', requires: list = None):
+    def java_src(cls, src_root: str = 'src'):
         """
         Example
         -------
         To deserialize type: io.oz.syn.AppSettings for Python class src.io.oz.syn.AppSetting
         from synode.py3, call::
-            Anson.java_src('src', ['synode_py3']
+        ```python
+            Anson.java_src('src')
 
         :param src_root: e. g. 'src',
         :param requires
         """
-        if LangExt.len(requires) > 0:
-            from importlib.metadata import distribution
-            for req in requires:
-                distribution(req)
+        # if LangExt.len(requires) > 0:
+        #     from importlib.metadata import distribution
+        #     for req in requires:
+        #         distribution(req)
 
         global java_src_path
         java_src_path = src_root
 
     @classmethod
     def from_envelope(cls, obj: dict):
-        return Anson.from_obj(obj,
-                '.'.join([java_src_path, obj['type']]) if len(java_src_path) > 0 else obj['type'])
+        return Anson.from_obj(obj, obj['type'])
+                # '.'.join([java_src_path, obj['type']]) if len(java_src_path) > 0 else obj['type'])
 
 
 class AnsonException(Exception):

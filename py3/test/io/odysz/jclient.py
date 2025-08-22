@@ -78,7 +78,7 @@ class SessionClient:
                 return None
         except Exception as e:
             if err is not None:
-                err.err(MsgCode.exIo, e.message if hasattr(e, 'message') else str(e), None)
+                err(MsgCode.exIo, e.message if hasattr(e, 'message') else str(e), None)
             else:
                 raise e
 

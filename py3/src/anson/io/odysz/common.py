@@ -18,7 +18,7 @@ passwd_allow_ext = ' @#!$%^&*()_+-='
 
 class LangExt:
     '''
-    classdocs
+    Language helper
     '''
 
     def __init__(self, params):
@@ -28,13 +28,26 @@ class LangExt:
 
     @staticmethod
     def isblank(s, regex=None):
+        """
+        self.assertTrue(LangExt.isblank(None))
+        self.assertTrue(LangExt.isblank(''))
+        self.assertTrue(LangExt.isblank(' '))
+        self.assertTrue(LangExt.isblank('00', r'0+'))
+        self.assertTrue(LangExt.isblank('00', r'0'))
+        self.assertFalse(LangExt.isblank(' ', r'0'))
+        :param s:
+        :param regex:
+        :return: is it taken as blank string
+        """
         if (s == None):
             return True
         if isinstance(s, str):
-            if regex == None or s == "":
-                return len(s) == 0
+            # if regex == None or s == "":
+            #     return len(s) == 0
+            if regex == None:
+                return len(s.strip()) == 0
             else:
-                return match(s, regex)
+                return match(regex, s) is not None
         return False
 
     @staticmethod

@@ -42,9 +42,17 @@ class LangExtTest(unittest.TestCase):
   "pswd": "8964"
 }"}]''', LangExt.str([2, usr]))
 
+    def test_isblank(self):
+        self.assertTrue(LangExt.isblank(None))
+        self.assertTrue(LangExt.isblank(''))
+        self.assertTrue(LangExt.isblank(' '))
+        self.assertTrue(LangExt.isblank('00', r'0+'))
+        self.assertTrue(LangExt.isblank('00', r'0'))
+        self.assertFalse(LangExt.isblank(' ', r'0'))
 
 if __name__ == '__main__':
     unittest.main()
     t = LangExtTest()
     t.testStr()
+    t.test_isblank()
 

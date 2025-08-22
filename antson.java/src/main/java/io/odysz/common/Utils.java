@@ -474,6 +474,29 @@ public class Utils {
 	}
 
 	/**
+	 * Touch a file.
+	 * @since 0.9.128
+	 * @param filePath
+	 * @throws IOException
+	 */
+    public static void touchFile(String filePath, boolean... updateLastModified) throws IOException {
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            // Create the file if it doesn't exist
+            if (!file.createNewFile()) {
+                throw new IOException("Failed to create file: " + filePath);
+            }
+        }
+        else {
+            // Update the last modified time to the current time
+            if (LangExt.is(updateLastModified) && !file.setLastModified(System.currentTimeMillis())) {
+                throw new IOException("Failed to update last modified time for: " + filePath);
+            }
+        }
+    }
+
+	/**
 	 * Load text in the file located within the calling class' package path.
 	 * @since 0.9.26
 	 * @param filename
