@@ -16,18 +16,24 @@ syn_db = 'doc-jserv.db'
 sys_db = 'jserv-main.db'
 syntity_json = 'syntity.json'
 
-# web_port = 8900
-# webroot = 'WEBROOT_HUB'
 webroot_hub = 'WEBROOT_HUB'
 
+# TODO replace with JProtocol.urlroot
 jserv_url_path = 'jserv-album'
 """
-    /jserv-album
+    jserv-album
 """
 
+# TODO Move to io.odysz.semantic.jprotocol.JServUrl
 def getJservUrl(https: bool, hostport: str):
+    """
+    :param https:
+    :param hostport: ip-or-host:port, NOT ONLY PORT!
+    :return: http(s)://ip-or-host:port/jserv-album
+    """
     return f'{"https" if https else "http"}://{hostport}/{jserv_url_path}'
 
+# TODO Move to io.odysz.semantic.jprotocol.JServUrl
 def getJservOption(synode: str, hostp: str, https: bool) -> str:
     """
     :param synode:
@@ -71,7 +77,6 @@ class PortfolioException(Exception):
 
 @dataclass
 class AppSettings(Anson):
-    registpath: str
     envars: dict
     startHandler: [str]
     rootkey: str    # | None # test 3.12
@@ -90,7 +95,6 @@ class AppSettings(Anson):
 
     def __init__(self):
         super().__init__()
-        self.registpath = "registry-i"
         self.port = 8964
         self.webport = 8900
         self.reverseProxy = False
@@ -125,8 +129,6 @@ class AppSettings(Anson):
     @overload
     def Jservs(self, jservs: dict):
         ...
-        # self.jservs = parseJservs(jservs)
-        # return self
 
     @overload
     def Jservs(self) -> str:

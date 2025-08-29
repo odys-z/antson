@@ -1,3 +1,6 @@
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
+
 import importlib.util
 from dataclasses import dataclass, Field
 
@@ -183,7 +186,7 @@ class Anson(dict):
         return self.toBlock_(0, beautify)
 
     def toFile(self, path: str):
-        with open(path, 'w+') as jf:
+        with open(path, 'w+', encoding="utf-8") as jf:
             jf.write(self.toBlock(True))
 
     def toBlock_(self, ind: int, beautify, suggestype: type = None) -> str:

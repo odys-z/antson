@@ -17,7 +17,12 @@ class SynOrg(Anson):
     orgType: str
     ''' This is a tree table. '''
     parent: str
+
     fullpath: str
+    """
+    Ignored by toJson / toBlock in java
+    """
+
     market: str
     # web server url, configured in dictionary like: $WEB-ROOT:8888
     webroot: str
@@ -78,7 +83,7 @@ class AnRegistry(Anson):
     @staticmethod
     def load(path) -> 'AnRegistry':
         if Path(path).is_file():
-            with open(path, 'r') as file:
+            with open(path, 'r', encoding="utf-8") as file:
                 obj = json.load(file)
                 obj['__type__'] = AnRegistry().__type__
                 return Anson.from_envelope(obj)

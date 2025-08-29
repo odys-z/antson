@@ -73,3 +73,6 @@ in debug configuration, uncheck
     Add content roots to PYTHONPATH
 
 """
+
+import sys
+sys.stdout.reconfigure(encoding="utf-8")
