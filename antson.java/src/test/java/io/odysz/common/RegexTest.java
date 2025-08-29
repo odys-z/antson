@@ -68,32 +68,6 @@ class RegexTest {
 		}
 	}
 	
-//    // RFC2396: domainlabel   = alphanum | alphanum *( alphanum | "-" ) alphanum
-//    // Max 63 characters
-//    private static final String DOMAIN_LABEL_REGEX = "\\p{Alnum}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?";
-//
-//    // RFC2396 toplabel = alpha | alpha *( alphanum | "-" ) alphanum
-//    // Max 63 characters
-//    private static final String TOP_LABEL_REGEX = "\\p{Alpha}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?";
-//
-//    // RFC2396 hostname = *( domainlabel "." ) toplabel [ "." ]
-//    // Note that the regex currently requires both a domain label and a top level label, whereas
-//    // the RFC does not. This is because the regex is used to detect if a TLD is present.
-//    // If the match fails, input is checked against DOMAIN_LABEL_REGEX (hostnameRegex)
-//    // RFC1123 sec 2.1 allows hostnames to start with a digit
-//    private static final String DOMAIN_NAME_REGEX =
-//            "^(?:" + DOMAIN_LABEL_REGEX + "\\.)+(" + TOP_LABEL_REGEX + ")\\.?$";
-//
-//	static Regex domainreg = new Regex(DOMAIN_NAME_REGEX);
-//	
-//	static boolean validHost(String host) {
-//        final ArrayList<String> groups = domainreg.findGroups(host);
-//        if (groups != null && groups.size() > 0) 
-//            return LangExt.len(groups.get(0)) > 0;
-//
-//        return false;
-//	}
-	
 	static UrlValidator urlValidator = new UrlValidator();
 
 	@Test

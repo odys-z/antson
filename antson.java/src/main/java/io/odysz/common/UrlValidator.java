@@ -80,7 +80,7 @@ import java.util.regex.Pattern;
  *  Uniform Resource Identifiers (URI): Generic Syntax
  * </a>
  *
- * @since 1.4
+ * @since 0.9.130
  */
 public class UrlValidator implements Serializable {
 

@@ -1259,6 +1259,15 @@ public class LangExt {
 		return join(sep, "[", "]", vi);
 	}
 
+	/**
+	 * 
+	 * @param sep
+	 * @param beginning
+	 * @param ending
+	 * @param vi
+	 * @return string {beginning}{v0}{sep}...{ending}
+	 * @since 0.9.130
+	 */
 	public static String join(String sep, String beginning, String ending, Object ... vi) {
 		if (sep == null) sep = ",";
 		final String[] seps = new String[] {sep};
@@ -1270,10 +1279,24 @@ public class LangExt {
 				.collect(Collectors.joining(sep, beginning, ending));
 	}
 
+	/**
+	 * @param vi
+	 * @return string: [v0, ...] 
+	 * @since 0.9.130
+	 */
 	public static String joinList(List<?> vi) {
 		return joinList(",", "[", "]", vi);
 	}
 
+	/**
+	 * 
+	 * @param sep
+	 * @param beginning
+	 * @param ending
+	 * @param vi
+	 * @return string {beginning}{v0}{sep}...{ending}
+	 * @since 0.9.130
+	 */
 	public static String joinList(String sep, String beginning, String ending, List<?> vi) {
 		return vi == null ? null
 			: Stream.of(vi)

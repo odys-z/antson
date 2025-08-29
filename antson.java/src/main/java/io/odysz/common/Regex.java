@@ -126,12 +126,12 @@ public class Regex {
 	}
 
 	/**
-	 * @since 0.9.127
+	 * @since 0.9.130
 	 */
 	static Regex reg_isIPv6 = new Regex("^(([^:/?#]+):)?(//)?\\[(::[0-9A-Fa-f]{1,4})|([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4}){7})\\](:\\d{1,8})?([/?#])?");
 
 	/**
-	 * @since 0.9.127
+	 * @since 0.9.130
 	 */
 	static Regex reg_hostportv6 = new Regex("\\[((::[0-9A-Fa-f]{1,4})|([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4}){7}))\\](:(\\d+))?");
 
@@ -140,7 +140,7 @@ public class Regex {
 	 * 
 	 * @param ip
 	 * @return true if a valid ip 
-	 * @since 0.9.127
+	 * @since 0.9.130
 	 */
 	public static boolean isIPv6(String ip) {
 		return reg_isIPv6.match(ip);
@@ -150,7 +150,7 @@ public class Regex {
 	 * groups[3]: ip[:port]
 	 * groups[4]: path
 	 * https://www.rfc-editor.org/rfc/rfc3986#appendix-B
-	 * @since 0.9.127
+	 * @since 0.9.130
 	 */
 	static Regex reg3986 = new Regex("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
 
@@ -185,10 +185,9 @@ public class Regex {
 	}
 
 	/**
-	 * @since 0.9.127
+	 * @since 0.9.130
 	 * @param semiJserv
 	 * @return nomalized jserv url (all url parts, in RFC3986, are present)
-	 * @since 0.9.129
 	 */
 	public static String asJserv(String semiJserv) {
 		Object[] parts = getJservParts(semiJserv);
@@ -212,7 +211,7 @@ public class Regex {
 	 * [4] sub-paths, String[]
 	 * [5] query
 	 * [6] fragment</pre>
-	 * @since 0.9.129
+	 * @since 0.9.130
 	 */
 	public static Object[] getJservParts(String url) {
 		return isIPv6(url)
@@ -231,7 +230,7 @@ public class Regex {
 	 * [3] sub-paths, String[]
 	 * [4] query
 	 * [5] fragment</pre>
-	 * @since 0.9.129
+	 * @since 0.9.130
 	 */
 	public static Object[] getJservPartsv6(String url) {
 		if (!protocolPrefix.match(url))
@@ -246,7 +245,6 @@ public class Regex {
 			int port = https ? 443 : http? 80 : 0; 
 
 			String host = grps.get(3);
-			// String[] iportss = host.split(":");
 			ArrayList<String> iportss = reg_hostportv6.findGroups(host);
 
 			if (LangExt.len(iportss) == 6) {
@@ -313,7 +311,7 @@ public class Regex {
 	 * @param p
 	 * @param range
 	 * @return valid or not
-	 * @since 0.9.129
+	 * @since 0.9.130
 	 */
 	public static boolean validUrlPort(String p, int... range) {
 		try {
@@ -328,7 +326,7 @@ public class Regex {
 	 * @param port
 	 * @param range
 	 * @return valid or not
-	 * @since 0.9.129
+	 * @since 0.9.130
 	 */
 	public static boolean validUrlPort(int port, int... range) {
 		if (isNull(range)) return port > 0;
@@ -343,7 +341,7 @@ public class Regex {
 	 * @param expects
 	 * @param subs
 	 * @return valid or not
-	 * @since 0.9.129
+	 * @since 0.9.130
 	 */
 	public static boolean validPaths(String[] expects, String[] subs) {
 		return isNull(expects) && isNull(subs) || Arrays.equals(expects, subs);

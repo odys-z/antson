@@ -69,7 +69,7 @@ import java.util.regex.Pattern;
  * Cached instances pre-compile and re-use {@link Pattern}(s) - which according to the {@link Pattern} API are safe to use in a multi-threaded environment.
  * </p>
  *
- * @since 1.4
+ * @since 0.9.130
  */
 public class RegexValidator implements Serializable {
 
