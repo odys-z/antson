@@ -217,11 +217,11 @@ class LangExtTest {
 
 	@Test
 	void testJoin() {
-		assertEquals("a,b", join(null, new String[] { "a", "b" }));
-		assertEquals("a-b", join("-",  new String[] { "a", "b" }));
-		assertEquals("", join("-",  new String[] {}));
-		assertEquals("", join(null, new String[] {}));
-		assertEquals(null, join(null, (String[])null));
+		assertEquals("[a,b]", join(null, new Object[] { "a", "b" }));
+		assertEquals("[a-b]", join("-",  new Object[] { "a", "b" }));
+		assertEquals("[]", join("-",  new Object[] {}));
+		assertEquals("[]", join(null, new Object[] {}));
+		assertEquals(null, join(null, (Object[])null));
 
 		assertEquals("a\\nx\nb", join("\n", "\\\\n", new String[] { "a\nx", "b"}));
 

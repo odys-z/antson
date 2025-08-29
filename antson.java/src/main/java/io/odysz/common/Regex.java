@@ -1,6 +1,16 @@
 package io.odysz.common;
 
+import static io.odysz.common.LangExt.eq;
+import static io.odysz.common.LangExt.eqi;
+import static io.odysz.common.LangExt.f;
+import static io.odysz.common.LangExt.ifnull;
+import static io.odysz.common.LangExt.insertAt;
+import static io.odysz.common.LangExt.isblank;
+import static io.odysz.common.LangExt.isNull;
+import static io.odysz.common.LangExt.join;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,7 +80,7 @@ public class Regex {
 	static Regex httpsregex;
 
 	/** https://www.rfc-editor.org/rfc/rfc3986#appendix-B */
-	static Regex rfc3986;
+//	static Regex rfc3986;
 
 	/**
 	 * Is the arg an HTTPS protocol address?
@@ -116,12 +126,37 @@ public class Regex {
 	}
 
 	/**
+	 * @since 0.9.127
+	 */
+	static Regex reg_isIPv6 = new Regex("^(([^:/?#]+):)?(//)?\\[(::[0-9A-Fa-f]{1,4})|([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4}){7})\\](:\\d{1,8})?([/?#])?");
+
+	/**
+	 * @since 0.9.127
+	 */
+	static Regex reg_hostportv6 = new Regex("\\[((::[0-9A-Fa-f]{1,4})|([0-9A-Fa-f]{1,4}(:[0-9A-Fa-f]{1,4}){7}))\\](:(\\d+))?");
+
+	/**
+	 * Is the IP include a valid IP v6 address?
+	 * 
+	 * @param ip
+	 * @return true if a valid ip 
+	 * @since 0.9.127
+	 */
+	public static boolean isIPv6(String ip) {
+		return reg_isIPv6.match(ip);
+	}
+
+	/**
 	 * groups[3]: ip[:port]
 	 * groups[4]: path
 	 * https://www.rfc-editor.org/rfc/rfc3986#appendix-B
-	 * */
+	 * @since 0.9.127
+	 */
 	static Regex reg3986 = new Regex("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
-	
+
+	/**
+	 * Regex for RFC3986 Schema
+	 */
 	static Regex protocolPrefix = new Regex("^(\\w+:)?//");
 
 	/**
@@ -129,6 +164,7 @@ public class Regex {
 	 * <a href='https://www.rfc-editor.org/rfc/rfc3986#appendix-B'>rfc 3986 regex</a>.
 	 * @param url, e.g. 127.0.0.1/index.html
 	 * @return [(String)doamin/ip, (Integer)port], e.g. 127.0.0.1, null
+	 * @deprecated
 	 */
 	public static Object[] getHostPort(String url) {
 		if (!protocolPrefix.match(url))
@@ -147,4 +183,170 @@ public class Regex {
 			return new Object[] {url, null};
 		}
 	}
+
+	/**
+	 * @since 0.9.127
+	 * @param semiJserv
+	 * @return nomalized jserv url (all url parts, in RFC3986, are present)
+	 * @since 0.9.129
+	 */
+	public static String asJserv(String semiJserv) {
+		Object[] parts = getJservParts(semiJserv);
+		return f("%s://%s%s%s%s%s", // schema, host, :port, /sub-paths, ?query, #fragment
+				(boolean)parts[1] ? "https" : "http",
+				parts[2],
+				eqi(80, (int)parts[3]) || eqi(443, (int)parts[3]) ? "" : ":" + (int)parts[3],
+				isNull((String[])parts[4]) ? "" : "/" + join("/", "", "", (Object[])parts[4]),
+				isblank(parts[5]) ? "" : "?" + parts[5],
+				isblank(parts[6]) ? "" : "#" + parts[6]);
+	}
+	
+	/**
+	 * 
+	 * @param url
+	 * @return<pre>
+	 * [0] ip v6 address
+	 * [1] scheme true: https, false: possibly http
+	 * [2] authority host
+	 * [3] authority port
+	 * [4] sub-paths, String[]
+	 * [5] query
+	 * [6] fragment</pre>
+	 * @since 0.9.129
+	 */
+	public static Object[] getJservParts(String url) {
+		return isIPv6(url)
+					? insertAt(getJservPartsv6(url), true,  0)
+					: insertAt(getJservPartsv4(url), false, 0);
+	}
+
+	/**
+	 * Parse parts in a URl with valid IP v6 address.
+	 * Return of invalid IP v6 address is unspecified.
+	 * @param url
+	 * @return<pre>
+	 * [0] scheme true: https, false: possibly http
+	 * [1] authority host
+	 * [2] authority port
+	 * [3] sub-paths, String[]
+	 * [4] query
+	 * [5] fragment</pre>
+	 * @since 0.9.129
+	 */
+	public static Object[] getJservPartsv6(String url) {
+		if (!protocolPrefix.match(url))
+			url = "http://" + url;
+
+		ArrayList<String> grps = reg3986.findGroups(url);
+		if (LangExt.isblank(grps.get(3)))
+			return null;
+		try {
+			boolean https = eq("https", grps.get(1));
+			boolean http  = eq("http", ifnull(grps.get(1), "http"));
+			int port = https ? 443 : http? 80 : 0; 
+
+			String host = grps.get(3);
+			// String[] iportss = host.split(":");
+			ArrayList<String> iportss = reg_hostportv6.findGroups(host);
+
+			if (LangExt.len(iportss) == 6) {
+				host = iportss.get(0);
+				try { port = Integer.valueOf(iportss.get(5)); }
+				catch (Exception e) {}
+			}
+			return new Object[] { https, "[" + host.replaceAll("(^\\[)|(\\]$)", "") + "]", port,
+					isblank(grps.get(4), "/+") ? null : grps.get(4).replaceAll("^/*", "").split("/"),
+					grps.get(6), grps.get(8)};
+		}
+		catch (Exception e) {
+			return new Object[] {url, null};
+		}
+	}
+
+	/**
+	 * Get URL parts.
+	 * See <a href='https://www.rfc-editor.org/rfc/rfc3986#section-3'>Section 3, RFC 3986</a>.
+	 * <pre>
+	 * foo://example.com:8042/over/there?name=ferret#nose
+	 * \_/   \______________/\_________/ \_________/ \__/
+	 * |           |            |            |        |
+	 * scheme     authority       path        query   fragment
+	 * </pre>
+	 * @param url
+	 * @return<pre>
+	 * [0] scheme true: https, false: possibly http
+	 * [1] authority host
+	 * [2] authority port
+	 * [3] sub-paths, String[]
+	 * [4] query
+	 * [5] fragment</pre>
+	 */
+	public static Object[] getJservPartsv4(String url) {
+		if (!protocolPrefix.match(url))
+			url = "http://" + url;
+
+		ArrayList<String> grps = reg3986.findGroups(url);
+		if (LangExt.isblank(grps.get(3)))
+			return null;
+		try {
+			boolean https = eq("https", grps.get(1));
+			boolean http  = eq("http", ifnull(grps.get(1), "http"));
+			int port = https ? 443 : http? 80 : 0; 
+			String host = grps.get(3);
+			String[] iportss = host.split(":");
+			if (LangExt.len(iportss) == 2) {
+				host = iportss[0];
+				try { port = Integer.valueOf(iportss[1]); }
+				catch (Exception e) {}
+			}
+			return new Object[] { https, host, port,
+					isblank(grps.get(4), "/+") ? null : grps.get(4).replaceAll("^/*", "").split("/"),
+					grps.get(6), grps.get(8)};
+		}
+		catch (Exception e) {
+			return new Object[] {url, null};
+		}
+	}
+
+	/**
+	 * 
+	 * @param p
+	 * @param range
+	 * @return valid or not
+	 * @since 0.9.129
+	 */
+	public static boolean validUrlPort(String p, int... range) {
+		try {
+			int port = Integer.valueOf(p);
+			return validUrlPort(port, range);
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	/**
+	 * @param port
+	 * @param range
+	 * @return valid or not
+	 * @since 0.9.129
+	 */
+	public static boolean validUrlPort(int port, int... range) {
+		if (isNull(range)) return port > 0;
+		else {
+			return (range[0] < 0 || port >= range[0])
+				&& (range.length < 2 || range[1] < 0 || port <= range[1]);
+		}
+	}
+	
+	/**
+	 * 
+	 * @param expects
+	 * @param subs
+	 * @return valid or not
+	 * @since 0.9.129
+	 */
+	public static boolean validPaths(String[] expects, String[] subs) {
+		return isNull(expects) && isNull(subs) || Arrays.equals(expects, subs);
+	}
+
 }

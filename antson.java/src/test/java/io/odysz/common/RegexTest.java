@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import io.odysz.anson.Anson;
 
 class RegexTest {
+	static final boolean verbose = true;
 
 	@Test
 	void testIsHttps() {
@@ -21,8 +22,7 @@ class RegexTest {
 	@Test
 	void testUrls() {
 		// https://www.rfc-editor.org/rfc/rfc3986#appendix-B
-		@SuppressWarnings("unused")
-		Regex reg = new Regex("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
+		// Regex reg = new Regex("^(([^:/?#]+):)?(//([^/?#]*))?([^?#]*)(\\?([^#]*))?(#(.*))?");
 
 		Object[][] urls = new Object[][] {
 			new Object[] {"https://odys-z.github.io/notes/index.html#rave?v=1&w=2", "odys-z.github.io", null, true},
@@ -56,8 +56,11 @@ class RegexTest {
 		
 		for (Object[] url : urls) {
 			String uri = (String)url[0];
-			// Utils.logi(uri);
-			// Utils.logix(reg.findGroups(uri));
+			
+			if (verbose) {
+				 Utils.logi(uri);
+				 Utils.logix(Regex.reg3986.findGroups(uri));
+			}
 			Object[] domport = getHostPort(uri);
 			assertTrue(eq((String)url[1], domport[0].toString()), uri);
 			assertEquals(url[2], domport[1], uri);
@@ -65,6 +68,92 @@ class RegexTest {
 		}
 	}
 	
+//    // RFC2396: domainlabel   = alphanum | alphanum *( alphanum | "-" ) alphanum
+//    // Max 63 characters
+//    private static final String DOMAIN_LABEL_REGEX = "\\p{Alnum}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?";
+//
+//    // RFC2396 toplabel = alpha | alpha *( alphanum | "-" ) alphanum
+//    // Max 63 characters
+//    private static final String TOP_LABEL_REGEX = "\\p{Alpha}(?>[\\p{Alnum}-]{0,61}\\p{Alnum})?";
+//
+//    // RFC2396 hostname = *( domainlabel "." ) toplabel [ "." ]
+//    // Note that the regex currently requires both a domain label and a top level label, whereas
+//    // the RFC does not. This is because the regex is used to detect if a TLD is present.
+//    // If the match fails, input is checked against DOMAIN_LABEL_REGEX (hostnameRegex)
+//    // RFC1123 sec 2.1 allows hostnames to start with a digit
+//    private static final String DOMAIN_NAME_REGEX =
+//            "^(?:" + DOMAIN_LABEL_REGEX + "\\.)+(" + TOP_LABEL_REGEX + ")\\.?$";
+//
+//	static Regex domainreg = new Regex(DOMAIN_NAME_REGEX);
+//	
+//	static boolean validHost(String host) {
+//        final ArrayList<String> groups = domainreg.findGroups(host);
+//        if (groups != null && groups.size() > 0) 
+//            return LangExt.len(groups.get(0)) > 0;
+//
+//        return false;
+//	}
+	
+	static UrlValidator urlValidator = new UrlValidator();
+
+	@Test
+	void testValidJserv() {
+		Object[][] urls = new Object[][] {
+			//           [0] ok? [1] case                                                      [2] https? [3] port-range      [4] root-path                        [5] ipv6
+			// 0
+			new Object[] {true,  "https://odys-z.github.io:443/notes/index.html?v=1&w=2#rave", true,  new int[] {80, 443},    new String[] {"notes", "index.html"}, false},
+			new Object[] {false, "https://odys-z.github.io/notes/index.html#rave?v=1&w=2",     true,  new int[] {1024, -1},   new String[] {"notes", "index.html"}, false},
+			new Object[] {true,  "//odys-z.github.io/notes/index.html#rave?v=1&w=2",           false, new int[] {80, 1024},   new String[] {"notes", "index.html"}, false},
+			new Object[] {true,  "//odys-z.github.io/notes/index.html#rave?v=1&w=2",           false, new int[] {80, 1024},   new String[] {"notes", "index.html"}, false},
+			// 4
+			new Object[] {true,  "//odys-z.github.io/notes/",                                  false, new int[] {80, 1024},   new String[] {"notes"}, false},
+			new Object[] {true,  "//odys-z.github.io/notes%20/",                               false, new int[] {80, 1024},   new String[] {"notes%20"}, false},
+			new Object[] {false, "//odys-z.github.io/notes /",                                 false, new int[] {80, 1024},   new String[] {"notes "}, false},
+			new Object[] {true,  "//odys-z.github.io/notes%20",                                false, new int[] {80, 1024},   new String[] {"notes%20"}, false},
+			// 8
+			new Object[] {true,  "//odys-z.github.io/",                                        false, new int[] {80, 1024},   null, false},
+			new Object[] {true,  "//odys-z.github.io",                                         false, new int[] {80, 1024},   null, false},
+			new Object[] {false, "//odys-z.github.io%20",                                      false, new int[] {80, 1024},   null, false},
+			new Object[] {false, "//odys-z.github.io%20/notes%20",                             false, new int[] {80, 1024},   new String[] {"notes%20"}, false},
+			// 12
+			new Object[] {true,  "odys-z.github.io/notes/index.html#rave?v=1&w=2",             false, new int[] {80, 1024},   new String[] {"notes", "index.html"}, false},
+			new Object[] {false, "odys-z.github.io/notes/index.html#rave?v=1&w=2",             false, new int[] {81, 1024},   new String[] {"notes", "index.html"}, false},
+			new Object[] {true,  "https://odys-z.github.io/notes/index.html",                  true,  new int[] {443,1024},   new String[] {"notes", "index.html"}, false},
+			new Object[] {false, "https://odys-z.github.io/notes/index.html",                  true,  new int[] {1024, -1},   new String[] {"notes", "index.html"}, false},
+			// 16
+			new Object[] {false, "https://127.0.0.1/jserv-album",                              true,  new int[] {1024, -1},   new String[] {"jserv-album"}, false},
+			new Object[] {true,  "https://127.0.0.1:8964/jserv-album",                         true,  new int[] {1024, -1},   new String[] {"jserv-album"}, false},
+			new Object[] {false, "//127.0.0.1/jserv-album",                                    true,  new int[] {1024, -1},   new String[] {"jserv-album"}, false},
+			new Object[] {true,  "127.0.0.1:8964/jserv-album",                                 false, new int[] {1024, -1},   new String[] {"jserv-album"}, false},
+			// 20
+			new Object[] {false, "https://::1/jserv-album",                                    true,  new int[] {1024, -1},   new String[] {"jserv-album"}, false},
+			new Object[] {true,  "https://[::3]:8964/jserv-album",                             true,  new int[] {1024, -1},   new String[] {"jserv-album"}, true},
+			new Object[] {false, "//2604:9cc0:14:b140:5706:4ab0:6cb8:d348/jserv-album",        true,  new int[] {80, -1},     new String[] {"jserv-album"}, false},
+			new Object[] {true,  "https://[2604:9cc0:14:b140:5706:4ab0:6cb8:d348]/jserv-album",true,  new int[] {443, -1},    new String[] {"jserv-album"}, true},
+			// 24
+			new Object[] {true,  "[2604:9cc0:14:b140:5706:4ab0:6cb8:d348]:8964/jserv-album",   false, new int[] {1024, -1},   new String[] {"jserv-album"}, true},
+		};
+		
+		for (Object[] url : urls)
+			assertEquals((boolean)url[5], isIPv6((String)url[1]), (String)url[1]);
+	
+		int ix = 0;
+		for (Object[] url : urls) {
+			String uri = (String)url[1];
+			
+			Object[] jservparts = getJservParts(uri);
+			if (verbose) {
+				Utils.logi("[%s] %s: %s", ix++, uri, LangExt.join(", ", jservparts));
+			}
+			assertEquals(url[0],
+					urlValidator.isValid(asJserv(uri)) &&
+					jservparts[1] == url[2] &&
+					validUrlPort((int)jservparts[3], (int[])url[3]) &&
+					validPaths((String[])url[4], (String[]) jservparts[4]),
+					uri);
+		}
+	}
+
 	@Test
 	void testIsEnvelope() {
 		assertTrue(Anson.startEnvelope("'{\"type\": \"com.examples.test\"}"));

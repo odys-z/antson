@@ -446,6 +446,19 @@ public class LangExt {
     	}
     }
 
+    public static boolean eqi(int ... v) {
+    	if (isNull(v))
+    		return true;
+    	else {
+    		if ((v.length %2) != 0) return false;
+    		for (int i = 0; i < v.length; i+=2) {
+				if (v[i] != v[i+1])
+					return false;
+    		}
+    		return true;
+    	}
+    }
+
 	public static boolean eq(String v, String u, boolean ... ignoreCase) {
 		return v == null && u == null || (u != null && v != null &&
 				(is(ignoreCase) ? v.equalsIgnoreCase(u) : v.equals(u)));
@@ -1242,10 +1255,32 @@ public class LangExt {
 	 * @param vi "a", null, "b", ...
 	 * @return "a,b,..."
 	 */
-	public static String join(String sep, String ... vi) {
+	public static String join(String sep, Object ... vi) {
+		return join(sep, "[", "]", vi);
+	}
+
+	public static String join(String sep, String beginning, String ending, Object ... vi) {
 		if (sep == null) sep = ",";
+		final String[] seps = new String[] {sep};
 		return vi == null ? null
-			: Stream.of(vi).filter(v -> v != null).collect(Collectors.joining(sep));
+			: Stream.of(vi)
+				.filter(v -> v != null)
+				.map(v ->
+					v.getClass().isArray() ? join(seps[0], (Object[])v) : v instanceof List ? joinList((List<?>)v) : v.toString())
+				.collect(Collectors.joining(sep, beginning, ending));
+	}
+
+	public static String joinList(List<?> vi) {
+		return joinList(",", "[", "]", vi);
+	}
+
+	public static String joinList(String sep, String beginning, String ending, List<?> vi) {
+		return vi == null ? null
+			: Stream.of(vi)
+				.filter(v -> v != null)
+				// .map(v -> ArrayUtils.is v.toString())
+				.map(v -> v.getClass().isArray() ? join(sep, v) : v instanceof List ? joinList(v) : v.toString())
+				.collect(Collectors.joining(sep, beginning, ending));
 	}
 
 	/**
@@ -1265,7 +1300,7 @@ public class LangExt {
 		return vi == null ? null
 				: Stream.of(vi)
 				.filter(v -> v != null)
-				.map(v -> v.replaceAll(sap, esc))
+				.map(v -> esc == null ? v : v.replaceAll(sap, esc))
 				.collect(Collectors.joining(sep));
 	}
 
@@ -1300,14 +1335,6 @@ public class LangExt {
 	 * @return http(s)://ip:port/subpath-1/...
 	 */
 	public static String joinurl_(boolean https, String ip, int port, String... subpaths) {
-//		return f("%s://%s:%s%s",
-//				https ? "https" : "http", ip, port == 0 ? 80 : port, 
-//				isNull(subpaths) ? "" :
-//				// jserv_album.startsWith("/") ? jserv_album : "/" + jserv_album);
-//				Stream.of(subpaths)
-//					.filter(sub -> !isblank(sub))
-//					.map(sub -> sub.replaceAll("^\\/", "").replaceAll("\\/$", ""))
-//					.collect(Collectors.joining("/", "/", "")));
 		return joinurl(https, ip, port, "", subpaths);
 	}
 
@@ -1324,7 +1351,6 @@ public class LangExt {
 		return Stream.concat(
 					Stream.of(f("%s://%s:%s", https ? "https" : "http", ip, port == 0 ? 80 : port), rootpath),
 					Stream.of(isNull(subpaths) ? new String[0] :subpaths))
-					// isNull(subpaths) ? null : Stream.of(subpaths))
 				.filter(sub -> !isblank(sub))
 				.map(sub -> sub.replaceAll("^\\/", "").replaceAll("\\/$", ""))
 				.collect(Collectors.joining("/"));
