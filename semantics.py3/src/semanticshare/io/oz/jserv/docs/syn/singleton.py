@@ -45,6 +45,8 @@ def getJservOption(synode: str, hostp: str, https: bool) -> str:
     """
     return f'{synode}\n{getJservUrl(https, hostp)}'
 
+def valid_url_port(p: int):
+    return 1024 < p;
 
 class PortfolioException(Exception):
     """
