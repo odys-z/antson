@@ -204,7 +204,7 @@ public class Regex {
 	 * 
 	 * @param url
 	 * @return<pre>
-	 * [0] ip v6 address
+	 * [0] is ip v6 address
 	 * [1] scheme true: https, false: possibly http
 	 * [2] authority host
 	 * [3] authority port
