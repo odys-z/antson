@@ -1426,6 +1426,32 @@ public class LangExt {
 			: (s + from.trim() + s).replaceAll(s + p + s, s).replaceAll("^"+s, "").replaceAll(s+"$", "");
 	}
 	
+	/**Remove arr[idx]
+	 * @param <T>
+	 * @param arr
+	 * @param idx
+	 * @param t type of element, default is String.class
+	 * @return new array
+	 * @since 0.9.131
+	 */
+	@SafeVarargs
+	public static <T> T[] removele(T[] arr, int idx, Class<T>... t) {
+		if (arr != null && arr.length > 0 && 0 <= idx && idx < arr.length) {
+			Class<?> type;
+			// T[] nouveau = (T[]) new Object[arr.length -1];
+			if (isNull(t))
+				type = String.class;
+			else type = _0(t);
+
+			@SuppressWarnings("unchecked")
+			T[] nouveau = (T[]) Array.newInstance(type, arr.length -1);
+			System.arraycopy(arr, 0, nouveau, 0, idx);
+			System.arraycopy(arr, idx+1, nouveau, idx, arr.length-idx-1);
+			return nouveau;
+		}
+		return arr;
+	}
+	
 	/**
 	 * Replace an element in array.
 	 * @param arr

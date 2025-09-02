@@ -341,6 +341,19 @@ class LangExtTest {
 		assertEquals("v1:v3", removele("v1:v2:v3", "v2", ":"));
 		assertEquals("v1:v2.1,v2.2:v3", removele("v1:v2.1,v2.2:v3", "v2", ":"));
 		assertEquals("v1:v2.1,v2.2", removele("v1:v2.1,v2.2:v3", "v3", ":"));
+		
+		String[] var = removele(new String[] {"a", "b", "c"}, 1);
+		assertArrayEquals(new String[] {"a", "c"}, var);
+		assertArrayEquals(new String[] {"a"}, removele(new String[] {"a", "b"}, 1));
+		assertArrayEquals(new String[] {"b"}, removele(new String[] {"a", "b"}, 0));
+		assertArrayEquals(new String[] {}, removele(new String[] {"a"}, 0));
+		assertArrayEquals(new String[] {"a"}, removele(new String[] {"a"}, -1));
+		assertArrayEquals(new String[] {}, removele(new String[] {}, 0));
+		assertArrayEquals(new String[] {"a"}, removele(new String[] {"a"}, 1));
+		assertArrayEquals(new String[] {"a", "b", "c"}, removele(new String[] {"a", "b", "c"}, 3));
+
+		Integer[] foo = removele(new Integer[] {1, 2, 3}, 1, Integer.class);
+		assertArrayEquals(new Integer[] {1, 3}, foo);
 	}
 	
 	@Test
