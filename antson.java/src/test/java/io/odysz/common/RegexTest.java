@@ -115,7 +115,7 @@ class RegexTest {
 		for (Object[] url : urls) {
 			String uri = (String)url[1];
 			
-			Object[] jservparts = getJservParts(uri);
+			Object[] jservparts = getHttpParts(uri);
 			if (verbose) {
 				Utils.logi("[%s] %s: %s", ix++, uri, LangExt.join(", ", jservparts));
 			}

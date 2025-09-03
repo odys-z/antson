@@ -190,7 +190,7 @@ public class Regex {
 	 * @return nomalized jserv url (all url parts, in RFC3986, are present)
 	 */
 	public static String asJserv(String semiJserv) {
-		Object[] parts = getJservParts(semiJserv);
+		Object[] parts = getHttpParts(semiJserv);
 		return f("%s://%s%s%s%s%s", // schema, host, :port, /sub-paths, ?query, #fragment
 				(boolean)parts[1] ? "https" : "http",
 				parts[2],
@@ -213,10 +213,10 @@ public class Regex {
 	 * [6] fragment</pre>
 	 * @since 0.9.130
 	 */
-	public static Object[] getJservParts(String url) {
+	public static Object[] getHttpParts(String url) {
 		return isIPv6(url)
-					? insertAt(getJservPartsv6(url), true,  0)
-					: insertAt(getJservPartsv4(url), false, 0);
+					? insertAt(getHttpsPartsv6(url), true,  0)
+					: insertAt(getHttpsPartsv4(url), false, 0);
 	}
 
 	/**
@@ -232,7 +232,7 @@ public class Regex {
 	 * [5] fragment</pre>
 	 * @since 0.9.130
 	 */
-	public static Object[] getJservPartsv6(String url) {
+	public static Object[] getHttpsPartsv6(String url) {
 		if (!protocolPrefix.match(url))
 			url = "http://" + url;
 
@@ -279,7 +279,7 @@ public class Regex {
 	 * [4] query
 	 * [5] fragment</pre>
 	 */
-	public static Object[] getJservPartsv4(String url) {
+	public static Object[] getHttpsPartsv4(String url) {
 		if (!protocolPrefix.match(url))
 			url = "http://" + url;
 
