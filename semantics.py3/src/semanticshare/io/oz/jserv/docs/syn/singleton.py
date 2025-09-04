@@ -1,7 +1,9 @@
 # This Python file uses the following encoding: utf-8
 import os
 from dataclasses import dataclass
+from datetime import timezone
 from typing import overload, Optional
+from datetime import datetime
 
 from anson.io.odysz.anson import Anson
 
@@ -77,6 +79,8 @@ class PortfolioException(Exception):
         return f'{self.msg}\n{self.cause if self.cause is not None else ""}'
 
 
+jour0 = '1911-10-10'
+
 @dataclass
 class AppSettings(Anson):
     envars: dict
@@ -94,6 +98,7 @@ class AppSettings(Anson):
     proxyPort: int
     webProxyPort: int
     jservs: dict
+    jserv_utc: str
 
     def __init__(self):
         super().__init__()
@@ -107,6 +112,8 @@ class AppSettings(Anson):
         self.envars = {}
         self.startHandler = [implISettingsLoaded, 'web-dist/private/host.json']
         self.webrootLocal = f'http://suppress.warning:{self.webport}'
+
+        self.jserv_utc = None
 
     @overload
     def Volume(self):
@@ -145,7 +152,8 @@ class AppSettings(Anson):
         if urldict is None:
             return [[k, self.jservs[k]] for k in self.jservs]
         else:
-            self.jservs = urldict
+            self.jservs = {**self.jservs, **urldict}
+            self.jserv_utc = datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
             return self
 
     def jservLines(self, peers_define: list[Synode]):

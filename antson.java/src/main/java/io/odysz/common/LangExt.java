@@ -513,6 +513,7 @@ public class LangExt {
 			|| a instanceof String && b instanceof String && eq((String)a, (String)b)
 			|| isPrimitive(a) && isPrimitive(b) && ev(a, b);
 	}
+
 	/**
 	 * Is there any element in {@code arr} is greater than {@code b}?
 	 * <pre>
