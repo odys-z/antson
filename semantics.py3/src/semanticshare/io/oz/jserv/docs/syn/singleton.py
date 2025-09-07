@@ -83,6 +83,7 @@ jour0 = '1911-10-10'
 
 @dataclass
 class AppSettings(Anson):
+    regiserv: str
     envars: dict
     startHandler: [str]
     rootkey: str    # | None # test 3.12
@@ -102,6 +103,7 @@ class AppSettings(Anson):
 
     def __init__(self):
         super().__init__()
+        self.regiserv = None
         self.port = 8964
         self.webport = 8900
         self.reverseProxy = False
