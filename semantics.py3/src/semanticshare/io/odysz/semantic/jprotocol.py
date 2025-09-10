@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
+
+from anson.io.odysz.common import LangExt
 from typing_extensions import Self
 
 from anson.io.odysz.anson import JsonOpt, Anson
@@ -40,25 +43,24 @@ class AnsonHeader(Anson):
         self.uid = uid
         self.ssToken = token
 
-# TAnsonBody = TypeVar('TAnsonBody', bound='AnsonBody')
-# class AnTypeRef(object):
-#     bref: str
-#     def __init__(self, bound: str):
-#         self.bref = bound
 
 @dataclass
 class AnsonMsg(Anson):
-    # body: [TAnsonBody]
     body: ['AnsonBody']
     header: AnsonHeader
-    port: Port
+
+    port: Optional[Port]
+    '''
+    The semantic-serv port, optional only when deserializing by Anson.fromJson().
+    '''
+
     code: MsgCode
     opts: JsonOpt
     addr: str
     seq: int
     version: str
 
-    def __init__(self, p: Port = None):
+    def __init__(self, p: Enum = None):
         super().__init__()
         self.port = p
         self.body = []
@@ -67,10 +69,12 @@ class AnsonMsg(Anson):
         self.header = h
         return self
 
-    # def Body(self, bodyItem: TAnsonBody) -> Self:
-    def Body(self, bodyItem: 'AnsonBody') -> Self:
-        self.body.append(bodyItem)
-        return self
+    def Body(self, bodyItem: 'AnsonBody'=None) -> Self:
+        if bodyItem is None:
+            return None if LangExt.len(self.body) == 0 else self.body[0]
+        else:
+            self.body.append(bodyItem)
+            return self
 
 
 @dataclass
@@ -96,8 +100,14 @@ class AnsonBody(Anson):
         self.a = a
         return self
 
+    def Uri(self, func_uri):
+        self.uri = func_uri
+        return self
+
+
 @dataclass
-class AnsonReq(AnsonBody):
+class UserReq(AnsonBody):
+    
     def __init__(self):
         super().__init__()
         self.a = None

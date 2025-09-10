@@ -103,7 +103,11 @@ def value_type(v):
 
 
 def instanceof(clsname: Union[str, type], props: dict):
-    obj = getClass(clsname)() if type(clsname) == str else clsname()
+    cls = getClass(clsname) if type(clsname) == str else clsname
+    try: obj = cls() 
+    except Exception as e:
+        print('Cannot create instance of', clsname, e)
+        raise e
     fds = _fields(obj, None)
     missingAttrs = []
 
@@ -183,6 +187,15 @@ class Anson(dict):
             '{' + ','.join(f'"{k}": ' + Anson.toValue_(dic[k], ind + 1, beautify) for k in dic) + '}'
 
     def toBlock(self, beautify=True) -> str:
+        '''
+        Serialize.
+        tip
+        ===
+            It is important to declare all the user classes the subclasses or Anson,
+            and with a '@dataclass' annotation.
+        :param beautify: 
+        :return: 
+        '''
         return self.toBlock_(0, beautify)
 
     def toFile(self, path: str):
@@ -191,7 +204,6 @@ class Anson(dict):
 
     def toBlock_(self, ind: int, beautify, suggestype: type = None) -> str:
         myfds = _fields(self, None)
-        # s = ' ' * (ind * 2) + '{\n' if beautify else '{'
         s = '{\n' if beautify else '{'
 
         has_prvious = False
@@ -204,7 +216,6 @@ class Anson(dict):
                 has_prvious = True
 
             else:
-                # v, vt = self[k], value_type(self[k])
                 v = self[k]
 
                 if k not in myfds:

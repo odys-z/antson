@@ -18,7 +18,7 @@ class AnclientTest(unittest.TestCase):
             self.fail(e)
 
         # Clients.servRt = 'http://192.168.0.1:8964/jserv-album'
-        Clients.servRt = 'http://127.0.0.1:8964/jserv-album'
+        Clients.servRt = 'http://127.0.0.1:1989/regist-central'
         resp = Clients.pingLess('Anson.py3/test', err_ctx)
         self.assertIsNotNone(resp)
 

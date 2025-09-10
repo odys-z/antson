@@ -1,9 +1,13 @@
 import json
 from dataclasses import dataclass
+from enum import Enum
 from pathlib import Path
-from typing import Union, cast
+from typing import Union, cast, Optional
 
 from anson.io.odysz.anson import Anson
+from anson.io.odysz.common import LangExt
+from semanticshare.io.odysz.semantic.jprotocol import AnsonBody, AnsonMsg, AnsonResp
+
 from . import Synode, SyncUser
 
 
@@ -16,7 +20,7 @@ class SynOrg(Anson):
     # edu | org | com | ...
     orgType: str
     ''' This is a tree table. '''
-    parent: str
+    parent: Optional[AnsonMsg]
 
     fullpath: str
     """
@@ -70,7 +74,7 @@ class SynodeConfig(Anson):
         self.https = False
 
 
-@dataclass()
+@dataclass
 class AnRegistry(Anson):
     config: SynodeConfig
     synusers: list[SyncUser]
@@ -106,6 +110,50 @@ class AnRegistry(Anson):
                     return u
         return None
 
+class Centralport(Enum):
+    heartbeat = "ping.serv"
+    session   = "login.serv"
+    register  = "regist.serv"
+    menu      = "menu.serv"
+
+@dataclass
+class RegistReq(AnsonBody):
+    diction: SynodeConfig
+    
+    class A:
+        registDom = "c/domx"
+        updateDom = "u/domx"
+
+
+    def __init__(self, act: str):
+        super().__init__()
+        self.a = act
+        self.diction = None
+    
+    def dictionary(self, d: SynodeConfig):
+        self.diction = d
+        return self
+    
+    def domain(self):
+        return None if self.diction is None else \
+               self.diction.domain
+
+
+@dataclass
+class RegistResp(AnsonResp):
+    diction: SynodeConfig
+    
+    def __init__(self):
+        super().__init__()
+    
+    def peer_ids(self):
+        return self.diction.peers if self.diction is not None else None
+    
+    def next_installing(self):
+        for p in self.diction.peers:
+            if LangExt.isblank(p.domain):
+                return p.synid
+        return None
 
 def loadYellowPages():
     path = ""
