@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -68,7 +69,7 @@ public class Utils {
 			// must be a file
 			Utils.warn("FATAL ExtFile can't create a folder, a same named file exists: ", dir);
 	}
-	
+
 	/**
 	 * @since 0.9.86
 	 * @param logStream e.g. System.out stream
@@ -510,6 +511,26 @@ public class Utils {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	/**
+	 * Load text from the dir/file.
+	 * @param dir
+	 * @param file
+	 * @return the text buffer
+	 * @since 0.9.134
+	 */
+	public static StringBuffer loadTxt(String dir, String file) {
+           StringBuffer lines = new StringBuffer();
+        try (BufferedReader reader = new BufferedReader(new FileReader(FilenameUtils.concat(dir, file)))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.append(line);
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+		return lines;
 	}
 
 	/**
