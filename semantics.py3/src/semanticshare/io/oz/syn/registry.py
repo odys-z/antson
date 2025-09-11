@@ -141,6 +141,13 @@ class RegistReq(AnsonBody):
 
 @dataclass
 class RegistResp(AnsonResp):
+    class R:
+        ok = "ok"
+        domexists = "domexists"
+        invalid = "invalid"
+        error = "error"
+
+    r: str
     diction: SynodeConfig
     
     def __init__(self):
