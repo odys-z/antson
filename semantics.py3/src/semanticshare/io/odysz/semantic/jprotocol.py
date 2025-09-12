@@ -126,3 +126,28 @@ class AnsonResp(AnsonBody):
     def msg(self) -> str:
         return self.m
 
+
+class JProtocol:
+    urlroot: str
+
+    @staticmethod
+    def setup(urlpath: str, p: Port = None):
+        JProtocol.urlroot = urlpath
+        # And understand p
+
+@dataclass
+class JServUrl(Anson):
+    https: bool
+    ip: str
+    port: int
+    subpaths: list[str]
+    jservtime: str
+
+    def __init__(self, https: bool=False, ip: str=None, port: int=80, subpaths: list[str]=[]):
+        super().__init__()
+        self.https = https
+        self.ip = ip
+        self.port = port
+        self.subpaths = subpaths
+        self.jservtime = '1911-10-10'
+

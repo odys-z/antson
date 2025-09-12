@@ -123,8 +123,6 @@ def instanceof(clsname: Union[str, type], props: dict):
 
 
 def parse_type_(obj) -> Union[str, None]:
-    # return obj['__type__'] if isinstance(obj, Anson) and hasattr(obj, '__type__') \
-    #     else f'{java_src_path}{"." if len(java_src_path) else ""}{obj["type"]}' if isinstance(obj, dict) and 'type' in obj.keys() else None
     return obj['__type__'] if isinstance(obj, Anson) and hasattr(obj, '__type__') \
         else obj["type"] if isinstance(obj, dict) and 'type' in obj.keys() else None
 
@@ -191,8 +189,11 @@ class Anson(dict):
         Serialize.
         tip
         ===
-            It is important to declare all the user classes the subclasses or Anson,
-            and with a '@dataclass' annotation.
+        1. It is important to declare all the user classes the subclasses or Anson,
+           and with a '@dataclass' annotation.
+        2. If print() an instance of Anson, use anson.py3/utils.log() for safety,
+           by which the fields declared but not created where not causing crashes.
+
         :param beautify: 
         :return: 
         '''
@@ -221,7 +222,7 @@ class Anson(dict):
                 if k not in myfds:
                     if k != 'type':
                         Utils.warn("Field {0}.{1} is not defined in Anson, which is presenting in data object. Value ignored: {2}.",
-                               str(self['__type__']), k, self[k])
+                               str(self['__type__']), k, v)
                     continue
 
                 if has_prvious: s += ',\n' if beautify else ','

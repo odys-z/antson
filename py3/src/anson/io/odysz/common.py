@@ -89,13 +89,15 @@ class LangExt:
     def musteqs(a: str, b: str, msg = None):
         if a != b:
             from .anson import AnsonException
-            raise AnsonException(f'{a} != {b}' if msg == None else msg)
+            raise AnsonException(0, f'{a} != {b}' if msg == None else msg)
 
     @staticmethod
-    def only_wordextlen(likely: str, ext={}, minlen = 0, maxlen = -1):
+    def only_wordextlen(likely: str, ext='', minlen = 0, maxlen = -1):
+        if ext is None:
+            ext = {}
         if maxlen >= 0 and len(likely) > maxlen:
             from .anson import AnsonException
-            raise AnsonException(f'len {likely[0: 10]} > {maxlen}')
+            raise AnsonException(0, f'len {likely[0: 10]} > {maxlen}')
 
         if minlen > 0 and len(likely) < minlen:
             from .anson import AnsonException
@@ -128,7 +130,13 @@ def log(out: Optional[TextIO], templt: str, *args):
     try:
         print(templt if LangExt.isblank(args) else templt.format(*args), file=out)
     except Exception as e:
-        print(templt, args, e)
+        try: print(templt)
+        except: pass
+        try: print(args)
+        except: pass
+        try: print(e)
+        except: pass
+        print('If printing Anson subclasses, all their memebers must be initialized.', file=sys.stderr)
 
 
 class Utils:

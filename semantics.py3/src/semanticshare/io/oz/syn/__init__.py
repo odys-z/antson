@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from anson.io.odysz.anson import Anson
 from enum import Enum
 
+
 @dataclass
 class SynodeMode(Enum):
     """
@@ -23,6 +24,7 @@ class SynodeMode(Enum):
     hub node, in passive service mode, accepting application from others.
     """
 
+
 @dataclass
 class Synode(Anson):
     org: str
@@ -31,9 +33,27 @@ class Synode(Anson):
     domain: str
     nyq: int
     syn_uid: str
+    jserv: str
+    remark: str
+    nyquence: int
+    stat: str
+    '''
+    CynodeStats.create | installed, ...
+    '''
 
     def __init__(self):
         super().__init__()
+        self.jserv = None
+        self.org = None
+        self.synid = None
+        self.mac = None
+        self.domain = None
+        self.nyq = None
+        self.syn_uid = None
+        self.jserv = None
+        self.remark = None
+        self.nyquence = None
+        self.stat = 'C' # not CynodeStats.create for circular import
 
 
 @dataclass()

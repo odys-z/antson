@@ -6,7 +6,8 @@ from typing import Union, cast, Optional
 
 from anson.io.odysz.anson import Anson
 from anson.io.odysz.common import LangExt
-from semanticshare.io.odysz.semantic.jprotocol import AnsonBody, AnsonMsg, AnsonResp
+from semanticshare.io.odysz.semantic.jprotocol import AnsonBody, AnsonMsg, AnsonResp, JServUrl, JProtocol
+from semanticshare.io.oz.jserv.docs.syn.singleton import AppSettings
 
 from . import Synode, SyncUser
 
@@ -47,18 +48,24 @@ class SynOrg(Anson):
 
 @dataclass
 class SynodeConfig(Anson):
-    synid: str
-    domain: str
-    mode: Union[str, None]
-
-    admin: str
+    debug: bool
+    '''
+    Java but not used
+    '''
+    chsize: int
+    '''
+    Java but not used
+    '''
 
     sysconn: str
     synconn: str
 
+    synid: str
+    domain: str
+    mode: Union[str, None]
+    admin: str
     org: SynOrg
     ''' Market, organization or so? '''
-
     syncIns: float
     '''
      * Synchronization interval, initially, in seconds.
@@ -72,6 +79,7 @@ class SynodeConfig(Anson):
     def __init__(self):
         super().__init__()
         self.https = False
+        self.peers = []
 
 
 @dataclass
@@ -93,7 +101,11 @@ class AnRegistry(Anson):
                 return Anson.from_envelope(obj)
         else:
             raise FileNotFoundError(f"File doesn't exist: {path}")
-
+        
+    def find_peer(self, peerid: str):
+        return None if LangExt.isblank(peerid) or self.config.peers is None \
+            else AnRegistry.find_synode(self.config.peers, peerid) \
+    
     @classmethod
     def find_synode(cls, synodes: list[Synode], id):
         if synodes is not None:
@@ -110,21 +122,34 @@ class AnRegistry(Anson):
                     return u
         return None
 
+
+@dataclass()
 class Centralport(Enum):
-    heartbeat = "ping.serv"
-    session   = "login.serv"
-    register  = "regist.serv"
-    menu      = "menu.serv"
+    heartbeat:str = "ping.serv"
+    session  :str = "login.serv"
+    register :str = "regist.serv"
+    menu     :str = "menu.serv"
+
+
+@dataclass
+class CynodeStats:
+    create   :str = "c"
+    asHub    :str = "h"
+    asPeer   :str = "p"
+    toInstall:str = "i"
+
 
 @dataclass
 class RegistReq(AnsonBody):
-    diction: SynodeConfig
     
     class A:
         registDom = "c/domx"
         updateDom = "u/domx"
+        submitSettings = "u/settings"
 
-
+    diction: Optional[SynodeConfig]
+    myjserv: Optional[JServUrl]
+    
     def __init__(self, act: str):
         super().__init__()
         self.a = act
@@ -138,6 +163,12 @@ class RegistReq(AnsonBody):
         return None if self.diction is None else \
                self.diction.domain
 
+    def jserurl(self, https: bool, settings: AppSettings):
+        self.myjserv = JServUrl(
+            https=https,
+            ip=settings.localip,
+            port=settings.port,
+            subpaths=[JProtocol.urlroot])
 
 @dataclass
 class RegistResp(AnsonResp):
@@ -158,7 +189,7 @@ class RegistResp(AnsonResp):
     
     def next_installing(self):
         for p in self.diction.peers:
-            if LangExt.isblank(p.domain):
+            if p is not None and p.stat == CynodeStats.create:
                 return p.synid
         return None
 
