@@ -128,7 +128,7 @@ class AnsonResp(AnsonBody):
 
 
 class JProtocol:
-    urlroot: str
+    urlroot: str = 'must call JProtocol.setup()'
 
     @staticmethod
     def setup(urlpath: str, p: Port = None):

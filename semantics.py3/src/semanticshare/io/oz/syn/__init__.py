@@ -51,7 +51,7 @@ class Synode(Anson):
         self.nyq = None
         self.syn_uid = None
         self.jserv = None
-        self.remark = None
+        self.remarks = None
         self.nyquence = None
         self.stat = 'C' # not CynodeStats.create for circular import
 

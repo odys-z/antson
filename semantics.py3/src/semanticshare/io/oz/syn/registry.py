@@ -133,10 +133,10 @@ class Centralport(Enum):
 
 @dataclass
 class CynodeStats:
-    create   :str = "c"
-    asHub    :str = "h"
-    asPeer   :str = "p"
-    toInstall:str = "i"
+    create :str = "c"
+    asHub  :str = "h"
+    asPeer :str = "p"
+    die    :str = "d"
 
 
 @dataclass
@@ -163,11 +163,11 @@ class RegistReq(AnsonBody):
         return None if self.diction is None else \
                self.diction.domain
 
-    def jserurl(self, https: bool, settings: AppSettings):
+    def jserurl(self, https: bool, settings: AppSettings, iport: tuple[str, int]):
         self.myjserv = JServUrl(
             https=https,
-            ip=settings.localip,
-            port=settings.port,
+            ip=iport[0],
+            port=iport[1],
             subpaths=[JProtocol.urlroot])
 
 @dataclass
