@@ -14,13 +14,13 @@ class ClientierTest(unittest.TestCase):
             print(c, e.format(args), file=sys.stderr)
             self.fail(e)
 
-        Clients.servRt = 'http://127.0.0.1:1989/regist-central'
+        Clients.servRt = 'http://127.0.0.1:8964/jserv-album'
         resp = Clients.pingLess('/registier/test', err_ctx)
         self.assertIsNotNone(resp)
 
         print(Clients.servRt, '<echo>', resp.toBlock())
-        self.assertEqual(type(resp.body[0]), AnsonResp.__type__)
-        self.assertEqual('ok', resp.code, resp.body[0].msg())
+        self.assertEqual(type(resp).__name__, 'AnsonResp')
+        self.assertEqual('ok', resp.code.name, resp.msg())
 
 
 if __name__ == '__main__':

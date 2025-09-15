@@ -94,7 +94,7 @@ class LangExt:
     @staticmethod
     def only_wordextlen(likely: str, ext='', minlen = 0, maxlen = -1):
         if ext is None:
-            ext = {}
+            ext = ''
         if maxlen >= 0 and len(likely) > maxlen:
             from .anson import AnsonException
             raise AnsonException(0, f'len {likely[0: 10]} > {maxlen}')
@@ -113,6 +113,20 @@ class LangExt:
     @staticmethod
     def only_wordtlen(likely: str, minlen=0, maxlen=-1):
         return LangExt.only_wordextlen(likely, minlen=minlen, maxlen=maxlen)
+
+    @staticmethod
+    def only_id_len(likely: str, ext='', minlen=0, maxlen=-1):
+        '''
+        Verify the *likely* string is only with chars of alphanumberic or anyof '`~!@#$%^&*_-+=:;,./'.
+        :param likely: 
+        :param ext: 
+        :param minlen: 
+        :param maxlen: 
+        :return: verified
+        '''
+        return LangExt.only_wordextlen(likely,
+                ext='`~!@#$%^&*_-+=:;,./' if ext is None else ext + '`~!@#$%^&*_-+=:;,./',
+                minlen=minlen, maxlen=maxlen)
 
     @staticmethod
     def only_passwdlen(likely: str, minlen=0, maxlen=-1):

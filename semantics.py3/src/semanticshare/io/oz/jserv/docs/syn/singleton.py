@@ -159,7 +159,8 @@ class AppSettings(Anson):
             return self
 
     def jservLines(self, peers_define: list[Synode]):
-        return [':\t'.join([p.synid,
-                            self.jservs[p.synid] if p.synid in self.jservs \
-                            else "http://?:?/{}".format(jserv_url_path)]
-                           ) for p in peers_define]
+        return '' if peers_define is None else \
+                [':\t'.join([p.synid, self.jservs[p.synid] if \
+                p.synid in self.jservs else \
+                "http://?:?/{}".format(jserv_url_path)]
+            ) for p in peers_define]

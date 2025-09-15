@@ -1,5 +1,5 @@
 """
-    run as module: test.test
+    debug/run as script
     working folder: semantics.py3
 """
 

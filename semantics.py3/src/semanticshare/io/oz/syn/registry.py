@@ -36,14 +36,16 @@ class SynOrg(Anson):
     # The default resources collection, usually a group / tree of documents.
     album0: str
 
-    def __init__(self):
+    def __init__(self, orgtype:str='', orgid:str='', orgname:str='', webroot:str='', homepage:str='', albumid=''):
         super().__init__()
         self.parent = None
         self.fullpath = ""
-        self.orgType = ""
-        self.webroot = ""
-        self.homepage = ""
-        self.album0 = ""
+        self.orgId = orgid
+        self.orgName = orgname
+        self.orgType = orgtype
+        self.webroot = webroot
+        self.homepage = homepage
+        self.album0 = albumid
 
 
 @dataclass
@@ -76,10 +78,18 @@ class SynodeConfig(Anson):
 
     https: bool
 
-    def __init__(self):
+    def __init__(self, domain:str=None, synode:str=None,
+                 synconn:str=None, sysconn:str=None, admin:str='admin',
+                 org:SynOrg=None, peers:list=None, mode:str=None):
         super().__init__()
         self.https = False
-        self.peers = []
+        self.synconn = synconn
+        self.sysconn = sysconn
+        self.synid = synode
+        self.admin = admin
+        self.peers = peers
+        self.mode  = mode
+        self.org   = org
 
 
 @dataclass
@@ -143,15 +153,19 @@ class CynodeStats:
 class RegistReq(AnsonBody):
     
     class A:
-        registDom = "c/domx"
-        updateDom = "u/domx"
+        queryDomx      = "r/domx"
+        queryDomConfig = "r/dom-config"
+        registDom      = "c/domx"
+        updateDom      = "u/domx"
         submitSettings = "u/settings"
 
+    market: str
     diction: Optional[SynodeConfig]
     myjserv: Optional[JServUrl]
     
-    def __init__(self, act: str):
+    def __init__(self, act: str=None, market:str=None):
         super().__init__()
+        self.market = market
         self.a = act
         self.diction = None
     
@@ -179,10 +193,13 @@ class RegistResp(AnsonResp):
         error = "error"
 
     r: str
+    orgDomains: list[str]
+    
     diction: SynodeConfig
     
     def __init__(self):
         super().__init__()
+        self.orgDomains = []
     
     def peer_ids(self):
         return self.diction.peers if self.diction is not None else None
@@ -192,6 +209,10 @@ class RegistResp(AnsonResp):
             if p is not None and p.stat == CynodeStats.create:
                 return p.synid
         return None
+
+    def domains(self):
+        return self.orgDomains if self.orgDomains is not None else []
+
 
 def loadYellowPages():
     path = ""
