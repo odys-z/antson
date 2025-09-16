@@ -29,12 +29,14 @@ class LangExt:
     @staticmethod
     def isblank(s, regex=None):
         """
-        self.assertTrue(LangExt.isblank(None))
-        self.assertTrue(LangExt.isblank(''))
-        self.assertTrue(LangExt.isblank(' '))
-        self.assertTrue(LangExt.isblank('00', r'0+'))
-        self.assertTrue(LangExt.isblank('00', r'0'))
-        self.assertFalse(LangExt.isblank(' ', r'0'))
+        ::
+        
+            self.assertTrue(LangExt.isblank(None))
+            self.assertTrue(LangExt.isblank(''))
+            self.assertTrue(LangExt.isblank(' '))
+            self.assertTrue(LangExt.isblank('00', r'0+'))
+            self.assertTrue(LangExt.isblank('00', r'0'))
+            self.assertFalse(LangExt.isblank(' ', r'0'))
         :param s:
         :param regex:
         :return: is it taken as blank string

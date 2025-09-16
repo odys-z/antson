@@ -9,7 +9,7 @@ from anson.io.odysz.common import LangExt
 from semanticshare.io.odysz.semantic.jprotocol import AnsonBody, AnsonMsg, AnsonResp, JServUrl, JProtocol
 from semanticshare.io.oz.jserv.docs.syn.singleton import AppSettings
 
-from . import Synode, SyncUser
+from . import Synode, SyncUser, SynodeMode
 
 
 @dataclass
@@ -130,6 +130,16 @@ class AnRegistry(Anson):
             for u in users:
                 if u.userId == id:
                     return u
+        return None
+
+    def find_hubpeer(self):
+        if LangExt.len(self.config.peers) > 0:
+            for p in self.config.peers:
+                if p.remarks == SynodeMode.hub.name:
+                    return p
+            else:
+                p0 = self.config.peers[0]
+                return p0 if LangExt.isblank(p0.stat) and LangExt.isblank(p0.remarks) else None
         return None
 
 

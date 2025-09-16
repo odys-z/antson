@@ -125,6 +125,10 @@ class AnsonResp(AnsonBody):
 
     def msg(self) -> str:
         return self.m
+    
+    def Code(self, code: MsgCode):
+        self.code = code
+        return self
 
 
 class JProtocol:

@@ -48,7 +48,11 @@ class LangExtTest(unittest.TestCase):
         self.assertTrue(LangExt.isblank(' '))
         self.assertTrue(LangExt.isblank('00', r'0+'))
         self.assertTrue(LangExt.isblank('00', r'0'))
+        self.assertFalse(LangExt.isblank('00', r'^0$'))
         self.assertFalse(LangExt.isblank(' ', r'0'))
+        self.assertTrue(LangExt.isblank('0.0.0.0', r'^\s*(0)|(0\\.(0\\.)*\\.0)\s*$'))
+        self.assertTrue(LangExt.isblank(' 0.0.0.0  ', r'^\s*(0)|(0\\.(0\\.)+\\.0)\s*$'))
+        self.assertTrue(LangExt.isblank('0.0.0.0.0', r'^\s*(0)|(0\\.(0\\.)+\\.0)\s*$'))
 
 if __name__ == '__main__':
     unittest.main()

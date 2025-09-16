@@ -34,7 +34,7 @@ class Synode(Anson):
     nyq: int
     syn_uid: str
     jserv: str
-    remark: str
+    remarks: str
     nyquence: int
     stat: str
     '''

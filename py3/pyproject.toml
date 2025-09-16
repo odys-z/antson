@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "anson.py3"
-version = "0.2.8"
+version = "0.3.0"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
@@ -26,7 +26,8 @@ For a copy, see <https://opensource.org/licenses/MIT>.""" }
 [project.optional-dependencies]
 testing = [
     "pytest",
-    "requests"
+    "requests",
+    "semantics.py3"
 ]
 
 [tool.hatch.build.targets.wheel]

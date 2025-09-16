@@ -117,7 +117,7 @@ def instanceof(clsname: Union[str, type], props: dict):
         setattr(obj, k, Anson.from_value(fds[k].antype if k in fds else None, v))
 
     if len(missingAttrs) > 0:
-        Utils.warn(f'Missing attributes in {obj.__type__}: {missingAttrs}. Anson expect a __init__() for all initialize the none default fields.')
+        Utils.warn(f'Missing attributes in {obj.__type__}: {missingAttrs}. Anson expect a __init__() initializing all the none default fields.')
 
     return obj
 
@@ -221,7 +221,7 @@ class Anson(dict):
 
                 if k not in myfds:
                     if k != 'type':
-                        Utils.warn("Field {0}.{1} is not defined in Anson, which is presenting in data object. Value ignored: {2}.",
+                        Utils.warn("Field {0}.{1} is not defined in Anson or Semantics.py3, which is presenting in data object. Value ignored: {2}.",
                                str(self['__type__']), k, v)
                     continue
 
