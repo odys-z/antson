@@ -92,6 +92,18 @@ class SynodeConfig(Anson):
         self.peers = peers
         self.mode  = mode
 
+    def overlay(self, by):
+        self.chsize = by.chsize if by.chsize >= 0 else self.chsize
+        self.synconn = by.synconn if not LangExt.isblank(by.synconn) else self.synconn
+        self.sysconn = by.sysconn if not LangExt.isblank(by.sysconn) else self.sysconn
+        self.domain  = by.domain if not LangExt.isblank(by.domain) else self.domain
+        self.org   = by.org if not LangExt.isblank(by.org) else self.org
+        self.https = by.https if by.https is not None else self.https
+        self.synid = by.synid if not LangExt.isblank(by.synid) else self.synid
+        self.admin = by.admin if not LangExt.isblank(by.admin) else self.admin
+        self.peers = by.peers if LangExt.len(by.peers) > 0 else self.peers
+        self.mode  = by.mode if not LangExt.isblank(by.mode) else self.mode
+
 
 @dataclass
 class AnRegistry(Anson):
@@ -173,12 +185,14 @@ class RegistReq(AnsonBody):
     market: str
     diction: Optional[SynodeConfig]
     myjserv: Optional[JServUrl]
+    jservtime: str
     
     def __init__(self, act: str=None, market:str=None):
         super().__init__()
         self.market = market
         self.a = act
         self.diction = None
+        self.jservtime = '1911-10-10'
     
     def dictionary(self, d: SynodeConfig):
         self.diction = d
@@ -188,12 +202,17 @@ class RegistReq(AnsonBody):
         return None if self.diction is None else \
                self.diction.domain
 
+    def Jservtime(self, utc:str):
+        self.jservtime = utc
+        return self
+
     def jserurl(self, https: bool, settings: AppSettings, iport: tuple[str, int]):
         self.myjserv = JServUrl(
             https=https,
             ip=iport[0],
             port=iport[1],
             subpaths=[JProtocol.urlroot])
+        return self
 
 @dataclass
 class RegistResp(AnsonResp):

@@ -44,8 +44,6 @@ class LangExt:
         if (s == None):
             return True
         if isinstance(s, str):
-            # if regex == None or s == "":
-            #     return len(s) == 0
             if regex == None:
                 return len(s.strip()) == 0
             else:
