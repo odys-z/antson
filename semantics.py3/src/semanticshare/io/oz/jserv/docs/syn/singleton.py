@@ -83,6 +83,11 @@ jour0 = '1911-10-10'
 
 @dataclass
 class AppSettings(Anson):
+    json: str
+    '''
+    Fullpath to settiongs.json
+    '''
+    
     regiserv: str
     envars: dict
     startHandler: [str]
@@ -164,3 +169,10 @@ class AppSettings(Anson):
                 p.synid in self.jservs else \
                 "http://?:?/{}".format(jserv_url_path)]
             ) for p in peers_define]
+
+    def save(self):
+        '''
+        Save to self.json. There is only on setting.json in a node, and is not movable.
+        :return: 
+        '''
+        self.toFile(self.json)

@@ -82,14 +82,15 @@ class SynodeConfig(Anson):
                  synconn:str=None, sysconn:str=None, admin:str='admin',
                  org:SynOrg=None, peers:list=None, mode:str=None):
         super().__init__()
-        self.https = False
         self.synconn = synconn
         self.sysconn = sysconn
+        self.domain  = domain
+        self.org   = org
+        self.https = False
         self.synid = synode
         self.admin = admin
         self.peers = peers
         self.mode  = mode
-        self.org   = org
 
 
 @dataclass
@@ -209,7 +210,9 @@ class RegistResp(AnsonResp):
     
     def __init__(self):
         super().__init__()
+        self.r = ''
         self.orgDomains = []
+        self.diction = SynodeConfig()
     
     def peer_ids(self):
         return self.diction.peers if self.diction is not None else None

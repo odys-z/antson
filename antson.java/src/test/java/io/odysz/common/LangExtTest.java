@@ -164,6 +164,25 @@ class LangExtTest {
 		assertArrayEquals(new String[] {}, concatArr(null, null));
 		assertArrayEquals(new String[] {}, concatArr(new String[] {}, new String[] {}));
 	}
+	
+	@Test
+	void testCompact() {
+		assertEquals("test.org-1", compact("test.org-", "1", -1));
+		assertEquals("1", compact("test.org", "1", 1));
+		assertEquals("-1", compact("test.org", "-1", 2));
+		assertEquals("t-1", compact("test.org", "-1", 3));
+		assertEquals("test.or-1", compact("test.org-", "-1", 9));
+		assertEquals("test.org-1", compact("test.org-", "-1", 10));
+		assertEquals("-", compact("", "-1", 1));
+		assertEquals("-", compact(null, "-1", 1));
+		assertEquals("-1", compact(null, "-1", 2));
+		assertEquals("-1", compact(null, "-1", 3));
+		assertEquals("test.org-1", compact("test.org", "-1", 10));
+		assertEquals("test.org-1", compact("test.org", "-1", -1));
+		assertEquals("", compact("test.org", "-1", 0));
+		assertEquals("t", compact("test.org", "", 1));
+		assertEquals("te", compact("test.org", "", 2));
+	}
 
 	@Test
 	void testGtLt() {

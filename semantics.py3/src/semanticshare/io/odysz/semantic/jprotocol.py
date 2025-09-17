@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
+from urllib.parse import urlparse
+import re
 
 from anson.io.odysz.common import LangExt
 from typing_extensions import Self
@@ -80,6 +82,7 @@ class AnsonMsg(Anson):
 @dataclass
 class AnsonBody(Anson):
     uri: str
+    parent: Optional[AnsonMsg]
     a: str
     rs: dict
     m: str
@@ -155,3 +158,19 @@ class JServUrl(Anson):
         self.subpaths = subpaths
         self.jservtime = '1911-10-10'
 
+    @staticmethod
+    def asJserv(jsrv: str):
+        parts = urlparse(jserv)
+        jurl = JServUrl(https=parts.scheme == 'https',
+                        ip=parts.hostname, port=parts.port,
+                        subpaths= None if LangExt.len(parts.path) == 0 else \
+                            re.sub('^/*', '', parts.path).split('/')[1:])
+        return jurl
+    
+    @staticmethod
+    def valid(jserv: str, rootpath: str=JProtocol.urlroot):
+        parts = urlparse(jserv)
+        urlroot = re.sub('^/*', '', parts.path.removeprefix("/")) if LangExt.len(parts.path) > 0 else ''
+        return parts.port >= 1024 \
+            and (parts.scheme == "http" or parts.scheme == "https") \
+            and rootpath == urlroot.split('/')[0]
