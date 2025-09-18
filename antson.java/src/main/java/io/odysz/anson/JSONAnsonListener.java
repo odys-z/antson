@@ -884,7 +884,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			Field f = top.fmap.get(fn);
 			if (f == null) {
 				// throw new AnsonException(0, "Field ignored: field: %s, value: %s", fn, ctx.getText());
-				Utils.warn("Field ignored: field: %s, value: %s", fn, ctx.getText());
+				Utils.warn("Field ignored: type: %s field: %s.%s, value: %s",
+						top.valType, enclosing.getClass().getName(), fn, ctx.getText());
 				return;
 			}
 
