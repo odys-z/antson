@@ -1703,6 +1703,16 @@ public class LangExt {
 		return a;
 	}
 
+	public static <T> void mustnoBlankAny(T... a) {
+		for (T i : a) {
+			if (i instanceof String) {
+				if (isblank(i)) throw new NullPointerException("Items must not be empty");
+			}
+			else if (i == null)
+				 throw new NullPointerException("Items must not be null");
+		}
+	}
+
 	public static void mustgt(Number a, Number b, String...msg) {
 		if (a.floatValue() <= b.floatValue())
 			throw new NullPointerException(f6(msg));
