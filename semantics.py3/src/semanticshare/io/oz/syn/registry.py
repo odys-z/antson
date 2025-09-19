@@ -185,15 +185,14 @@ class RegistReq(AnsonBody):
     market: str
     diction: Optional[SynodeConfig]
     myjserv: Optional[JServUrl]
-    jservtime: str
-    
+    protocolPath: Optional[str]
+
     def __init__(self, act: str=None, market:str=None):
         super().__init__()
         self.market = market
         self.a = act
         self.diction = None
-        self.jservtime = '1911-10-10'
-    
+
     def dictionary(self, d: SynodeConfig):
         self.diction = d
         return self
@@ -203,7 +202,9 @@ class RegistReq(AnsonBody):
                self.diction.domain
 
     def Jservtime(self, utc:str):
-        self.jservtime = utc
+        if self.myjserv is None:
+            self.myjserv = JServUrl()
+        self.myjserv.jservtime = utc
         return self
 
     def jserurl(self, https: bool, settings: AppSettings, iport: tuple[str, int]):
@@ -213,6 +214,11 @@ class RegistReq(AnsonBody):
             port=iport[1],
             subpaths=[JProtocol.urlroot])
         return self
+
+    def protocol_path(self, urlroot):
+        self.protocolPath = urlroot
+        return self
+
 
 @dataclass
 class RegistResp(AnsonResp):
