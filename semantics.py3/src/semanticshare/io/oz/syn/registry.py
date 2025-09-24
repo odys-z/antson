@@ -7,7 +7,6 @@ from typing import Union, cast, Optional
 from anson.io.odysz.anson import Anson
 from anson.io.odysz.common import LangExt
 from semanticshare.io.odysz.semantic.jprotocol import AnsonBody, AnsonMsg, AnsonResp, JServUrl, JProtocol
-from semanticshare.io.oz.jserv.docs.syn.singleton import AppSettings
 
 from . import Synode, SyncUser, SynodeMode
 
@@ -207,7 +206,7 @@ class RegistReq(AnsonBody):
         self.myjserv.jservtime = utc
         return self
 
-    def jserurl(self, https: bool, settings: AppSettings, iport: tuple[str, int]):
+    def jserurl(self, https: bool, iport: tuple[str, int]):
         self.myjserv = JServUrl(
             https=https,
             ip=iport[0],

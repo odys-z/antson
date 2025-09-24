@@ -47,8 +47,6 @@ class DataClassTest(unittest.TestCase):
         # __type__: Anson.Trumpfield(name='__type__', fieldtype=<class 'str'>, ...)
         # name: 'name': Anson.Trumpfield(name='name', ...)
 
-        # self.assertEqual(_fields(foo, None)['age'].type, int)
-
         my = MyDataClass('zz', 12)
         my.incumbent = True
         mytype = type(my)
@@ -70,7 +68,6 @@ class DataClassTest(unittest.TestCase):
 }''', my.toBlock(beautify=True))
 
         your = mytype('yy', 13)
-        # print(your.toBlock())
         self.assertEqual('''{
   "type": "test.test_00_Anson.MyDataClass",
   "extra": {

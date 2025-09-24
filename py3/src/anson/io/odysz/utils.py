@@ -37,7 +37,6 @@ def zip2(distzip, resources, exclude_patterns=[]):
                         if not matches_patterns(file, exclude_patterns):
                             file_path = os.path.join(pth, file)
                             relative_path = os.path.relpath(file_path, srcroot)
-                            # print(file, file_path, pth, srcroot, relative_path)
 
                             visited = set()
                             while os.path.islink(file_path):
@@ -64,4 +63,5 @@ def zip2(distzip, resources, exclude_patterns=[]):
                     err = True
                     raise FileNotFoundError(f"[ERROR]: Resource '{rk}': '{file}' not found.")
 
-    print(f'Created ZIP file successfully: {distzip}' if not err else 'Errors while making target (creaded zip file)')
+    print(f'Created ZIP file successfully: {distzip}' \
+          if not err else 'Errors while making target (creaded zip file)')

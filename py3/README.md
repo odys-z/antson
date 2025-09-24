@@ -65,30 +65,29 @@ define as
 }
 ```
 
-and the user's project tree is:
+and the user's project include two parts:
 
+* The semantics.py3 name space for json protocol package, the user types.
+
+Which is currently need to be manually keep all fields the
+same with the java end. Start the project from the source:
+
+    github.com/odys-z/antson/semantics.py3
+
+You need use the following commands to build and install it,
+so it can be imported to the application project.
+
+```code
+    python -m build
+    pip install dist/semantics_py3-#.#.#-py3-none-any.whl
 ```
-src
-├── io
-│   └── oz
-│       ├── jserv
-│       │   └── docs
-│       │       └── syn
-│       │           └── singleton.py "class AppSettings"
-│       └── syn.py "class AnRegistry, SynodeConfig, SynOrg, YellowPages"
-main.py
-```
+
+* The (client end) source project for applications.
 
 In main.py, call
 
 ```code
-Anson.java_src('src')
-```
-
-before
-
-```code
-AnRegistry.from_file(path)
+    from semanticshare.your.package import Your_class
 ```
 
 # Issues
@@ -132,8 +131,6 @@ AttributeError: 'SynOrg' object has no attribute 'parent'
 # References
 
 - https://packaging.python.org/en/latest/tutorials/packaging-projects/
-
-```python3 -m twine upload --repository testpypi dist/*```
 
 # Troubleshootings
 

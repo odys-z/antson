@@ -53,7 +53,7 @@ class Synode(Anson):
         self.jserv = None
         self.remarks = None
         self.nyquence = None
-        self.stat = 'C' # not CynodeStats.create for circular import
+        self.stat = 'c' # not CynodeStats.create for circular import
 
 
 @dataclass()
