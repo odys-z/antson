@@ -168,7 +168,10 @@ class JServUrl(Anson):
         return jurl
     
     @staticmethod
-    def valid(jserv: str, rootpath: str=JProtocol.urlroot):
+    def valid(jserv: str, rootpath: str = None):
+        if rootpath is None:
+            rootpath = JProtocol.urlroot
+
         parts = urlparse(jserv)
         urlroot = re.sub('^/*', '', parts.path.removeprefix("/")) if LangExt.len(parts.path) > 0 else ''
         return parts.port >= 1024 \
