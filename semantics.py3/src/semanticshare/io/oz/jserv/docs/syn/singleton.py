@@ -6,6 +6,7 @@ from typing import overload, Optional
 from datetime import datetime
 
 from anson.io.odysz.anson import Anson
+from anson.io.odysz.common import LangExt
 
 from semanticshare.io.oz.syn import Synode
 
@@ -83,10 +84,10 @@ jour0 = '1911-10-10'
 
 @dataclass
 class AppSettings(Anson):
-    json: str
-    '''
-    Fullpath to settiongs.json
-    '''
+    # json: str
+    # '''
+    # Fullpath to settiongs.json
+    # '''
     
     regiserv: str
     envars: dict
@@ -170,9 +171,7 @@ class AppSettings(Anson):
                 "http://?:?/{}".format(jserv_url_path)]
             ) for p in peers_define]
 
-    def save(self):
-        '''
-        Save to self.json. There is only on setting.json in a node, and is not movable.
-        :return: 
-        '''
-        self.toFile(self.json)
+    def acceptj_butme(self, myid, peers: list[Synode]):
+        for p in peers:
+            if myid != p.synid and not LangExt.isblank(p.jserv):
+                self.jservs[p.synid] = p.jserv

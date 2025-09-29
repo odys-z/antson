@@ -31,7 +31,7 @@ def class4Name(m, clssn: str) -> type:
             try:
                 return find_spec(name) is not None
             except Exception as exp:
-                print(exp)
+                if Anson.verbose: print(name, exp)
             
         if len(m) == 0:
             return java_src_path if has_module(java_src_path) else ''
@@ -117,7 +117,8 @@ def instanceof(clsname: Union[str, type], props: dict):
         setattr(obj, k, Anson.from_value(fds[k].antype if k in fds else None, v))
 
     if len(missingAttrs) > 0:
-        Utils.warn(f'Missing attributes in {obj.__type__}: {missingAttrs}. Anson expect a __init__() initializing all the none default fields.')
+        Utils.warn(f'Missing attributes in {obj.__type__}: {missingAttrs}. '
+                   'Anson expect a __init__() initializing all the none default fields.')
 
     return obj
 
@@ -143,6 +144,9 @@ class JsonOpt:
 
 @dataclass
 class Anson(dict):
+    verbose: bool
+    json_path: str
+    
     enclosinguardtypes = set()
     
     __type__: str
@@ -202,6 +206,13 @@ class Anson(dict):
     def toFile(self, path: str):
         with open(path, 'w+', encoding="utf-8") as jf:
             jf.write(self.toBlock(True))
+
+    def save(self):
+        '''
+        Save to self.json. There is only on setting.json in a node, and is not movable.
+        :return:
+        '''
+        self.toFile(self.json_path)
 
     def toBlock_(self, ind: int, beautify, suggestype: type = None) -> str:
         myfds = _fields(self, None)
@@ -340,7 +351,9 @@ class Anson(dict):
     def from_file(fp: str) -> 'Anson':
         with open(fp, 'r', encoding='utf-8') as file:
             obj = json.load(file)
-            return Anson.from_envelope(obj)
+            an = Anson.from_envelope(obj)
+            an.json_path = fp
+            return an
 
     @classmethod
     def java_src(cls, src_root: str = 'src'):
@@ -368,6 +381,7 @@ class Anson(dict):
         return Anson.from_obj(obj, obj['type'])
                 # '.'.join([java_src_path, obj['type']]) if len(java_src_path) > 0 else obj['type'])
 
+Anson.verbose = False
 
 class AnsonException(Exception):
     type = "io.odysz.ansons.x.AnsonException"

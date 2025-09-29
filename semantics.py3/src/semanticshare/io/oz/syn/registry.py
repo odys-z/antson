@@ -92,7 +92,8 @@ class SynodeConfig(Anson):
         self.mode  = mode
 
     def overlay(self, by):
-        self.chsize = by.chsize if by.chsize >= 0 else self.chsize
+        ''' self.org |= by.org '''
+        self.chsize  = by.chsize if by.chsize >= 0 else self.chsize
         self.synconn = by.synconn if not LangExt.isblank(by.synconn) else self.synconn
         self.sysconn = by.sysconn if not LangExt.isblank(by.sysconn) else self.sysconn
         self.domain  = by.domain if not LangExt.isblank(by.domain) else self.domain
@@ -103,9 +104,19 @@ class SynodeConfig(Anson):
         self.peers = by.peers if LangExt.len(by.peers) > 0 else self.peers
         self.mode  = by.mode if not LangExt.isblank(by.mode) else self.mode
 
+    def set_domain(self, domid: str):
+        self.domain = domid
+        if LangExt.len(self.peers) > 0:
+            for p in self.peers:
+                p.domain = domid
+
 
 @dataclass
 class AnRegistry(Anson):
+    json: str
+    '''
+    Null java equivolent
+    '''
     config: SynodeConfig
     synusers: list[SyncUser]
 
@@ -113,16 +124,20 @@ class AnRegistry(Anson):
         super().__init__()
         self.config = cast('SynodeConfig', None)
         self.synusers = []
+        # self.json = cast(str, None)
 
     @staticmethod
-    def load(path) -> 'AnRegistry':
-        if Path(path).is_file():
-            with open(path, 'r', encoding="utf-8") as file:
-                obj = json.load(file)
-                obj['__type__'] = AnRegistry().__type__
-                return Anson.from_envelope(obj)
-        else:
-            raise FileNotFoundError(f"File doesn't exist: {path}")
+    def load(path: str) -> 'AnRegistry':
+        return cast('AnRegistry', Anson.from_file(path))
+    #     if Path(path).is_file():
+    #         with open(path, 'r', encoding="utf-8") as file:
+    #             obj = json.load(file)
+    #             obj['__type__'] = AnRegistry().__type__
+    #             an =  Anson.from_envelope(obj)
+    #             an.json = path
+    #             return an
+    #     else:
+    #         raise FileNotFoundError(f"File doesn't exist: {path}")
         
     def find_peer(self, peerid: str):
         return None if LangExt.isblank(peerid) or self.config.peers is None \
@@ -153,6 +168,9 @@ class AnRegistry(Anson):
                 p0 = self.config.peers[0]
                 return p0 if LangExt.isblank(p0.stat) and LangExt.isblank(p0.remarks) else None
         return None
+
+    # def save(self):
+    #     self.toFile(self.json)
 
 
 @dataclass()
@@ -210,8 +228,9 @@ class RegistReq(AnsonBody):
         self.myjserv = JServUrl(
             https=https,
             ip=iport[0],
-            port=iport[1],
-            subpaths=[JProtocol.urlroot])
+            port=iport[1])
+            # 2025-09-29 Java version doesn't have this line:
+            # subpaths=[JProtocol.urlroot],
         return self
 
     def protocol_path(self, urlroot):
@@ -238,8 +257,8 @@ class RegistResp(AnsonResp):
         self.orgDomains = []
         self.diction = SynodeConfig()
     
-    def peer_ids(self):
-        return self.diction.peers if self.diction is not None else None
+    # def peer_ids(self) -> list[Synode]:
+    #     return self.diction.peers if self.diction is not None else None
     
     def next_installing(self):
         for p in self.diction.peers:

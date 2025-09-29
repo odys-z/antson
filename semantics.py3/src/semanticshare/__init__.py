@@ -50,8 +50,8 @@ The sys.path of default interpreter:
 
     . The current working directory (if set).
     . Directories from the PYTHONPATH environment variable (if set).
-    . Standard library paths (e.g., C:\Python313\lib).
-    . Site-packages for installed packages (e.g., C:\Python313\lib\site-packages).
+    . Standard library paths (e.g., C:\\Python313\\lib).
+    . Site-packages for installed packages (e.g., C:\\Python313\\lib\\site-packages).
 
 The sys.path of venv:
 
