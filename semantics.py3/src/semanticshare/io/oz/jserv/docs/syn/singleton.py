@@ -107,6 +107,8 @@ class AppSettings(Anson):
     jservs: dict
     jserv_utc: str
 
+    centralPswd: str
+
     def __init__(self):
         super().__init__()
         self.regiserv = None
@@ -122,6 +124,7 @@ class AppSettings(Anson):
         self.webrootLocal = f'http://suppress.warning:{self.webport}'
 
         self.jserv_utc = None
+        self.centralPswd = None
 
     @overload
     def Volume(self):

@@ -233,6 +233,10 @@ class RegistReq(AnsonBody):
             # subpaths=[JProtocol.urlroot],
         return self
 
+    def mystate(self, stat: CynodeStats=None):
+        self.mystate = stat
+        return self
+
     def protocol_path(self, urlroot):
         self.protocolPath = urlroot
         return self
