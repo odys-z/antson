@@ -27,7 +27,8 @@ class SynOrg(Anson):
     Ignored by toJson / toBlock in java
     """
 
-    market: str
+    # market: str
+
     # web server url, configured in dictionary like: $WEB-ROOT:8888
     webroot: str
     # The home page url (landing page)
