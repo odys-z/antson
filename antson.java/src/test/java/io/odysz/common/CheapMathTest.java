@@ -39,6 +39,7 @@ class CheapMathTest {
 		assertEquals(1, blocks(3, 4));
 
 		assertEquals(0, blocks(0, 10));
+		assertEquals(10, blocks(100, 10));
 	}
 
 }

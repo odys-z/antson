@@ -97,6 +97,7 @@ class AppSettings(Anson):
 
     volume: str
     vol_name: str
+    localIp: str
     port: int
     webport: int
     webrootLocal: str
@@ -107,7 +108,9 @@ class AppSettings(Anson):
     jservs: dict
     jserv_utc: str
 
+    connIdleSnds: int
     centralPswd: str
+    json: str
 
     def __init__(self):
         super().__init__()

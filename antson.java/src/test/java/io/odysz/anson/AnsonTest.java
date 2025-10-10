@@ -268,7 +268,6 @@ class AnsonTest {
 		assertEquals(T4_Port.dataset, problem.problem);
 	}
 	
-	@SuppressWarnings("serial")
 	@Test
 	void test2Json4StrsList() throws AnsonException, IOException {
 		AnsTStrsList lst = new AnsTStrsList("0-0-0", "0-1-0");

@@ -18,7 +18,7 @@ public class AnsTStrsList extends Anson {
 	 * @param ele000 element[0, 0, 0], e.g "0 0 0"
 	 * @param ele001 element[0, 1, 0], e.g "0 1 0"
 	 */
-	@SuppressWarnings({ "serial", "unchecked" })
+	@SuppressWarnings({ "unchecked" })
 	public AnsTStrsList(Object ele000, Object ele010) {
 		lst = new ArrayList<String[]>();
 		lst3d = new ArrayList<ArrayList<Object[]>>();
