@@ -626,6 +626,10 @@ public class FilenameUtils {
         		;
     }
 
+	public static String concat(Path p, String fullFileNameToAdd) {
+		return concat(p.toString(), fullFileNameToAdd);
+	}
+
     /**
      * Determines whether the {@code parent} directory contains the {@code child} element (a file or directory).
      * <p>
@@ -1812,5 +1816,4 @@ public class FilenameUtils {
 	public static String rel2abs(String... relpath) {
 		return normalize(concat(new File(".").getAbsolutePath(), relpath));
 	}
-
 }
