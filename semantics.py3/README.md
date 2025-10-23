@@ -1,3 +1,5 @@
+[![PyPI version](https://img.shields.io/pypi/v/semantics.py3.svg)](https://pypi.org/project/semantics.py3)
+
 # About
 
 Semantics.py3 is a sharing name space for the protocol layer of 

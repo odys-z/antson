@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "semantics.py3"
-version = "0.1.7"
+version = "0.1.8"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
