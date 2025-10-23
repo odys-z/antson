@@ -1703,7 +1703,7 @@ public class LangExt {
 		return a;
 	}
 
-	public static <T> void mustnoBlankAny(T... a) {
+	public static <T> void mustnoBlankAny(@SuppressWarnings("unchecked") T... a) {
 		for (T i : a) {
 			if (i instanceof String) {
 				if (isblank(i)) throw new NullPointerException("Items must not be empty");

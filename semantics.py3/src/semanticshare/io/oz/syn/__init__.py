@@ -37,6 +37,10 @@ class Synode(Anson):
     remarks: str
     nyquence: int
     stat: str
+
+    oper: str
+    optime: str
+
     '''
     CynodeStats.create | installed, ...
     '''
