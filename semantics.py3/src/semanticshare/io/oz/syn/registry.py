@@ -174,7 +174,7 @@ class AnRegistry(Anson):
     #     self.toFile(self.json)
 
 
-@dataclass()
+@dataclass
 class Centralport(Enum):
     heartbeat:str = "ping.serv"
     session  :str = "login.serv"
@@ -204,6 +204,7 @@ class RegistReq(AnsonBody):
     diction: Optional[SynodeConfig]
     myjserv: Optional[JServUrl]
     protocolPath: Optional[str]
+    mystate: Optional[str]
 
     def __init__(self, act: str=None, market:str=None):
         super().__init__()

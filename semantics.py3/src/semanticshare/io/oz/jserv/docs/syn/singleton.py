@@ -178,6 +178,7 @@ class AppSettings(Anson):
             ) for p in peers_define]
 
     def acceptj_butme(self, myid, peers: list[Synode]):
-        for p in peers:
-            if myid != p.synid and not LangExt.isblank(p.jserv):
-                self.jservs[p.synid] = p.jserv
+        if peers is not None:
+            for p in peers:
+                if myid != p.synid and not LangExt.isblank(p.jserv):
+                    self.jservs[p.synid] = p.jserv
