@@ -177,7 +177,7 @@ class AppSettings(Anson):
                 "http://?:?/{}".format(jserv_url_path)]
             ) for p in peers_define]
 
-    def acceptj_butme(self, myid, peers: list[Synode]):
+    def acceptj_butme(self, myid: str, peers: list[Synode]):
         if peers is not None:
             for p in peers:
                 if myid != p.synid and not LangExt.isblank(p.jserv):
