@@ -25,14 +25,12 @@ class SynOrg(Anson):
     Ignored by toJson / toBlock in java
     """
 
-    # market: str
-
-    # web server url, configured in dictionary like: $WEB-ROOT:8888
     webroot: str
-    # The home page url (landing page)
+    ''' web server url, configured in dictionary like: $WEB-ROOT:8888 '''
     homepage: str
-    # The default resources collection, usually a group / tree of documents.
+    ''' The home page url (landing page) '''
     album0: str
+    ''' The default resources collection, usually a group / tree of documents.'''
 
     def __init__(self, orgtype:str='', orgid:str='', orgname:str='', webroot:str='', homepage:str='', albumid=''):
         super().__init__()
