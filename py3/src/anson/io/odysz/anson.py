@@ -1,4 +1,6 @@
 import sys
+from pathlib import Path
+
 sys.stdout.reconfigure(encoding="utf-8")
 
 import importlib.util
@@ -12,7 +14,7 @@ from typing import Union, Optional
 
 from typing_extensions import get_args, get_origin
 
-from .common import Utils
+from .common import Utils, LangExt
 
 java_src_path: str = 'semanticshare'
 
@@ -136,20 +138,16 @@ def parse_forward(ref: Union[type, str]):
 
 
 class JsonOpt:
-    quotekey = True;
+    quotekey = True
 
     def quoteK(self):
-        return self.quotekey;
+        return self.quotekey
 
 
 @dataclass
 class Anson(dict):
     verbose: bool
-    json_path: str
-    '''
-    No equivalent in Java
-    '''
-    
+
     enclosinguardtypes = set()
     
     __type__: str
@@ -210,12 +208,15 @@ class Anson(dict):
         with open(path, 'w+', encoding="utf-8") as jf:
             jf.write(self.toBlock(True))
 
-    def save(self):
+    def save(self, json_path):
         '''
         Save to self.json. There is only on setting.json in a node, and is not movable.
         :return: None
         '''
-        self.toFile(self.json_path)
+        # if not LangExt.isblank(self.json_path):
+        #     self.json_path = Path(self.json_path).as_posix()
+
+        self.toFile(json_path)
 
     def toBlock_(self, ind: int, beautify, suggestype: type = None) -> str:
         myfds = _fields(self, None)
@@ -355,7 +356,7 @@ class Anson(dict):
         with open(fp, 'r', encoding='utf-8') as file:
             obj = json.load(file)
             an = Anson.from_envelope(obj)
-            an.json_path = fp
+            # an.json_path = fp
             return an
 
     @classmethod

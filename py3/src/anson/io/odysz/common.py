@@ -5,6 +5,7 @@ Created on 25 Oct 2019
 '''
 import os
 import sys
+from numbers import Number
 from re import match
 from typing import TextIO, Optional, TypeVar, Union
 
@@ -63,7 +64,15 @@ class LangExt:
         return 0 if obj is None else len(obj)
 
     @staticmethod
-    def str(obj: Union[dict, list]):
+    def str(obj):
+        '''
+        :param obj:
+        :return:
+        {obj.k: obj.v, ...} if obj is dict;
+        [0, 1, ...] if obj is list;
+        obj.toAnson if obj is Anson;
+        else str(obj)
+        '''
         def quot(v) -> str:
             return f'"{v}"' if type(v) == str else f'"{v.toBlock()}"' if isinstance(v, Anson) else LangExt.str(v)
         from .anson import Anson

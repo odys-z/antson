@@ -44,9 +44,6 @@ class DataClassTest(unittest.TestCase):
         self.assertEqual('test.testier.extra.MyDataClass',
                          f'{foo.extra.__module__}.{foo.__class__.__name__}')
 
-        # __type__: Anson.Trumpfield(name='__type__', fieldtype=<class 'str'>, ...)
-        # name: 'name': Anson.Trumpfield(name='name', ...)
-
         my = MyDataClass('zz', 12)
         my.incumbent = True
         mytype = type(my)

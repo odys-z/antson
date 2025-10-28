@@ -1,7 +1,5 @@
-import json
 from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
 from typing import Union, cast, Optional
 
 from anson.io.odysz.anson import Anson
@@ -130,15 +128,6 @@ class AnRegistry(Anson):
     @staticmethod
     def load(path: str) -> 'AnRegistry':
         return cast('AnRegistry', Anson.from_file(path))
-    #     if Path(path).is_file():
-    #         with open(path, 'r', encoding="utf-8") as file:
-    #             obj = json.load(file)
-    #             obj['__type__'] = AnRegistry().__type__
-    #             an =  Anson.from_envelope(obj)
-    #             an.json = path
-    #             return an
-    #     else:
-    #         raise FileNotFoundError(f"File doesn't exist: {path}")
         
     def find_peer(self, peerid: str):
         return None if LangExt.isblank(peerid) or self.config.peers is None \
@@ -169,9 +158,6 @@ class AnRegistry(Anson):
                 p0 = self.config.peers[0]
                 return p0 if LangExt.isblank(p0.stat) and LangExt.isblank(p0.remarks) else None
         return None
-
-    # def save(self):
-    #     self.toFile(self.json)
 
 
 @dataclass
@@ -262,9 +248,6 @@ class RegistResp(AnsonResp):
         self.r = ''
         self.orgDomains = []
         self.diction = SynodeConfig()
-    
-    # def peer_ids(self) -> list[Synode]:
-    #     return self.diction.peers if self.diction is not None else None
     
     def next_installing(self):
         for p in self.diction.peers:
