@@ -146,6 +146,9 @@ class JsonOpt:
 class Anson(dict):
     verbose: bool
     json_path: str
+    '''
+    No equivalent in Java
+    '''
     
     enclosinguardtypes = set()
     
@@ -210,7 +213,7 @@ class Anson(dict):
     def save(self):
         '''
         Save to self.json. There is only on setting.json in a node, and is not movable.
-        :return:
+        :return: None
         '''
         self.toFile(self.json_path)
 
