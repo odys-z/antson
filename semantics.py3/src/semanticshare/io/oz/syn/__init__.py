@@ -3,7 +3,6 @@ from anson.io.odysz.anson import Anson
 from enum import Enum
 
 
-@dataclass
 class SynodeMode(Enum):
     """
     @since synode.py3 0.7.6
