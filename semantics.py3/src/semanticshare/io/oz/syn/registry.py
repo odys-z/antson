@@ -110,7 +110,7 @@ class SynodeConfig(Anson):
     def set_org(self, orgid: str, orgtype: str, orgname: str = None):
         self.org.orgId = orgid
         self.org.orgType = orgtype
-        self.org.orgName = orgname if orgname is not None else f'{orgtype}.{orgid}'
+        self.org.orgName = orgname if orgname is not None else f'[{orgtype}] {orgid}'
         if LangExt.len(self.peers) > 0:
             for p in self.peers:
                 p.org = orgid

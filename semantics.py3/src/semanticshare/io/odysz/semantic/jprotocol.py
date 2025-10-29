@@ -172,8 +172,11 @@ class JServUrl(Anson):
         if rootpath is None:
             rootpath = JProtocol.urlroot
 
+        if LangExt.len(jserv) < 8 + len(rootpath):
+            return False
+
         parts = urlparse(jserv)
         urlroot = re.sub('^/*', '', parts.path.removeprefix("/")) if LangExt.len(parts.path) > 0 else ''
-        return parts.port >= 1024 \
+        return (parts.port is None or type(parts.port) == int and parts.port >= 1024) \
             and (parts.scheme == "http" or parts.scheme == "https") \
             and rootpath == urlroot.split('/')[0]
