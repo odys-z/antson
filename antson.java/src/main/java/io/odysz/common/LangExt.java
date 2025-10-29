@@ -1652,20 +1652,20 @@ public class LangExt {
 
 	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> void shouldeq (Object tag, T a, T b, String ...msg) {
-		if (a != b)
-			Utils.warnT(tag, isNull(msg)
-					? f("a, %s != b, %s", a, b)
-					: msg[0], 
-					a, b);
+		if (a instanceof String && b instanceof String)
+			shouldeqs(tag, (String)a, (String)b, msg);
+		else if (a != b)
+//			Utils.warnT(tag, isNull(msg)
+//					? f("a, %s != b, %s", a, b)
+//					: msg[0], 
+//					a, b);
+			Utils.warnT(tag, len(msg) > 0 ? f("a, %s != b, %s", a, b) : f6(msg));
 	}
 
 	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static void shouldeqs (Object tag, String a, String b, String...msg) {
 		if (!eq(a, b))
-			Utils.warnT(tag, isNull(msg)
-					? f("a, %s != b, %s", a, b)
-					: msg[0],
-					a, b);
+			Utils.warnT(tag, len(msg) > 0 ? f("a, %s != b, %s", a, b) : f6(msg));
 	}
 
 	/**
