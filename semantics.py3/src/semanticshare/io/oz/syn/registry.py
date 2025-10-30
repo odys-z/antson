@@ -110,12 +110,24 @@ class SynodeConfig(Anson):
 
         if LangExt.len(by.peers) > 0:
             for p in by.peers:
-                if p.synid == self.synid: continue
+                if p.synid == self.synid:
+                    # ISSUE: if users brutally deleted settings.rootkey, has_run() will return false.
+                    # The already running states from Central will be ignored,
+                    # So all the nodes can be reinstalled and be reset?
+                    continue
+
                 loc_peer = find_mypeer(p.synid)
                 if loc_peer is not None:
+                    loc_peer.remarks = p.remarks
+                    loc_peer.stat    = p.stat
+                    loc_peer.mac     = p.mac
+                    loc_peer.oper    = p.oper
+                    loc_peer.optime  = p.optime
                     if JServUrl.valid(p.jserv):
                         loc_peer.jserv = p.jserv
                 else:
+                    if self.peers is None:
+                        self.peers = []
                     self.peers.append(p)
 
     def set_domain(self, domid: str):
