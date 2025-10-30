@@ -98,8 +98,25 @@ class SynodeConfig(Anson):
         self.https = by.https if by.https is not None else self.https
         self.synid = by.synid if not LangExt.isblank(by.synid) else self.synid
         self.admin = by.admin if not LangExt.isblank(by.admin) else self.admin
-        self.peers = by.peers if LangExt.len(by.peers) > 0 else self.peers
+        # self.peers = by.peers if LangExt.len(by.peers) > 0 else self.peers
         self.mode  = by.mode if not LangExt.isblank(by.mode) else self.mode
+
+        def find_mypeer(pid: str) -> Synode:
+            if LangExt.len(self.peers) > 0:
+                for p in self.peers:
+                    if p.synid == pid:
+                        return p
+            return None
+
+        if LangExt.len(by.peers) > 0:
+            for p in by.peers:
+                if p.synid == self.synid: continue
+                loc_peer = find_mypeer(p.synid)
+                if loc_peer is not None:
+                    if JServUrl.valid(p.jserv):
+                        loc_peer.jserv = p.jserv
+                else:
+                    self.peers.append(p)
 
     def set_domain(self, domid: str):
         self.domain = domid
@@ -110,7 +127,7 @@ class SynodeConfig(Anson):
     def set_org(self, orgid: str, orgtype: str, orgname: str = None):
         self.org.orgId = orgid
         self.org.orgType = orgtype
-        self.org.orgName = orgname if orgname is not None else f'[{orgtype}] {orgid}'
+        self.org.orgName = orgname if orgname is not None else f'{orgid}-{orgtype}'
         if LangExt.len(self.peers) > 0:
             for p in self.peers:
                 p.org = orgid
