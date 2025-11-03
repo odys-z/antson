@@ -1718,10 +1718,17 @@ public class LangExt {
 			throw new NullPointerException(f6(msg));
 	}
 
+	public static void mustlt(Number a, Number b, String...msg) {
+		mustgt(b, a, msg);
+	}
+
 	public static void mustge(Number a, Number b, String...msg) {
 		if (a.floatValue() < b.floatValue())
 			throw new NullPointerException(f6(msg));
 	}
-
+	
+	public static void mustle(Number a, Number b, String...msg) {
+		mustge(b, a, msg);
+	}
 }
 
