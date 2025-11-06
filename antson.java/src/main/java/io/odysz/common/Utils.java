@@ -536,7 +536,7 @@ public class Utils {
 	/**
 	 * Print system out with 
 	 * <pre>
-	 * if section &ge 0:
+	 * if section &gt; 0:
 	 * [section.] fromat
 	 * =================
 	 * 

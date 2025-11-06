@@ -1075,7 +1075,7 @@ public class LangExt {
 	}
 	
 	/**
-	 * Get the first element in {@link args}. Typically used to forward optional args.
+	 * Get the first element in {@param args}. Typically used to forward optional args.
 	 * @param <T>
 	 * @param args
 	 * @return arg[0] or null
