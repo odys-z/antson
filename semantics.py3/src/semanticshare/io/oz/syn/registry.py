@@ -98,7 +98,6 @@ class SynodeConfig(Anson):
         self.https = by.https if by.https is not None else self.https
         self.synid = by.synid if not LangExt.isblank(by.synid) else self.synid
         self.admin = by.admin if not LangExt.isblank(by.admin) else self.admin
-        # self.peers = by.peers if LangExt.len(by.peers) > 0 else self.peers
         self.mode  = by.mode if not LangExt.isblank(by.mode) else self.mode
 
         def find_mypeer(pid: str) -> Synode:
@@ -108,27 +107,34 @@ class SynodeConfig(Anson):
                         return p
             return None
 
+        self.peers = by.peers; # always trust reply
         if LangExt.len(by.peers) > 0:
             for p in by.peers:
-                if p.synid == self.synid:
-                    # ISSUE: if users brutally deleted settings.rootkey, has_run() will return false.
-                    # The already running states from Central will be ignored,
-                    # So all the nodes can be reinstalled and be reset?
-                    continue
-
-                loc_peer = find_mypeer(p.synid)
-                if loc_peer is not None:
-                    loc_peer.remarks = p.remarks
-                    loc_peer.stat    = p.stat
-                    loc_peer.mac     = p.mac
-                    loc_peer.oper    = p.oper
-                    loc_peer.optime  = p.optime
-                    if JServUrl.valid(p.jserv):
-                        loc_peer.jserv = p.jserv
-                else:
-                    if self.peers is None:
-                        self.peers = []
-                    self.peers.append(p)
+                p.domain = self.domain
+        # if LangExt.len(self.peers) > 0:
+        #     self.peers = list(filter(lambda p : p.domain == self.domain, self.peers))
+        #
+        # if LangExt.len(by.peers) > 0:
+        #     for p in by.peers:
+        #         # if p.synid == self.synid:
+        #         #     # ISSUE: if users brutally deleted settings.rootkey, has_run() will return false.
+        #         #     # The already running states from Central will be ignored,
+        #         #     # So all the nodes can be reinstalled and be reset?
+        #         #     continue
+        #
+        #         loc_peer = find_mypeer(p.synid)
+        #         if loc_peer is not None:
+        #             loc_peer.remarks = p.remarks
+        #             loc_peer.stat    = p.stat
+        #             loc_peer.mac     = p.mac
+        #             loc_peer.oper    = p.oper
+        #             loc_peer.optime  = p.optime
+        #             if JServUrl.valid(p.jserv):
+        #                 loc_peer.jserv = p.jserv
+        #         else:
+        #             if self.peers is None:
+        #                 self.peers = []
+        #             self.peers.append(p)
 
     def set_domain(self, domid: str):
         self.domain = domid
