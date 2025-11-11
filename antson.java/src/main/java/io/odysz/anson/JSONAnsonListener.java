@@ -1000,7 +1000,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		catch (Throwable t) {
 			Throwable cause = t.getCause();
 			throw new AnsonException(0,
-				"[Quick Error check: AnsonMsg.understandPorts(port: %1$s) in JSingleton & Clientier ever working, which can be silenced in Docker conatianer?]\n" +
+				"[Quick check: AnsonMsg.understandPorts(port: %1$s), called by JProtocol.setup(), in Server-tier & Clientier ever working, which can be silenced in Docker conatianer?]\n" +
 				"Invoking registered factory failed for value: %1$s\n" +
 				"Field Type: %2$s,\nCause: %3$s\tMessage: %4$s\n",
 				v, f.getType().getName(),
