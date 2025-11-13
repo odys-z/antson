@@ -7,6 +7,7 @@ from datetime import datetime
 
 from anson.io.odysz.anson import Anson
 from anson.io.odysz.common import LangExt
+from semanticshare.io.odysz.semantic.jprotocol import JProtocol
 
 from semanticshare.io.oz.syn import Synode
 
@@ -22,10 +23,10 @@ syntity_json = 'syntity.json'
 webroot_hub = 'WEBROOT_HUB'
 
 # TODO replace with JProtocol.urlroot
-jserv_url_path = 'jserv-album'
-"""
-    jserv-album
-"""
+# jserv_url_path = 'jserv-album'
+# """
+#     jserv-album
+# """
 
 # TODO Move to io.odysz.semantic.jprotocol.JServUrl
 def getJservUrl(https: bool, hostport: str):
@@ -34,7 +35,7 @@ def getJservUrl(https: bool, hostport: str):
     :param hostport: ip-or-host:port, NOT ONLY PORT!
     :return: http(s)://ip-or-host:port/jserv-album
     """
-    return f'{"https" if https else "http"}://{hostport}/{jserv_url_path}'
+    return f'{"https" if https else "http"}://{hostport}/{JProtocol.urlroot}'
 
 # TODO Move to io.odysz.semantic.jprotocol.JServUrl
 def getJservOption(synode: str, hostp: str, https: bool) -> str:
@@ -49,7 +50,7 @@ def getJservOption(synode: str, hostp: str, https: bool) -> str:
     return f'{synode}\n{getJservUrl(https, hostp)}'
 
 def valid_url_port(p: int):
-    return 1024 < p;
+    return 1024 <= p <= 65535;
 
 class PortfolioException(Exception):
     """
@@ -174,7 +175,7 @@ class AppSettings(Anson):
         return '' if peers_define is None else \
                 [':\t'.join([p.synid, self.jservs[p.synid] if \
                 p.synid in self.jservs else \
-                "http://?:?/{}".format(jserv_url_path)]
+                "http://?:?/{}".format(JProtocol.urlroot)]
             ) for p in peers_define]
 
     def acceptj_butme(self, myid: str, peers: list[Synode]):
