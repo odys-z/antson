@@ -213,9 +213,9 @@ class Utils:
             patterns (dict): Regular expression pattern, key, to replace with value.
         """
         import re
-        print('Updating JAR version...', file)
+        print('Updating Patterns ...', file)
 
-        with open(file, 'r') as f:
+        with open(file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
 
         cnt = 0
@@ -232,7 +232,7 @@ class Utils:
                 if len(updated) == len(patterns):
                     break
 
-        with open(file, 'w') as f:
+        with open(file, 'w', encoding='utf-8') as f:
             f.writelines(lines)
 
         print(f'[{cnt / len(patterns)}] lines updated. Patterns updating finsiedh.', file)
@@ -241,7 +241,7 @@ class Utils:
 
     @classmethod
     def writeline_nl(cls, file: str, lines: list[str]):
-        with open(file, 'w+') as f:
+        with open(file, 'w+', encoding='utf-8') as f:
             for l in lines:
                 f.write(l)
                 f.write('\n')

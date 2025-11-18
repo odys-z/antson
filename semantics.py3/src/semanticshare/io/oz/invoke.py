@@ -10,10 +10,17 @@ class DeployInfo(Anson):
     '''
     Synode Client for Deploying
     '''
+
+    # synode.json
+    central_iport: str
+    central_path: str
+    central_pswd: str
+    root_key: str
     market: str
+    market_id: str
     orgid: str
     '''
-    E.g. riped, for domain id like riped-1, and so on.
+    E.g. riped, for domain id generation like riped-1, and so on.
     '''
 
     dom_nodes: int
@@ -21,7 +28,7 @@ class DeployInfo(Anson):
     The domain initial nodes
     '''
 
-    default_pswd: str
+    syn_admin_pswd: str
 
     ui: str
     '''
@@ -57,6 +64,7 @@ class SynodeTask(Anson):
     '''
     Replacing dictionary.json/registry/synusers[0].pswd, pattern of tasks.synuser_pswd_pattern
     '''
+    web_inf_dir: str
 
     def __init__(self):
         super().__init__()
