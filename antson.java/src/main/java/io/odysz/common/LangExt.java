@@ -1634,7 +1634,7 @@ public class LangExt {
 	 */
 	public static <T> void musteq (T a, T b, String ...msg) {
 		if (a instanceof String && b instanceof String)
-			musteqs((String)a, (String)b);
+			musteqs((String)a, (String)b, msg);
 
 		else if (a != b)
 			throw new NullPointerException(isNull(msg)
