@@ -4,6 +4,7 @@ Configuration of invoke tasks. All the configuration here only change the built 
 from dataclasses import dataclass
 
 from anson.io.odysz.anson import Anson
+from semanticshare.io.oz.register.central import CentralSettings
 
 @dataclass
 class DeployInfo(Anson):
@@ -15,6 +16,8 @@ class DeployInfo(Anson):
     central_iport: str
     central_path: str
     central_pswd: str
+    web_port: str
+    jserv_port: str
     root_key: str
     market: str
     market_id: str
@@ -68,3 +71,18 @@ class SynodeTask(Anson):
 
     def __init__(self):
         super().__init__()
+
+    def config_central(self, central_settings: CentralSettings):
+        print(central_settings.market)
+        # MEMO set central_path to config.xml/c[k=regist-central]/v
+        pass
+        '''
+        Configure central settings from task configuration
+        central_settings.market = self.deploy.market
+        central_settings.vol_name = f'VOLUME_{self.deploy.market.upper()}'
+        central_settings.volume = f'../{self.registry_dir}/{central_settings.vol_name}'
+        central_settings.port = '1990'
+        central_settings.conn = 'sys-sqlite'
+        central_settings.startHandler = []
+        central_settings.rootkey = self.deploy.root_key
+        '''
