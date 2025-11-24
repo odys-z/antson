@@ -148,6 +148,15 @@ class LangExt:
         '''
         return LangExt.only_wordextlen(likely, ext=passwd_allow_ext, minlen=minlen, maxlen=maxlen)
 
+    @classmethod
+    def suffix(cls, s: str, suffices: Union[str, list[str], tuple]):
+        if isinstance(suffices, str):
+            return s.endswith((suffices))
+        elif isinstance(sufx, tuple):
+            return s.endswith(suffices)
+        else:
+            return s.endswith(tuple(suffices))
+
 
 def log(out: Optional[TextIO], templt: str, *args):
     try:
