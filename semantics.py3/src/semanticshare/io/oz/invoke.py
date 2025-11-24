@@ -1,7 +1,15 @@
 '''
 Configuration of invoke tasks. All the configuration here only change the built packages.
 '''
+
+import platform
+import urllib.request
+import zipfile
+import os
+from pathlib import Path
+
 from dataclasses import dataclass
+from urllib.parse import ParseResult
 
 from anson.io.odysz.anson import Anson
 from semanticshare.io.oz.register.central import CentralSettings
@@ -34,14 +42,17 @@ class Temurin17Release(JRERelease):
 
     def __init__(self):
         super().__init__()
-        
+
     def mirror(self):
         pass
     
     def get_resources(self):
         pass
-    
-    def jre(self, r):
+
+    def jre(self):
+        '''
+        :return: the jre item needed by current environment
+        '''
         system = platform.system()
         machine = platform.machine()
 
@@ -77,56 +88,60 @@ class JRE17Installer():
     '''
 
     release: JRERelease
+    urlroot: ParseResult
 
-    def __init__(self, release: JRERelease):
+    def __init__(self, release: JRERelease, site: ParseResult = None):
         self.release = release
+        self.urlroot = site
+
     
-    import platform
-    import urllib.request
-    import zipfile
-    import os
-    from pathlib import Path
-
-    def get_adoptium_jre17_url(download_url: str = None):
-        system = platform.system()
-        machine = platform.machine()
-
-        if system == "Windows":
-            os_name = "windows"
-            ext = "zip"
-        elif system == "Darwin":
-            os_name = "mac"
-            ext = "tar.gz"
-        elif system == "Linux":
-            os_name = "linux"
-            ext = "tar.gz"
-        else:
-            raise RuntimeError("Unsupported OS")
-
-        if machine in ("AMD64", "x86_64"):
-            arch = "x64"
-        elif machine in ("aarch64", "arm64"):
-            arch = "aarch64"
-        else:
-            raise RuntimeError(f"Unsupported arch: {machine}")
-
-        # Latest Temurin 17 as of Nov 2025
-        # version = "17.0.13+11"   # ← change this when updating
-        if download_url is None:
-            #               https://github.com/adoptium/temurin17-binaries/releases/download/
-            #                       jdk-17.0.9%2B9.1/OpenJDK17U-jdk_x64_windows_hotspot_17.0.9_9.zip
-            #
-            #               https://github.com/adoptium/temurin17-binaries/releases/download
-            #                      /jdk-17.0.9%2B9/OpenJDK17U-jre_x86-32_windows_hotspot_17.0.9_9.zip
-            #               https://github.com/adoptium/temurin17-binaries/releases/download
-            #                      /jdk-17.0.9%2B9/OpenJDK17U-jre_arm_linux_hotspot_17.0.9_9.tar.gz
-            download_url = 'https://github.com/adoptium/temurin17-binaries/releases/download'
-
-        build, plus = "17.0.9", "9"
-        zip_gz = f"OpenJDK17U-jre_{arch}_{os_name}_hotspot_{build}_{plus}.{ext}"
-        return f"{download_url}/jdk-{build}%2B{plus}/{zip_gz}"
+    # def get_adoptium_jre17_url(download_url: str = None):
+    #     system = platform.system()
+    #     machine = platform.machine()
+    #
+    #     if system == "Windows":
+    #         os_name = "windows"
+    #         ext = "zip"
+    #     elif system == "Darwin":
+    #         os_name = "mac"
+    #         ext = "tar.gz"
+    #     elif system == "Linux":
+    #         os_name = "linux"
+    #         ext = "tar.gz"
+    #     else:
+    #         raise RuntimeError("Unsupported OS")
+    #
+    #     if machine in ("AMD64", "x86_64"):
+    #         arch = "x64"
+    #     elif machine in ("aarch64", "arm64"):
+    #         arch = "aarch64"
+    #     else:
+    #         raise RuntimeError(f"Unsupported arch: {machine}")
+    #
+    #     # Latest Temurin 17 as of Nov 2025
+    #     # version = "17.0.13+11"   # ← change this when updating
+    #     if download_url is None:
+    #         #               https://github.com/adoptium/temurin17-binaries/releases/download/
+    #         #                       jdk-17.0.9%2B9.1/OpenJDK17U-jdk_x64_windows_hotspot_17.0.9_9.zip
+    #         #
+    #         #               https://github.com/adoptium/temurin17-binaries/releases/download
+    #         #                      /jdk-17.0.9%2B9/OpenJDK17U-jre_x86-32_windows_hotspot_17.0.9_9.zip
+    #         #               https://github.com/adoptium/temurin17-binaries/releases/download
+    #         #                      /jdk-17.0.9%2B9/OpenJDK17U-jre_arm_linux_hotspot_17.0.9_9.tar.gz
+    #         download_url = 'https://github.com/adoptium/temurin17-binaries/releases/download'
+    #
+    #     build, plus = "17.0.9", "9"
+    #     zip_gz = f"OpenJDK17U-jre_{arch}_{os_name}_hotspot_{build}_{plus}.{ext}"
+    #     return f"{download_url}/jdk-{build}%2B{plus}/{zip_gz}"
 
     def download_and_extract(url, target_dir="jre-download"):
+
+        def progress_hook(blocknum, blocksize, totalsize):
+            read = blocknum * blocksize
+            if totalsize > 0:
+                percent = min(100, read * 100 // totalsize)
+                print(f"\rDownloading... {percent}%", end="")
+
         target_dir = Path(target_dir)
         target_dir.mkdir(exist_ok=True)
 
