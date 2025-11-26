@@ -47,7 +47,7 @@ def tryModulename():
             setattr(obj, k, None)
 
     if len(missingAttrs) > 0:
-        Utils.warn(f'Missing attributes in {module_name}.{class_name}: {missingAttrs}. Anson expect a __init__() for all initialize the none default fields.')
+        Utils.warn(f'Missing attributes in {module_name}.{class_name}: {missingAttrs}. Anson expects a __init__() for all initialize the none default fields.')
 
     print(obj)
 

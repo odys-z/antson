@@ -120,7 +120,7 @@ def instanceof(clsname: Union[str, type], props: dict):
 
     if len(missingAttrs) > 0:
         Utils.warn(f'Missing attributes in {obj.__type__}: {missingAttrs}. '
-                   'Anson expect a __init__() initializing all the none default fields.')
+                   'Anson expects a __init__() initializing all the none default fields.')
 
     return obj
 
