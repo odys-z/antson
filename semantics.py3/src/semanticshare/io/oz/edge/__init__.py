@@ -62,7 +62,7 @@ class Temurin17Release(JRERelease):
     def set_jre(self):
         '''
         Find out what jre is needed, push into mirroring
-        :return: expected-itme, is-in-resources, is-in-mirroring
+        :return: expected-itme, is-in-resources, is-in-mirroring, extreacted-rootpath (e.g. 'jdk-17.0.17+10-jre')
         the jre item needed by current environment
         '''
         system = platform.system()
@@ -87,17 +87,14 @@ class Temurin17Release(JRERelease):
         else:
             raise RuntimeError(f"Unsupported arch: {machine}")
 
-
-        # build, plus = "17.0.9", "9"
         release = "17.0.17_10"
         zip_gz = f"OpenJDK17U-jre_{arch}_{os_name}_hotspot_{release}.{ext}"
-        # download_url = f'https://github.com/{self.path}'
-        # exp_item = f"{download_url}/jdk-{build}%2B{plus}/{zip_gz}"
-        # exp_item = f"{self.path}/{zip_gz}"
+
+        self.extract_root = 'jdk-17.0.17+10-jre'
 
         if not hasattr(self, 'mirroring') or self.mirroring is None:
             self.mirroring = []
         inmirror = zip_gz in self.mirroring
         if not inmirror:
             self.mirroring.append(zip_gz)
-        return zip_gz, zip_gz in self.resources, inmirror
+        return zip_gz, zip_gz in self.resources, inmirror, self.extract_root
