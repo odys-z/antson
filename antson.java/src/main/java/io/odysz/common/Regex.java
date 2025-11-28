@@ -165,7 +165,6 @@ public class Regex {
 	 * @param url, e.g. 127.0.0.1/index.html
 	 * @return [(String)doamin/ip, (Integer)port], e.g. 127.0.0.1, null
 	 * @deprecated
-	 */
 	public static Object[] getHostPort(String url) {
 		if (!protocolPrefix.match(url))
 			url = "http://" + url;
@@ -183,6 +182,7 @@ public class Regex {
 			return new Object[] {url, null};
 		}
 	}
+	 */
 
 	/**
 	 * @since 0.9.130

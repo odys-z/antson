@@ -36,15 +36,12 @@ public class JsonOpt extends Anson {
 
 	/**
 	 * @deprecated since 0.9.116
-	 * @param has
+	 * @param yes
 	 * @return
 	 * @throws NullPointerException if has == false, since 0.9.116, illegal argument.
 	 */
-	public JsonOpt quotKey(boolean has) throws NullPointerException {
-//		if (!has)
-//			throw new NullPointerException("Key field without a quot, '\"\"', is a js object, not a valid JSON string."
-//					+ "This is deprecated since 0.9.116.");
-		quotKey = has;
+	public JsonOpt quotKey(boolean yes) throws NullPointerException {
+		quotKey = yes;
 		return this;
 	}
 
