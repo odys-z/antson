@@ -20,7 +20,14 @@ class DeployInfo(Anson):
     '''
 
     # synode.json
+    mirror_path: str
+    '''
+    task.json -> synodepy3.synode.json/{lang-id: {jre_mirror: "value to be replaced"}}
+    '''
     central_iport: str
+    '''
+    task.json -> settings.json
+    '''
     central_path: str
     central_pswd: str
     web_port: str
