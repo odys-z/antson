@@ -3,3 +3,4 @@ dist
 clean_env*
 *.egg-info
 *.egg
+.idea
