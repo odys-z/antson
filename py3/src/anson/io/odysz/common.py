@@ -7,8 +7,7 @@ import os
 import sys
 from numbers import Number
 from re import match
-from typing import TextIO, Optional, TypeVar, Union
-
+from typing import TextIO, Optional, TypeVar, Union, List, Tuple
 
 T = TypeVar('T')
 
@@ -149,10 +148,10 @@ class LangExt:
         return LangExt.only_wordextlen(likely, ext=passwd_allow_ext, minlen=minlen, maxlen=maxlen)
 
     @classmethod
-    def suffix(cls, s: str, suffices: Union[str, list[str], tuple]):
+    def suffix(cls, s: str, suffices: "Union[str, List[str], Tuple]") -> bool:
         if isinstance(suffices, str):
             return s.endswith((suffices))
-        elif isinstance(sufx, tuple):
+        elif isinstance(suffices, tuple):
             return s.endswith(suffices)
         else:
             return s.endswith(tuple(suffices))
