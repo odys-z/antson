@@ -78,10 +78,8 @@ class SynodeTask(Anson):
     android_dir: str
     deploy: DeployInfo
     dist_dir: str
-    '''
-    Replacing dictionary.json/registry/synusers[0].pswd, pattern of tasks.synuser_pswd_pattern
-    '''
     web_inf_dir: str
+    jre_release: str
 
     def __init__(self):
         super().__init__()

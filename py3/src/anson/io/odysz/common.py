@@ -243,7 +243,7 @@ class Utils:
         with open(file, 'w', encoding='utf-8') as f:
             f.writelines(lines)
 
-        print(f'[{cnt / len(patterns)}] lines updated. Patterns updating finsiedh.', file)
+        print(f'[{cnt / len(patterns)}] lines updated. Patterns updating finsied.', file)
 
         return None
 
