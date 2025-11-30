@@ -11,7 +11,7 @@ from typing import TextIO, Optional, TypeVar, Union, List, Tuple
 
 T = TypeVar('T')
 
-passwd_allow_ext = ' @#!$%^&*()_+-='
+passwd_allow_ext = ' @#!$%^&*()_+-=.<>,[]{}|?/:;'
 '''
     allowed chars in addition to alpha numerics for password.
 '''

@@ -2,6 +2,7 @@
 import unittest
 from datetime import datetime
 
+from src.anson.io.odysz.anson import AnsonException
 from src.anson.io.odysz.common import LangExt
 from test.io.oz.syn import SyncUser
 
@@ -54,9 +55,23 @@ class LangExtTest(unittest.TestCase):
         self.assertTrue(LangExt.isblank(' 0.0.0.0  ', r'^\s*(0)|(0\\.(0\\.)+\\.0)\s*$'))
         self.assertTrue(LangExt.isblank('0.0.0.0.0', r'^\s*(0)|(0\\.(0\\.)+\\.0)\s*$'))
 
+    def test_passwd_valid(self):
+        pswds = ['io.github.odys-z', '12345678', '!#%^*(){}:;']
+        for p in pswds:
+            self.assertTrue(LangExt.only_passwdlen(p, 8, 32))
+
+        np = ['1234567', '1234567\\', '1234567890ABCDEF1234567890ABCDEF-bi5']
+        for p in np:
+            try:
+                LangExt.only_passwdlen(p, 8, 32)
+                self.fail(p)
+            except AnsonException as e:
+                pass
+
 if __name__ == '__main__':
     unittest.main()
     t = LangExtTest()
     t.testStr()
     t.test_isblank()
+    t.test_passwd_valid()
 
