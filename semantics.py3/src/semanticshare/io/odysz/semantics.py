@@ -16,3 +16,12 @@ class SessionInf(Anson):
         self.pswd = pswd
         self.ssid = None
         self.ssToken = None
+
+@dataclass
+class SemanticObject(Anson):
+
+    props: dict
+
+    def __init__(self):
+        super().__init__()
+        props = {}

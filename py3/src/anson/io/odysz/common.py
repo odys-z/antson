@@ -5,7 +5,6 @@ Created on 25 Oct 2019
 '''
 import os
 import sys
-from numbers import Number
 from re import match
 from typing import TextIO, Optional, TypeVar, Union, List, Tuple
 

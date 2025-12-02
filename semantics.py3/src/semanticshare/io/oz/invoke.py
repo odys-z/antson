@@ -2,16 +2,12 @@
 Configuration of invoke tasks. All the configuration here only change the built packages.
 '''
 
-import platform
-import urllib.request
-import zipfile
-import os
-from pathlib import Path
-
 from dataclasses import dataclass
 
 from anson.io.odysz.anson import Anson
 from semanticshare.io.oz.register.central import CentralSettings
+from semanticshare.io.odysz.semantic.jsession import JUser
+
 
 @dataclass
 class DeployInfo(Anson):
@@ -71,15 +67,20 @@ class SynodeTask(Anson):
     apk_ver: str
     html_jar_v: str
     web_ver: str
+    web_inf_dir: str
+    jre_release: str
+    jre_name: str
     host_json: str
     vol_files: dict
     vol_resource: dict
     registry_dir: str
     android_dir: str
-    deploy: DeployInfo
+    central_dir: str
     dist_dir: str
-    web_inf_dir: str
-    jre_release: str
+    deploy: DeployInfo
+    '''
+    E.g. x64_windows, used in final zip name for distinguished packages of different runtime.
+    '''
 
     def __init__(self):
         super().__init__()
@@ -98,3 +99,15 @@ class SynodeTask(Anson):
         central_settings.startHandler = []
         central_settings.rootkey = self.deploy.root_key
         '''
+
+@dataclass
+class CentralTask(Anson):
+    '''
+    The Portifolio 0.7 invoke tasks' configuration for central server
+    '''
+
+    users: dict[str, JUser] # ISSUE/FIXME: Anson.py3 0.4.1 cannot handle types in dict.
+
+    def __init__(self):
+        super().__init__()
+        users = {}
