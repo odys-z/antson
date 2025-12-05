@@ -457,14 +457,6 @@ class AnsonTest {
 		assertEquals("pid", cll.checkRels[0][1].name);
 		assertEquals("2023_12", cll.checkRels[0][1].value);
 		
-		/* FIXME error report: line 1:47 extraneous input '<EOF>' expecting {',', '}'}
-		 * This should be a grammar error.
-		 * g4:
-			array
-			: '[' value (',' value)* ']'
-			| '[' ']'
-			;
-		*/
 		cll = (T_ListPhoto) Anson.fromJson("{type: io.odysz.anson.T_ListPhoto, ansp: [[]]");
 		assertEquals(1, cll.ansp.size());
 		assertEquals(0, cll.ansp.get(0).length);

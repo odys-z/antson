@@ -2,7 +2,8 @@ package io.odysz.anson;
 
 public class AnsT1 extends Anson {
 
-	/**Inner class must be static.
+	/**
+	 * Inner class must be static.
 	 * The parser uses reflection create instances. (TODO: docs)
 	 * 
 	 * @author odys-z@github.com

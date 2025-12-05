@@ -1615,7 +1615,6 @@ public class LangExt {
 					: msg[0]);
 	}
 
-	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static void musteqs (String a, String b, String... msg) {
 		if (!eq(a, b))
 			throw new NullPointerException(isNull(msg)
@@ -1650,30 +1649,23 @@ public class LangExt {
 		return v;
 	}
 
-	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> void shouldeq (Object tag, T a, T b, String ...msg) {
 		if (a instanceof String && b instanceof String)
 			shouldeqs(tag, (String)a, (String)b, msg);
 		else if (a != b)
-//			Utils.warnT(tag, isNull(msg)
-//					? f("a, %s != b, %s", a, b)
-//					: msg[0], 
-//					a, b);
 			Utils.warnT(tag, len(msg) > 0 ? f("a, %s != b, %s", a, b) : f6(msg));
 	}
 
-	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static void shouldeqs (Object tag, String a, String b, String...msg) {
 		if (!eq(a, b))
 			Utils.warnT(tag, len(msg) > 0 ? f("a, %s != b, %s", a, b) : f6(msg));
 	}
 
 	/**
-	 * TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	 * @param <T>
 	 * @param tag alwasy created as "new Object() {}".
 	 * @param a
-	 * @return
+	 * @return T
 	 */
 	public static <T> T shouldnull(Object tag, T a, String ... msg) {
 		if (a != null)
@@ -1681,7 +1673,6 @@ public class LangExt {
 		return a;
 	}
 	
-	// TODO accept msg array, template with args, can save calling String.format() when checking is valid.
 	public static <T> T mustnull(T a, String...msg) {
 		if (a != null)
 			throw new NullPointerException(isNull(msg) ? f("Object must be null: %s", a) : msg[0]);
