@@ -5,6 +5,7 @@ Created on 25 Oct 2019
 '''
 import os
 import sys
+from numbers import Number
 from re import match
 from typing import TextIO, Optional, TypeVar, Union, List, Tuple
 
@@ -202,7 +203,7 @@ class Utils:
         return Utils.get_os() == 'Windows'
 
     @staticmethod
-    def update_patterns(file, patterns: dict):
+    def update_patterns(file, patterns: dict, replaced_vals: dict=None):
         """
         Update the version in a text file.
 
@@ -230,11 +231,16 @@ class Utils:
         for i, line in enumerate(lines):
             updated = set()
             for k, v in patterns.items():
-                if re.search(k, line):
+                # if re.search(k, line):
+                matched = re.search(k, line)
+                if matched:
                     lines[i] = re.sub(k, v, line)
                     updated.add(k)
                     print('Updated line:', lines[i])
                     cnt += 1
+
+                    if replaced_vals is not None and k in replaced_vals and replaced_vals[k] >= 0:
+                        replaced_vals[k] = matched.group(replaced_vals[k])
 
                 if len(updated) == len(patterns):
                     break
@@ -244,7 +250,7 @@ class Utils:
 
         print(f'[{cnt / len(patterns)}] lines updated. Patterns updating finsied.', file)
 
-        return None
+        return replaced_vals
 
     @classmethod
     def writeline_nl(cls, file: str, lines: list[str]):
