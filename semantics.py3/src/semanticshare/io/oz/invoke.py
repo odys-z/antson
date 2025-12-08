@@ -99,6 +99,11 @@ class SynodeTask(Anson):
         central_settings.startHandler = []
         central_settings.rootkey = self.deploy.root_key
         '''
+    
+    def zip_name(self) -> str:
+        dist_name = f'{self.jre_name if self.jre_name else "online"}-{self.deploy.market_id}-{self.deploy.orgid}'
+        return f'synode-{self.version}-{dist_name}.zip'
+
 
 @dataclass
 class CentralTask(Anson):
