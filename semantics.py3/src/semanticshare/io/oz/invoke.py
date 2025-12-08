@@ -82,6 +82,22 @@ class SynodeTask(Anson):
     E.g. x64_windows, used in final zip name for distinguished packages of different runtime.
     '''
 
+    build_zip: str
+    '''
+    The final zip (relativ-)path.file-name.zip. This is a runtime value and not configurable.
+    '''
+    download_root: str
+    '''
+    Used for compose the download url of the built zip in host.json:
+    {synodesetups: {
+        "orgid": [
+        "download 0, {download_root}/zip_name, e.g. http://127.0.0.1/html-service-synodes/synode-0.7.8-x64-windows-alpha-zsu.zip",
+        ...]} } 
+    
+    TODO: move 'resources.apk' in host.json/resources to clients.apk?
+    '''
+    post_cmds: list[str]
+
     def __init__(self):
         super().__init__()
 
@@ -116,3 +132,21 @@ class CentralTask(Anson):
     def __init__(self):
         super().__init__()
         users = {}
+
+from importlib.metadata import version, PackageNotFoundError
+from packaging.version import Version
+
+# requir_pkg("anson.py3", "0.4.3")
+# requir_pkg("semantics.py3", "0.4.5")
+
+def requir_pkg(pkg_name: str, require_ver: str):
+    try:
+        pkg_version = version(pkg_name.replace('.', '_'))
+    except PackageNotFoundError:
+        pkg_version = "uninstalled" 
+    print (f"{pkg_name}: ", pkg_version)
+
+    if Version(pkg_version) < Version(require_ver):
+        print(f'Please upgrade {pkg_name} to version {require_ver} or above. Current version: {pkg_version}')
+        import sys
+        sys.exit(1)
