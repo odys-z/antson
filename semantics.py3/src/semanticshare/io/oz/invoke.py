@@ -296,7 +296,7 @@ def requir_pkg(pkg_name: str, require_ver: Union[str, list[str]]):
     :type require_ver: Union[str, list[str]]
     '''
     try:
-        pkg_version = version(pkg_name.replace('.', '_'))
+        pkg_version = version(pkg_name.replace('.', '_').replace('-', '_'))
     except PackageNotFoundError:
         pkg_version = "uninstalled" 
     print (f"{pkg_name}: ", pkg_version)
