@@ -95,6 +95,17 @@ class ScpCmd(Anson):
         self.port = 22
 
 @dataclass
+class LandingSite(Anson):
+    redirector: str
+    re_links  : str
+    remot_path: str
+    dist_path : str
+    post_scp  : ScpCmd
+
+    def __init__(self):
+        super().__init__()
+
+@dataclass
 class SynodeTask(Anson):
     '''
     The Portifolio 0.7 invoke tasks' configuration
@@ -135,6 +146,8 @@ class SynodeTask(Anson):
     '''
     post_cmds: list[BashCmd]
     post_scps: list[ScpCmd]
+
+    landings: list[LandingSite]
 
     backings: dict
     '''
@@ -190,67 +203,115 @@ class SynodeTask(Anson):
         scplen = LangExt.len(self.post_scps)
         print('Executing post build SCPs, len = {scplen}...')
         if scplen > 0:
+            self.scp_pushs(local_path=self.get_distzip())
+
+    def scp_pushs(self, local_path):
+        for cmd in self.post_scps:
+            self.scp_push(local_path=local_path, cmd=cmd)
+    
+    def scp_push(self, local_path: Path, cmd: ScpCmd):
+        try:
+            from paramiko import SSHClient
+            from scp import SCPClient
+        except ImportError as e:
+            print('ERROR', e)
+            print('Please install paramiko and scp packages to enable SCP post build:')
+            print('pip install paramiko scp')
+            return           
+
+        def report_scporg(filename, size, sent):
+            percent_complete = float(sent) / float(size) * 100
+            print(f'Transferring {filename}: {percent_complete:.2f}% complete', end='\r')
+        
+        def create_remote_dir_if_not_exists(sftp, remote_dir):
             try:
-                from paramiko import SSHClient
-                from scp import SCPClient
-            except ImportError as e:
-                print('ERROR', e)
-                print('Please install paramiko and scp packages to enable SCP post build:')
-                print('pip install paramiko scp')
-                return
-
-            def report_scporg(filename, size, sent):
-                percent_complete = float(sent) / float(size) * 100
-                print(f'Transferring {filename}: {percent_complete:.2f}% complete', end='\r')
-            
-            def create_remote_dir_if_not_exists(sftp, remote_dir):
-                try:
-                    sftp.chdir()
-                    remote_dir = re.sub(r'(^\$HOME/?)|(^~/?)', '', remote_dir)
-                    print("chdir:", remote_dir)
-                    sftp.chdir(remote_dir)
-                    return remote_dir
-                except FileNotFoundError as fe:
-                    print(fe)
-                    print("Remote directory does not exist. Creating:", remote_dir)
-                    full_path = '/' if remote_dir.startswith('/') else ''
-                    for ch_dir in remote_dir.split('/'):
-                        if ch_dir:
-                            full_path += f'{ch_dir}/'
-                            print('ch_dir =', full_path)
-                            try:
-                                sftp.chdir(ch_dir)
-                            except IOError as e:
-                                print(e)
-                                print("creating remote directory:", full_path)
-                                sftp.mkdir(ch_dir)
-                                sftp.chdir(ch_dir)
-                    else:
-                        return remote_dir
-
-            for cmd in self.post_scps:
-                if sys.version_info.major < 3 or sys.version_info.minor < 10:
-                    print('SCP post command requires Python 3.10 or above. Use tasks.json/post_cmds for this task,\n'
-                          f'"post_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
-                          '# Google AI sys it is widely reported that Python 3.9 has issues with scp packages.')
-                    continue
-
-                print(f'[SCP] {self.get_distzip()} -> {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
-                if cmd.pswd is None:
-                    password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
+                sftp.chdir()
+                remote_dir = re.sub(r'(^\$HOME/?)|(^~/?)', '', remote_dir)
+                print("chdir:", remote_dir)
+                sftp.chdir(remote_dir)
+                return remote_dir
+            except FileNotFoundError as fe:
+                print(fe)
+                print("Remote directory does not exist. Creating:", remote_dir)
+                full_path = '/' if remote_dir.startswith('/') else ''
+                for ch_dir in remote_dir.split('/'):
+                    if ch_dir:
+                        full_path += f'{ch_dir}/'
+                        print('ch_dir =', full_path)
+                        try:
+                            sftp.chdir(ch_dir)
+                        except IOError as e:
+                            print(e)
+                            print("creating remote directory:", full_path)
+                            sftp.mkdir(ch_dir)
+                            sftp.chdir(ch_dir)
                 else:
-                    password = cmd.pswd
+                    return remote_dir
 
-                with SSHClient() as ssh:
-                    ssh.load_system_host_keys()
-                    ssh.connect(cmd.host, username=cmd.user, password=password)
+        if sys.version_info.major < 3 or sys.version_info.minor < 10:
+            print('SCP post command requires Python 3.10 or above. Use tasks.json/post_cmds for this task,\n'
+                    f'"post_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
+                    '# Google AI sys it is widely reported that Python 3.9 has issues with scp packages.')
+            return None
 
-                    # Use SFTP to manage directories
-                    sftp_client = ssh.open_sftp()
-                    norm_dir = create_remote_dir_if_not_exists(sftp_client, cmd.remote_dir)
+        print(f'[SCP] {local_path} -> {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
+        if cmd.pswd is None:
+            password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
+        else:
+            password = cmd.pswd
 
-                    with SCPClient(ssh.get_transport(), progress=report_scporg) as scp:
-                        scp.put(self.get_distzip(), remote_path=norm_dir)
+        with SSHClient() as ssh:
+            ssh.load_system_host_keys()
+            ssh.connect(cmd.host, username=cmd.user, password=password)
+
+            # Use SFTP to manage directories
+            sftp_client = ssh.open_sftp()
+            norm_dir = create_remote_dir_if_not_exists(sftp_client, cmd.remote_dir)
+
+            with SCPClient(ssh.get_transport(), progress=report_scporg) as scp:
+                scp.put(local_path, remote_path=norm_dir)
+
+    def scp_pull(self, target: str, cmd: ScpCmd) -> Union[dict, None]:
+        try:
+            from paramiko import SSHClient
+            from scp import SCPClient
+        except ImportError as e:
+            print('ERROR', e)
+            print('Please install paramiko and scp packages to enable SCP post build:')
+            print('pip install paramiko scp')
+            return None
+
+        def report_scporg(filename, size, sent):
+            percent_complete = float(sent) / float(size) * 100
+            print(f'Downloading {filename}: {percent_complete:.2f}%', end='\r')
+        
+        if sys.version_info.major < 3 or sys.version_info.minor < 10:
+            print('SCP post command requires Python 3.10 or above. Use tasks.json/post_cmds for this task,\n'
+                    f'"post_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
+                    '# Google AI sys it is widely reported that Python 3.9 has issues with scp packages.')
+            return None
+
+        print(f'[SCP] {self.get_distzip()} <- {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
+        if cmd.pswd is None:
+            password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
+        else:
+            password = cmd.pswd
+
+        with SSHClient() as ssh:
+            ssh.load_system_host_keys()
+            ssh.connect(cmd.host, username=cmd.user, password=password)
+
+            with SCPClient(ssh.get_transport(), progress=report_scporg) as scp:
+                if not os.path.isdir('temp'):
+                    os.mkdir('temp')
+
+                local_path = f'temp/{target}'
+                scp.get(local_path=local_path, remote_path=f'{cmd.remote_dir}/{target}')
+
+                with open(local_path, 'r') as file:
+                    return json.load(file)
+                
+        return None
 
     def backup(self, target_path: str):
         backed = os.path.join(os.getcwd(), target_path) # '../synode.py/src/synodepy3/synode.json')
@@ -266,6 +327,42 @@ class SynodeTask(Anson):
     def restore_backups(self):
         for backed, backing in self.backings.items():
             shutil.copy2(backing, backed)
+    
+    def publish_landings(self):
+        import json
+
+        if not hasattr(self, 'landings') or LangExt.len(self.landings) == 0:
+            return
+
+        for landing in self.landings:
+            # generate redirctor json
+            links_path = f'links-{self.deploy.market}-{self.deploy.orgid}.json'
+            redirector = {'redirect': links_path}
+
+            local_redir_p = 'temp/redirector.json'
+            with open(local_redir_p, 'w') as f:
+                json.dump(redirector, f)
+
+            # download links.json
+            _images_ = 'images'
+            links = self.scp_pull(links_path, landing.post_scp)
+            if links is not None:
+                imgs = links[_images_] if hasattr(links, _images_) else {}
+                imgs[self.jre_name] = f'{landing.dist}/{self.zip_name()}' # x64_windows = 'res/dist/synode-0.7.8-x64_windows-alpha-qqhome.zip'
+                links['image'] = imgs 
+            else:
+                links = {}
+                links['image'] = {self.jre_name: f'{landing.dist}/{self.zip_name()}'}
+
+            local_links_p = f'temp/{links_path}'
+            with open(local_links_p, 'w') as f:
+                json.dump(links, f)
+
+            # push lings.json, redirector.json
+            scpcmd = landing.post_scp
+            scpcmd.remote_dir = f'{landing.remot_path}/{links_path}'
+            self.scp_push(local_path=local_redir_p, cmd=landing.post_scp)
+            self.scp_push(local_path=local_links_p, cmd=landing.post_scp)
 
 @dataclass
 class CentralTask(Anson):
@@ -281,9 +378,6 @@ class CentralTask(Anson):
 
 from importlib.metadata import version, PackageNotFoundError
 from packaging.version import Version
-
-# requir_pkg("anson.py3", "0.4.3")
-# requir_pkg("semantics.py3", "0.4.5")
 
 def requir_pkg(pkg_name: str, require_ver: Union[str, list[str]]):
     '''
