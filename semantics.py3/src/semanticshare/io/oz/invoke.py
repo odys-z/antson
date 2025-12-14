@@ -3,6 +3,7 @@ Configuration of invoke tasks. All the configuration here only change the built 
 '''
 
 from dataclasses import dataclass
+import json
 import re
 import shutil
 import sys
@@ -104,6 +105,38 @@ class LandingSite(Anson):
 
     def __init__(self):
         super().__init__()
+
+class TaskCredentials():
+    credentials: dict
+    '''
+        {host: {user: pswd}}
+    '''
+    def __init__(self):
+        super().__init__()
+
+        cred_path = f'{Path.home()}/.tasksrc.json'
+        if os.path.isfile(cred_path):
+            print('Global Tasks Credentials:', cred_path)
+            with open(cred_path, 'r') as file:
+                self.credentials = json.load(file)
+        else:
+            print('Task Credentials not found:', cred_path)
+
+    
+    def find_pswd(self, scpcmd: ScpCmd = None):
+        
+        if scpcmd is not None and scpcmd.pswd is not None:
+            return scpcmd.pswd
+
+        if self.credentials is not None and scpcmd.host in self.credentials:
+            if scpcmd.user in self.credentials[scpcmd.host]:
+                return self.credentials[scpcmd.host][scpcmd.user]
+
+        return input(f'Enter password for {scpcmd.user}@{scpcmd.host}: ')
+
+task_credentials: TaskCredentials = TaskCredentials()
+
+_temp_ = 'temp'
 
 @dataclass
 class SynodeTask(Anson):
@@ -255,10 +288,12 @@ class SynodeTask(Anson):
             return None
 
         print(f'[SCP] {local_path} -> {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
-        if cmd.pswd is None:
-            password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
-        else:
-            password = cmd.pswd
+
+        # if cmd.pswd is None:
+        #     password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
+        # else:
+        #     password = cmd.pswd
+        password = task_credentials.find_pswd(cmd)
 
         with SSHClient() as ssh:
             ssh.load_system_host_keys()
@@ -274,7 +309,7 @@ class SynodeTask(Anson):
     def scp_pull(self, target: str, cmd: ScpCmd) -> Union[dict, None]:
         try:
             from paramiko import SSHClient
-            from scp import SCPClient
+            from scp import SCPClient, SCPException
         except ImportError as e:
             print('ERROR', e)
             print('Please install paramiko and scp packages to enable SCP post build:')
@@ -292,21 +327,26 @@ class SynodeTask(Anson):
             return None
 
         print(f'[SCP] {self.get_distzip()} <- {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
-        if cmd.pswd is None:
-            password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
-        else:
-            password = cmd.pswd
+        # if cmd.pswd is None:
+        #     password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
+        # else:
+        #     password = cmd.pswd
+        password = task_credentials.find_pswd(cmd)
 
         with SSHClient() as ssh:
             ssh.load_system_host_keys()
             ssh.connect(cmd.host, username=cmd.user, password=password)
 
             with SCPClient(ssh.get_transport(), progress=report_scporg) as scp:
-                if not os.path.isdir('temp'):
-                    os.mkdir('temp')
+                if not os.path.isdir(_temp_):
+                    os.mkdir(_temp_)
 
-                local_path = f'temp/{target}'
-                scp.get(local_path=local_path, remote_path=f'{cmd.remote_dir}/{target}')
+                local_path = f'{_temp_}/{target}'
+                try:
+                    scp.get(local_path=local_path, remote_path=f'{cmd.remote_dir}/{target}')
+                except SCPException as e: 
+                    print(e)
+                    return None
 
                 with open(local_path, 'r') as file:
                     return json.load(file)
@@ -334,35 +374,42 @@ class SynodeTask(Anson):
         if not hasattr(self, 'landings') or LangExt.len(self.landings) == 0:
             return
 
+        if not os.path.exists(_temp_):
+            os.mkdir(_temp_)
+
         for landing in self.landings:
             # generate redirctor json
-            links_path = f'links-{self.deploy.market}-{self.deploy.orgid}.json'
+            links_path = f'links-{self.deploy.market_id}-{self.deploy.orgid}.json'
             redirector = {'redirect': links_path}
 
-            local_redir_p = 'temp/redirector.json'
+            local_redir_p = f'{_temp_}/{landing.redirector}'
             with open(local_redir_p, 'w') as f:
                 json.dump(redirector, f)
 
             # download links.json
             _images_ = 'images'
+            landing.post_scp.remote_dir = f'{landing.remot_path}/{landing.dist_path}'
             links = self.scp_pull(links_path, landing.post_scp)
             if links is not None:
                 imgs = links[_images_] if hasattr(links, _images_) else {}
-                imgs[self.jre_name] = f'{landing.dist}/{self.zip_name()}' # x64_windows = 'res/dist/synode-0.7.8-x64_windows-alpha-qqhome.zip'
+                imgs[self.jre_name] = f'{landing.dist_path}/{self.zip_name()}' # x64_windows = 'res/dist/synode-0.7.8-x64_windows-alpha-qqhome.zip'
                 links['image'] = imgs 
             else:
                 links = {}
-                links['image'] = {self.jre_name: f'{landing.dist}/{self.zip_name()}'}
+                links['image'] = {self.jre_name: f'{landing.dist_path}/{self.zip_name()}'}
 
-            local_links_p = f'temp/{links_path}'
+            local_links_p = f'{_temp_}/{links_path}'
             with open(local_links_p, 'w') as f:
                 json.dump(links, f)
 
             # push lings.json, redirector.json
             scpcmd = landing.post_scp
-            scpcmd.remote_dir = f'{landing.remot_path}/{links_path}'
+            scpcmd.remote_dir = landing.remot_path
             self.scp_push(local_path=local_redir_p, cmd=landing.post_scp)
             self.scp_push(local_path=local_links_p, cmd=landing.post_scp)
+            
+            scpcmd.remote_dir = f'{landing.remot_path}/{landing.dist_path}'
+            self.scp_push(local_path=self.get_distzip(), cmd=landing.post_scp)
 
 @dataclass
 class CentralTask(Anson):
