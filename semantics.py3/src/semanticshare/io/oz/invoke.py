@@ -393,10 +393,10 @@ class SynodeTask(Anson):
             if links is not None:
                 imgs = links[_images_] if hasattr(links, _images_) else {}
                 imgs[self.jre_name] = f'{landing.dist_path}/{self.zip_name()}' # x64_windows = 'res/dist/synode-0.7.8-x64_windows-alpha-qqhome.zip'
-                links['image'] = imgs 
+                links[_images_] = imgs 
             else:
                 links = {}
-                links['image'] = {self.jre_name: f'{landing.dist_path}/{self.zip_name()}'}
+                links[_images_] = {self.jre_name: f'{landing.dist_path}/{self.zip_name()}'}
 
             local_links_p = f'{_temp_}/{links_path}'
             with open(local_links_p, 'w') as f:
