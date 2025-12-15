@@ -132,6 +132,8 @@ class TaskCredentials():
             if scpcmd.user in self.credentials[scpcmd.host]:
                 return self.credentials[scpcmd.host][scpcmd.user]
 
+        print(f'File {Path.home()}/.taskrs.json can be used for configuring remote password.')
+        print('''Example: { "host": { "user": "pswd" } }''')
         return input(f'Enter password for {scpcmd.user}@{scpcmd.host}: ')
 
 task_credentials: TaskCredentials = TaskCredentials()
