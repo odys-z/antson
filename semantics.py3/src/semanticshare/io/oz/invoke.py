@@ -179,8 +179,8 @@ class SynodeTask(Anson):
     
     TODO: move 'resources.apk' in host.json/resources to clients.apk?
     '''
-    post_cmds: list[BashCmd]
-    post_scps: list[ScpCmd]
+    deploy_cmds: list[BashCmd]
+    deploy_scps: list[ScpCmd]
 
     landings: list[LandingSite]
 
@@ -215,10 +215,10 @@ class SynodeTask(Anson):
     def get_distzip(self) -> Path:
         return os.path.join(self.dist_dir, self.zip_name())
 
-    def run_postcmds(self, c):
-        if hasattr(self, 'post_cmds') and LangExt.len(self.post_cmds) > 0:
+    def run_deploycmds(self, c):
+        if hasattr(self, 'deploy_cmds') and LangExt.len(self.deploy_cmds) > 0:
             print('Executing post build commands...')
-            for bashcmd in self.post_cmds:
+            for bashcmd in self.deploy_cmds:
                 for cmd in bashcmd.cmds:
                     print('cmd-config:', cmd)
                     for vk, vv in bashcmd.vars.items():
@@ -228,20 +228,20 @@ class SynodeTask(Anson):
                     ret = c.run(cmd)
                 print('OK:', ret.ok, ret.stderr)
         else: 
-            print('No post commands in property [post_cmds] are configured.')
+            print('No post commands in property [deploy_cmds] are configured.')
  
-    def run_postscps(self):
-        if not hasattr(self, 'post_scps'):
+    def run_deployscps(self):
+        if not hasattr(self, 'deploy_scps'):
             print('No post SCPs configured.')
             return
 
-        scplen = LangExt.len(self.post_scps)
-        print('Executing post build SCPs, len = {scplen}...')
+        scplen = LangExt.len(self.deploy_scps)
+        print(f'Executing post build SCPs, len = {scplen}...')
         if scplen > 0:
             self.scp_pushs(local_path=self.get_distzip())
 
     def scp_pushs(self, local_path):
-        for cmd in self.post_scps:
+        for cmd in self.deploy_scps:
             self.scp_push(local_path=local_path, cmd=cmd)
     
     def scp_push(self, local_path: Path, cmd: ScpCmd):
@@ -252,7 +252,7 @@ class SynodeTask(Anson):
             print('ERROR', e)
             print('Please install paramiko and scp packages to enable SCP post build:')
             print('pip install paramiko scp')
-            return           
+            return
 
         def report_scporg(filename, size, sent):
             percent_complete = float(sent) / float(size) * 100
@@ -284,17 +284,13 @@ class SynodeTask(Anson):
                     return remote_dir
 
         if sys.version_info.major < 3 or sys.version_info.minor < 10:
-            print('SCP post command requires Python 3.10 or above. Use tasks.json/post_cmds for this task,\n'
-                    f'"post_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
+            print('SCP post command requires Python 3.10 or above. Use tasks.json/deploy_cmds for this task,\n'
+                    f'"deploy_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
                     '# Google AI sys it is widely reported that Python 3.9 has issues with scp packages.')
             return None
 
         print(f'[SCP] {local_path} -> {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
 
-        # if cmd.pswd is None:
-        #     password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
-        # else:
-        #     password = cmd.pswd
         password = task_credentials.find_pswd(cmd)
 
         with SSHClient() as ssh:
@@ -323,16 +319,12 @@ class SynodeTask(Anson):
             print(f'Downloading {filename}: {percent_complete:.2f}%', end='\r')
         
         if sys.version_info.major < 3 or sys.version_info.minor < 10:
-            print('SCP post command requires Python 3.10 or above. Use tasks.json/post_cmds for this task,\n'
-                    f'"post_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
+            print('SCP post command requires Python 3.10 or above. Use tasks.json/deploy_cmds for this task,\n'
+                    f'"deploy_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
                     '# Google AI sys it is widely reported that Python 3.9 has issues with scp packages.')
             return None
 
         print(f'[SCP] {self.get_distzip()} <- {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
-        # if cmd.pswd is None:
-        #     password = input(f'Enter password for {cmd.user}@{cmd.host}: ')
-        # else:
-        #     password = cmd.pswd
         password = task_credentials.find_pswd(cmd)
 
         with SSHClient() as ssh:
