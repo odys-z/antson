@@ -151,6 +151,9 @@ class SynodeTask(Anson):
     html_jar_v: str
     web_ver: str
     web_inf_dir: str
+    '''
+        'WEB-INF': 'src/main/webapp/WEB-INF-0.7/*', # Do not replace with version.
+    '''
     jre_release: str
     jre_name: str
     host_json: str
@@ -420,7 +423,7 @@ class CentralTask(Anson):
 from importlib.metadata import version, PackageNotFoundError
 from packaging.version import Version
 
-def requir_pkg(pkg_name: str, require_ver: Union[str, list[str]]):
+def requir_pkg(pkg_name: str, require_ver: Union[str, list[str]]=None):
     '''
     Docstring for requir_pkg
     
@@ -430,25 +433,26 @@ def requir_pkg(pkg_name: str, require_ver: Union[str, list[str]]):
      list for exact version or version range [min, max]
     :type require_ver: Union[str, list[str]]
     '''
+    import sys
     try:
         pkg_version = version(pkg_name.replace('.', '_').replace('-', '_'))
     except PackageNotFoundError:
-        pkg_version = "uninstalled" 
+        # pkg_version = 'uninstalled' 
+        print('Package not found:', pkg_name)
+        sys.exit(1)
+
     print (f"{pkg_name}: ", pkg_version)
 
     if isinstance(require_ver, str):
         if Version(pkg_version) < Version(require_ver):
             print(f'Please upgrade {pkg_name} to version {require_ver} or above. Current version: {pkg_version}')
-            import sys
             sys.exit(1)
     elif isinstance(require_ver, list):
         if len(require_ver) == 1:
             if Version(pkg_version) != Version(require_ver[0]):
                 print(f'Please install {pkg_name} version {require_ver[0]}. Current version: {pkg_version}')
-                import sys
                 sys.exit(1)
         else:
             if Version(pkg_version) < Version(require_ver[0]) or Version(pkg_version) > Version(require_ver[1]):
                 print(f'Please install {pkg_name} version between {require_ver[0]} and {require_ver[1]}. Current version: {pkg_version}')
-                import sys
                 sys.exit(1)
