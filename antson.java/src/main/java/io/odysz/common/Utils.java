@@ -698,6 +698,7 @@ public class Utils {
 	}
 
 	/**
+	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
 	 * Wait until all lights turn into green (true), a helper for tests.
 	 * @example <pre>
 	 * boolean[] lights = new boolean[] {true, false, false};
@@ -730,6 +731,7 @@ public class Utils {
 	}
 	
 	/**
+	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
 	 * Wait on n-th light only.
 	 * @see #awaitAll(boolean[], int...)
 	 * @param signals
@@ -743,6 +745,7 @@ public class Utils {
 	}
 	
 	/**
+	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
 	 * Turn lights to red,
 	 * @see #awaitAll(boolean[], int...)
 	 * @param signals
@@ -752,6 +755,11 @@ public class Utils {
 			signals[i] = false;
 	}
 	
+	/**
+	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
+	 * @param signals
+	 * @param indx
+	 */
 	public static void turngreen(boolean[] signals, int... indx) {
 		if (isNull(indx))
 			for (int i = 0; i < signals.length; i++)
