@@ -710,7 +710,6 @@ public class T_AnResultset extends Anson {
 
 	/**
 	 * Generate row indices, start at 0.
-	 * FIXME move this method to Query and be called before rs construction.
 	 * @param pk
 	 * @return this
 	 */

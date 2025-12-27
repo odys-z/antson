@@ -1,4 +1,5 @@
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.github.odys-z/antson/)
+[![Maven Central Version](https://img.shields.io/maven-central/v/io.github.odys-z/antson)
+](https://central.sonatype.com/artifact/io.github.odys-z/antson)
 [![License](https://img.shields.io/badge/license-MIT-blue)](../LICENSE)
 
 # About
