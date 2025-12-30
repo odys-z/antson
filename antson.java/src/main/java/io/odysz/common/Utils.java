@@ -114,7 +114,7 @@ public class Utils {
 			}
 
 			if (printag)
-				es().print(String.format("[%s.%s] ",
+				os().print(String.format("[%s.%s] ",
 					new Throwable().getStackTrace()[1].getClassName(),
 					new Throwable().getStackTrace()[1].getMethodName()));
 
@@ -144,7 +144,7 @@ public class Utils {
 
 			if (row != null) {
 				if (printag)
-					es().print(String.format("[%s.%s] ",
+					os().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
@@ -168,7 +168,7 @@ public class Utils {
 
 			if (list != null) {
 				if (printag)
-					es().print(String.format("[%s.%s] ",
+					os().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
@@ -198,7 +198,7 @@ public class Utils {
 
 			if (list != null) {
 				if (printag)
-					es().print(String.format("[%s.%s] ",
+					os().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
@@ -270,7 +270,7 @@ public class Utils {
 		try {
 			if (map != null) {
 				if (printag)
-					es().print(String.format("[%s.%s] ",
+					os().print(String.format("[%s.%s] ",
 						new Throwable().getStackTrace()[1].getClassName(),
 						new Throwable().getStackTrace()[1].getMethodName()));
 
@@ -296,7 +296,7 @@ public class Utils {
 			}
 
 			if (printag)
-				es().print(String.format("[%s.%s] ",
+				os().print(String.format("[%s.%s] ",
 					new Throwable().getStackTrace()[1].getClassName(),
 					new Throwable().getStackTrace()[1].getMethodName()));
 
@@ -343,7 +343,7 @@ public class Utils {
 		try {
 			if (printCaller) {
 				StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
-				os().println(String.format("logger:        %s.%s(%s:%s)", 
+				es().println(String.format("logger:        %s.%s(%s:%s)", 
 								stElements[2].getClassName(), stElements[2].getMethodName(),
 								stElements[2].getFileName(), stElements[2].getLineNumber()));
 			}
