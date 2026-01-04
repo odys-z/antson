@@ -1,5 +1,8 @@
 package io.odysz.common;
 
+import java.util.Collection;
+import java.util.List;
+
 public class CheapMath {
 	
 	/**
@@ -36,5 +39,15 @@ public class CheapMath {
 	 */
 	public static int blocks(int vol, int size) {
 		return vol <= 0 || size <= 0 ? 0 : 1 + (int)(vol - 1) / size;
+	}
+	
+	public static int maxLen(Collection<String> arr) {
+		int maxlen = 0;
+		if (arr != null)
+		for (String a : arr) {
+			int l = LangExt.len(a);
+			maxlen = l > maxlen ? l : maxlen;
+		}
+		return maxlen;
 	}
 }

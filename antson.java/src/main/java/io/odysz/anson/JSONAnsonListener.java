@@ -190,7 +190,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 					} catch (InvocationTargetException e) {
 						throw new AnsonException(0, "Failed to create instance of IJsonable with\nconstructor: %s\n"
 							+ "class: %s\nerror: %s\nmessage: %s\n"
-							+ "Make sure the object can be created with the constructor.",
+							+ "Make sure the object can be created with the default constructor.",
 							ctor, enclosingClazz.getName(), e.getClass().getName(), e.getMessage());
 					}
 				}
