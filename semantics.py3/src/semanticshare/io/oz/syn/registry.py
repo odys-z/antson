@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Union, cast, Optional
+from typing import List, Union, cast, Optional
 
 from anson.io.odysz.anson import Anson
 from anson.io.odysz.common import LangExt
@@ -70,13 +70,13 @@ class SynodeConfig(Anson):
      * No worker thread started if less or equals 0.
     '''
 
-    peers: list[Synode]
+    peers: List[Synode]
 
     https: bool
 
     def __init__(self, domain:str=None, synode:str=None,
                  synconn:str=None, sysconn:str=None, admin:str='admin',
-                 org:SynOrg=None, peers:list=None, mode:str=None):
+                 org:SynOrg=None, peers:List=None, mode:str=None):
         super().__init__()
         self.synconn = synconn
         self.sysconn = sysconn
@@ -157,7 +157,7 @@ class AnRegistry(Anson):
     Null java equivolent
     '''
     config: SynodeConfig
-    synusers: list[SyncUser]
+    synusers: List[SyncUser]
 
     def __init__(self):
         super().__init__()
@@ -174,7 +174,7 @@ class AnRegistry(Anson):
             else AnRegistry.find_synode(self.config.peers, peerid) \
     
     @classmethod
-    def find_synode(cls, synodes: list[Synode], id):
+    def find_synode(cls, synodes: List[Synode], id):
         if synodes is not None:
             for peer in synodes:
                 if peer.synid == id:
@@ -182,7 +182,7 @@ class AnRegistry(Anson):
         return None
 
     @classmethod
-    def find_synuser(cls, users: list[SyncUser], id):
+    def find_synuser(cls, users: List[SyncUser], id):
         if users is not None:
             for u in users:
                 if u.userId == id:
@@ -279,7 +279,7 @@ class RegistResp(AnsonResp):
         error = "error"
 
     r: str
-    orgDomains: list[str]
+    orgDomains: List[str]
     
     diction: SynodeConfig
     

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
+from typing import Optional, List
 from urllib.parse import urlparse
 import re
 
@@ -147,10 +147,10 @@ class JServUrl(Anson):
     https: bool
     ip: str
     port: int
-    subpaths: list[str]
+    subpaths: List[str]
     jservtime: str
 
-    def __init__(self, https: bool=False, ip: str=None, port: int=80, subpaths: list[str]=[]):
+    def __init__(self, https: bool=False, ip: str=None, port: int=80, subpaths: List[str]=[]):
         super().__init__()
         self.https = https
         self.ip = ip
@@ -159,7 +159,7 @@ class JServUrl(Anson):
         self.jservtime = '1911-10-10'
 
     @staticmethod
-    def asJserv(jsrv: str):
+    def asJserv(jserv: str):
         parts = urlparse(jserv)
         jurl = JServUrl(https=parts.scheme == 'https',
                         ip=parts.hostname, port=parts.port,

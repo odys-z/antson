@@ -4,6 +4,7 @@ Helpers for deploy, networking, mirroring, etc.
 
 from dataclasses import dataclass
 import platform
+from typing import List
 
 from anson.io.odysz.anson import Anson
 
@@ -41,11 +42,11 @@ class Temurin17Release(JRERelease):
     "https://github.com/{path}/{resources[i]}" should reach the jre/jdk item.
     "https://<mirror-ip>/deploy-path/{resources[i]}" should reach the jre/jdk item at the mirror site.
     '''
-    resources: list[str]
+    resources: List[str]
 
-    mirroring: list[str]
+    mirroring: List[str]
 
-    backup: list[str]
+    backup: List[str]
 
     def __init__(self):
         super().__init__()

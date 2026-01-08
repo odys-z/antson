@@ -13,7 +13,7 @@ from anson.io.odysz.common import LangExt
 from semanticshare.io.oz.register.central import CentralSettings
 from semanticshare.io.odysz.semantic.jsession import JUser
 import os
-from typing import Union
+from typing import Union, List
 from pathlib import Path
 
 
@@ -182,10 +182,10 @@ class SynodeTask(Anson):
     
     TODO: move 'resources.apk' in host.json/resources to clients.apk?
     '''
-    deploy_cmds: list[BashCmd]
-    deploy_scps: list[ScpCmd]
+    deploy_cmds: List[BashCmd]
+    deploy_scps: List[ScpCmd]
 
-    landings: list[LandingSite]
+    landings: List[LandingSite]
 
     backings: dict
     '''
@@ -298,7 +298,7 @@ class SynodeTask(Anson):
 
         with SSHClient() as ssh:
             ssh.load_system_host_keys()
-            ssh.connect(cmd.host, username=cmd.user, password=password)
+            ssh.connect(cmd.host, port=cmd.port, username=cmd.user, password=password)
 
             # Use SFTP to manage directories
             sftp_client = ssh.open_sftp()
@@ -332,7 +332,7 @@ class SynodeTask(Anson):
 
         with SSHClient() as ssh:
             ssh.load_system_host_keys()
-            ssh.connect(cmd.host, username=cmd.user, password=password)
+            ssh.connect(cmd.host, port=cmd.port, username=cmd.user, password=password)
 
             with SCPClient(ssh.get_transport(), progress=report_scporg) as scp:
                 if not os.path.isdir(_temp_):
@@ -423,7 +423,7 @@ class CentralTask(Anson):
 from importlib.metadata import version, PackageNotFoundError
 from packaging.version import Version
 
-def requir_pkg(pkg_name: str, require_ver: Union[str, list[str]]=None):
+def requir_pkg(pkg_name: str, require_ver: Union[str, List[str]]=None):
     '''
     Docstring for requir_pkg
     
@@ -431,7 +431,7 @@ def requir_pkg(pkg_name: str, require_ver: Union[str, list[str]]=None):
     :type pkg_name: str
     :param require_ver: requred version, str for minimum version,
      list for exact version or version range [min, max]
-    :type require_ver: Union[str, list[str]]
+    :type require_ver: Union[str, List[str]]
     '''
     import sys
     try:

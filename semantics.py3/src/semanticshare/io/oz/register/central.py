@@ -1,5 +1,6 @@
 
 from dataclasses import dataclass
+from typing import List
 from anson.io.odysz.anson import Anson
 
 @dataclass
@@ -9,7 +10,7 @@ class CentralSettings(Anson):
     volume: str   # "../regist-vol
     port: str     # 1990"
     conn: str     # "sys-sqlite
-    startHandler: list #: []"
+    startHandler: List #: []"
     rootkey: str  # "0123456789ABCDEF"
     
     def __init__(self):

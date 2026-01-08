@@ -2,7 +2,7 @@
 import os
 from dataclasses import dataclass
 from datetime import timezone
-from typing import overload, Optional
+from typing import List, overload, Optional
 from datetime import datetime
 
 from anson.io.odysz.anson import Anson
@@ -171,14 +171,14 @@ class AppSettings(Anson):
             self.jserv_utc = datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
             return self
 
-    def jservLines(self, peers_define: list[Synode]):
+    def jservLines(self, peers_define: List[Synode]):
         return '' if peers_define is None else \
                 [':\t'.join([p.synid, self.jservs[p.synid] if \
                 p.synid in self.jservs else \
                 "http://?:?/{}".format(JProtocol.urlroot)]
             ) for p in peers_define]
 
-    def acceptj_butme(self, myid: str, peers: list[Synode]):
+    def acceptj_butme(self, myid: str, peers: List[Synode]):
         if peers is not None:
             for p in peers:
                 if myid != p.synid and not LangExt.isblank(p.jserv):
