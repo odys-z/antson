@@ -257,7 +257,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				// But this is confusing to user. Set some report here.
 				if (top.isInList() || top.isInMap())
 					Utils.warn("Type of elements in the list or map is complicate, but no annotation for type info can be found.\n"
-							+ "field type: %s\njson: %s\n"
+							+ "field type: %s\njson string: %s\n"
 							+ "E.g. Java field example: @AnsonField(valType=\"io.your.type\")\n"
 							+ "Anson instances don't need annotation, but objects in json array without type-pair can also trigger this error report.",
 							top.enclosing.getClass(), ctx.getText());;

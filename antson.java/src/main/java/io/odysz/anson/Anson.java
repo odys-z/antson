@@ -158,7 +158,7 @@ public class Anson implements IJsonable {
 	}
 	
 	public Anson toFile(String path, JsonOpt... opts) throws IOException {
-		try (FileOutputStream os = new FileOutputStream(path)) {
+		try (FileOutputStream os = new FileOutputStream(path, false)) {
 			return toBlock(os, opts);
 		}
 	}
