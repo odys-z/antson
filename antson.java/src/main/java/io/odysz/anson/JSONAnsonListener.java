@@ -1080,7 +1080,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	}
 
 	
-	/**Register a factory of IJsonable implementation.
+	/**
+	 * Register a factory of IJsonable implementation.
 	 * @param jsonable
 	 * @param factory
 	 */
