@@ -32,7 +32,6 @@ public interface IJsonable {
 	}
 
 	/**
-	 * <p>TODO to be renamed as toEnvelope().</p>
 	 * 
 	 * {@link Anson} implemented this for almost all the case, user shouldn't care about this.
 	 * 
