@@ -1,10 +1,10 @@
 # About
 
-The c++ 2023 version of anclient.
+The C++ 2023 version of Anclient.
 
 # Support C++ 23 on Windows with Qt 6.10.1
 
-* [Download Build Tools for Visual Studio (2026 or latest)](https://visualstudio.microsoft.com/downloads/)
+* Download [Build Tools for Visual Studio (2026 or latest)](https://visualstudio.microsoft.com/downloads/)
 
 * Install
 
@@ -13,5 +13,7 @@ The c++ 2023 version of anclient.
   - C++ CMake tools for Windows (essential for Qt Creator).
 
 * Configue Qt Creator Kit
+
+  (Delete the *build* folder)
 
 

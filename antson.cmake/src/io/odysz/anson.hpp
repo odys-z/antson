@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <glaze/glaze.hpp>
 #include <glaze/util/type_traits.hpp>
+#include <string_view>
+#include <format>
 // #include <bits/stl_map.h>
 
 using namespace std;
@@ -44,6 +46,7 @@ public:
 };
 
 class Anson : public IJsonable {
+    string type;
 public:
     virtual ~Anson() = default;
 
@@ -94,11 +97,11 @@ public:
 
     // string toBlock();
 
-private:
-    template <typename T, typename V>
-    T* try_get_animal(V& variant_obj) {
-        return std::get_if<T>(&variant_obj);
-    }
+// private:
+//     template <typename T, typename V>
+//     T* try_get_animal(V& variant_obj) {
+//         return std::get_if<T>(&variant_obj);
+//     }
 };
 
 class JsonOpt : public Anson {
@@ -167,5 +170,41 @@ inline IJsonable& IJsonable::toBlock(ostream& os, JsonOpt& opt)
 }
 
 } // namespace anson
+
+// Expected signature for write callback: returns the value to serialize
+template <std::derived_from<anson::Anson> T>
+std::string_view write_message_type(const T&) noexcept {
+    static_assert(false, "No type tag defined for this message type");
+    return "Only incorrect of _antype_() in {} usage can reach here.";
+}
+
+template <class T>
+constexpr std::string_view get_expected_type_tag() noexcept {
+    static_assert(false, "You must specialize get_expected_type_tag for this type");
+}
+
+// Default: no-op / skip on read (or validate if you want)
+template <std::derived_from<anson::Anson> T>
+void read_message_type(T&, glz::is_context auto&& ctx, auto&& it, auto&& end) noexcept {
+    std::string_view tag{};
+    glz::parse<glz::JSON>::op<glz::opts{}>(tag, ctx, it, end);
+    std::string_view expected = get_message_type_tag(T{});
+    if (tag != expected) {
+        ctx.error = format("expecting {} but is {}", expected, tag);
+        return;
+    }
+}
+
+// void ignore_type_tag(anson::Anson&, glz::is_context auto&& ctx, auto&& it, auto&& end) noexcept {
+//     std::string_view ignored{};
+//     glz::parse<glz::JSON>::op<glz::opts{}>(ignored, ctx, it, end);
+//     if (it != end && *it == ',') ++it;
+// }
+
+#define _ANSON_TYPE_(Class, ExpectedStr) \
+glz::custom<\
+  &read_message_type<Class, ExpectedStr>, \
+  &write_message_type<Class> >
+
 
 #endif // ANSON_HPP
