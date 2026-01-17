@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20.0)
 
 project(${PROJECT_NAME} LANGUAGES CXX)
 
+add_compile_options(/utf-8)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -17,7 +19,6 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_sources(${PROJECT_NAME} INTERFACE
     io/odysz/semantics.hpp
     io/odysz/anson.hpp
-    io/odysz/glaze.hpp
     io/odysz/semantic/jprotocol.hpp
     io/odysz/module/rs.hpp
 )

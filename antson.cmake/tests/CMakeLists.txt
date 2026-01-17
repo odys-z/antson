@@ -17,7 +17,7 @@ add_executable(unit_tests
     # utils_test.cpp
     anson_test.cpp
     io/oz/anclient/ipcagent.hpp
-    io/oz/anclient/soketier.h
+    io/oz/anclient/soketier2.h
 )
 
 # 3. Link to library and the testing framework

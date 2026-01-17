@@ -207,4 +207,34 @@ glz::custom<\
   &write_message_type<Class> >
 
 
+
+// Put this macro definition in a shared header (e.g. anson/glaze_helpers.hpp)
+// or at the top of soketier.h  before any class that uses it
+
+#define REGISTER_ANTYPE(Class, TagLiteral, ...) \
+static void read_type_##Class(Class& self, \
+                              glz::is_context auto&& ctx, \
+                              auto&& it, auto&& end) noexcept { \
+        std::string_view tag{}; \
+        glz::parse<glz::JSON>::op<glz::opts{}>(tag, ctx, it, end); \
+\
+        /* You can add validation here if desired */ \
+        if (tag != TagLiteral) [[unlikely]] { ctx.error = "Types are not the same."; return; } \
+\
+        /* optional trailing comma tolerance */ \
+        if (it != end && *it == ',') ++it; \
+} \
+\
+    static std::string_view write_type_##Class(const Class&) noexcept { \
+        return TagLiteral; \
+} \
+\
+    struct glaze { \
+        static constexpr auto value = glz::object( \
+            "type", glz::custom< \
+            &Class::read_type_##Class, \
+            &Class::write_type_##Class >, \
+            __VA_ARGS__ \
+            ); \
+}
 #endif // ANSON_HPP
