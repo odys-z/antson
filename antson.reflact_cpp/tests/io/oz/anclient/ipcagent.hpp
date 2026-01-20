@@ -39,19 +39,7 @@ struct TestSettings : public anson::Anson {
         filesystem::path p0 = prefix;
         return p0 / this->agent_json;
     }
-
-    struct glaze {
-        using T = TestSettings;
-        static constexpr auto value = glz::object(
-            "type",       [](auto&&) { return "io.oz.anclient.ipcagent.TestSettings"; },
-            "agent_jar",  &T::agent_jar,
-            "agent_json", &T::agent_json,
-            "qtclient",   &T::qtclient,
-            "ipc_port",   &T::ipc_port,
-            "ipc_session",&T::ipc_session);
-    };
 };
 
-template void anson::Anson::toPath<TestSettings>(const string&);
 
 #endif

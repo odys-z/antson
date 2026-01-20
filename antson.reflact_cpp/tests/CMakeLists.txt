@@ -21,7 +21,8 @@ FetchContent_MakeAvailable(googletest)
 # ────────────────────────────────────────
 
 add_executable(unit_tests
-    anson_test.cpp
+    hello_rfl_test.cpp
+    # anson_test.cpp
     io/oz/anclient/ipcagent.hpp
     io/oz/anclient/soketier.h
 )

@@ -4,10 +4,13 @@
 #include <memory>
 #include <string>
 #include <sstream>
+#include <fstream>
 #include <concepts>
 #include <stdexcept>
 #include <string_view>
 #include <format>
+#include <rfl/json.hpp>
+#include <rfl.hpp>
 
 using namespace std;
 
@@ -24,21 +27,18 @@ public:
         virtual unique_ptr<IJsonable> fromJson(const string& json);
     };
 
-    template <typename T>
     IJsonable& toBlock(ostream& stream, JsonOpt& opt);
 
-    template <typename T>
     string toBlock(JsonOpt& opt)
     {
         ostringstream bos;// = new ByteArrayOutputStream();
-        this->toBlock<T>(bos, opt);
+        this->toBlock(bos, opt);
         return bos.str();
     }
 
-    template <typename T>
+    // template<std::derived_from<IJsonable> T = IJsonable>
     string toBlock();
 
-    template <typename T>
     IJsonable& toJson(ostringstream& buf) ;
 };
 
@@ -49,22 +49,17 @@ public:
 
     template<std::derived_from<Anson> T = Anson>
     static T* fromJson(const string& json) {
-        auto p = make_unique<T>();
-
-        return p.get();
+        return rfl::json::read<T>(json);
     }
 
-    template<derived_from<Anson> T = Anson>
-    static unique_ptr<T> fromPath(const string& path) {
-        auto p = std::make_unique<T>();
-
-        return p;
+    template<std::derived_from<Anson> T = Anson>
+    static T* fromPath(const string& path) {
+        ifstream fs(path);
+        return rfl::json::read<T>(fs);
     }
 
-    template<derived_from<Anson> T = Anson>
     void toPath(const string& path);
 
-    template<derived_from<Anson> T = Anson>
     void toPath(const string& path, JsonOpt& opt);
 };
 
@@ -83,41 +78,36 @@ public:
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
-/// \brief IJsonable::toBlock
-/// \return
-///
-///
-template <typename T>
+
 inline string IJsonable::toBlock()
 {
-    JsonOpt defaultopt;
-    return ((IJsonable*)this)->toBlock<T>(defaultopt);
+    ostringstream bos;
+    JsonOpt opt;
+    this->toBlock(bos, opt);
+    return bos.str();
 }
 
-template <typename T>
+inline IJsonable& IJsonable::toBlock(ostream& os, JsonOpt& opt)
+{
+    this->toBlock(os, opt);
+    return *this;
+}
+
 inline IJsonable& IJsonable::toJson(ostringstream& buf)
 {
     JsonOpt opt;
-    ((IJsonable*)this)->toBlock<T>(buf, opt);
+    ((IJsonable*)this)->toBlock(buf, opt);
     return *this;
 }
 
-template <std::derived_from<Anson> T>
 inline void Anson::toPath(const string& path) {
     JsonOpt defaultopt;
-    this->toPath<T>(path, defaultopt);
+    this->toPath(path, defaultopt);
 }
 
-template <std::derived_from<Anson> T>
 inline void Anson::toPath(const string& path, JsonOpt& opt) {
-    std::ofstream fout(path);
-    ((IJsonable*)this)->toBlock<T>(fout, opt);
-}
-
-template <typename T>
-inline IJsonable& IJsonable::toBlock(ostream& os, JsonOpt& opt)
-{
-    return *this;
+    ofstream fout(path);
+    ((IJsonable*)this)->toBlock(fout, opt);
 }
 
 } // namespace anson
