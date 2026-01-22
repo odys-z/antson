@@ -8,12 +8,17 @@ The C++ 17 version of Anclient.
 
 # Quick Start
 
-  ### 📦 Installation (CMake)
+### Prerequisite
+
+  * C++ 17 Compiler, CMake 3.30
+  * [rttrorg/RTTR](https://github.com/rttrorg/rttr) ([Install it shouldn't take hours](#build--install-rttr))
+
+### 📦 Installation (CMake)
 
   ```cmake
   include(FetchContent)
   FetchContent_Declare(
-    antson
+    anson
     GIT_REPOSITORY [https://github.com/antson/antson.git](https://github.com/antson/antson.git)
     GIT_TAG        cmake-v0.1.0 # replace with latest
     SOURCE_SUBDIR  antson.cmake
@@ -74,6 +79,8 @@ The compiler errors:
    One of the restrictions of RTTR is it requirs one and only one RTTR_REGISTRATION block.
    See [#106](https://github.com/rttrorg/rttr/issues/106).
 
+
+<a id="build-install-rttr"></a>
 ## Build & Install RTTR
 
 Download from the [download page](https://www.rttr.org/doc/master/building_install_page.html).

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.30)
 project(anson.cmake VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -16,7 +16,7 @@ add_compile_options(/WX-)
 
 # RTTR needs to be installed locally
 # See readme for install RTTR
-find_package(RTTR REQUIRED Core)
+find_package(RTTR CONFIG REQUIRED Core)
 
 include(FetchContent)
 
@@ -38,6 +38,7 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# include_directories("C:/Users/Alice/github/rttr-0.9.6/install/include")
 # 3. Add Subdirectories
 add_subdirectory(src)
 add_subdirectory(tests)

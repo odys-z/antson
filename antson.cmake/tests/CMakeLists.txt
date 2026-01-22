@@ -19,7 +19,6 @@ add_custom_command(TARGET anson_tests POST_BUILD
 # Link to our source library and GoogleTest
 # gtest_main provides the main() function for the tests
 target_link_libraries(anson_tests PRIVATE 
-    # json_sax_lib
     RTTR::Core
     nlohmann_json::nlohmann_json
     anson
