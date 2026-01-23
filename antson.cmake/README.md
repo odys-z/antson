@@ -32,7 +32,15 @@ The C++ 17 version of Anclient.
 Add this to user projects:
 
 ```cmake
+    set(RTTR_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+    set(RTTR_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(RTTR_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+    set(RTTR_BUILD_INSTALLER OFF CACHE BOOL "" FORCE)
+    set(CMAKE_COMPILER_IS_MSVC 1)
+    set(RTTR_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+    set(BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
 
+    add_compile_options(/WX-)
 ```
 # If you need dive deep
 
