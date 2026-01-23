@@ -41,5 +41,11 @@ FetchContent_MakeAvailable(googletest)
 # include_directories("C:/Users/Alice/github/rttr-0.9.6/install/include")
 # 3. Add Subdirectories
 add_subdirectory(src)
-add_subdirectory(tests)
+
+option(ANSON_BUILD_TESTS "Build tests for Anson.cmake" ON)
+if (ANSON_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
+
 

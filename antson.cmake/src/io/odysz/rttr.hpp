@@ -18,6 +18,7 @@
 
 #define NL '\n'
 
+#ifdef TEST_ANSON
 RTTR_REGISTRATION {
     using namespace rttr;
     using namespace anson;
@@ -35,7 +36,7 @@ RTTR_REGISTRATION {
         .property("a", &AnsonBody::a)
         ;
 
-    rttr::registration::enumeration<Port>("PortType")(
+    rttr::registration::enumeration<Port>("Port")(
         rttr::value("query", Port::query),
         rttr::value("update", Port::update),
         rttr::value("echo", Port::echo)
@@ -47,6 +48,39 @@ RTTR_REGISTRATION {
         .property("port", &Req::port)
         ;
 }
+#else
+#define PROTOCOL_REGISTRY \
+RTTR_REGISTRATION { \
+    using namespace rttr; \
+    using namespace anson; \
+    rttr::registration::class_<Anson>("anson::Anson") \
+        .constructor<std::string>() \
+         (policy::ctor::as_std_shared_ptr, \
+          default_arguments(string("-type-")) ) \
+        .property("type", &Anson::type) \
+        ; \
+ \
+    rttr::registration::class_<AnsonBody>("anson::AnsonBody") \
+        .constructor<std::string>() \
+         (policy::ctor::as_std_shared_ptr, \
+          default_arguments(string("-a-")) ) \
+        .property("a", &AnsonBody::a) \
+        ; \
+ \
+    rttr::registration::enumeration<Port>("Port")( \
+        rttr::value("query", Port::query), \
+        rttr::value("update", Port::update), \
+        rttr::value("echo", Port::echo) \
+        ); \
+ \
+    using Req = AnsonMsg<EchoReq>; \
+    rttr::registration::class_<Req>("anson::AnsonMsg<EchoReq>") \
+        .constructor<Port>() \
+        .property("port", &Req::port) \
+        ;
+
+#define PROTOCOL_END }
+#endif
 
 class RttrSaxHandler : public nlohmann::json_sax<nlohmann::json> {
     rttr::instance m_instance;

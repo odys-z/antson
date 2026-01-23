@@ -9,6 +9,8 @@ add_executable(
     test_02_deserializer.cpp
 )
 
+target_compile_definitions(anson_tests PRIVATE TEST_ANSON)
+
 add_custom_command(TARGET anson_tests POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     # "C:/Users/Alice/github/rttr-0.9.6/install/bin/rttr_core.dll"

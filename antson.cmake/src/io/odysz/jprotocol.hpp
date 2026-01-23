@@ -4,6 +4,10 @@
 
 namespace anson {
 
+/**
+ * @brief The AnsonBody class
+ * java type: io.odysz.semantic.jprotocol
+ */
 class AnsonBody : public anson::Anson {
 public:
     string a;
@@ -22,14 +26,17 @@ public:
 
     EchoReq(string echo) : AnsonBody("r/query", "io.odysz.jprotocol.EchoReq"), echo(echo) {}
 
-    RTTR_ENABLE()
+    RTTR_ENABLE(AnsonBody)
 };
 
-enum class Port {
-    query,
-    update,
-    echo
+class UserReq : public AnsonBody {
+public:
+    string data;
+
+    RTTR_ENABLE(AnsonBody)
 };
+
+enum class Port { query, update, echo };
 
 std::ostream& operator<<(std::ostream& os, const Port& p) {
     rttr::enumeration e = rttr::type::get<Port>().get_enumeration();
@@ -49,6 +56,18 @@ bool operator==(const std::string& s, const Port& p) {
     return p == s;
 }
 
+enum class MsgCode { ok, exSession, exSemantic, exIo, exTransct, exDA, exGeneral, ext };
+
+class AnsonResp : public AnsonBody{
+public:
+    MsgCode code;
+    AnsonResp() : AnsonBody("NA", "io.odysz.semantic.jprotocol.AnsonResp") {}
+
+    AnsonResp(string a) : AnsonBody(a, "io.odysz.semantic.jprotocol.AnsonResp") {}
+
+    RTTR_ENABLE(AnsonBody)
+};
+
 // c20 template<std::derived_from<AnsonBody> T = AnsonBody>
 template <
     typename T,
@@ -65,5 +84,9 @@ public:
     RTTR_ENABLE(Anson)
 };
 
+class OnError {
+    // virtual void err(MsgCode c, string& e, string... args);
+    virtual void err(MsgCode code, std::string_view msg,std::initializer_list<std::string_view> args);
+};
 }
 

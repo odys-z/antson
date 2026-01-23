@@ -23,9 +23,17 @@ The C++ 17 version of Anclient.
     GIT_TAG        cmake-v0.1.0 # replace with latest
     SOURCE_SUBDIR  antson.cmake
   )
+  set(ANSON_BUILD_TESTS OFF CACHE BOOL "" FORCE) # Users don't need the tests
   FetchContent_MakeAvailable(antson)
   ```
 
+### Build with MSVC
+
+Add this to user projects:
+
+```cmake
+
+```
 # If you need dive deep
 
 ## A Cheap survey on C++ reflection

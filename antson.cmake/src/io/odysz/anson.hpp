@@ -9,6 +9,10 @@
 using namespace  std ;
 
 namespace anson {
+/**
+ * @brief The Anson class
+ * java type: io.odysz.anson.Anson
+ */
 class Anson {
 public:
     std::string type;
@@ -17,6 +21,11 @@ public:
     Anson(string t) : type(t) { cout << "override contructor, type = " << t << NL ; }
 
     RTTR_ENABLE()
+};
+
+class SemanticObject : public Anson {
+
+    RTTR_ENABLE(Anson)
 };
 }
 
