@@ -99,11 +99,14 @@ The compiler errors:
 <a id="build-install-rttr"></a>
 ## Build & Install RTTR
 
+See [How to install RTTR](https://www.rttr.org/doc/master/building_install_page.html)
+
 Download from the [download page](https://www.rttr.org/doc/master/building_install_page.html).
 
 Open the *x64 Native Tools Command Prompt for VS", 
 
 ```
+    cmake -G "Visual Studio 18 2026"  # cmake -G "Visual Studio 18 2026" -DCMAKE_POLICY_VERSION_MINIMUM=3.5 . for master
     cmake --build . --config Release
     dir lib\Release
     rttr-0.9.6\lib\Release 的目录
