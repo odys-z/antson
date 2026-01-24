@@ -20,7 +20,7 @@ The C++ 17 version of Anclient.
   FetchContent_Declare(
     anson
     GIT_REPOSITORY [https://github.com/antson/antson.git](https://github.com/antson/antson.git)
-    GIT_TAG        cmake-v0.1.0 # replace with latest
+    GIT_TAG        cmake-v0.0.1 # replace with latest
     SOURCE_SUBDIR  antson.cmake
   )
   set(ANSON_BUILD_TESTS OFF CACHE BOOL "" FORCE) # Users don't need the tests
