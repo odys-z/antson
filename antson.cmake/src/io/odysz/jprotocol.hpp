@@ -32,13 +32,14 @@ public:
 class UserReq : public AnsonBody {
 public:
     string data;
+    UserReq(string a) : AnsonBody(a, "io.odysz.jprotocol.UserReq") {}
 
     RTTR_ENABLE(AnsonBody)
 };
 
 enum class Port { query, update, echo };
 
-std::ostream& operator<<(std::ostream& os, const Port& p) {
+inline std::ostream& operator<<(std::ostream& os, const Port& p) {
     rttr::enumeration e = rttr::type::get<Port>().get_enumeration();
     std::string name = e.value_to_name(p).to_string();
 
@@ -47,12 +48,12 @@ std::ostream& operator<<(std::ostream& os, const Port& p) {
     return os;
 }
 
-bool operator==(const Port& p, const std::string& s) {
+inline bool operator==(const Port& p, const std::string& s) {
     rttr::enumeration e = rttr::type::get<Port>().get_enumeration();
     return e.value_to_name(p).to_string() == s;
 }
 
-bool operator==(const std::string& s, const Port& p) {
+inline bool operator==(const std::string& s, const Port& p) {
     return p == s;
 }
 

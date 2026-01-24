@@ -36,16 +36,41 @@ RTTR_REGISTRATION {
         .property("a", &AnsonBody::a)
         ;
 
+    rttr::registration::class_<UserReq>("anson::UserReq")
+        .constructor<string>()
+        .property("data", &UserReq::data)
+        ;
+
+    rttr::registration::class_<AnsonResp>("anson::AnsonResp")
+        .constructor<>()
+        .constructor<std::string>()
+        (policy::ctor::as_std_shared_ptr,
+         default_arguments(string("-a-")) )
+        .property("code", &AnsonResp::code)
+        ;
+
     rttr::registration::enumeration<Port>("Port")(
         rttr::value("query", Port::query),
         rttr::value("update", Port::update),
         rttr::value("echo", Port::echo)
         );
 
-    using Req = AnsonMsg<EchoReq>;
-    rttr::registration::class_<Req>("anson::AnsonMsg<EchoReq>")
+    rttr::registration::enumeration<MsgCode>("MsgCode")(
+        rttr::value("ok", MsgCode::ok),
+        rttr::value("exDA", MsgCode::exDA),
+        rttr::value("exGeneral", MsgCode::exGeneral),
+        rttr::value("exIo", MsgCode::exIo),
+        rttr::value("exSemantic", MsgCode::exSemantic),
+        rttr::value("exSession", MsgCode::exSession),
+        rttr::value("exTransct", MsgCode::exTransct),
+        rttr::value("ext", MsgCode::ext)
+        );
+
+
+    using RqEch = AnsonMsg<EchoReq>;
+    rttr::registration::class_<RqEch>("anson::AnsonMsg<EchoReq>")
         .constructor<Port>()
-        .property("port", &Req::port)
+        .property("port", &RqEch::port)
         ;
 }
 #else
@@ -133,7 +158,7 @@ public:
 using json = nlohmann::json;
 using namespace rttr;
 
-void serialize_anson(std::ostream& os, rttr::variant var) {
+inline void serialize_anson(std::ostream& os, rttr::variant var) {
     if (!var.is_valid()) {
         os << "null";
         return;

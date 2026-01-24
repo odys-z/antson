@@ -7,6 +7,7 @@ add_executable(
     rttr/node.cpp
     test_01_rttr_tutor.cpp
     test_02_deserializer.cpp
+    test03_anclient.cpp
 )
 
 target_compile_definitions(anson_tests PRIVATE TEST_ANSON)
