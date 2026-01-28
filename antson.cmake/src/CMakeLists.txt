@@ -18,7 +18,7 @@ target_sources(anson INTERFACE
         io/odysz/rttr.hpp
 )
 
-target_compile_definitions(anson INTERFACE TEST_ANSON)
+# target_compile_definitions(anson INTERFACE TEST_ANSON)
 
 # 2. Add the stub file separately (No FILE_SET keyword for this part)
 # target_sources(anson INTERFACE
