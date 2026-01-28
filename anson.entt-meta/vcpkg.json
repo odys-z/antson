@@ -1,0 +1,8 @@
+{
+  "name": "anson-enttmeta",
+  "version": "0.1.0",
+  "dependencies": [
+    "entt",
+    "nlohmann-json"
+  ]
+}
