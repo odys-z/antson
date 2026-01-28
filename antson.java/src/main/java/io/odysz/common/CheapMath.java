@@ -1,7 +1,6 @@
 package io.odysz.common;
 
 import java.util.Collection;
-import java.util.List;
 
 public class CheapMath {
 	
