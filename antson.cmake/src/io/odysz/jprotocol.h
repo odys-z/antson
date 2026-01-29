@@ -32,22 +32,11 @@ public:
 
 class UserReq : public AnsonBody {
 public:
-    string data;
+    map<string, any> data;
     UserReq(string a) : AnsonBody(a, "io.odysz.jprotocol.UserReq") {}
 };
 
 enum class Port { query, update, echo };
-
-void register_port_meta() {
-    using namespace entt::literals;
-
-    entt::meta_factory<Port>()
-        .type("Port"_hs, "io.odysz.anson.Port")
-        .data<Port::query>("query"_hs, "query")
-        .data<Port::update>("update"_hs, "update")
-        .data<Port::echo>("echo"_hs, "echo")
-        ;
-}
 
 inline std::ostream& operator<<(std::ostream& os, const Port& p) {
     using namespace entt::literals;
@@ -107,16 +96,41 @@ public:
 
 // c20 template<std::derived_from<AnsonBody> T = AnsonBody>
 template <
-    typename T,
-    typename = std::enable_if_t<std::is_base_of_v<AnsonBody, T>>
+    typename T //, typename = std::enable_if_t<std::is_base_of_v<AnsonBody, T>>
     >
 class AnsonMsg: public Anson {
 public:
+    inline static const std::string _type_ = "io.odysz.jprotocol.AnsonMsg";
+
     vector<shared_ptr<T>> body;
 
     Port port;
 
-    AnsonMsg(Port port) : Anson("io.odysz.jprotocol.AnsonMsg"), port(port) {}
+    AnsonMsg(Port port) : Anson(_type_), port(port) {}
+
+    AnsonMsg<T>& Body(const T& body) {
+        this->body.push_back(make_shared<T>(body));
+        return *this;
+    }
+
+    /**
+     * The R-value version of AnsonMsg::Body(T&);
+     * @brief Body
+     * @param b
+     * @return this
+     * @details
+     * These to overriden methods can be merged in the future, like
+     * <pre>template<typename U>
+     * AnsonMsg<T>& Body(U&& arg) {
+     *   // This creates the shared_ptr and handles both copies and moves perfectly
+     *   this->body.push_back(std::make_shared<T>(std::forward<U>(arg)));
+     *   return *this;
+     * }</pre>
+     */
+    AnsonMsg<T>& Body(T&& body) {
+        this->body.push_back(std::make_shared<T>(std::move(body)));
+        return *this;
+    }
 };
 
 class OnError {

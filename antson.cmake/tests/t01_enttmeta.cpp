@@ -7,19 +7,7 @@
 #include "io/odysz/json.h"
 
 using json = nlohmann::json;
-using namespace entt::literals;
 using namespace anson;
-
-// 1. Setup Reflection
-void register_meta() {
-    entt::meta_factory<EchoReq>()
-        .type("EchoReq"_hs)
-        .data<&EchoReq::echo>("echo"_hs, "echo");
-
-    entt::meta_factory<AnsonMsg<EchoReq>>()
-        .type("AnsonMsg"_hs)
-        .data<&AnsonMsg<EchoReq>::body>("body"_hs, "body");
-}
 
 template<typename T>
 void load_json(const std::string& raw_json, T& out_obj) {
@@ -51,41 +39,59 @@ json convert(entt::meta_any instance) {
     return j;
 }
 
-std::string serialize_to_json(entt::meta_any instance) {
-    using namespace entt::literals;
-
-    // 1. Resolve the type of the instance provided
-    auto type = instance.type();
-    if (!type) return "{}";
-
-    nlohmann::json j;
-
-    // 2. Iterate through all data members registered in meta
-    for (auto [id, data] : type.data()) {
-        auto value = data.get(instance);
-
-        // 3. Convert the meta_any value to a JSON-compatible type
-        // We check for types we expect (float, int, etc.)
-        if (auto* f = value.try_cast<float>()) {
-            j[id] = *f; // EnTT uses the hashed string ID as the key
-        } else if (auto* i = value.try_cast<int>()) {
-            j[id] = *i;
-        }
-        // Note: For real-world use, you can expand this to strings, bools, etc.
-    }
-
-    return j.dump(2); // 2-space indentation
-}
-
-
 TEST(HELLO, ENTT_META) {
     register_meta();
 
     AnsonMsg<EchoReq> msg{Port::echo};
-    
-    // Wrap in meta_any and serialize
-    // json result = convert(entt::forward_as_meta(msg));
-    // std::cout << "JSON Object: " << result.dump(4) << std::endl;
 
-    std::cout << serialize_to_json(msg);
+    cout << "Port: " << msg.port;
+    EchoReq echobd{"echo..."};
+    msg.Body(echobd);
+
+    cout << "Echo: " << msg.body.back()->echo << NL;
+
+    cout << serialize_json(msg) << NL;
+    serialize_recursive(msg, cout) << NL;
+
+    EXPECT_EQ(R"({"type": "io.odysz.jprotocol.AnsonMsg", )"
+              R"("port": 2, "body": [{"a": "r/query", "echo": "echo..."}]})",
+              serialize_json(msg))
+        << "Obviously lack of port name, TODO ...";
+
+    // 1. Create EchoReq via reflection
+    auto echo_type = entt::resolve("EchoReq"_hs);
+    auto req_instance = echo_type.construct();
+    std::cout << "Actual Type Name: " << req_instance.type().info().name() << std::endl;
+    EchoReq* echoreq = req_instance.try_cast<EchoReq>();
+    cout << "EchoReq Reflected: " << echoreq->a << NL;
+
+    // Set the 'echo' field
+    if (auto data = echo_type.data("echo"_hs)) {
+        data.set(req_instance, std::string("Reflection Hello"));
+    }
+
+    // 2. Create AnsonMsg<EchoReq> via reflection
+    auto msg_rfl = entt::resolve("AnsonMsgEcho"_hs).construct(Port::echo);
+
+    // Use this to check what EnTT actually thinks the type is:
+    std::cout << "Actual Type Name: " << msg_rfl.type().info().name() << std::endl;
+
+    // Try to get the reference first, then take the address
+    if (auto* msg_rpt = msg_rfl.try_cast<AnsonMsg<EchoReq>>()) {
+        string t = msg_rpt->type;
+        ASSERT_EQ(AnsonMsg<EchoReq>::_type_, t);
+    } else {
+        // If that fails, msg_rfl might be holding a pointer.
+        // Try casting to the pointer type directly:
+        auto** ptr_to_ptr = msg_rfl.try_cast<AnsonMsg<EchoReq>*>();
+        if (ptr_to_ptr) {
+            AnsonMsg<EchoReq>* msg_rpt_actual = *ptr_to_ptr;
+            ASSERT_EQ(AnsonMsg<EchoReq>::_type_, msg_rpt_actual->type);
+        } else {
+            FAIL() << "Could not cast meta_any to AnsonMsg<EchoReq>";
+        }
+    }
+
+    // string t = msg_rpt->type;
+    // ASSERT_EQ(AnsonMsg<EchoReq>::_type_, msg_rpt->type);
 }

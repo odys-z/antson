@@ -4,3 +4,4 @@ debug
 Debug
 *.usr
 *.user
+vcpkg_installed

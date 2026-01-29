@@ -13,6 +13,7 @@ include(GoogleTest)
 add_executable(unit_tests
   semantier.h
   t01_enttmeta.cpp
+  t02_deserialize.cpp
 )
 
 find_package(nlohmann_json CONFIG REQUIRED)
