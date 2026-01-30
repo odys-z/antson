@@ -24,15 +24,6 @@ target_sources(anson INTERFACE
         io/odysz/json.h
 )
 
-# if(MSVC OR APPLE OR UNIX)
-#     # Create a target that is NEVER built, but exists for Clangd
-#     # add_library(anson_ide_indexer EXCLUDE_FROM_ALL
-#         # ${CMAKE_CURRENT_SOURCE_DIR}/clangd_stub.cpp
-#     # )
-#     # target_link_libraries(anson_ide_indexer PRIVATE anson)
-# endif()
-
-
 target_include_directories(anson INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}
     $<INSTALL_INTERFACE:include>

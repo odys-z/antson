@@ -14,4 +14,9 @@ find_package(EnTT CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 add_subdirectory(src)
-add_subdirectory(tests)
+
+option(ANSON_BUILD_TESTS "Build tests for Anson.cmake" ON)
+if (ANSON_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()
