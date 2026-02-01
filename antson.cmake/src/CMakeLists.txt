@@ -36,7 +36,7 @@ target_link_libraries(anson INTERFACE
 )
 
 
-# cland helper
+# clangd helper
 if(ANSON_BUILD_TESTS)
     add_executable(anson_clangd_helper dev/ping.cpp)
     target_link_libraries(anson_clangd_helper PRIVATE anson)
