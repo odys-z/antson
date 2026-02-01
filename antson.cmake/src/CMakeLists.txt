@@ -29,7 +29,15 @@ target_include_directories(anson INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
+
 target_link_libraries(anson INTERFACE
     EnTT::EnTT
     nlohmann_json::nlohmann_json
 )
+
+
+# cland helper
+if(ANSON_BUILD_TESTS)
+    add_executable(anson_clangd_helper dev/ping.cpp)
+    target_link_libraries(anson_clangd_helper PRIVATE anson)
+endif()

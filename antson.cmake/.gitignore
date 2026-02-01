@@ -5,3 +5,4 @@ Debug
 *.usr
 *.user
 vcpkg_installed
+vcpkg_packages

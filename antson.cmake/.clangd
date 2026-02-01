@@ -1,6 +1,6 @@
 CompileFlags:
   Add:
-    - "-I./vcpkg_installed/x64-windows/include"
+    - "-I./vcpkg_packages/x64-windows/include"
     - "-I./src"
   Suppress:
     - -Wunused-parameter

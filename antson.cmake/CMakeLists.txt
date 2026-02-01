@@ -9,7 +9,6 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
   set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 endif()
 
-
 find_package(EnTT CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
