@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from src.semanticshare.io.odysz.semantic.jprotocol import AnsonResp, MsgCode
+from src.semanticshare.io.odysz.semantic.jprotocol import MsgCode
 
 from anson.io.odysz.anson import Anson
 from anclient.io.odysz.jclient import Clients
