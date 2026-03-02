@@ -1,8 +1,0 @@
-.qtcreator
-build
-debug
-Debug
-*.usr
-*.user
-vcpkg_installed
-vcpkg_packages
