@@ -119,10 +119,11 @@ public class Anson implements IJsonable {
 					}
 					if (f.getType() == char.class) {
 						char c = f.getChar(anson);
-						stream.write(c == 0 ? '0' : c);
+						stream.write(c == 0 ? '0' : c); // ISSUE Review 2026-03-02: Compatible to JSON? 
 					}
 					else if (f.getType().isPrimitive()) {
-						String str = String.valueOf(f.get(anson));
+						// String str = String.valueOf(f.get(anson));
+						String str = String.valueOf(v); // 2026-03-02
 						if (!isNull(opts) && opts[0].escape4DB)
 							str.replace("'", "''");
 						stream.write(str.getBytes(StandardCharsets.UTF_8));
@@ -165,7 +166,7 @@ public class Anson implements IJsonable {
 
 	private static void toArrayBlock(OutputStream stream, Object[] v, JsonOpt opt)
 			throws AnsonException, IOException {
-		if (v == null) return;
+		if (v == null) return;  // 2026-03-02, not "null"?
 
 		boolean the1st = true;
 		stream.write('[');
@@ -194,17 +195,17 @@ public class Anson implements IJsonable {
 		stream.write(']');
 	}
 
-	private static void toPrimArrayBlock(OutputStream stream, Object v, JsonOpt opt) throws IOException {
-		if (v == null) {
+	private static void toPrimArrayBlock(OutputStream stream, Object arr, JsonOpt opt) throws IOException {
+		if (arr == null) {
 			stream.write("null".getBytes(StandardCharsets.UTF_8));
 			return;
 		}
 
 		boolean the1st = true;
 		stream.write('[');
-		int length = Array.getLength(v);
+		int length = Array.getLength(arr);
 		for (int i = 0; i < length; i ++) {
-			Object o = Array.get(v, i);
+			Object o = Array.get(arr, i);
 
 			if (the1st)
 				the1st = false;
@@ -377,10 +378,10 @@ public class Anson implements IJsonable {
 			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes(StandardCharsets.UTF_8));
 		else if (v instanceof Number)
 			stream.write(v.toString().getBytes());
-		else
-		{
+		else {
 			if (verbose)
-				Utils.warn("Don't know how to serialize object.\n\ttype: %s\n\tvalue: %s", vclz.getName(), v.toString());
+				Utils.warn("Don't know how to serialize object.\n\ttype: %s\n\tvalue: %s",
+						vclz.getName(), v.toString());
 			try { stream.write(v.toString().getBytes(StandardCharsets.UTF_8)); }
 			catch (NotSerializableException e) {
 				throw new AnsonException(0, "A filed of type %s can't been serialized: %s",
@@ -459,13 +460,13 @@ public class Anson implements IJsonable {
 	}
 	
 	/**
-	 * NOTE v1.3.0 25 Aug 2021 - Doc Task # 001
+	 * NOTE Aug 2021 - Doc Task # 001
 	 * When client upload json, it's automatically escaped.
 	 * This makes DB (or server stored data) are mixed with escaped and un-escaped strings.
 	 * When a json string is parsed, we unescape it for the initial value (and escape it when send back - toBlock() is called)
 	 * The following is experimental to keep server side data be consists with raw data.
 	 *  
-	 * befor change:
+	 * before change:
 	 * top.parsedVal = getStringVal(ctx.STRING(), ctx.getText());
 	 * @since 0.9.55 This method scan through the string an will create a new for return 
 	 * @param v
@@ -629,6 +630,6 @@ public class Anson implements IJsonable {
 	}
 
 	public static boolean startEnvelope(String str) {
-		return str != null && Regex.startsEvelope(str); // str.startsWith("{\\s*\"type\":");
+		return str != null && Regex.startsEvelope(str);
 	}
 }

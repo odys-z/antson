@@ -29,7 +29,8 @@ public class JsonOpt extends Anson {
 	private boolean quotKey = true;
 
 
-	/**Must serialize key with quotes, default true */
+	/**Must serialize key with quotes, default true
+	 * @deprecated since 0.9.116 JSON keys must have quotes.*/
 	public boolean quotKey() {
 		return quotKey;
 	}

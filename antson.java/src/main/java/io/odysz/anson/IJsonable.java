@@ -64,4 +64,10 @@ public interface IJsonable {
 	 * @throws AnsonException
 	 */
 	IJsonable toJson(StringBuffer buf) throws IOException, AnsonException;
+
+	public default IJsonable toJsonAST(OutputStream buf, JsonOpt... opts)
+			throws IOException, AnsonException {
+		throw new AnsonException(AnsonException.err_AST,
+				"Must be overriden by Anson, AnsonBody and AnsonMsg.");
+	};
 }
