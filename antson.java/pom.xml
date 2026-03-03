@@ -69,6 +69,11 @@
     	<version>5.7.0</version>
     	<scope>test</scope>
     </dependency>
+	<dependency>
+		<groupId>io.github.odys-z</groupId>
+		<artifactId>syndoc-lib</artifactId>
+		<version>0.5.18</version>
+	</dependency>
   </dependencies>
 
   <scm>

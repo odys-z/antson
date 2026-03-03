@@ -58,7 +58,7 @@ public class Anson implements IJsonable {
 	public Anson() {}
 
 	/**
-	 * Serialize an envelope int string. 
+	 * Serialize an envelope to a string. 
 	 * @since 0.9.41
 	 * @param anson
 	 * @param stream

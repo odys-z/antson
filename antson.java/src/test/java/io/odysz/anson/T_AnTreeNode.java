@@ -3,6 +3,9 @@ package io.odysz.anson;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * Test version of TS tree node.
+ */
 public class T_AnTreeNode extends Anson {
 	public static class SubTree extends Anson {
 		public ArrayList<T_AnTreeNode> children;

@@ -1,7 +1,5 @@
 from semanticshare.io.odysz.semantic.jprotocol import AnsonBody, AnsonMsg
 
-
-
 class EchoReq(AnsonBody):
     class A:
         echo = "echo"
