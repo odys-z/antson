@@ -219,7 +219,7 @@ def gen_entt(entt: TextIO, asts: List[AnsonAst]):
 
 
 @dataclass
-class SemanticSettings(Anson):
+class PeerSettings(Anson):
     """
     TODO there must be a similar / equivalent in @anclient/semantier?
     """
@@ -241,7 +241,7 @@ class SemanticSettings(Anson):
         self.json_h = "json.hpp"
 
 
-def gen_peers(settings: SemanticSettings):
+def gen_peers(settings: PeerSettings):
     count = 0
     entt_regs = []
     for astjson in settings.requests:
