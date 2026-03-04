@@ -1,5 +1,5 @@
 """
-@deprecated Moved to anson.py3/src/src_plugin.py
+@deprecated Moved to anson.py3/src/semantier.py
 """
 
 from dataclasses import dataclass
@@ -8,11 +8,11 @@ from typing import List, cast
 
 from anson.io.odysz.anson import Anson
 
-from src.anson.gen import gen_py, gen_cpp, gen_ts, AnsonAst, gen_entt
+from src.anson.peers import gen_py, gen_cpp, gen_ts, AnsonAst, gen_entt
 
 
 @dataclass
-class CSettings(Anson):
+class SemanticSettings(Anson):
     """
     Mapping for gen.cmake.CSettings
     """
@@ -42,7 +42,7 @@ class CSettings(Anson):
         self.json_h = "json.hpp"
 
 
-def gen_tier_req(settings: CSettings):
+def gen_peers(settings: SemanticSettings):
     count = 0
     entt_regs = []
     for astjson in settings.requests:
