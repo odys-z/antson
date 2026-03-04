@@ -14,16 +14,16 @@ public class PeerSettings extends Anson {
 
 	public String[] requestMsgs;
 	
-	/** @deprecated shouldn't be used other than in python generators. */
+	/** @deprecated shouldn't be used other than in Python generators. */
     public String header;
 
-	/** @deprecated shouldn't be used other than in python generators. */
+	/** @deprecated shouldn't be used other than in Python generators. */
     public String json_h;
 
-	/** @deprecated shouldn't be used other than in python generators. */
+	/** @deprecated shouldn't be used other than in Python generators. */
     public String py;
 
-	/** @deprecated shouldn't be used other than in python generators. */
+	/** @deprecated shouldn't be used other than in Python generators. */
     public String ts;
 
     public ArrayList<ArrayList<String>> requests;
