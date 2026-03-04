@@ -8,7 +8,7 @@ from typing import List, cast
 
 from anson.io.odysz.anson import Anson
 
-from src.anson.peers import gen_py, gen_cpp, gen_ts, AnsonAst, gen_entt
+from src.anson.io.odysz.peers import gen_py, gen_cpp, gen_ts, AnsonAst, gen_entt
 
 
 @dataclass
