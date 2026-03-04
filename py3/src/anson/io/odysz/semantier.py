@@ -221,16 +221,8 @@ def gen_entt(entt: TextIO, asts: List[AnsonAst]):
 @dataclass
 class SemanticSettings(Anson):
     """
-    Mapping for gen.cmake.CSettings
+    TODO there must be a similar / equivalent in @anclient/semantier?
     """
-    src: str
-
-    headers: List[str]
-    '''
-    @deprecated: for tree-sitter only, is replaced by AstConfig
-    '''
-
-    ###########################################################
     header: str
     json_h: str
     py: str
