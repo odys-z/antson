@@ -9,7 +9,7 @@ from typing import List, cast, Union, TextIO
 from anson.io.odysz.anson import Anson
 
 @dataclass
-class AnsonAst():
+class AnsonAst(Anson):
     isEnum: bool
     base  : Union[str, None]
     fields: dict

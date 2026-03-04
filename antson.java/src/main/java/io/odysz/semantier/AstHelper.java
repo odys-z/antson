@@ -1,9 +1,12 @@
-package io.odysz.anson;
+package io.odysz.semantier;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
+/**
+ * @since 1.0.5
+ */
 public class AstHelper {
 
 	public static ByteArrayOutputStream toAst(Class cls, ByteArrayOutputStream bos) {

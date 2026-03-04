@@ -118,7 +118,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @param fmap
 	 * @return fmap
 	 */
-	static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
+	public static HashMap<String, Field> mergeFields(Class<?> clazz, HashMap<String, Field> fmap) {
 		Field flist[] = clazz.getDeclaredFields();
 		for (Field f : flist) {
 			int mod = f.getModifiers();

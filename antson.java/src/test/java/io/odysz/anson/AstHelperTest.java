@@ -9,11 +9,14 @@ import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
 
+import io.odysz.semantier.PeerSettings;
+import io.odysz.semantier.AstHelper;
+
 class AstHelperTest {
 
 	@Test
 	void test() {
-		AstConfig config = new AstConfig(); 
+		PeerSettings config = new PeerSettings(); 
 		config.ansonMsg = io.odysz.semantic.jprotocol.test.T_AnsonMsg.class.getName();
 		config.requestMsgs = new String[] {
 				io.odysz.anson.jprotocol.T_EchoReq.class.getName()};
