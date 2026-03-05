@@ -14,7 +14,7 @@ class ClientierTest(unittest.TestCase):
             print(c, e.format(args), file=sys.stderr)
             self.fail(e)
 
-        Clients.servRt = 'http://127.0.0.1:8964/jserv-album'
+        Clients.servRt = 'http://127.0.0.1:8961/jserv-album'
         resp = Clients.pingLess('/registier/test', err_ctx)
         self.assertIsNotNone(resp)
 
