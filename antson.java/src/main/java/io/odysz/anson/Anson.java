@@ -629,6 +629,11 @@ public class Anson implements IJsonable {
 		}
 	}
 
+	/**
+	 * FIXME to be moved to Regex or Common.
+	 * @param str
+	 * @return
+	 */
 	public static boolean startEnvelope(String str) {
 		return str != null && Regex.startsEvelope(str);
 	}

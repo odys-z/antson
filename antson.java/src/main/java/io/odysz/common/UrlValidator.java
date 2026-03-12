@@ -23,7 +23,6 @@ package io.odysz.common;
 
 import static io.odysz.common.LangExt.isblank;
 
-import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
@@ -32,8 +31,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-//import org.apache.commons.validator.GenericValidator;
 
 /**
  * <p><strong>URL Validation</strong> routines.</p>
@@ -82,9 +79,9 @@ import java.util.regex.Pattern;
  *
  * @since 0.9.130
  */
-public class UrlValidator implements Serializable {
+public class UrlValidator {
 
-    private static final long serialVersionUID = 7557161713937335013L;
+//    private static final long serialVersionUID = 7557161713937335013L;
 
     private static final int MAX_UNSIGNED_16_BIT_INT = 0xFFFF; // port max
 
@@ -373,15 +370,18 @@ public class UrlValidator implements Serializable {
             return false;
         }
         final String authority = uri.getRawAuthority();
-        // if ("file".equals(scheme) && GenericValidator.isBlankOrNull(authority)) { // Special case - file: allows an empty authority
+        // if ("file".equals(scheme) && GenericValidator.isBlankOrNull(authority)) {
+        // Special case - file: allows an empty authority
         if ("file".equals(scheme) && isblank(authority)) { // Special case - file: allows an empty authority
             return true; // this is a local file - nothing more to do here
         }
         // Validate the authority
-        if ("file".equals(scheme) && authority != null && authority.contains(":") || !isValidAuthority(authority)) {
+        if ("file".equals(scheme) && authority != null && authority.contains(":")
+        		|| !isValidAuthority(authority)) {
             return false;
         }
-        if (!isValidPath(uri.getRawPath()) || !isValidQuery(uri.getRawQuery()) || !isValidFragment(uri.getRawFragment())) {
+        if (!isValidPath(uri.getRawPath()) || !isValidQuery(uri.getRawQuery())
+        		|| !isValidFragment(uri.getRawFragment())) {
             return false;
         }
         return true;
