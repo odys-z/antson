@@ -10,7 +10,6 @@ import static io.odysz.common.LangExt.isNull;
 import static io.odysz.common.LangExt.join;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -154,7 +153,7 @@ public class Regex {
 	/**
 	 * Regex for RFC3986 Schema
 	 */
-	static Regex protocolPrefix = new Regex("^(\\w+:)?//");
+	static Regex schemePrefix = new Regex("^(\\w+:)?//");
 
 	/**
 	 * @since 0.9.130
@@ -205,7 +204,7 @@ public class Regex {
 	 * @since 0.9.130
 	 */
 	public static Object[] getHttpsPartsv6(String url) {
-		if (!protocolPrefix.match(url))
+		if (!schemePrefix.match(url))
 			url = "http://" + url;
 
 		ArrayList<String> grps = reg3986.findGroups(url);
@@ -252,7 +251,7 @@ public class Regex {
 	 * [5] fragment</pre>
 	 */
 	public static Object[] getHttpsPartsv4(String url) {
-		if (!protocolPrefix.match(url))
+		if (!schemePrefix.match(url))
 			url = "http://" + url;
 
 		ArrayList<String> grps = reg3986.findGroups(url);
