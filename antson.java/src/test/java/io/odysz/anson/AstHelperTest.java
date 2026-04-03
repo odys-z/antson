@@ -10,7 +10,6 @@ import java.util.HashMap;
 import org.junit.jupiter.api.Test;
 
 import io.odysz.semantier.PeerSettings;
-import io.odysz.semantier.AstHelper;
 
 class AstHelperTest {
 
