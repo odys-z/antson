@@ -283,7 +283,7 @@ public class FilenameUtils {
      * @param unixSeparator {@code true} if a unix separator should
      * be used or {@code false} if a windows separator should be used.
      * @return the normalized fileName, or null if invalid. Null bytes inside string will be removed
-     * @since 2.0
+     * @since 1.5
      */
     public static String normalize(final String fileName, final boolean unixSeparator) {
         final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;
@@ -377,7 +377,7 @@ public class FilenameUtils {
      * @param unixSeparator {@code true} if a unix separator should
      * be used or {@code false} if a windows separator should be used.
      * @return the normalized fileName, or null if invalid. Null bytes inside string will be removed
-     * @since 2.0
+     * @since 1.5
      */
     public static String normalizeNoEndSeparator(final String fileName, final boolean unixSeparator) {
          final char separator = unixSeparator ? UNIX_SEPARATOR : WINDOWS_SEPARATOR;

@@ -663,7 +663,7 @@ public class LangExt {
 
     /**
      * The empty String {@code ""}.
-     * @since 2.0
+     * @since 1.5
      */
     public static final String EMPTY = "";
 
@@ -862,8 +862,6 @@ public class LangExt {
      *  {@code null} if null String input
      */
     public static String repeat(final String str, final int repeat) {
-        // Performance tuned for 2.0 (JDK1.4)
-
         if (str == null) {
             return null;
         }
