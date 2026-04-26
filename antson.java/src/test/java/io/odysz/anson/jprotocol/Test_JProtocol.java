@@ -385,7 +385,6 @@ class Test_JProtocol {
 		assertEquals ("\"type\"\"type\"", req.nvs.get(0)[0]);
 		assertEquals ("\"type\"", req.nvs.get(0)[1]);
 
-		// assertEquals ("\"0-0-0.0\"\"0-0-0.1\"", req.nvss.get(0).get(0)[0]);
 		assertEquals ("0-0-0.0 0-0-0.1", req.nvss.get(0).get(0)[0]);
 		assertEquals ("0-0-2", req.nvss.get(0).get(0)[2]);
 		assertEquals ("0-1-0", req.nvss.get(0).get(1)[0]);
@@ -394,11 +393,17 @@ class Test_JProtocol {
 	@Test
 	void test_NoSql() {
 		String jblock = "{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\","
-				+ "\"nvs\":[[\"type\"\"type\",\"type\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.odysz.semantic.T_PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"]],"
+				+ "\"nvs\":[[\"type\"\"type\",\"type\",\"generic string\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.odysz.semantic.T_PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"]],"
 				+ "\"nvss\": [[[\"0-0-0.0,0-0-0.1\",\"0-0-1\"],[\"0-1-0\"]]]"
 				+ "}";
 
 		T_AnInsertReq req = (T_AnInsertReq) Anson.fromJson(jblock);
+
+		// ISSUE FIXME shouldn't be 'type\"\"type'?
+		assertEquals("\"type\"\"type\"", req.nvs.get(0)[0], "shouldn't be 'type\"\"type'?");
+		assertEquals("\"type\"", req.nvs.get(0)[1], "shouldn't be 'type'?");
+		assertEquals("generic string", req.nvs.get(0)[2], "generic string");
+
 		T_PhotoCSS css = (T_PhotoCSS)Anson.fromJson((String) req.nvs.get(1)[1]);
 		assertEquals (4, css.size[0]);
 	}
