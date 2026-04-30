@@ -52,12 +52,14 @@ class AnsonAst(Anson):
         self.fields = {}
         self.enums = None
         self.ctors = []
+        self.baseAnclass = ''
+        self.dataAnclass = ''
 
     def c_class(self) -> str:
         return self.dataAnclass.split('.')[-1]
 
     def c_base(self) -> str:
-        return self.baseAnclass.split('.')[-1]
+        return self.baseAnclass.split('.')[-1] if len(self.baseAnclass) > 0 else ''
 
 
 @dataclass
@@ -99,7 +101,7 @@ namespace anson {'''
     '''
 
     class_decl = '''
-public class {} : public anson::{} {{
+class {} : public anson::{} {{
 public:
     inline static const std::string _type_ = "{}";'''
     '''
@@ -119,8 +121,7 @@ public:
     [3] inline static const string...
     '''
 
-    end_A = '''
-    };'''
+    end_A = '''\n\t};\n'''
 
     inline_static = True
 
@@ -128,12 +129,15 @@ public:
     load_ast = '''void load_{0}Ast(AstMap &asts, const string &ast_path) {{
         specialize_msg_astpth<{1}>(asts, ast_path,
           [](meta_factory<{1}> &entf, AnsonBodyAst *ast) {{'''
-    entt_data = 'entf.data<&{0}::{1}>("{1}");'
-    field_getter0 = '''
+    entt_data = '''
+            entf.data<&{0}::{1}>("{1}");'''
+    field_getter0 = '''\n
+            //
             ast->get_field_instance = [ast](const IJsonable& ans, const string& fieldname) -> meta_any {{
                 if (ast->fields.contains(fieldname)) {{
                     auto& concrete = static_cast<const {0}&>(ans);'''
-    field_getif ='''if ("{0}" == fieldname)
+    field_getif ='''
+                    if ("{0}" == fieldname)
                         return entt::forward_as_meta(concrete.{0});'''
     field_getter9 = '''
                 }
@@ -202,8 +206,9 @@ public:
         '''
         return [self.start_header, self.class_decl.format(ast.c_class(), ast.c_base(), ast.dataAnclass),
                 self.struct_A,
-                *[f'inline statci const string {k} = "{v}";' for k, v in ast.A.items()],
-                '\t' + ('inline static ' if self.inline_static else '') + self.load_ast.format(
+                *[f'\n        inline static const string {k} = "{v}";' for k, v in ast.A.items()],
+                self.end_A,
+                '\n    ' + ('inline static ' if self.inline_static else '') + self.load_ast.format(
                     ast.c_class().lower(), ast.c_class()),
                 *[self.entt_data.format(ast.c_class(), fn) for fn, _ in ast.fields.items()],
                 self.field_getter0.format(ast.c_class()),
@@ -229,9 +234,9 @@ def gen_cpp_peer(settings: PeerSettings, ast_folder: Path):
         gen.writelines(msglines.start_header)
 
         for astjson in settings.anRequests:
-            if Path(astjson).exists():
+            if Path(ast_folder / astjson).exists():
                 ast = cast(AnsonBodyAst, Anson.from_file(str(ast_folder / astjson)))
-                msglines.specialize_req(ast)
+                gen.writelines(msglines.specialize_req(ast))
             else:
                 Utils.warn('Cannot find file ' + astjson)
 

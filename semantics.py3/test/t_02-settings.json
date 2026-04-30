@@ -8,5 +8,5 @@
                 "io.odysz.semantic.jprotocol.SessionReq",
                 "io.odysz.semantic.jprotocol.QueryReq", "io.odysz.semantic.jprotocol.UpdateReq", "io.odysz.semantic.jprotocol.DeleteReq",
                 "io.odysz.semantic.jprotocol.UsersReq"],
-  "cpp_gen"   : "semantier.gen.hpp"
+  "cpp_gen"   : "test/gen/t_02_semantier.hpp"
 }
