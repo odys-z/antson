@@ -1,4 +1,6 @@
-package io.odysz.anson;
+package io.odysz.reflect;
+
+import io.odysz.anson.Anson;
 
 /**
  * @deprecated shouldn't be used in Java?
