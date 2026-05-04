@@ -48,6 +48,8 @@ class LangExt:
                 return len(s.strip()) == 0
             else:
                 return match(regex, s) is not None
+        try: return len(s) == 0
+        except: pass
         return False
 
     @staticmethod
@@ -157,17 +159,22 @@ class LangExt:
             return s.endswith(tuple(suffices))
 
 
-def log(out: Optional[TextIO], templt: str, *args):
-    try:
-        print(templt if LangExt.isblank(args) else templt.format(*args), file=out)
-    except Exception as e:
-        try: print(templt)
-        except: pass
-        try: print(args)
-        except: pass
-        try: print(e)
-        except: pass
-        print('If printing Anson subclasses, all their memebers must be initialized.', file=sys.stderr)
+def log(out: Optional[TextIO], templt: Union [str, List[str]], *args):
+    if (isinstance(templt, str)):
+        try:
+            print(templt if LangExt.isblank(args) else templt.format(*args), file=out)
+        except Exception as e:
+            print(e, file=sys.stderr)
+            try: print(templt)
+            except: pass
+            try: print(args)
+            except: pass
+            try: print(e)
+            except: pass
+            print('If printing Anson subclasses, all their memebers must be initialized.', file=sys.stderr)
+    elif isinstance(templt, (list, tuple)):
+        for tmp in templt:
+            log(out, tmp, *args)
 
 
 class Utils:
@@ -175,10 +182,17 @@ class Utils:
         '''
         Constructor
         '''
+        pass
 
     @staticmethod
-    def logi(templt, *args):
+    def logi(templt: Union[str, List[str]], *args):
         log(sys.stdout, templt, *args)
+
+    @classmethod
+    def log_arr(cls, lines):
+        for tmp in lines:
+            log(sys.stdout, tmp)
+            print(file=sys.stdout)
 
     @staticmethod
     def warn(templt, *args):

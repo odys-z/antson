@@ -58,10 +58,14 @@ def getClass(_typ_: Optional[str]):
 
 
 class AnsonField:
+    dataAnclass: str
+    fieldname: str
+
     def __init__(self, **kwargs):
         self.elemtype = kwargs.get('elemtype', None)
         antype = kwargs.get('type', None)
         self.antype = antype if not isinstance(antype, str) else getClass(antype)
+        self.dataAnclass = antype if not isinstance(antype, str) else getClass(antype)
 
     def isAnson(self):
         return self.antype is not None and type(self.antype) == type and issubclass(self.antype, Anson)
