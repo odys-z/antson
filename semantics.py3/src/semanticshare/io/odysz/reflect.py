@@ -5,7 +5,6 @@ from typing import List, cast, Union, Final, ClassVar
 from types import MappingProxyType
 
 from anson.io.odysz.anson import Anson, AnsonField
-from anson.io.odysz.common import Utils
 
 
 semantypes = {
@@ -17,18 +16,9 @@ semantypes = {
     'Map': ['map', 'Map', '{}']
 }
 
-@dataclass
-class primtypes:
-    C20: ClassVar[MappingProxyType] = MappingProxyType({
-        "String": "string", "string": "string", "java.lang.String": "string",
-        "int": "int", "Integer": "int", "java.lang.Integer": "int",
-        "short": "int", "Short": "int", "java.lang.Short": "int",
-        "long": "long", "Long": "long", "java.lang.Long": "long",
-        "float": "float", "Float": "float", "java.lang.Float": "float",
-        "double": "double", "Double": "double", "java.lang.Double": "double",
-        "boolean": "boolean", "Boolean": "boolean", "java.lang.Boolean": "boolean",
-        "VarType": "VarType", "LangExt::VarType": "VarType", "anson::LangExt::VarType": "VarType"
-    })
+# @dataclass
+# class primtypes:
+#     C20: ClassVar[MappingProxyType] = MappingProxyType({
 
 @dataclass
 class AnsonAst(Anson):
@@ -103,6 +93,7 @@ class AnsonBodyAst(AnsonAst):
 
     def __init__(self):
         super().__init__()
+        self.A = {}
 
 
 @dataclass
@@ -163,3 +154,31 @@ class PeerSettings(Anson):
         self.ansonMsgs = []
         self.anRequests= []
         self.cpp_gen = 'semantier.gen.h'
+
+
+def init_asts(ast_folder: str = None):
+    '''
+	@deprecated
+
+    inline static void register_jserv(AstMap &asts, JsonOpt &ctx_opt) {
+        IJsonable::contxt_ptr = &ctx_opt;
+
+        register_varctors();
+        register_asts(asts);
+        register_msgs(asts);
+        register_enums<MsgCode>(asts);
+        register_port(asts, "ast/port.ast.json");
+        specialize_respmsg(asts);
+        setup_jserv_crud(asts);
+        register_peersettings(asts);
+    }
+    :param ast_folder:
+    :return:
+    '''
+    asts = {}
+
+    # Anson
+    ast = AnsonAst()
+    asts[Anson().__type__] = ast
+
+    return asts

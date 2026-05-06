@@ -16,6 +16,19 @@ passwd_allow_ext = ' @#!$%^&*()_+-=.<>,[]{}|?/:;'
     allowed chars in addition to alpha numerics for password.
 '''
 
+primtypes = {
+    'C20': {
+        "String": "string", "string": "string", "java.lang.String": "string",
+        "int": "int", "Integer": "int", "java.lang.Integer": "int",
+        "short": "int", "Short": "int", "java.lang.Short": "int",
+        "long": "long", "Long": "long", "java.lang.Long": "long",
+        "float": "float", "Float": "float", "java.lang.Float": "float",
+        "double": "double", "Double": "double", "java.lang.Double": "double",
+        "boolean": "boolean", "Boolean": "boolean", "java.lang.Boolean": "boolean",
+        "VarType": "VarType", "LangExt::VarType": "VarType", "anson::LangExt::VarType": "VarType"
+    }
+}
+
 class LangExt:
     '''
     Language helper

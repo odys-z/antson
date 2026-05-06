@@ -25,5 +25,7 @@ public @interface AnsonCtor {
 	/**
 	 * @return
 	 */
-	String[] base() default "";
+	String[] base() default {""};
+	
+	String[] semntics() default {};
 }

@@ -14,8 +14,6 @@ from typing import Union, Optional
 
 from typing_extensions import get_args, get_origin
 
-from .common import Utils, LangExt
-
 java_src_path: str = 'semanticshare'
 
 def class4Name(m, clssn: str) -> type:
@@ -142,10 +140,31 @@ def parse_forward(ref: Union[type, str]):
 
 
 class JsonOpt:
-    quotekey = True
+    # quotekey = True
+    #
+    # def quoteK(self):
+    #     return self.quotekey
+    serialize_type: bool
+    escape4DB: bool
+    doubleFormat: str
+    indent: str
 
-    def quoteK(self):
-        return self.quotekey
+    # const map<string, string> astyps;
+    astyps: dict[str, str]
+    # const map<string, string> primtypes;
+    # primtypes: dict[str, str]
+    # const AstMap *asts;
+    asts: dict[str, 'AnsonAst']
+
+    def __init__(self):
+        self.astyps = {
+            "io.odysz.anson.AnsonAst": "AnsonAst",
+            "io.odysz.anson.AnsonJavaEnumAst": "AnsonJavaEnumAst",
+            "io.odysz.anson.AnsonBodyAst": "AnsonBodyAst",
+            "io.odysz.anson.AnsonMsgAst": "AnsonMsgAst"
+        }
+
+        self.asts = {}
 
 
 @dataclass
