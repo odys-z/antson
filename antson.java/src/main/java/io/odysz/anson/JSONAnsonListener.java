@@ -918,7 +918,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			}
 			else if (ft.isEnum()) {
 				String v = getStringVal(ctx);
-				if (!LangExt.isblank(v))
+				if (!LangExt.isblank(v, "null"))
 					f.set(enclosing, Enum.valueOf((Class<Enum>) ft, v));
 			}
 			else if (ft.isArray())
