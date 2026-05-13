@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * E.g. if define (Design Cmake 0.1)
  * <pre>
- * @AnsonCtor(initialist="string echo = m", base={"r/query", "uri"}),
+ * @AnsonCtor(initialist="string echo = m", base={"\"r/query\"", "uri"}),
  * 
  * // [0]: Initializer 0, ..., [-1] Base Initializer
  * AnsonAst.cotrs[i] = [["AnsonBody", "r/query", "uri"], ["string", "echo", "m"]]
@@ -20,7 +20,7 @@ import java.lang.annotation.*;
 @Target(ElementType.CONSTRUCTOR)
 public @interface AnsonCtor {
 
-	String initialist() default "";
+	String[] initialist() default "";
 
 	/**
 	 * @return

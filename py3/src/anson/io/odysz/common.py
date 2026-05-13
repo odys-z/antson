@@ -8,6 +8,7 @@ import sys
 from numbers import Number
 from re import match
 from typing import TextIO, Optional, TypeVar, Union, List, Tuple
+from dataclasses import dataclass
 
 T = TypeVar('T')
 
@@ -16,18 +17,21 @@ passwd_allow_ext = ' @#!$%^&*()_+-=.<>,[]{}|?/:;'
     allowed chars in addition to alpha numerics for password.
 '''
 
-primtypes = {
-    'C20': {
+@dataclass
+class Primtypes:
+    C20 = {
         "String": "string", "string": "string", "java.lang.String": "string",
         "int": "int", "Integer": "int", "java.lang.Integer": "int",
         "short": "int", "Short": "int", "java.lang.Short": "int",
         "long": "long", "Long": "long", "java.lang.Long": "long",
         "float": "float", "Float": "float", "java.lang.Float": "float",
         "double": "double", "Double": "double", "java.lang.Double": "double",
-        "boolean": "boolean", "Boolean": "boolean", "java.lang.Boolean": "boolean",
-        "VarType": "VarType", "LangExt::VarType": "VarType", "anson::LangExt::VarType": "VarType"
+        "boolean": "bool", "Boolean": "bool", "java.lang.Boolean": "bool",
+        "VarType": "LangExt::VarType", "LangExt::VarType": "LangExt::VarType", "anson::LangExt::VarType": "LangExt::VarType",
+        "list": "vector",
+        "map": "map"
     }
-}
+
 
 class LangExt:
     '''

@@ -143,6 +143,7 @@ class PeerSettings(Anson):
     ansonBody: str
     ansonMsgs: List[str]
     anRequests: List[str]
+    cpp_include: List[str]
     cpp_gen: str
 
     def __init__(self):
@@ -153,6 +154,7 @@ class PeerSettings(Anson):
         self.javaEnums = ['io.odysz.semantic.jprotocol.Port']
         self.ansonMsgs = []
         self.anRequests= []
+        self.cpp_include = []
         self.cpp_gen = 'semantier.gen.h'
 
 
@@ -182,3 +184,4 @@ def init_asts(ast_folder: str = None):
     asts[Anson().__type__] = ast
 
     return asts
+
