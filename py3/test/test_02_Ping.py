@@ -14,11 +14,14 @@ class AnclientTest(unittest.TestCase):
         # err = OnError(lambda c, e, args: print(c, e.format(args), file=sys.stderr) and self.fail(e))
 
         def err_ctx (c: MsgCode, e: str, *args: str) -> None:
-            print(c, e.format(args), file=sys.stderr)
+            try: print(c, e.format(args), file=sys.stderr)
+            except:
+                try: print(e, args)
+                except: "Errors unable to be printed"
             self.fail(e)
 
-        Clients.servRt = 'http://192.168.0.201:8964/jserv-album'
-        # Clients.servRt = 'http://127.0.0.1:1989/regist-central'
+        Clients.servRt = 'http://192.168.0.###:8961/jserv-album'
+        # Clients.servRt = 'http://192.168.0.###:1984/regist-central'
         resp = Clients.pingLess('Anson.py3/test', err_ctx)
         self.assertIsNotNone(resp)
 

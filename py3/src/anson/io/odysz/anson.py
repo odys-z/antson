@@ -1,9 +1,9 @@
 import sys
-from pathlib import Path
+
+from anson.io.odysz.common import Utils
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-import importlib.util
 from dataclasses import dataclass, Field
 
 import json
@@ -62,8 +62,9 @@ class AnsonField:
     def __init__(self, **kwargs):
         self.elemtype = kwargs.get('elemtype', None)
         antype = kwargs.get('type', None)
+        self.dataAnclass = kwargs.get('dataAnclass')
+        self.antype = type(self.dataAnclass)
         self.antype = antype if not isinstance(antype, str) else getClass(antype)
-        self.dataAnclass = antype if not isinstance(antype, str) else getClass(antype)
 
     def isAnson(self):
         return self.antype is not None and type(self.antype) == type and issubclass(self.antype, Anson)
@@ -82,6 +83,9 @@ def _fields(anson, fromval):
 
 
 class DataStruct:
+    '''
+    Should be moved to, or merged with, AnsonAst?
+    '''
     def __init__(self, **kwargs):
         self.isEnm = kwargs.get('enum', False)
         self.isLst = kwargs.get('lst', False)
