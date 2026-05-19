@@ -125,7 +125,7 @@ def instanceof(clsname: Union[str, type], props: dict):
         setattr(obj, k, Anson.from_value(fds[k].antype if k in fds else None, v))
 
     if len(missingAttrs) > 0:
-        Utils.warn(f'Missing attributes in {obj.__type__}: {missingAttrs}. '
+        Utils.warn(f'Missing attributes in {obj.__type__ if "__type__" in obj else clsname}: {missingAttrs}. '
                    'Anson expects a __init__() initializing all the none default fields.')
 
     return obj
@@ -160,7 +160,11 @@ class JsonOpt:
     # const AstMap *asts;
     asts: dict[str, 'AnsonAst']
 
+    verbose: bool
+
     def __init__(self):
+        self.verbose = False
+
         self.astyps = {
             "io.odysz.anson.AnsonAst": "AnsonAst",
             "io.odysz.anson.AnsonJavaEnumAst": "AnsonJavaEnumAst",
@@ -372,10 +376,12 @@ class Anson(dict):
             raise TypeError(f'Not here: {obj}')
 
     @staticmethod
-    def from_json(jsonstr: str) -> 'Anson':
+    def from_json(jsonstr: str, opts: JsonOpt = {}) -> 'Anson':
         obj = json.loads(jsonstr)
         v = Anson.from_envelope(obj)
-        print(v, type(v))
+        if opts and opts.verbose:
+            print(v)
+
         return v
 
     @staticmethod

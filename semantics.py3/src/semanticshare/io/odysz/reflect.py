@@ -1,10 +1,11 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, cast, Union, Final, ClassVar
+from typing import List, cast, Union, Final, ClassVar, Literal
 from types import MappingProxyType
 
 from anson.io.odysz.anson import Anson, AnsonField
+from anson.io.odysz.common import LangExt
 
 
 semantypes = {
@@ -16,9 +17,117 @@ semantypes = {
     'Map': ['map', 'Map', '{}']
 }
 
-# @dataclass
-# class primtypes:
-#     C20: ClassVar[MappingProxyType] = MappingProxyType({
+@dataclass
+class Semantics(Anson):
+    def __init__(self):
+        pass
+
+Semantype = Literal['()', '=', 'ini']
+
+@dataclass
+class SemanExpr(Semantics):
+    stype: Semantype
+    args: [str]
+    semantics: ['SemanExpr']
+    expect_result: str
+
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.stype = kwargs.get('stype', '')
+        self.args = kwargs.get('args', [])
+        self.semantics = kwargs.get('semantics', [])
+
+    def cpp_arg_decl(self):
+        if self.stype == '':
+            return ' '.join(self.args) if len(self.args) <= 2 else ' '.join(self.args)
+        else: #elif self.stype == 'ini':
+            return ' '.join(self.args) if len(self.args) <= 2 else ' '.join(self.args[:-1])
+
+
+    def cpp_arg_ini(self):
+        # return None if self.stype != 'ini' else f'{self.args[-1]}({self.args[-2]})' if len(self.args) > 2 else ' '.join(self.args) + '?'
+        return None if self.stype != 'ini' else f'{self.args[-1]}({self.args[-2]})'
+
+    def cpp_expr(self, indent: str):
+        if self.stype == '()':
+            return f'{indent}{self.args[0]}({", ".join(self.args[1:])});'
+        elif self.stype == '=':
+            return f'{indent}{("" if self.args[-2] != self.args[-1] else "this->") + " ".join(self.args[:-1])} = {self.args[-1]};'
+        # else no body lines
+        return None
+
+    def arg_name_types(self):
+        if self.stype == '':
+            return self.args[-1], ' '.join(self.args[:-1])
+        elif self.stype == 'ini':
+            return self.args[-2], ' '.join(self.args[:-2])
+        else:
+            Utils.warn("shouldn't reach here: " + ' '.join(self.args))
+            return self.args[-1], ' '.join(self.args[:-1])
+        # if LangExt.len(self.args) <= 1:
+        #     return None, ' '.join(self.args)
+        # elif LangExt.len(self.args) == 2:
+        #     # e.g. UserReq uri
+        #     return self.args[-1], self.args[0]
+        # else:
+        #     # e.g.   string m echo
+        #     #  const string m echo
+        #     #  const unsigned int x seq
+        #     return self.args[-2], ' '.join(self.args[:-2])
+
+
+@dataclass
+class AnCtor(Semantics):
+    base: SemanExpr
+    args: [SemanExpr]
+    body: [SemanExpr]
+
+    def __init__(self):
+        super().__init__()
+        self.base = ''
+        self.args = []
+        self.body = []
+
+    def as_default(self, ast: 'AnsonAst'):
+        self.base = SemanExpr(stype = '()', args=[ast.c_base()])
+        return self
+
+    def cpp_arg_decl(self):
+        return ', '.join([arg.cpp_arg_decl() for arg in self.args])
+
+    def cpp_base_ini(self, ast: 'AnsonAst'):
+        if self.base.stype != '()':
+            return None
+
+        # if LangExt.len(self.base.args) == 0:
+        #     return None
+
+        basecls = self.base.args[0] if LangExt.len(self.base.args) > 0 else 'baseAnclass'
+        basecls = ast.c_base() if basecls == 'baseAnclass' else basecls
+        base_args = ", ".join(self.base.args[1:]) if LangExt.len(self.base.args) > 0 else ""
+        return f'{basecls}({base_args})'
+
+    def map_args_decls(self):
+        m = {}
+        for arg in self.args:
+            arg_name, arg_type = arg.arg_name_types()
+            if arg_name is not None:
+                m.update({arg_name: arg_type})
+        return m
+
+    def cpp_arg_inis(self):
+        return None if LangExt.len(self.args) == 0 else ', '.join(filter(lambda ini : not LangExt.isblank(ini), [arg.cpp_arg_ini() for arg in self.args]))
+
+    def cpp_body_exprs(self, ast, indent: str) -> List[str]:
+        withType_setter = len(self.base.args) == 0 or ast.c_class() != self.base.args[0]
+        # ret = [' ' * 8 + 'Type(_type_);'] if withType_setter else []
+        ret = [indent + 'Type(_type_);'] if withType_setter else []
+        if len(self.body) > 0:
+            ret.extend([exp.cpp_expr(indent) for exp in self.body])
+        elif isinstance(self.body, SemanExpr): # tolerate config error?
+            ret.append(self.body.cpp_expr(indent))
+        return ret
+
 
 @dataclass
 class AnsonAst(Anson):
@@ -58,6 +167,8 @@ class AnsonAst(Anson):
     see Java io.odysz.anson.AnsonCtor
     '''
 
+    ctorsemantics: List[AnCtor]
+
     def __init__(self):
         super().__init__()
         self.base = 'io.odysz.anson.Anson'
@@ -78,6 +189,8 @@ class AnsonAst(Anson):
         self.ctors = []
         self.baseAnclass = ''
         self.dataAnclass = ''
+
+        self.ctorsemantics = []
 
     def c_class(self) -> str:
         return self.dataAnclass.split('.')[-1]
@@ -184,4 +297,3 @@ def init_asts(ast_folder: str = None):
     asts[Anson().__type__] = ast
 
     return asts
-
