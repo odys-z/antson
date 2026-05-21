@@ -171,11 +171,16 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 				Constructor<?> ctor = null;
 				try { ctor = enclosingClazz.getConstructor(new Class<?>[] {});
 				} catch (NoSuchMethodException e) {
+					String chain = "";
+					try {
+						for (ParsingCtx c : stack)
+							chain += " <- " + (c.enclosing == null ? c.valType : c.enclosing.getClass().getName());
+					} catch (Exception x) {}
 					throw new AnsonException(0,
 						"To make json can be parsed to %s, the class must has a default public constructor(0 parameter)\n"
 						+ "Also, inner class must be static.\n"
-						+ "Class.getConstructor() error on getting: %s %s\n",
-						enclosingClazz.getName(), e.getMessage(), e.getClass().getName());
+						+ "Class.getConstructor() error on getting: %s %s\n%s\n",
+						enclosingClazz.getName(), e.getMessage(), e.getClass().getName(), chain);
 				}
 
 				if (IJsonable.class.isAssignableFrom(enclosingClazz)) {

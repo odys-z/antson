@@ -99,9 +99,6 @@ class AnCtor(Semantics):
         if self.base.stype != '()':
             return None
 
-        # if LangExt.len(self.base.args) == 0:
-        #     return None
-
         basecls = self.base.args[0] if LangExt.len(self.base.args) > 0 else 'baseAnclass'
         basecls = ast.c_base() if basecls == 'baseAnclass' else basecls
         base_args = ", ".join(self.base.args[1:]) if LangExt.len(self.base.args) > 0 else ""
@@ -131,6 +128,10 @@ class AnCtor(Semantics):
 
 @dataclass
 class AnsonAst(Anson):
+    '''
+    ISSUE: should be the subcalss of SemanExpr or Semantics?
+    '''
+
     base: str
 
     isInt: bool
