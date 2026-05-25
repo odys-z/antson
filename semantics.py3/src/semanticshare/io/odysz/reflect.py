@@ -204,7 +204,6 @@ class AnsonAst(Anson):
 class AnsonBodyAst(AnsonAst):
     A: dict[str, str]
 
-
     def __init__(self):
         super().__init__()
         self.A = {}
@@ -250,6 +249,8 @@ class PeerSettings(Anson):
           "anRequests": ["ast/echo.ast.json", ... ]
         }
     """
+    tier_name: str
+    ast_folder: str
     ansons: List[str]
     scopeEnums: List[str]
     javaEnums: List[str]
@@ -262,14 +263,16 @@ class PeerSettings(Anson):
 
     def __init__(self):
         super().__init__()
-        self.ansonMsg  = 'io.odysz.semantic.jprotocol.AnsonMsg'
-        self.ansonBody = 'io.odysz.semantic.jprotocol.AnsonBody'
-        self.scopeEnums= ['io.odysz.semantic.jprotocol.MsgCode']
-        self.javaEnums = ['io.odysz.semantic.jprotocol.Port']
-        self.ansonMsgs = []
-        self.anRequests= []
-        self.cpp_include = []
-        self.cpp_gen = 'semantier.gen.h'
+        self.tier_name = None
+        self.ast_folder = 'ast'
+        self.ansonMsg   = 'io.odysz.semantic.jprotocol.AnsonMsg'
+        self.ansonBody  = 'io.odysz.semantic.jprotocol.AnsonBody'
+        self.scopeEnums = ['io.odysz.semantic.jprotocol.MsgCode']
+        self.javaEnums  = ['io.odysz.semantic.jprotocol.Port']
+        self.ansonMsgs  = []
+        self.anRequests = []
+        self.cpp_include= []
+        self.cpp_gen    = 'semantier.gen.h'
 
 
 def init_asts(ast_folder: str = None):
