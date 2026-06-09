@@ -28,7 +28,10 @@ class RegexTest {
 		
 		// In java, this is a invalid authority by Apache UrlValidator;
 		// in cpp, authority validation is ignored by boots.url.
-		assertTrue(urlValidator.isValid(asJserv("//odys-z.github.io%20")));
+		// Gemini: While spaces are technically allowed inside a URL if they are encoded as %20
+		// (such as in a file path like .../my%20folder/), a URL cannot end with a space or a
+		// space-equivalent encoding right after the domain name.
+		assertFalse(urlValidator.isValid(asJserv("//odys-z.github.io%20")));
 	}
 
 	@Test

@@ -1415,6 +1415,30 @@ public class LangExt {
 	}
 
 	/**
+	 * @since 1.0.6
+	 * @param https
+	 * @param ip
+	 * @param port
+	 * @param subpaths
+	 * @return URI
+	 */
+	public static String joinurl_ws_(boolean https, String ip, int port, String... subpaths) {
+		return joinurl_ws(https, ip, port, "", subpaths);
+	}
+
+	/**
+	 * @since 1.0.6
+	 */
+	public static String joinurl_ws(boolean https, String ip, int port, String rootpath, String... subpaths) {
+		return Stream.concat(
+					Stream.of(f("%s://%s:%s", https ? "wss" : "ws", ip, port == 0 ? 80 : port), rootpath),
+					Stream.of(isNull(subpaths) ? new String[0] :subpaths))
+				.filter(sub -> !isblank(sub))
+				.map(sub -> sub.replaceAll("^\\/", "").replaceAll("\\/$", ""))
+				.collect(Collectors.joining("/"));
+	}
+
+	/**
 	 * Concatenate strings into a "\n" separated string. 
 	 * @since 0.9.33
 	 * @param vals
