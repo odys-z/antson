@@ -401,6 +401,9 @@ public class Anson implements IJsonable {
 	 * Issue found in 0.9.118, that will result in OutOfMemoryError for serializing MP4 files.
      * TODO using stream as output
      * 
+     * ISSUE 2026.7.13: No \f & \b escape?
+     * ISSUE 2026.7.14: Key must also escaped
+     * 
 	 * @param v
 	 * @param opts use opts.escape_singlquot = true for db writing.
 	 * @return escaped bytes
@@ -616,14 +619,14 @@ public class Anson implements IJsonable {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Anson> T fromPath(String absPath) throws FileNotFoundException, IOException {
+	public static <T extends Anson> T fromPath(String absPath) throws IOException {
 		try (FileInputStream inf = new FileInputStream(new File(absPath))) {
 			return (T) Anson.fromJson(inf); 
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Anson> T fromPath(Path webcfg) throws FileNotFoundException, IOException {
+	public static <T extends Anson> T fromPath(Path webcfg) throws IOException {
 		try (FileInputStream inf = new FileInputStream(webcfg.toFile())) {
 			return (T) Anson.fromJson(inf); 
 		}
