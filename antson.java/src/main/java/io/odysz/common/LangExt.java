@@ -1694,7 +1694,25 @@ public class LangExt {
 			Utils.warnT(tag, isNull(msg) ? "Object should be null: %s" : msg[0], a);
 		return a;
 	}
-	
+
+	/**
+	 * @since 1.0.7
+	 */
+	public static <T> T shouldntnull(Object tag, T a, String ... msg) {
+		if (a == null || a instanceof String && isblank(a))
+			Utils.warnT(tag, isNull(msg) ? "Object shouldn't be null: %s" : msg[0], a);
+		return a;
+	}
+
+	/**
+	 * @since 1.0.7
+	 */
+	public static <T> T[] shouldntnull(Object tag, T[] a, String ... msg) {
+		if (isNull(a))
+			Utils.warnT(tag, isNull(msg) ? "Object shouldn't be null: %s" : msg[0], a);
+		return a;
+	}
+
 	public static <T> T mustnull(T a, String...msg) {
 		if (a != null)
 			throw new NullPointerException(isNull(msg) ? f("Object must be null: %s", a) : msg[0]);
@@ -1709,7 +1727,7 @@ public class LangExt {
 	 * @return a if no exceptions
 	 */
 	public static <T> T mustnonull(T a, String... msg) {
-		if (a == null)
+		if (a == null || a instanceof String && isblank(a))
 			throw new NullPointerException(isNull(msg)
 					? f("Object must not be null: %s", a)
 					: f(msg));

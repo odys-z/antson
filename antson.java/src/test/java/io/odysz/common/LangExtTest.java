@@ -483,6 +483,24 @@ class LangExtTest {
 			musteq("ab", a);
 			fail("Expecting an exception.");
 		} catch (NullPointerException e) {}
+
+		try {
+			mustnonull("", a);
+			fail("Expecting an exception.");
+		} catch (NullPointerException e) {}
+
+		try {
+			mustnonull(null, a);
+			fail("Expecting an exception.");
+		} catch (NullPointerException e) {}
+
+		mustnull(null, a);
+		try {
+			mustnull(1, a);
+			fail("Expecting an exception.");
+		} catch (NullPointerException e) {}
+
+
 	}
 	
 	@Test
