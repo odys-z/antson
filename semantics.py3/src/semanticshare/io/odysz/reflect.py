@@ -1,11 +1,10 @@
 
 from dataclasses import dataclass
-from pathlib import Path
-from typing import List, cast, Union, Final, ClassVar, Literal
-from types import MappingProxyType
+from typing import List, Union, Literal
 
 from anson.io.odysz.anson import Anson, AnsonField
 from anson.io.odysz.common import LangExt
+from anson.io.odysz.common import Utils
 
 
 semantypes = {
@@ -62,18 +61,8 @@ class SemanExpr(Semantics):
         elif self.stype == 'ini':
             return self.args[-2], ' '.join(self.args[:-2])
         else:
-            Utils.warn("shouldn't reach here: " + ' '.join(self.args))
+            Utils.warn("shouldn't reach here: " + ' '.join(self.args) + '. Supported stype: ' + ', '.join(["''", "'ini'"]))
             return self.args[-1], ' '.join(self.args[:-1])
-        # if LangExt.len(self.args) <= 1:
-        #     return None, ' '.join(self.args)
-        # elif LangExt.len(self.args) == 2:
-        #     # e.g. UserReq uri
-        #     return self.args[-1], self.args[0]
-        # else:
-        #     # e.g.   string m echo
-        #     #  const string m echo
-        #     #  const unsigned int x seq
-        #     return self.args[-2], ' '.join(self.args[:-2])
 
 
 @dataclass
