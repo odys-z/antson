@@ -219,6 +219,16 @@ class SynodeTask(Anson):
         return os.path.join(self.dist_dir, self.zip_name())
 
     def run_deploycmds(self, c):
+        '''
+        Run self.deploy_cmds.
+        deploy_cmds: [{cmd: "cmd template", vars{k: v}}, ...]
+            auto args:
+                built_zip: self.get_distzip()
+                built_dir: self.dist_dir
+                zip_name : self.zip_name()
+            
+            c.run(formated cmd)
+        '''
         if hasattr(self, 'deploy_cmds') and LangExt.len(self.deploy_cmds) > 0:
             print('Executing post build commands...')
             for bashcmd in self.deploy_cmds:
