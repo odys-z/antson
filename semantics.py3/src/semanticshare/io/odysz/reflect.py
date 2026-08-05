@@ -107,7 +107,7 @@ class AnCtor(Semantics):
     def cpp_body_exprs(self, ast, indent: str) -> List[str]:
         withType_setter = len(self.base.args) == 0 or ast.c_class() != self.base.args[0]
         # ret = [' ' * 8 + 'Type(_type_);'] if withType_setter else []
-        ret = [indent + 'Type(_type_);'] if withType_setter else []
+        ret = [indent + 'Type(_type_);'] if withType_setter and not isinstance(ast, AnsonJavaEnumAst) else []
         if len(self.body) > 0:
             ret.extend([exp.cpp_expr(indent) for exp in self.body])
         elif isinstance(self.body, SemanExpr): # tolerate config error?
@@ -188,6 +188,14 @@ class AnsonAst(Anson):
     def c_base(self) -> str:
         return self.baseAnclass.split('.')[-1] if len(self.baseAnclass) > 0 else ''
 
+
+@dataclass
+class AnsonJavaEnumAst(AnsonAst):
+    decode: dict[str, str]
+    encode: dict[str, str]
+
+    def __init__(self):
+        super().__init__()
 
 @dataclass
 class AnsonBodyAst(AnsonAst):
