@@ -1,7 +1,13 @@
+from __future__ import annotations
+
 import fnmatch
 import os
 import re
+import shutil
 import zipfile
+from pathlib import Path
+
+from pycparser.c_ast import Union
 
 
 def zip2(distzip, resources, exclude_patterns=[]):
@@ -65,3 +71,12 @@ def zip2(distzip, resources, exclude_patterns=[]):
 
     print(f'Created ZIP file successfully: {distzip}' \
           if not err else 'Errors while making target (creaded zip file)')
+
+def copy_anyway(src: Union(str, Path), dest: Path) -> Path:
+    src = Path(src)
+    if not src.is_file():
+        raise FileNotFoundError(f'source path not found: {src}')
+
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
+    return dest
