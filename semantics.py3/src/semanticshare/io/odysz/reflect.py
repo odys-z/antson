@@ -81,8 +81,19 @@ class AnCtor(Semantics):
         self.base = SemanExpr(stype = '()', args=[ast.c_base()])
         return self
 
-    def cpp_arg_decl(self):
-        return ', '.join([arg.cpp_arg_decl() for arg in self.args])
+    def cpp_arg_decl(self, ast: 'AnsonAst'):
+        '''
+        e.g.:
+            ctx, _type_, "sentinel",
+        for
+            Centralport(const JsonOpt* ctx) : JavaEnum(JsonOpt* ctx, _type_, "_sentinel_") { }
+        :param ast:
+        :return:
+        '''
+        arglist = [arg.cpp_arg_decl() for arg in self.args]
+        if isinstance(ast, AnsonJavaEnumAst):
+            arglist.insert(0, 'const JsonOpt* ctx')
+        return ', '.join(arglist)
 
     def cpp_base_ini(self, ast: 'AnsonAst'):
         if self.base.stype != '()':
@@ -91,6 +102,9 @@ class AnCtor(Semantics):
         basecls = self.base.args[0] if LangExt.len(self.base.args) > 0 else 'baseAnclass'
         basecls = ast.c_base() if basecls == 'baseAnclass' else basecls
         base_args = ", ".join(self.base.args[1:]) if LangExt.len(self.base.args) > 0 else ""
+
+        if isinstance(ast, AnsonJavaEnumAst):
+            base_args = ", ".join(['ctx', base_args])
         return f'{basecls}({base_args})'
 
     def map_args_decls(self):
@@ -264,8 +278,8 @@ class PeerSettings(Anson):
         self.ast_folder = 'ast'
         self.ansonMsg   = 'io.odysz.semantic.jprotocol.AnsonMsg'
         self.ansonBody  = 'io.odysz.semantic.jprotocol.AnsonBody'
-        self.scopeEnums = ['io.odysz.semantic.jprotocol.MsgCode']
-        self.javaEnums  = ['io.odysz.semantic.jprotocol.Port']
+        self.scopeEnums = []
+        self.javaEnums  = []
         self.ansonMsgs  = []
         self.anRequests = []
         self.cpp_include= []

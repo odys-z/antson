@@ -34,9 +34,9 @@ class DeployInfo(Anson):
     '''
     central_path: str
     central_pswd: str
-    web_port: str
-    jserv_port: str
-    root_key: str
+    web_port: int
+    jserv_port: int
+    ws_port: int
     market: str
     market_id: str
     orgid: str
@@ -50,6 +50,11 @@ class DeployInfo(Anson):
     '''
 
     syn_admin_pswd: str
+    '''
+    deprecated since 0.5.6
+    '''
+    admin: str
+    domain_token: str
 
     ui: str
     '''
@@ -57,8 +62,8 @@ class DeployInfo(Anson):
     '''
 
     lang: str
-
     langs: dict
+    root_key: str
 
     def __init__(self):
         super().__init__()
@@ -150,6 +155,9 @@ class SynodeTask(Anson):
     apk_ver: str
     html_jar_v: str
     web_ver: str
+    desktop_ver: str
+    ipcagent_ver: str
+
     web_inf_dir: str
     '''
         'WEB-INF': 'src/main/webapp/WEB-INF-0.7/*', # Do not replace with version.
@@ -161,6 +169,9 @@ class SynodeTask(Anson):
     vol_resource: dict
     registry_dir: str
     android_dir: str
+    desktop_dir: str
+    desktop_dist_dir: str = 'qt-build/dist'
+    ipcagent_dir: str
     central_dir: str
     dist_dir: str
     deploy: DeployInfo

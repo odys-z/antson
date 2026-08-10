@@ -85,10 +85,16 @@ jour0 = '1911-10-10'
 
 @dataclass
 class AppSettings(Anson):
-    # json: str
-    # '''
-    # Fullpath to settiongs.json
-    # '''
+    '''
+    Fullpath to settiongs.json
+
+    ISSUE TODO
+    ==========
+        Types can be merged?
+        - io.oz.jserv.docs.singleton.AppSettings
+        - io.odysz.jclient.AnclientSettings
+        - io.oz.anclient.app.DesktopSettings
+    '''
     
     regiserv: str
     envars: dict
@@ -111,7 +117,6 @@ class AppSettings(Anson):
 
     connIdleSnds: int
     centralPswd: str
-    # json: str
 
     def __init__(self):
         super().__init__()
