@@ -5,6 +5,8 @@ from anson.io.odysz.common import Utils
 sys.stdout.reconfigure(encoding="utf-8")
 
 from dataclasses import dataclass, Field
+from typing import Union
+from pathlib import Path
 
 import json
 from enum import Enum
@@ -235,7 +237,7 @@ class Anson(dict):
         '''
         return self.toBlock_(0, beautify)
 
-    def toFile(self, path: str):
+    def toFile(self, path: Union[str, Path]):
         with open(path, 'w+', encoding="utf-8") as jf:
             jf.write(self.toBlock(True))
 
@@ -244,9 +246,6 @@ class Anson(dict):
         Save to self.json. There is only on setting.json in a node, and is not movable.
         :return: None
         '''
-        # if not LangExt.isblank(self.json_path):
-        #     self.json_path = Path(self.json_path).as_posix()
-
         self.toFile(json_path)
 
     def toBlock_(self, ind: int, beautify, suggestype: type = None) -> str:
@@ -339,7 +338,6 @@ class Anson(dict):
         if len(v) > 0:
             _type_ = parse_type_(v[0])
             eletype = _type_ if _type_ is not None and len(_type_) > 0 else eletype
-            # eletype = f'{java_src_path}.{eletype}'
 
         return 'null' if v is None else [Anson.from_value(eletype, x) for x in v]
 
@@ -367,7 +365,7 @@ class Anson(dict):
             # for jsonk in obj:
             #     k = '__type__' if jsonk == 'type' else jsonk
             #     if k != '__type__' and k not in fds:
-            #         Utils.warn(f'Field ignored: {k}: {obj[k]}')  # TODO deserialize enum, e.g. MsgCode
+            #         Utils.warn(f'Field ignored: {k}: {obj[k]}')
             #         continue
             #
             #     dicv[k] = Anson.from_value(fds[k], obj[jsonk])
@@ -385,11 +383,10 @@ class Anson(dict):
         return v
 
     @staticmethod
-    def from_file(fp: str) -> 'Anson':
+    def from_file(fp: Union[str, Path]) -> 'Anson':
         with open(fp, 'r', encoding='utf-8') as file:
             obj = json.load(file)
             an = Anson.from_envelope(obj)
-            # an.json_path = fp
             return an
 
     @classmethod
@@ -421,7 +418,7 @@ class Anson(dict):
 Anson.verbose = False
 
 class AnsonException(Exception):
-    type = "io.odysz.ansons.x.AnsonException"
+    type = "io.odysz.ansons.x.AnsonException" # 2026.8.9 What's this used for?
     excode = 0
     err = ""
 
