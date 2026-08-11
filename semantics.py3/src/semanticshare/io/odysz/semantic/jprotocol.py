@@ -136,11 +136,25 @@ class AnsonResp(AnsonBody):
 
 class JProtocol:
     urlroot: str = 'must call JProtocol.setup()'
+    '''
+    @deprecated
+    replaced by protocolpath
+    '''
+
+    protocolpath: str
 
     @staticmethod
     def setup(urlpath: str, p: Port = None):
+        '''
+        @deprecated
+
+        static usage of JProtocol is deprecated
+        '''
         JProtocol.urlroot = urlpath
-        # And understand p
+        # And understand p ?
+    
+    def __init__(self, protocol_id: str = ''):
+        self.protocolpath = protocol_id
 
 @dataclass
 class JServUrl(Anson):
@@ -150,13 +164,47 @@ class JServUrl(Anson):
     subpaths: List[str]
     jservtime: str
 
-    def __init__(self, https: bool=False, ip: str=None, port: int=80, subpaths: List[str]=[]):
+    jprotocol: JProtocol
+    '''
+    @since 0.5.7
+    '''
+
+    def __init__(self,
+                 jservurl: str = None,
+                 https: bool=False,
+                 ip: str=None, port: int=80, iport: str = None,
+                 protocolroot: str = '',
+                 subpaths: List[str]=[]):
         super().__init__()
+        self.jprotocol = JProtocol(protocol_id=protocolroot)
+        
         self.https = https
         self.ip = ip
         self.port = port
+        if iport is not None:
+            iport.split(":")
+            self.ip = iport[0]
+            self.port = int(iport[1])
         self.subpaths = subpaths
         self.jservtime = '1911-10-10'
+
+        if jservurl:
+            parts = urlparse(jserv)
+            self.https = parts.scheme == 'https',
+            self.ip = parts.hostname
+            self.port = parts.port,
+            self.subpaths = None if LangExt.len(parts.path) == 0 else \
+                            re.sub('^/*', '', parts.path).split('/')[1:]
+        
+        if not LangExt.isNull(subpaths):
+            self.jprotocol = JProtocol(protocol_id=subpaths[0])
+
+
+    def __str__(self):
+        return f"{'https' if self.https else 'http'}://{self.ip}:{self.port}/{'/'.join(self.subpaths)}"
+
+    def jserv(self):
+        return self.__str__()
 
     @staticmethod
     def asJserv(jserv: str):

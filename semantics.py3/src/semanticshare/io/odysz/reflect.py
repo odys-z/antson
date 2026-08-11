@@ -53,6 +53,12 @@ class SemanExpr(Semantics):
         elif self.stype == '=':
             return f'{indent}{("" if self.args[-2] != self.args[-1] else "this->") + " ".join(self.args[:-1])} = {self.args[-1]};'
         # else no body lines
+        else:
+            Utils.warn(f"""Configure Error:
+            Only '()' and '=' types of c++ expression can be handled.
+            stype: {self.stype}, args = {LangExt.str(self.args)}
+            """)
+            print(self.args)
         return None
 
     def arg_name_types(self):
@@ -85,8 +91,8 @@ class AnCtor(Semantics):
         '''
         e.g.:
             ctx, _type_, "sentinel",
-        for
-            Centralport(const JsonOpt* ctx) : JavaEnum(JsonOpt* ctx, _type_, "_sentinel_") { }
+        for JavaEnum subclasses, also force a 'JsonOpt* ctx'.
+            Centralport(const JsonOpt* ctx) : JavaEnum(ctx, _type_, "_sentinel_") { }
         :param ast:
         :return:
         '''
@@ -96,16 +102,24 @@ class AnCtor(Semantics):
         return ', '.join(arglist)
 
     def cpp_base_ini(self, ast: 'AnsonAst'):
+        '''
+        :param ast:
+        :return:
+        e.g.
+
+        1.    Port(ctx, "_sentinel_") for  WSPort(const JsonOpt* ctx) : Port(ctx, "_sentinel_")
+        '''
         if self.base.stype != '()':
             return None
 
         basecls = self.base.args[0] if LangExt.len(self.base.args) > 0 else 'baseAnclass'
-        basecls = ast.c_base() if basecls == 'baseAnclass' else basecls
-        base_args = ", ".join(self.base.args[1:]) if LangExt.len(self.base.args) > 0 else ""
+        # basecls = ast.c_base() if basecls == 'baseAnclass' else basecls
+        basecls = ast.c_base() if basecls == 'baseAnclass' or basecls == 'base' else basecls
+        base_args = ", ".join(self.base.args[1:]) if LangExt.len(self.base.args) > 0 else None
 
         if isinstance(ast, AnsonJavaEnumAst):
-            base_args = ", ".join(['ctx', base_args])
-        return f'{basecls}({base_args})'
+            base_args = ", ".join(['ctx', base_args]) if base_args else 'ctx'
+        return f"{basecls}({base_args if base_args else ''})"
 
     def map_args_decls(self):
         m = {}
@@ -120,10 +134,21 @@ class AnCtor(Semantics):
 
     def cpp_body_exprs(self, ast, indent: str) -> List[str]:
         withType_setter = len(self.base.args) == 0 or ast.c_class() != self.base.args[0]
-        # ret = [' ' * 8 + 'Type(_type_);'] if withType_setter else []
-        ret = [indent + 'Type(_type_);'] if withType_setter and not isinstance(ast, AnsonJavaEnumAst) else []
+
+        if isinstance(ast, AnsonJavaEnumAst):
+            if ast.c_class() != 'JavaEnum':
+                '''
+                WSPort(const JsonOpt * ctx): Port(ctx, "_sentinel_") {
+                    Anclass(_type_);
+                }
+                '''
+                ret = [indent + 'Anclass(_type_);']
+        else: # not isinstance(ast, AnsonJavaEnumAst):
+            ret = [indent + 'Type(_type_);'] if withType_setter else []
+
         if len(self.body) > 0:
-            ret.extend([exp.cpp_expr(indent) for exp in self.body])
+            results = [exp.cpp_expr(indent) for exp in self.body]
+            ret.extend(r for r in results if r is not None)
         elif isinstance(self.body, SemanExpr): # tolerate config error?
             ret.append(self.body.cpp_expr(indent))
         return ret

@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from anson.io.odysz.anson import Anson
+from semanticshare.io.odysz.jclient import AnclientSettings
+
 
 @dataclass
-class DesktopSettings (Anson):
+class DesktopSettings (AnclientSettings):
     # class DesktopSettings(AnclientSettings):
     market: str
     org: str

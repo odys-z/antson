@@ -169,9 +169,9 @@ class SynodeTask(Anson):
     vol_resource: dict
     registry_dir: str
     android_dir: str
-    desktop_dir: str
-    desktop_dist_dir: str = 'qt-build/dist'
     ipcagent_dir: str
+    desktop_dir: str
+    desktop_dist_dir: str
     central_dir: str
     dist_dir: str
     deploy: DeployInfo
@@ -203,9 +203,12 @@ class SynodeTask(Anson):
     An ignored json field for deserilization.
     '''
 
+    since: str = '0.5.6 2026-08-11'
+
     def __init__(self):
         super().__init__()
         self.backings = {}
+        self.desktop_dist_dir = 'qt-build/dist'
 
     def config_central(self, central_settings: CentralSettings):
         print(central_settings.market)

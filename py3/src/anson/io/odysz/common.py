@@ -7,7 +7,7 @@ import os
 import sys
 from numbers import Number
 from re import match
-from typing import TextIO, Optional, TypeVar, Union, List, Tuple
+from typing import TextIO, Optional, TypeVar, Union, List, Tuple, Sequence, Any
 from dataclasses import dataclass
 
 T = TypeVar('T')
@@ -68,6 +68,10 @@ class LangExt:
         try: return len(s) == 0
         except: pass
         return False
+    
+    @staticmethod
+    def isNull(arr: Optional[Sequence[Any]] = None) -> bool:
+        return arr is None or len(arr) == 0 or (len(arr) == 1 and arr[0] is None)
 
     @staticmethod
     def ifnull(a: T, b: T) -> T:
