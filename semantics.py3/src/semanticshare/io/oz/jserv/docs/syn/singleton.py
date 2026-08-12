@@ -86,14 +86,13 @@ jour0 = '1911-10-10'
 @dataclass
 class AppSettings(Anson):
     '''
-    Fullpath to settiongs.json
-
     ISSUE TODO
     ==========
-        Types can be merged?
-        - io.oz.jserv.docs.singleton.AppSettings
-        - io.odysz.jclient.AnclientSettings
-        - io.oz.anclient.app.DesktopSettings
+
+    Types can be merged?
+    - io.oz.jserv.docs.singleton.AppSettings
+    - io.odysz.jclient.AnclientSettings
+    - io.oz.anclient.app.DesktopSettings
     '''
     
     regiserv: str
@@ -110,6 +109,9 @@ class AppSettings(Anson):
     webrootLocal: str
     reverseProxy: bool
     proxyIp: str
+    '''
+    The revers proxy
+    '''
     proxyPort: int
     webProxyPort: int
     jservs: dict

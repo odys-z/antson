@@ -1,4 +1,4 @@
-{ "type"      : "io.odysz.semantier.PeerSettings",
+{ "type"      : "io.odysz.reflect.PeerSettings",
   "ansonMsg"  : "io.odysz.semantic.jprotocol.AnsonMsg",
   "ansons"    : [],
   "scopeEnums": ["io.odysz.semantic.jprotocol.MsgCode"],

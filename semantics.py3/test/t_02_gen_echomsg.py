@@ -3,9 +3,7 @@ from typing import cast
 from unittest import TestCase
 
 from anson.io.odysz.anson import Anson
-
-from src.semanticshare.io.odysz.reflect import gen_peers
-from src.semanticshare.io.odysz.semantier import PeerSettings
+from semanticshare.io.odysz.reflect import PeerSettings
 
 
 class GenEchomsgTest(TestCase):
@@ -14,6 +12,7 @@ class GenEchomsgTest(TestCase):
         testpath = Path('test')
         settings = cast(PeerSettings, Anson.from_file('test/t_02-settings.json'))
 
+        from semantier_gen.io.oz.semanticpeer.generator2 import gen_peers
         gen_peers(settings, testpath)
 
         with (open(testpath / 'expect/t_02_semantier.hpp', 'r') as e,

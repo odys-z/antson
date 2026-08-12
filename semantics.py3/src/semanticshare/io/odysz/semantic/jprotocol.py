@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 import re
 
 from anson.io.odysz.common import LangExt
+from anson.io.odysz.utils import Regexs
+from py2exe.hooks import hook_tkinter
 from typing_extensions import Self
 
 from anson.io.odysz.anson import JsonOpt, Anson
@@ -182,26 +184,34 @@ class JServUrl(Anson):
         self.ip = ip
         self.port = port
         if iport is not None:
-            iport.split(":")
-            self.ip = iport[0]
-            self.port = int(iport[1])
+            host_port = iport.split(":")
+            self.ip = host_port[0]
+            self.port = int(host_port[1])
         self.subpaths = subpaths
         self.jservtime = '1911-10-10'
 
         if jservurl:
-            parts = urlparse(jserv)
-            self.https = parts.scheme == 'https',
-            self.ip = parts.hostname
-            self.port = parts.port,
-            self.subpaths = None if LangExt.len(parts.path) == 0 else \
-                            re.sub('^/*', '', parts.path).split('/')[1:]
+            parts = Regexs.get_http_parts(jservurl)
+            self.https = parts[1]
+            self.ip = parts[2]
+            self.port = parts[3]
+            self.subpaths = parts[4]
+            # self.subpaths = None if LangExt.len(parts[4]) == 0 else \
+            #                 re.sub('^/*', '', parts[4]).split('/')[1:]
         
         if not LangExt.isNull(subpaths):
             self.jprotocol = JProtocol(protocol_id=subpaths[0])
 
 
     def __str__(self):
-        return f"{'https' if self.https else 'http'}://{self.ip}:{self.port}/{'/'.join(self.subpaths)}"
+        # return f"{'https' if self.https else 'http'}://{self.ip}:{self.port}/{
+        # '/'.join(filter(lambda v: not LangExt.isblank(v), [
+        # self.jprotocol.protocolpath, *self.subpaths]))}"
+
+        scheme = "https" if self.https else "http"
+        raw_paths = [self.jprotocol.protocolpath, *self.subpaths]
+        path = "/".join(v for v in raw_paths if not LangExt.isblank(v))
+        return f"{scheme}://{self.ip}:{self.port}/{path}"
 
     def jserv(self):
         return self.__str__()
