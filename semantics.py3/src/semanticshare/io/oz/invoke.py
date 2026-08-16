@@ -442,7 +442,7 @@ class CentralTask(Anson):
 
     def __init__(self):
         super().__init__()
-        users = {}
+        self.users = {}
 
 from importlib.metadata import version, PackageNotFoundError
 from packaging.version import Version
