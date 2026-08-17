@@ -199,9 +199,8 @@ class JServUrl(Anson):
             # self.subpaths = None if LangExt.len(parts[4]) == 0 else \
             #                 re.sub('^/*', '', parts[4]).split('/')[1:]
         
-        if not LangExt.isNull(subpaths):
-            self.jprotocol = JProtocol(protocol_id=subpaths[0])
-
+        if not LangExt.isNull(self.subpaths):
+            self.jprotocol = JProtocol(protocol_id=self.subpaths[0])
 
     def __str__(self):
         # return f"{'https' if self.https else 'http'}://{self.ip}:{self.port}/{
@@ -227,6 +226,12 @@ class JServUrl(Anson):
     
     @staticmethod
     def valid(jserv: str, rootpath: str = None):
+        '''
+        @deprecated
+        There are better version in anson.cmake
+        :param jserv:
+        :param rootpath: length template, not really used
+        '''
         if rootpath is None:
             rootpath = JProtocol.urlroot
 
@@ -238,3 +243,11 @@ class JServUrl(Anson):
         return (parts.port is None or type(parts.port) == int and parts.port >= 1024) \
             and (parts.scheme == "http" or parts.scheme == "https") \
             and rootpath == urlroot.split('/')[0]
+
+    def is_valid(self, target_jserv: str):
+        '''
+        @seince 0.5.8
+        :param targe_jserv:
+        :return: True valid agains my jprotocol.
+        '''
+        return JServUrl.valid(target_jserv, self.jprotocol.protocolpath)

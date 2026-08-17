@@ -94,7 +94,8 @@ class AppSettings(Anson):
     - io.odysz.jclient.AnclientSettings
     - io.oz.anclient.app.DesktopSettings
     '''
-    
+    market_id: str
+    market_name: str
     regiserv: str
     envars: dict
     startHandler: [str]
