@@ -180,7 +180,7 @@ class AnRegistry(Anson):
 class Centralport(Enum):
     heartbeat:str = "ping.serv"
     session  :str = "login.serv"
-    register :str = "regist.serv"
+    regist   :str = "regist.serv"
     menu     :str = "menu.serv"
 
 
@@ -196,6 +196,7 @@ class CynodeStats:
 class RegistReq(AnsonBody):
     
     class A:
+        createOrg      = "c/org"
         queryDomx      = "r/domx"
         queryDomConfig = "r/dom-config"
         registDom      = "c/domx"
@@ -229,6 +230,12 @@ class RegistReq(AnsonBody):
         return self
 
     def jserurl(self, https: bool, iport: tuple[str, int]):
+        '''
+        @deprecated
+        :param https:
+        :param iport:
+        :return:
+        '''
         self.myjserv = JServUrl(
             https=https,
             ip=iport[0],
@@ -236,6 +243,9 @@ class RegistReq(AnsonBody):
             # 2025-09-29 Java version doesn't have this line:
             # subpaths=[JProtocol.urlroot],
         return self
+
+    def as_jserv(self, jserv: str):
+        self.myjserv = JServUrl.asJserv(jserv)
 
     def mystate(self, stat: CynodeStats=None):
         self.mystate = stat

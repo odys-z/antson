@@ -20,8 +20,9 @@ class AnclientTest(unittest.TestCase):
                 except: "Errors unable to be printed"
             self.fail(e)
 
-        Clients.servRt = 'http://192.168.0.###:8961/jserv-album'
+        # Clients.servRt = 'http://192.168.0.###:8961/jserv-album'
         # Clients.servRt = 'http://192.168.0.###:1984/regist-central'
+        Clients.servRt = 'http://182.150.29.34:1991/regist-central'
         resp = Clients.pingLess('Anson.py3/test', err_ctx)
         self.assertIsNotNone(resp)
 

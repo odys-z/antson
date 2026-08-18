@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, List
 from urllib.parse import urlparse
@@ -9,7 +9,7 @@ from anson.io.odysz.utils import Regexs
 from py2exe.hooks import hook_tkinter
 from typing_extensions import Self
 
-from anson.io.odysz.anson import JsonOpt, Anson
+from anson.io.odysz.anson import JsonOpt, Anson, AnsonField
 
 
 class MsgCode(Enum):
@@ -69,8 +69,14 @@ class AnsonMsg(Anson):
         self.port = p
         self.body = []
 
-    def Header(self, h: AnsonHeader) -> Self:
-        self.header = h
+    def Header(self, h: AnsonHeader = None, ssinf: 'SessionInf' = None) -> Self:
+        if h is not None:
+            self.header = h
+        if ssinf is not None:
+            self.header = AnsonHeader()
+            self.header.uid = ssinf.uid
+            self.header.ssid = ssinf.ssid
+            self.header.ssToken = ssinf.ssToken
         return self
 
     def Body(self, bodyItem: 'AnsonBody'=None) -> Self:
@@ -166,7 +172,8 @@ class JServUrl(Anson):
     subpaths: List[str]
     jservtime: str
 
-    jprotocol: JProtocol
+
+    jprotocol: JProtocol = field(metadata={'ignore': True})
     '''
     @since 0.5.7
     '''

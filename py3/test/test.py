@@ -17,6 +17,7 @@ def run_script(script_path):
 test_loader = unittest.TestLoader()
 # test_suite = test_loader.discover(start_dir='.', pattern='test_*.py')
 # test_suite = test_loader.discover(start_dir='.', pattern='test_00_Anson.py')
+# test_suite = test_loader.discover(start_dir='.', pattern='test_00_AnsonField.py')
 # test_suite = test_loader.discover(start_dir='.', pattern='test_01_Instance4Name.py')
 # test_suite = test_loader.discover(start_dir='.', pattern='test_02_Ping.py')
 # test_suite = test_loader.discover(start_dir='.', pattern='test_05_*.py')

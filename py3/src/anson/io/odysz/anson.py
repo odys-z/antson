@@ -5,7 +5,6 @@ from anson.io.odysz.common import Utils
 sys.stdout.reconfigure(encoding="utf-8")
 
 from dataclasses import dataclass, Field
-from typing import Union
 from pathlib import Path
 
 import json
@@ -56,8 +55,14 @@ def getClass(_typ_: Optional[str]):
     # return m
     return class4Name(module, parts[-1])
 
+def AnsonField(value):
+    def decorator(func):
+        func.metadata = value
+        return func # unchanged, just tagged
+    return decorator
 
-class AnsonField:
+class AnsonFieldMeta:
+    metadata: dict
     dataAnclass: str
     fieldname: str
 
@@ -65,6 +70,7 @@ class AnsonField:
         self.elemtype = kwargs.get('elemtype', None)
         antype = kwargs.get('type', None)
         self.dataAnclass = kwargs.get('dataAnclass')
+        self.metadata = kwargs.get('metadata')
         self.antype = type(self.dataAnclass)
         self.antype = antype if not isinstance(antype, str) else getClass(antype)
 
@@ -72,7 +78,7 @@ class AnsonField:
         return self.antype is not None and type(self.antype) == type and issubclass(self.antype, Anson)
 
 
-def _fields(anson, fromval):
+def _fields(anson):
     """
     Get all fields from an Anson type.
     :param anson: the object of Anson type, for finding its type.
@@ -81,7 +87,7 @@ def _fields(anson, fromval):
     """
     _FIELDS = '__dataclass_fields__'
     fds = getattr(type(anson), _FIELDS)
-    return {it: AnsonField(type=f.type) for it, f in fds.items()}
+    return {it: AnsonFieldMeta(type=f.type, metadata=f.metadata if hasattr(f, 'metadata') else None) for it, f in fds.items()}
 
 
 class DataStruct:
@@ -118,7 +124,7 @@ def instanceof(clsname: Union[str, type], props: dict):
     except Exception as e:
         print('Cannot create instance of', clsname, e)
         raise e
-    fds = _fields(obj, None)
+    fds = _fields(obj)
     missingAttrs = []
 
     for k, v in props.items():
@@ -249,7 +255,7 @@ class Anson(dict):
         self.toFile(json_path)
 
     def toBlock_(self, ind: int, beautify, suggestype: type = None) -> str:
-        myfds = _fields(self, None)
+        myfds = _fields(self)
         s = '{\n' if beautify else '{'
 
         has_prvious = False
@@ -260,7 +266,6 @@ class Anson(dict):
                 if has_prvious: s += ',\n' if beautify else ', '
                 s += f'{" " * (ind * 2 + 2) if beautify else ""}"type": "{tp}"'
                 has_prvious = True
-
             else:
                 v = self[k]
 
@@ -268,6 +273,10 @@ class Anson(dict):
                     if k != 'type':
                         Utils.warn("Field {0}.{1} is not defined in Anson or Semantics.py3, which is presenting in data object. Value ignored: {2}.",
                                str(self['__type__']), k, v)
+                    continue
+                # 2026-8-18 empty ignoring value can handle like this
+                fmeta = myfds[k].metadata
+                if fmeta and (fmeta.get('ignore') == True or fmeta.get('ignoreTo') == True):
                     continue
 
                 if has_prvious: s += ',\n' if beautify else ','
