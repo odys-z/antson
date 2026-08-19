@@ -374,16 +374,22 @@ class SynodeTask(Anson):
                 
         return None
 
-    def backup(self, target_path: str):
-        backed = os.path.join(os.getcwd(), target_path) # '../synode.py/src/synodepy3/synode.json')
-        backing = os.path.join('backup', os.path.basename(target_path))
-        print('Backing up:', backed, '\n    ->', backing)
-        if not os.path.exists('backup'):
-            os.makedirs('backup')
-
-        shutil.copy2(backed, backing)
-        self.backings[backed] = backing
-        return backed
+    # def backup(self, target_path: str):
+    #     '''
+    #     @deprecated
+    #     move target_path to cwd/backup/target_path.
+    #     :param target_path:
+    #     :return:
+    #     '''
+    #     backed = os.path.join(os.getcwd(), target_path) # '../synode.py/src/synodepy3/synode.json')
+    #     backing = os.path.join('backup', os.path.basename(target_path))
+    #     print('Backing up:', backed, '\n    ->', backing)
+    #     if not os.path.exists('backup'):
+    #         os.makedirs('backup')
+    #
+    #     shutil.copy2(backed, backing)
+    #     self.backings[backed] = backing
+    #     return backed
     
     def restore_backups(self):
         for backed, backing in self.backings.items():
