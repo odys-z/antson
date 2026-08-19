@@ -4,6 +4,7 @@ Created on 25 Oct 2019
 @author: odys-z@github.com
 '''
 import os
+import shutil
 import sys
 from numbers import Number
 from re import match
@@ -293,3 +294,22 @@ class Utils:
             for l in lines:
                 f.write(l)
                 f.write('\n')
+
+    @classmethod
+    def rm_any(cls, res: str):
+        try:
+            if os.path.isfile(res):
+                os.remove(res)
+            else:
+                shutil.rmtree(res, ignore_errors=False)
+            print(f"Successfully removed {res}")
+        except FileNotFoundError:
+            pass
+        except PermissionError:
+            print(f"Permission denied: Unable to remove {res}")
+        except OSError as e:
+            if e.errno != errno.ENOENT:  # Ignore "No such file or directory" errors
+                pass
+            else:
+                print(f"Path {res} does not exist")
+

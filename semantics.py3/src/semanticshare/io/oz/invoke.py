@@ -24,7 +24,7 @@ class DeployInfo(Anson):
     '''
 
     # synode.json
-    mirror_path: str
+    mirror_path: dict
     '''
     task.json -> synodepy3.synode.json/{lang-id: {jre_mirror: "value to be replaced"}}
     '''
@@ -480,3 +480,4 @@ def requir_pkg(pkg_name: str, require_ver: Union[str, List[str]]=None):
             if Version(pkg_version) < Version(require_ver[0]) or Version(pkg_version) > Version(require_ver[1]):
                 print(f'Please install {pkg_name} version between {require_ver[0]} and {require_ver[1]}. Current version: {pkg_version}')
                 sys.exit(1)
+    print('Positive.')
