@@ -3,7 +3,9 @@ Created on 25 Oct 2019
 
 @author: odys-z@github.com
 '''
+import errno
 import os
+from pathlib import Path
 import shutil
 import sys
 from numbers import Number
@@ -296,7 +298,7 @@ class Utils:
                 f.write('\n')
 
     @classmethod
-    def rm_any(cls, res: str):
+    def rm_any(cls, res: Union[str, Path]):
         try:
             if os.path.isfile(res):
                 os.remove(res)

@@ -11,7 +11,7 @@ class DesktopSettings (AnclientSettings):
     market_name: str
     org_name: str
     java_path: str
-    doctier_jar: str
+    # doctier_jar: str
     wsagent_jar: str
     synode_id: str
     synode_vol: str

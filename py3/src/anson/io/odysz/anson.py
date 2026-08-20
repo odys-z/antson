@@ -427,7 +427,7 @@ class Anson(dict):
 Anson.verbose = False
 
 class AnsonException(Exception):
-    type = "io.odysz.ansons.x.AnsonException" # 2026.8.9 What's this used for?
+    type = "io.odysz.ansons.x.AnsonException" # 2026.8.20 ISSUE: goes way of IJsonable?
     excode = 0
     err = ""
 
