@@ -68,8 +68,9 @@ class SyncUser(Anson):
     domain: str
     org: str
 
-    def __init__(self, userId=None, userName=None, pswd=None):
+    def __init__(self, userId=None, userName=None, pswd=None, orgid=None):
         super().__init__()
+        self.org = orgid
         self.userId = userId
         self.userName = userName
         self.pswd = pswd

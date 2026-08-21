@@ -6,7 +6,6 @@ import re
 
 from anson.io.odysz.common import LangExt
 from anson.io.odysz.utils import Regexs
-from py2exe.hooks import hook_tkinter
 from typing_extensions import Self
 
 from anson.io.odysz.anson import JsonOpt, Anson, AnsonField

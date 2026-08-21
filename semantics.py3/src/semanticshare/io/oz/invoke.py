@@ -9,7 +9,7 @@ import shutil
 import sys
 
 from anson.io.odysz.anson import Anson
-from anson.io.odysz.common import LangExt
+from anson.io.odysz.common import LangExt, Utils
 from semanticshare.io.oz.register.central import CentralSettings
 from semanticshare.io.odysz.semantic.jsession import JUser
 import os
@@ -148,7 +148,9 @@ _temp_ = 'temp'
 @dataclass
 class SynodeTask(Anson):
     '''
-    The Portifolio 0.7 invoke tasks' configuration
+    The Portfolio 0.8 invoke tasks' configuration
+    @since Portfolio 0.7
+    TODO rename to PortfolioTask
     '''
 
     version: str
@@ -173,7 +175,7 @@ class SynodeTask(Anson):
     desktop_dir: str
     desktop_dist_dir: str
     central_dir: str
-    dist_dir: str
+    package_dir: str
     deploy: DeployInfo
     '''
     E.g. x64_windows, used in final zip name for distinguished packages of different runtime.
@@ -209,6 +211,7 @@ class SynodeTask(Anson):
         super().__init__()
         self.backings = {}
         self.desktop_dist_dir = 'qt-build/dist'
+        self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
 
     def config_central(self, central_settings: CentralSettings):
         print(central_settings.market)
@@ -226,11 +229,40 @@ class SynodeTask(Anson):
         '''
     
     def zip_name(self) -> str:
+        '''
+        :return: e.g. synode-0.8.0-jre17-alpha-pmking.zip
+        '''
         dist_name = f'{self.jre_name if self.jre_name else "online"}-{self.deploy.market_id}-{self.deploy.orgid}'
         return f'synode-{self.version}-{dist_name}.zip'
 
+    def get_apk_name(self):
+        '''
+        :return: e.g. portfolio-0.5.4.apk
+        '''
+        return f'portfolio-{self.apk_ver}.apk'
+
+    def deskzip_name(self) -> str:
+        '''
+        :return: e.g. desktop-0.8.0-alpha-pmking.zip
+        '''
+        market_org = f'{self.deploy.market_id}-{self.deploy.orgid}'
+        return f'desktop-{self.version}-{market_org}.zip'
+
     def get_distzip(self) -> Path:
-        return os.path.join(self.dist_dir, self.zip_name())
+        return os.path.join(self.package_dir, self.zip_name())
+
+    def get_deskapp_zip(self) -> Path:
+        '''
+        @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.zip
+        '''
+        return os.path.join(self.desktop_dir, self.package_dir, self.deskzip_name())
+
+    def get_gradleprj_apk(self) -> Path:
+        '''
+        :return: Path(self.android_dir) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
+        (must keep consist with gradle project settings)
+        '''
+        return Path(self.android_dir) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
 
     def run_deploycmds(self, c):
         '''
@@ -257,7 +289,11 @@ class SynodeTask(Anson):
         else: 
             print('No post commands in property [deploy_cmds] are configured.')
  
-    def run_deployscps(self):
+    def run_deployscps(self, dist_zip: str):
+        if LangExt.isblank(dist_zip):
+            Utils.warn("*** ERROR *** dest_zip is empty. Nothing to push with scp.")
+            return
+            
         if not hasattr(self, 'deploy_scps'):
             print('No post SCPs configured.')
             return
@@ -265,7 +301,7 @@ class SynodeTask(Anson):
         scplen = LangExt.len(self.deploy_scps)
         print(f'Executing post build SCPs, len = {scplen}...')
         if scplen > 0:
-            self.scp_pushs(local_path=self.get_distzip())
+            self.scp_pushs(local_path=dist_zip)
 
     def scp_pushs(self, local_path):
         for cmd in self.deploy_scps:
@@ -374,23 +410,6 @@ class SynodeTask(Anson):
                 
         return None
 
-    # def backup(self, target_path: str):
-    #     '''
-    #     @deprecated
-    #     move target_path to cwd/backup/target_path.
-    #     :param target_path:
-    #     :return:
-    #     '''
-    #     backed = os.path.join(os.getcwd(), target_path) # '../synode.py/src/synodepy3/synode.json')
-    #     backing = os.path.join('backup', os.path.basename(target_path))
-    #     print('Backing up:', backed, '\n    ->', backing)
-    #     if not os.path.exists('backup'):
-    #         os.makedirs('backup')
-    #
-    #     shutil.copy2(backed, backing)
-    #     self.backings[backed] = backing
-    #     return backed
-    
     def restore_backups(self):
         for backed, backing in self.backings.items():
             shutil.copy2(backing, backed)
@@ -449,6 +468,7 @@ class CentralTask(Anson):
     def __init__(self):
         super().__init__()
         self.users = {}
+
 
 from importlib.metadata import version, PackageNotFoundError
 from packaging.version import Version
