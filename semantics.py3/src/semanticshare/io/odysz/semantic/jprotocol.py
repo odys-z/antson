@@ -182,9 +182,14 @@ class JServUrl(Anson):
                  https: bool=False,
                  ip: str=None, port: int=80, iport: str = None,
                  protocolroot: str = '',
+                 jprotocol: JProtocol = None,
                  subpaths: List[str]=[]):
         super().__init__()
-        self.jprotocol = JProtocol(protocol_id=protocolroot)
+
+        if jprotocol is None:
+            self.jprotocol = JProtocol(protocol_id=protocolroot)
+        else:
+            self.jprotocol = JProtocol(jprotocol.protocolpath)
         
         self.https = https
         self.ip = ip

@@ -206,7 +206,10 @@ class RegistReq(AnsonBody):
     market: str
     diction: Optional[SynodeConfig]
     myjserv: Optional[JServUrl]
-    protocolPath: Optional[str]
+    myProtocolPath: Optional[str]
+    '''
+    Note: for the submitting jserv's, not for the request itself.
+    '''
     mystate: Optional[str]
 
     def __init__(self, act: str=None, market:str=None):
@@ -229,7 +232,7 @@ class RegistReq(AnsonBody):
         self.myjserv.jservtime = utc
         return self
 
-    def jserurl(self, https: bool, iport: tuple[str, int]):
+    def jserurl(self, https: bool, iport: tuple[str, int], jprotcl:JProtocol):
         '''
         @deprecated
         :param https:
@@ -237,11 +240,12 @@ class RegistReq(AnsonBody):
         :return:
         '''
         self.myjserv = JServUrl(
-            https=https,
-            ip=iport[0],
+            https=https, ip=iport[0],
+            jprotocol=jprotcl,
             port=iport[1])
             # 2025-09-29 Java version doesn't have this line:
             # subpaths=[JProtocol.urlroot],
+        self.my_protocolpath(jprotcl.protocolpath)
         return self
 
     def as_jserv(self, jserv: str):
@@ -251,8 +255,8 @@ class RegistReq(AnsonBody):
         self.mystate = stat
         return self
 
-    def protocol_path(self, urlroot):
-        self.protocolPath = urlroot
+    def my_protocolpath(self, protcl_pth):
+        self.myProtocolPath = protcl_pth
         return self
 
 
