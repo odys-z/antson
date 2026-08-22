@@ -275,6 +275,7 @@ class SynodeTask(Anson):
             
             c.run(formated cmd)
         '''
+        ok, err = 0, 0
         if hasattr(self, 'deploy_cmds') and LangExt.len(self.deploy_cmds) > 0:
             print('Executing post build commands...')
             for bashcmd in self.deploy_cmds:
@@ -286,8 +287,11 @@ class SynodeTask(Anson):
                     print(f'Executing: {cmd}')
                     ret = c.run(cmd)
                 print('OK:', ret.ok, ret.stderr)
+                ok = ok + 1
         else: 
             print('No post commands in property [deploy_cmds] are configured.')
+            err = err + 1
+        return ok, err
  
     def run_deployscps(self, dist_zip: str):
         if LangExt.isblank(dist_zip):
