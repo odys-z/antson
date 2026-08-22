@@ -75,12 +75,14 @@ def zip2(distzip, resources, exclude_patterns=[]):
           if not err else 'Errors while making target (creaded zip file)')
 
 
-def copy_anyway(src: Union[str, Path], dest: Union[Path, str]) -> Path:
+def copy_anyway(src: Union[str, Path], dest: Union[Path, str], log=False) -> Path:
     src = Path(src)
     if not src.is_file():
         raise FileNotFoundError(f'source path not found: {src}')
 
     dest.parent.mkdir(parents=True, exist_ok=True)
+    if log:
+        print(src.absolute().as_posix(), ":=>", dest.absolute().as_posix())
     shutil.copy2(src, dest)
     return dest
 

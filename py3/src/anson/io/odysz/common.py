@@ -119,6 +119,14 @@ class LangExt:
         else:
             return str(obj)
 
+    def trunc_right(s: str, bytes: int, encoding='utf-8') -> str:
+        if bytes <= 0:
+            return ''
+        b = s.encode(encoding)
+        truncated = b[-bytes:]
+        # decode, ignoring any partial multi-byte char left at the start
+        return truncated.decode(encoding, errors='ignore')
+
     @staticmethod
     def musteqs(a: str, b: str, msg = None):
         if a != b:

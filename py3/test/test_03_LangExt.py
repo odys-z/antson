@@ -68,6 +68,81 @@ class LangExtTest(unittest.TestCase):
             except AnsonException as e:
                 pass
 
+
+class TestTruncRightASCII(unittest.TestCase):
+    def test_shorter_than_limit(self):
+        assert LangExt.trunc_right("hello", 12) == "hello"
+
+    def test_exact_limit(self):
+        s = "hello world!"  # exactly 12 chars/bytes
+        assert LangExt.trunc_right(s, 12) == "hello world!"
+
+    def test_longer_than_limit(self):
+        s = "hello world, how are you?"
+        result = LangExt.trunc_right(s, 12)
+        assert result == s[-12:]
+        assert len(result.encode('utf-8')) == 12
+
+    def test_empty_string(self):
+        assert LangExt.trunc_right("", 12) == ""
+
+    def test_n_zero(self):
+        assert LangExt.trunc_right("hello", 0) == ""
+
+    def test_n_negative(self):
+        assert LangExt.trunc_right("hello", -5) == ""
+
+
+class TestTruncRightUnicode(unittest.TestCase):
+    def test_multibyte_chars_no_split(self):
+        # each 世/界 char is 3 bytes in utf-8; choose n that lands cleanly
+        s = "世界世界"  # 12 bytes total
+        result = LangExt.trunc_right(s, 12)
+        assert result == "世界世界"
+        assert len(result.encode('utf-8')) == 12
+
+    def test_multibyte_chars_forces_trim(self):
+        ss = [(" 世界", "héllo wörld 世界"), ("їні!", "Слава Україні!")]
+        for exp, t_str in ss:
+            result = LangExt.trunc_right(t_str, 7)
+            encoded = result.encode('utf-8')
+            assert len(encoded) <= 7
+            assert t_str.endswith(result)  # result is a genuine suffix of s
+            self.assertEqual(exp, result)  # result is a genuine suffix of s
+
+    def test_result_is_always_valid_utf8(self):
+        s = "abc世界xyz"
+        for n in range(0, 15):
+            result = LangExt.trunc_right(s, n)
+            # should not raise
+            result.encode('utf-8').decode('utf-8')
+
+    def test_single_multibyte_char_too_small_n(self):
+        # if n is smaller than a single multi-byte char, may return ''
+        s = "世"  # 3 bytes
+        assert LangExt.trunc_right(s, 1) == ""
+        assert LangExt.trunc_right(s, 2) == ""
+        assert LangExt.trunc_right(s, 3) == "世"
+
+
+class TestTruncRightEdgeCases(unittest.TestCase):
+    def test_n_larger_than_string(self):
+        s = "hi"
+        assert LangExt.trunc_right(s, 1000) == "hi"
+
+    def test_emoji(self):
+        s = "hello 👋🌍"  # emojis are 4 bytes each in utf-8
+        result = LangExt.trunc_right(s, 4)
+        assert result == "🌍" or result == ""  # depends on exact byte alignment
+        assert len(result.encode('utf-8')) <= 4
+
+    def test_result_never_exceeds_n_bytes(self):
+        s = "The quick brown fox jumps over the lazy dog 🦊🐕"
+        for n in range(0, 20):
+            result = LangExt.trunc_right(s, n)
+            assert len(result.encode('utf-8')) <= n
+
+
 if __name__ == '__main__':
     unittest.main()
     t = LangExtTest()
@@ -75,3 +150,22 @@ if __name__ == '__main__':
     t.test_isblank()
     t.test_passwd_valid()
 
+    t = TestTruncRightASCII()
+    t.test_shorter_than_limit()
+    t.test_exact_limit()
+    t.test_longer_than_limit()
+    t.test_empty_string()
+    t.test_n_zero()
+    t.test_n_negative()
+
+    t = TestTruncRightUnicode()
+    t.test_single_multibyte_char_too_small_n()
+    t.test_multibyte_chars_forces_trim()
+    t.test_result_is_always_valid_utf8()
+    t.test_multibyte_chars_no_split()
+    t.test_multibyte_chars_forces_trim()
+
+    t = TestTruncRightEdgeCases()
+    t.test_emoji()
+    t.test_n_larger_than_string()
+    t.test_result_never_exceeds_n_bytes()
