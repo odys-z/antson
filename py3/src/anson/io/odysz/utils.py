@@ -80,6 +80,7 @@ def copy_anyway(src: Union[str, Path], dest: Union[Path, str], log=False) -> Pat
     if not src.is_file():
         raise FileNotFoundError(f'source path not found: {src}')
 
+    dest = Path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
     if log:
         print(src.absolute().as_posix(), ":=>", dest.absolute().as_posix())
