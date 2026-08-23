@@ -207,17 +207,11 @@ class JServUrl(Anson):
             self.ip = parts[2]
             self.port = parts[3]
             self.subpaths = parts[4]
-            # self.subpaths = None if LangExt.len(parts[4]) == 0 else \
-            #                 re.sub('^/*', '', parts[4]).split('/')[1:]
-        
+
         if not LangExt.isNull(self.subpaths):
             self.jprotocol = JProtocol(protocol_id=self.subpaths[0])
 
     def __str__(self):
-        # return f"{'https' if self.https else 'http'}://{self.ip}:{self.port}/{
-        # '/'.join(filter(lambda v: not LangExt.isblank(v), [
-        # self.jprotocol.protocolpath, *self.subpaths]))}"
-
         scheme = "https" if self.https else "http"
         raw_paths = [self.jprotocol.protocolpath, *self.subpaths]
         path = "/".join(v for v in raw_paths if not LangExt.isblank(v))

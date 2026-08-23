@@ -95,6 +95,9 @@ class AppSettings(Anson):
     - io.oz.anclient.app.DesktopSettings
     '''
     market_id: str
+    '''
+    In 0.8.0, for client Apps. For the synode org, also required in Registry.org.
+    '''
     market_name: str
     regiserv: str
     envars: dict
