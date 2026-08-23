@@ -8,8 +8,6 @@ import shutil
 import zipfile
 from pathlib import Path
 
-from pycparser.c_ast import Union
-
 from typing import List, Optional, Sequence, Union
 
 def zip2(distzip, resources, exclude_patterns=[]):
