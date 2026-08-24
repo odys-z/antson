@@ -10,7 +10,7 @@ from pathlib import Path
 
 from typing import List, Optional, Sequence, Union
 
-def zip2(distzip, resources, exclude_patterns=[]):
+def zip2(distzip, resources, exclude_patterns=None):
     """
     example: zip2('registry-zsu.zip', {"zsu": "registry-deploy/*"}, ['*.zip'])
     :param distzip:
@@ -18,6 +18,9 @@ def zip2(distzip, resources, exclude_patterns=[]):
     :param exclude_patterns:
     :return: None
     """
+    if exclude_patterns is None:
+        exclude_patterns = []
+
     def matches_patterns(filename, patterns):
         """
         Check if a filename matches any of the given patterns.
@@ -211,7 +214,8 @@ class Regexs():
     import ipaddress
     import re
 
-    __all__ = [
+    # noinspection PyUnresolvedReferences
+    __all__ : [str] = [
         "is_ipv6",
         "get_http_parts",
         "get_https_partsv4",
@@ -219,7 +223,7 @@ class Regexs():
         "as_jserv",
         "valid_url_port",
         "valid_paths",
-        "is_valid_jserv_url",
+        "is_valid_jserv_url"
     ]
 
     # ---------------------------------------------------------------------------

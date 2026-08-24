@@ -5,6 +5,8 @@ from anson.io.odysz.anson import Anson
 
 @dataclass
 class AnclientSettings (Anson):
+    market_id: str
+    market_name: str
     sysuri: str
     synuri: str
     jserv: str
