@@ -76,64 +76,6 @@ def zip2(distzip, resources, exclude_patterns=None):
           if not err else 'Errors while making target (creaded zip file)')
 
 
-def copy_anyway(src: Union[str, Path], dest: Union[Path, str], log=False) -> Path:
-    src = Path(src)
-    if not src.is_file():
-        raise FileNotFoundError(f'source path not found: {src}')
-
-    dest = Path(dest)
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    if log:
-        print(src.absolute().as_posix(), ":=>", dest.absolute().as_posix())
-    shutil.copy2(src, dest)
-    return dest
-
-
-def move_anyway(src: Union[str, Path], dest: Union[Path, str], overwrite: bool = True, log: bool = False) -> Union[Path, list[Path]]:
-    '''
-    Credits to Claude.
-    :param src:
-    :param dest:
-    :param overwrite:
-    :param log:
-    :return:
-    '''
-    src_str = str(src)
-
-    # wildcard support: expand and recurse
-    if any(ch in src_str for ch in '*?['):
-        matches = glob(src_str, recursive=True)
-        if not matches:
-            raise FileNotFoundError(f'no files matched: {src}')
-        return [move_anyway(m, dest, overwrite=overwrite, log=log) for m in matches]
-
-    src = Path(src)
-    dest = Path(dest)
-    if not src.is_file():
-        raise FileNotFoundError(f'source path not found: {src}')
-
-    # if dest is an existing directory, the real target is dest/src.name
-    final_dest = dest / src.name if dest.is_dir() else dest
-
-    if final_dest.exists():
-        if not overwrite:
-            raise FileExistsError(f'destination already exists: {final_dest}')
-        # shutil.move raises shutil.Error instead of overwriting when the
-        # target already exists inside a directory dest -- remove it first
-        if final_dest.is_dir():
-            shutil.rmtree(final_dest)
-        else:
-            final_dest.unlink()
-
-    dest.parent.mkdir(parents=True, exist_ok=True)
-
-    if log:
-        print(f'{src.resolve()} -> {final_dest.absolute()}')
-
-    shutil.move(str(src), str(dest))
-    return final_dest
-
-
 class Regexs():
     """
     [Credits to Claude]

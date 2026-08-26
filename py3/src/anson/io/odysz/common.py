@@ -6,6 +6,7 @@ Created on 25 Oct 2019
 import errno
 import os
 from pathlib import Path
+from glob import glob
 import shutil
 import sys
 from numbers import Number
@@ -323,3 +324,97 @@ class Utils:
             else:
                 print(f"Path {res} does not exist")
 
+    @classmethod
+    def copy_anyway(cls, src: Union[str, Path, List[Path]], dest: Union[Path, str], log: bool = False) -> Union[
+        Path, List[Path]]:
+        if isinstance(src, (list, tuple)):
+            dest_dir = Path(dest)
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            return [
+                cls.copy_anyway(s, dest_dir, log)
+                if any(ch in str(s) for ch in "*?[")
+                else cls.copy_anyway(s, dest_dir / Path(s).name, log)
+                for s in src
+            ]
+
+        src_str = str(src)
+
+        # Wildcard: expand (recursively) and recurse per match, copying into dest as a directory
+        if any(ch in src_str for ch in "*?["):
+            matches = [Path(p) for p in glob(src_str, recursive=True) if Path(p).is_file()]
+            if not matches:
+                raise FileNotFoundError(f"no files matched pattern: {src_str}")
+
+            dest_dir = Path(dest)
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            return [cls.copy_anyway(match, dest_dir / match.name, log) for match in matches]
+
+        src = Path(src)
+        if not src.is_file():
+            raise FileNotFoundError(f"source path not found: {src}")
+
+        dest = Path(dest)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if log:
+            print(src.absolute().as_posix(), ":=>", dest.absolute().as_posix())
+        shutil.copy2(src, dest)
+        return dest
+
+    @classmethod
+    def move_anyway(cls, src: Union[str, Path, List[Path]], dest: Union[Path, str], overwrite: bool = True,
+                     log: bool = False) -> Union[Path, List[Path]]:
+        '''
+        Credits to Claude.
+        :param src:
+        :param dest:
+        :param overwrite:
+        :param log:
+        :return:
+        '''
+        if isinstance(src, (list, tuple)):
+            dest_dir = Path(dest)
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            return [
+                cls.move_anyway(s, dest_dir, overwrite=overwrite, log=log)
+                if any(ch in str(s) for ch in "*?[")
+                else cls.move_anyway(s, dest_dir / Path(s).name, overwrite=overwrite, log=log)
+                for s in src
+            ]
+
+        src_str = str(src)
+
+        # wildcard support: expand (recursively) and recurse per match
+        if any(ch in src_str for ch in "*?["):
+            matches = [Path(p) for p in glob(src_str, recursive=True) if Path(p).is_file()]
+            if not matches:
+                raise FileNotFoundError(f"no files matched pattern: {src_str}")
+
+            dest_dir = Path(dest)
+            dest_dir.mkdir(parents=True, exist_ok=True)
+            return [cls.move_anyway(match, dest_dir / match.name, overwrite=overwrite, log=log) for match in matches]
+
+        src = Path(src)
+        dest = Path(dest)
+        if not src.is_file():
+            raise FileNotFoundError(f"source path not found: {src}")
+
+        # if dest is an existing directory, the real target is dest/src.name
+        final_dest = dest / src.name if dest.is_dir() else dest
+
+        if final_dest.exists():
+            if not overwrite:
+                raise FileExistsError(f"destination already exists: {final_dest}")
+            # shutil.move raises shutil.Error instead of overwriting when the
+            # target already exists inside a directory dest -- remove it first
+            if final_dest.is_dir():
+                shutil.rmtree(final_dest)
+            else:
+                final_dest.unlink()
+
+        final_dest.parent.mkdir(parents=True, exist_ok=True)
+
+        if log:
+            print(src.absolute().as_posix(), ":=>", final_dest.absolute().as_posix())
+
+        shutil.move(str(src), str(final_dest))
+        return final_dest
