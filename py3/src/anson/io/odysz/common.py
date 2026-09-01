@@ -9,7 +9,6 @@ from pathlib import Path
 from glob import glob
 import shutil
 import sys
-from numbers import Number
 from re import match
 from typing import TextIO, Optional, TypeVar, Union, List, Tuple, Sequence, Any
 from dataclasses import dataclass
@@ -31,7 +30,6 @@ def requir_pkg(pkg_name: str, require_ver: Union[str, List[str]] = None):
     try:
         pkg_version = version(pkg_name.replace('.', '_').replace('-', '_'))
     except PackageNotFoundError:
-        # pkg_version = 'uninstalled'
         print('Package not found:', pkg_name)
         sys.exit(1)
 
