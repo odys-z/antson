@@ -128,10 +128,13 @@ def instanceof(clsname: Union[str, type], props: dict):
     fds = _fields(obj)
     missingAttrs = []
 
-    for k, v in props.items():
-        if k != 'type' and k not in fds:
-            missingAttrs.append(k)
-        setattr(obj, k, Anson.from_value(fds[k].antype if k in fds else None, v))
+    if hasattr(props, 'items'):
+        for k, v in props.items():
+            if k != 'type' and k not in fds:
+                missingAttrs.append(k)
+            setattr(obj, k, Anson.from_value(fds[k].antype if k in fds else None, v))
+    else:
+        Utils.warn('Unexpected type for dict instance: {}', props)
 
     if len(missingAttrs) > 0:
         Utils.warn(f'Missing attributes in {obj.__type__ if "__type__" in obj else clsname}: {missingAttrs}. '
