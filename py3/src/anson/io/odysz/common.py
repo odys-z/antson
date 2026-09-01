@@ -14,6 +14,59 @@ from re import match
 from typing import TextIO, Optional, TypeVar, Union, List, Tuple, Sequence, Any
 from dataclasses import dataclass
 
+
+def requir_pkg(pkg_name: str, require_ver: Union[str, List[str]] = None):
+    '''
+        Docstring for requir_pkg
+
+        :param pkg_name: package name, e.g. 'cryptography', 'anson.py3', 'semantics.py3', ...
+        :type pkg_name: str
+        :param require_ver: requred version, str for minimum version,
+        list for exact version or version range [min, max]
+        :type require_ver: Union[str, List[str]]
+    '''
+    from importlib.metadata import version, PackageNotFoundError
+    from packaging.version import Version
+
+    try:
+        pkg_version = version(pkg_name.replace('.', '_').replace('-', '_'))
+    except PackageNotFoundError:
+        # pkg_version = 'uninstalled'
+        print('Package not found:', pkg_name)
+        sys.exit(1)
+
+    print(f"{pkg_name}: ", pkg_version)
+
+    if isinstance(require_ver, str):
+        if Version(pkg_version) < Version(require_ver):
+            print(f'Please upgrade {pkg_name} to version {require_ver} or above. Current version: {pkg_version}')
+            sys.exit(1)
+    elif isinstance(require_ver, list):
+        if len(require_ver) == 1:
+            if Version(pkg_version) != Version(require_ver[0]):
+                print(f'Please install {pkg_name} version {require_ver[0]}. Current version: {pkg_version}')
+                sys.exit(1)
+        else:
+            if Version(pkg_version) < Version(require_ver[0]) or Version(pkg_version) > Version(require_ver[1]):
+                print(
+                    f'Please install {pkg_name} version between {require_ver[0]} and {require_ver[1]}. Current version: {pkg_version}')
+                sys.exit(1)
+    print('Positive.')
+
+
+def requir_executable(cmd: str, setup_hint: str, tolerate: bool = False):
+    """
+        Check if an executable is present on PATH, otherwise exit with user guidance.
+
+        :tolerate: True if not to exit even the executable is missing.
+    """
+    if not shutil.which(cmd):
+        print(f"\n[ERROR] '{cmd}' command not found.")
+        print(f"-> How to fix: {setup_hint}\n")
+        if not tolerate:
+            sys.exit(1)
+
+
 T = TypeVar('T')
 
 passwd_allow_ext = ' @#!$%^&*()_+-=.<>,[]{}|?/:;'

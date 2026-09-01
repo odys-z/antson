@@ -4,3 +4,4 @@ clean_env*
 *.egg-info
 *.egg
 test/gen
+.idea

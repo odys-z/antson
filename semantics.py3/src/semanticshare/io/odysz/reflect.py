@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import List, Union, Literal
 
-from anson.io.odysz.anson import Anson, AnsonField
+from anson.io.odysz.anson import Anson, AnsonFieldMeta
 from anson.io.odysz.common import LangExt
 from anson.io.odysz.common import Utils
 
@@ -177,7 +177,7 @@ class AnsonAst(Anson):
     dataAnclass: str
     baseAnclass: str
 
-    fields: dict[str, AnsonField]
+    fields: dict[str, AnsonFieldMeta]
     enums: Union[dict, None]
 
     ctors: List[List[List[str]]]

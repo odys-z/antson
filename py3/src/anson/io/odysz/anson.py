@@ -11,11 +11,12 @@ import json
 from enum import Enum
 from importlib.util import find_spec
 from numbers import Number
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 from typing_extensions import get_args, get_origin
 
 java_src_path: str = 'semanticshare'
+
 
 def class4Name(m, clssn: str) -> type:
     """
@@ -411,18 +412,12 @@ class Anson(dict):
         :param src_root: e. g. 'src',
         :param requires
         """
-        # if LangExt.len(requires) > 0:
-        #     from importlib.metadata import distribution
-        #     for req in requires:
-        #         distribution(req)
-
         global java_src_path
         java_src_path = src_root
 
     @classmethod
     def from_envelope(cls, obj: dict):
         return Anson.from_obj(obj, obj['type'])
-                # '.'.join([java_src_path, obj['type']]) if len(java_src_path) > 0 else obj['type'])
 
 Anson.verbose = False
 

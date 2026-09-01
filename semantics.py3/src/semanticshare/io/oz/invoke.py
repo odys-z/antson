@@ -7,14 +7,15 @@ import json
 import re
 import shutil
 import sys
+import os
+from typing import Union, List
+from pathlib import Path
+
 
 from anson.io.odysz.anson import Anson
 from anson.io.odysz.common import LangExt, Utils
 from semanticshare.io.oz.register.central import CentralSettings
 from semanticshare.io.odysz.semantic.jsession import JUser
-import os
-from typing import Union, List
-from pathlib import Path
 
 
 @dataclass
@@ -162,14 +163,16 @@ class SynodeTask(Anson):
 
     web_inf_dir: str
     '''
-        'WEB-INF': 'src/main/webapp/WEB-INF-0.7/*', # Do not replace with version.
+        Synode 'WEB-INF': 'src/main/webapp/WEB-INF-0.7/*', 
     '''
     jre_release: str
     jre_name: str
+    java_home: str
     host_json: str
     vol_files: dict
     vol_resource: dict
     registry_dir: str
+    web_root_dir: str
     android_dir: str
     ipcagent_dir: str
     desktop_dir: str
@@ -210,6 +213,7 @@ class SynodeTask(Anson):
     def __init__(self):
         super().__init__()
         self.backings = {}
+        self.web_root_dir = '../../anclient/examples/example.js/album'
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
 
@@ -473,41 +477,3 @@ class CentralTask(Anson):
         super().__init__()
         self.users = {}
 
-
-from importlib.metadata import version, PackageNotFoundError
-from packaging.version import Version
-
-def requir_pkg(pkg_name: str, require_ver: Union[str, List[str]]=None):
-    '''
-    Docstring for requir_pkg
-    
-    :param pkg_name: package name, e.g. 'cryptography', 'anson.py3', 'semantics.py3', ...
-    :type pkg_name: str
-    :param require_ver: requred version, str for minimum version,
-     list for exact version or version range [min, max]
-    :type require_ver: Union[str, List[str]]
-    '''
-    import sys
-    try:
-        pkg_version = version(pkg_name.replace('.', '_').replace('-', '_'))
-    except PackageNotFoundError:
-        # pkg_version = 'uninstalled' 
-        print('Package not found:', pkg_name)
-        sys.exit(1)
-
-    print (f"{pkg_name}: ", pkg_version)
-
-    if isinstance(require_ver, str):
-        if Version(pkg_version) < Version(require_ver):
-            print(f'Please upgrade {pkg_name} to version {require_ver} or above. Current version: {pkg_version}')
-            sys.exit(1)
-    elif isinstance(require_ver, list):
-        if len(require_ver) == 1:
-            if Version(pkg_version) != Version(require_ver[0]):
-                print(f'Please install {pkg_name} version {require_ver[0]}. Current version: {pkg_version}')
-                sys.exit(1)
-        else:
-            if Version(pkg_version) < Version(require_ver[0]) or Version(pkg_version) > Version(require_ver[1]):
-                print(f'Please install {pkg_name} version between {require_ver[0]} and {require_ver[1]}. Current version: {pkg_version}')
-                sys.exit(1)
-    print('Positive.')
