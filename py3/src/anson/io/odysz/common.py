@@ -14,7 +14,7 @@ from typing import TextIO, Optional, TypeVar, Union, List, Tuple, Sequence, Any
 from dataclasses import dataclass
 
 
-def requir_pkg(pkg_name: str, require_ver: Union[str, List[str]] = None):
+def requir_pkg(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = None):
     '''
         Docstring for requir_pkg
 
@@ -141,7 +141,7 @@ class LangExt:
         return 0 if obj is None else len(obj)
 
     @staticmethod
-    def str(obj):
+    def to_str(obj):
         '''
         :param obj:
         :return:
@@ -151,7 +151,7 @@ class LangExt:
         else str(obj)
         '''
         def quot(v) -> str:
-            return f'"{v}"' if type(v) == str else f'"{v.toBlock()}"' if isinstance(v, Anson) else LangExt.str(v)
+            return f'"{v}"' if type(v) == str else f'"{v.toBlock()}"' if isinstance(v, Anson) else LangExt.to_str(v)
         from .anson import Anson
         if type(obj) == dict:
             s = '{'
@@ -171,11 +171,12 @@ class LangExt:
         else:
             return str(obj)
 
-    def trunc_right(s: str, bytes: int, encoding='utf-8') -> str:
-        if bytes <= 0:
+    @staticmethod
+    def trunc_right(s: str, byte_nums: int, encoding='utf-8') -> str:
+        if byte_nums <= 0:
             return ''
         b = s.encode(encoding)
-        truncated = b[-bytes:]
+        truncated = b[-byte_nums:]
         # decode, ignoring any partial multi-byte char left at the start
         return truncated.decode(encoding, errors='ignore')
 
@@ -187,8 +188,6 @@ class LangExt:
 
     @staticmethod
     def only_wordextlen(likely: str, ext='', minlen = 0, maxlen = -1):
-        if ext is None:
-            ext = ''
         if maxlen >= 0 and len(likely) > maxlen:
             from .anson import AnsonException
             raise AnsonException(0, f'len {likely[0: 10]} > {maxlen}')
@@ -242,6 +241,16 @@ class LangExt:
         else:
             return s.endswith(tuple(suffices))
 
+
+    @classmethod
+    def str(cls, obj):
+        '''
+        @deprecated
+        This function name is not a good choice. Uset str_() instead.
+        :param obj:
+        :return:
+        '''
+        return LangExt.to_str(obj)
 
 def log(out: Optional[TextIO], templt: Union [str, List[str]], *args):
     if (isinstance(templt, str)):
@@ -301,7 +310,7 @@ class Utils:
         return Utils.get_os() == 'Windows'
 
     @staticmethod
-    def update_patterns(file, patterns: dict, replaced_vals: dict=None):
+    def update_patterns(file, patterns: dict, replaced_vals: Optional[dict]=None):
         """
         Update the version in a text file.
 
@@ -376,8 +385,7 @@ class Utils:
                 print(f"Path {res} does not exist")
 
     @classmethod
-    def copy_anyway(cls, src: Union[str, Path, List[Path]], dest: Union[Path, str], log: bool = False) -> Union[
-        Path, List[Path]]:
+    def copy_anyway(cls, src: Union[str, Path, List[Path]], dest: Union[Path, str], log: bool = False) -> Union[Path, List]:
         if isinstance(src, (list, tuple)):
             dest_dir = Path(dest)
             dest_dir.mkdir(parents=True, exist_ok=True)
@@ -413,7 +421,7 @@ class Utils:
 
     @classmethod
     def move_anyway(cls, src: Union[str, Path, List[Path]], dest: Union[Path, str], overwrite: bool = True,
-                     log: bool = False) -> Union[Path, List[Path]]:
+                     log: bool = False) -> Union[Path, List]:
         '''
         Credits to Claude.
         :param src:
