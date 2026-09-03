@@ -279,6 +279,7 @@ class SynodeTask(Anson):
             
             c.run(formated cmd)
         '''
+
         ok, err = 0, 0
         if hasattr(self, 'deploy_cmds') and LangExt.len(self.deploy_cmds) > 0:
             print('Executing post build commands...')
@@ -286,18 +287,22 @@ class SynodeTask(Anson):
                 print(f"""\t\tcommands format:
                 [{{cmd: "string template", vars{{k: v}}, ...]
                 with default / named args include: 
-                    built_zip: {self.get_distzip()}
-                    built_dir: {self.dist_dir}
-                    zip_name : {self.zip_name()}""")
+                    built_zip  : {self.get_distzip()}
+                    package_dir: {self.package_dir}
+                    zip_name   : {self.zip_name()}""")
             for bashcmd in self.deploy_cmds:
-                for cmd in bashcmd.cmds:
-                    if verbose: print('cmd-template:', cmd)
-                    for vk, vv in bashcmd.vars.items():
-                        if verbose: print(k, ":", v)
-                        cmd = cmd.replace(f'{{{vk}}}', str(vv))
-                    cmd = cmd.format(built_zip=self.get_distzip(), build_dir=self.dist_dir, zip_name=self.zip_name())
-                    print(f'Executing: {cmd}')
-                    ret = c.run(cmd)
+                if verbose: print('cmd-template:', bashcmd.cmd)
+
+                ccli = bashcmd.cmd.format(built_zip=self.get_distzip(),
+                                          package_dir=self.package_dir,
+                                          zip_name=self.zip_name(),
+                                          **bashcmd.vars)
+
+                print(f'Executing: {ccli}')
+                if os.name != 'nt':
+                    ret = c.run(ccli, pty=True)
+                else:
+                    ret = c.run(ccli)
                 print('OK:', ret.ok, ret.stderr)
                 ok = ok + 1
         else: 
