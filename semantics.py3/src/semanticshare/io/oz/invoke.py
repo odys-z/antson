@@ -10,7 +10,7 @@ import sys
 import os
 from typing import Union, List
 from pathlib import Path
-
+from invoke import Context
 
 from anson.io.odysz.anson import Anson
 from anson.io.odysz.common import LangExt, Utils
@@ -78,12 +78,12 @@ class BashCmd(Anson):
     '''
     remarks: str
     vars: dict
-    cmds: str
+    cmd: str
 
-    def __init__(self):
+    def __init__(self, cmd: str = None):
         super().__init__()
-        vars = {}
-        cmds = []
+        self.vars = {}
+        self.cmd = cmd
 
 @dataclass
 class ScpCmd(Anson):
@@ -268,7 +268,7 @@ class SynodeTask(Anson):
         '''
         return Path(self.android_dir) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
 
-    def run_deploycmds(self, c):
+    def run_deploycmds(self, c: Context, verbose=True):
         '''
         Run self.deploy_cmds.
         deploy_cmds: [{cmd: "cmd template", vars{k: v}}, ...]
@@ -282,10 +282,18 @@ class SynodeTask(Anson):
         ok, err = 0, 0
         if hasattr(self, 'deploy_cmds') and LangExt.len(self.deploy_cmds) > 0:
             print('Executing post build commands...')
+            if verbose:
+                print(f"""\t\tcommands format:
+                [{{cmd: "string template", vars{{k: v}}, ...]
+                with default / named args include: 
+                    built_zip: {self.get_distzip()}
+                    built_dir: {self.dist_dir}
+                    zip_name : {self.zip_name()}""")
             for bashcmd in self.deploy_cmds:
                 for cmd in bashcmd.cmds:
-                    print('cmd-config:', cmd)
+                    if verbose: print('cmd-template:', cmd)
                     for vk, vv in bashcmd.vars.items():
+                        if verbose: print(k, ":", v)
                         cmd = cmd.replace(f'{{{vk}}}', str(vv))
                     cmd = cmd.format(built_zip=self.get_distzip(), build_dir=self.dist_dir, zip_name=self.zip_name())
                     print(f'Executing: {cmd}')
