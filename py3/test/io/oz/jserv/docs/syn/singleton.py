@@ -36,7 +36,7 @@ class PortfolioException(Exception):
 
 
 @dataclass
-class AppSettings(Anson):
+class T_AppSettings(Anson):
     envars: dict
     rootkey: str    # | None # test 3.12
     installkey: Optional[str] # test 3.9

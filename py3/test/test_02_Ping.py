@@ -8,7 +8,7 @@ from test.io.odysz.semantic.jprotocol import AnsonResp, MsgCode
 
 class AnclientTest(unittest.TestCase):
     def testPing(self):
-        Anson.java_src('test')
+        Anson.add_package('test')
 
         # only for 3.11
         # err = OnError(lambda c, e, args: print(c, e.format(args), file=sys.stderr) and self.fail(e))

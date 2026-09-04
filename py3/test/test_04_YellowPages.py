@@ -2,7 +2,7 @@ import unittest
 from typing import cast
 
 from src.anson.io.odysz import anson
-from test.io.oz.jserv.docs.syn.singleton import AppSettings
+from test.io.oz.jserv.docs.syn.singleton import T_AppSettings
 from test.io.oz.syn import SynodeConfig, AnRegistry, Synode, SynOrg
 
 
@@ -11,14 +11,14 @@ class YellowPagesTests(unittest.TestCase):
         self.maxDiff = None
 
     def testAnregistry(self):
-        anson.Anson.java_src('test')
+        anson.Anson.add_package('test')
 
-        settings: AppSettings = cast(AppSettings, anson.Anson.from_file('test/json/registry/settings.json'))
+        settings: T_AppSettings = cast(T_AppSettings, anson.Anson.from_file('test/json/registry/settings.json'))
 
-        self.assertEqual(type(settings), AppSettings)
+        self.assertEqual(type(settings), T_AppSettings)
         self.assertEqual('http://192.168.0.0:8964/jserv-album', settings.jservs['X'])
         self.assertEqual('''{
-  "type": "io.oz.jserv.docs.syn.singleton.AppSettings",
+  "type": "io.oz.jserv.docs.syn.singleton.T_AppSettings",
   "envars": {"WEBROOT_Album-web": "example.com"},
   "vol_name": "VOLUME_HOME",
   "volume": "~/github/semantic-jserv/jserv-album/vol",

@@ -1,4 +1,4 @@
-{ "type"      : "io.oz.jserv.docs.syn.singleton.T_AppSettings",
+{ "type"      : "io.oz.jserv.docs.syn.singleton.AppSettings",
   "vol_name"  : "VOLUME_HOME",
   "volume"    : "~/github/semantic-jserv/jserv-album/vol",
   "port"      : 8964,

@@ -19,13 +19,13 @@ class UserTypesTests(unittest.TestCase):
     '''
 
     def testUserTypes(self):
-        requir_pkg('semantics.py3', '0.6.4')
+        requir_pkg('semantics.py3', '0.6.2')
         requir_pkg('T06B')
 
         Anson.add_package('T06A')
         Anson.add_package('T06B')
 
-        settings: AppSettings = cast(AppSettings, Anson.from_file('test/json/registry/settings.json'))
+        settings: AppSettings = cast(AppSettings, Anson.from_file('test/json/registry/settings-t06.json'))
 
         self.assertEqual(type(settings), AppSettings)
         self.assertEqual('http://192.168.0.0:8964/jserv-album', settings.jservs['X'])
