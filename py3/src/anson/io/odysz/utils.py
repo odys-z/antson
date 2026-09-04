@@ -130,14 +130,30 @@ def targz2(disttargz, resources, exclude_patterns=[]):
           if not err else 'Errors while making target (created tar.gz file)')
 
 
-# def zip2(distzip, resources, exclude_patterns=[]):
-def gzip2(distpath, resources, exclude_patterns=[]):
+def gzip2(distpath, resources, exclude_patterns=[], tolerate_suffix=False):
     import tarfile
     import zipfile
 
     tar = os.name == 'posix'
-    with tarfile.open(distpath, 'w:gz') if tar else zipfile.ZipFile(distpath, 'w', zipfile.ZIP_DEFLATED) as archive:
+    is_posix = os.name == 'posix'
+    
+    is_tar_suffix = distpath.lower().endswith(('.tar.gz', '.tgz'))
+    is_zip_suffix = distpath.lower().endswith('.zip')
 
+    if not is_tar_suffix and not is_zip_suffix:
+        raise ValueError(f"Unsupported archive extension for '{distpath}'. Must be .zip, .tar.gz, or .tgz")
+
+    mismatch = (is_posix and is_zip_suffix) or (not is_posix and is_tar_suffix)
+    if mismatch:
+        expected_ext = ".tar.gz or .tgz" if is_posix else ".zip"
+        error_msg = f"[ERROR] OS mismatch: Running on {os.name}, expected archive format suffix: {expected_ext} but got '{distpath}'"
+        
+        if not tolerate_suffix:
+            raise ValueError(error_msg)
+        else:
+            print(f"*** WARNING *** {error_msg}. Proceeding anyway due to tolerate_suffix=True.")
+
+    with tarfile.open(distpath, 'w:gz') if tar else zipfile.ZipFile(distpath, 'w', zipfile.ZIP_DEFLATED) as archive:
         err = False
         # resources
         for rk, rv in resources.items():

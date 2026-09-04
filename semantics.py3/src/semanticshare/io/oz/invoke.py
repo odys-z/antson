@@ -234,10 +234,10 @@ class SynodeTask(Anson):
     
     def zip_name(self) -> str:
         '''
-        :return: e.g. synode-0.8.0-jre17-alpha-pmking.zip
+        :return: e.g. synode-0.8.0-jre17-alpha-pmking.zip or tar.gz
         '''
         dist_name = f'{self.jre_name if self.jre_name else "online"}-{self.deploy.market_id}-{self.deploy.orgid}'
-        return f'synode-{self.version}-{dist_name}.zip'
+        return f'synode-{self.version}-{dist_name}.{"zip" if os.name != "nt" else "tar.gz"}'
 
     def get_apk_name(self):
         '''
@@ -250,14 +250,15 @@ class SynodeTask(Anson):
         :return: e.g. desktop-0.8.0-alpha-pmking.zip
         '''
         market_org = f'{self.deploy.market_id}-{self.deploy.orgid}'
-        return f'desktop-{self.version}-{market_org}.zip'
+        return f'desktop-{self.version}-{market_org}.{"zip" if os.name != "nt" else "tar.gz"}'
 
     def get_distzip(self) -> Path:
         return os.path.join(self.package_dir, self.zip_name())
 
     def get_deskapp_zip(self) -> Path:
         '''
-        @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-nt-alpha-pmking.zip
+        @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.zip
+                      .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.tar.gz
         '''
         return os.path.join(self.desktop_dir, self.desktop_dist_dir, self.deskzip_name())
 
