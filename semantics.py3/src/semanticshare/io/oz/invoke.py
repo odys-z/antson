@@ -257,9 +257,9 @@ class SynodeTask(Anson):
 
     def get_deskapp_zip(self) -> Path:
         '''
-        @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.zip
+        @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-nt-alpha-pmking.zip
         '''
-        return os.path.join(self.desktop_dir, self.package_dir, self.deskzip_name())
+        return os.path.join(self.desktop_dir, self.desktop_dist_dir, self.deskzip_name())
 
     def get_gradleprj_apk(self) -> Path:
         '''
@@ -273,9 +273,9 @@ class SynodeTask(Anson):
         Run self.deploy_cmds.
         deploy_cmds: [{cmd: "cmd template", vars{k: v}}, ...]
             auto args:
-                built_zip: self.get_distzip()
-                built_dir: self.dist_dir
-                zip_name : self.zip_name()
+                built_zip  : self.get_distzip()
+                package_dir: self.package_dir
+                zip_name   : self.zip_name()
             
             c.run(formated cmd)
         '''

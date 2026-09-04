@@ -28,18 +28,6 @@ def class4Name(m, clssn: str) -> type:
     :return class type:
     """
 
-    # def adjustMoudlename(m: str):
-    #     def has_module(name: str):
-    #         try:
-    #             return find_spec(name) is not None
-    #         except Exception as exp:
-    #             if Anson.verbose: print(name, exp)
-    #
-    #     if len(m) == 0:
-    #         return java_src_path if has_module(java_src_path) else ''
-    #
-    #     return m if has_module(m) else f'{java_src_path}.{m}'
-
     def has_module(name: str):
         try:
             return find_spec(name) is not None
@@ -185,10 +173,6 @@ class JsonOpt:
 
     # const map<string, string> astyps;
     astyps: dict[str, str]
-
-    # from typing import TYPE_CHECKING
-    # if TYPE_CHECKING:
-    #     from semanticshare.io.odysz.reflect import AnsonAst
     asts: dict[str, 'AnsonAst']
 
     verbose: bool

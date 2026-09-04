@@ -16,13 +16,29 @@ from dataclasses import dataclass
 
 def requir_pkg(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = None):
     '''
-        Docstring for requir_pkg
-
         :param pkg_name: package name, e.g. 'cryptography', 'anson.py3', 'semantics.py3', ...
         :type pkg_name: str
         :param require_ver: requred version, str for minimum version,
         list for exact version or version range [min, max]
         :type require_ver: Union[str, List[str]]
+        @since 0.6.4
+    '''
+    if not check_package(pkg_name, require_ver):
+        if not tolerate:
+            sys.exit(1)
+        else:
+            print(f'*** WARNING *** Please install {pkg_name} {require_ver}.')
+
+
+def check_package(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = None) -> bool:
+    '''
+        Check if a package can be imported.
+
+        :param pkg_name: package name, e.g. 'cryptography', 'anson.py3', 'semantics.py3', ...
+        :param require_ver: requred version, str for minimum version,
+                            list for exact version or version range [min, max]
+        :return: True if the package can be imported, False otherwise.
+        @since 0.6.4
     '''
     from importlib.metadata import version, PackageNotFoundError
     from packaging.version import Version
@@ -31,25 +47,26 @@ def requir_pkg(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = Non
         pkg_version = version(pkg_name.replace('.', '_').replace('-', '_'))
     except PackageNotFoundError:
         print('Package not found:', pkg_name)
-        sys.exit(1)
+        return False
 
     print(f"{pkg_name}: ", pkg_version)
 
     if isinstance(require_ver, str):
         if Version(pkg_version) < Version(require_ver):
             print(f'Please upgrade {pkg_name} to version {require_ver} or above. Current version: {pkg_version}')
-            sys.exit(1)
+            return False
     elif isinstance(require_ver, list):
         if len(require_ver) == 1:
             if Version(pkg_version) != Version(require_ver[0]):
                 print(f'Please install {pkg_name} version {require_ver[0]}. Current version: {pkg_version}')
-                sys.exit(1)
+                return False
         else:
             if Version(pkg_version) < Version(require_ver[0]) or Version(pkg_version) > Version(require_ver[1]):
                 print(
                     f'Please install {pkg_name} version between {require_ver[0]} and {require_ver[1]}. Current version: {pkg_version}')
-                sys.exit(1)
-    print('Positive.')
+                return False
+    print(f'{pkg_name} {require_ver}: Positive.')
+    return True
 
 
 def requir_executable(cmd: str, setup_hint: str, tolerate: bool = False):

@@ -236,6 +236,7 @@ class AnsonJavaEnumAst(AnsonAst):
     def __init__(self):
         super().__init__()
 
+
 @dataclass
 class AnsonBodyAst(AnsonAst):
     A: dict[str, str]
@@ -247,9 +248,6 @@ class AnsonBodyAst(AnsonAst):
 
 @dataclass
 class AnsonMsgAst(AnsonAst):
-    """
-
-    """
     msg: str
     A: dict
 
