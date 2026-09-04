@@ -130,6 +130,59 @@ def targz2(disttargz, resources, exclude_patterns=[]):
           if not err else 'Errors while making target (created tar.gz file)')
 
 
+# def zip2(distzip, resources, exclude_patterns=[]):
+def gzip2(distpath, resources, exclude_patterns=[]):
+    import tarfile
+    import zipfile
+
+    tar = os.name == 'posix'
+    with tarfile.open(distpath, 'w:gz') if tar else zipfile.ZipFile(distpath, 'w', zipfile.ZIP_DEFLATED) as archive:
+
+        err = False
+        # resources
+        for rk, rv in resources.items():
+            if "*" in rv:
+                count = 0
+                srcroot = re.sub('\\*$', '', rv.replace('\\', '/'))
+                for pth, _dir, fs in os.walk(srcroot):
+                    for file in fs:
+                        if not matches_patterns(file, exclude_patterns):
+                            file_path = os.path.join(pth, file)
+                            relative_path = os.path.relpath(file_path, srcroot)
+
+                            visited = set()
+                            while os.path.islink(file_path):
+                                if file_path in visited:
+                                    raise ValueError(f"Cycle detected in symbolic links at {relative_path}")
+                                visited.add(file_path)
+                                print(file_path, '->', os.path.realpath(file_path))
+                                file_path = os.path.realpath(file_path)
+
+                            relative_path = os.path.relpath(relative_path)
+                            arcname = os.path.join(rk, relative_path)
+                            if tar:
+                                archive.add(file_path, arcname=arcname)
+                            else:
+                                archive.write(file_path, arcname)
+                            count += 1
+                            print(f"Added to ZIP: {relative_path} as {arcname}")
+                if count == 0:
+                    err = True
+                    raise FileNotFoundError(f'[ERROR] No files found in {rv}.')
+            else:  # Handle single files (jserv.jar and exiftool.exe)
+                file = rk if rv == '.' else rv
+                if os.path.exists(file):
+                    if tar:
+                        archive.add(file, arcname=rk)
+                    else:
+                        archive.write(file, rk)
+                    print(f"Added to ZIP: {file} as {rk}")
+                else:
+                    err = True
+                    raise FileNotFoundError(f"[ERROR]: Resource '{rk}': '{file}' not found.")
+
+    print(f'Created zip/gz successfully: {distpath}' if not err else 'Errors while making target (creade zip/gz file)')
+
 class Regexs():
     """
     [Credits to Claude]
