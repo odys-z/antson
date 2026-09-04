@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling>=1.25.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "t06b"
+version = "1.0.0"
+authors = [
+  { name="Ody Z", email="odys.zhou@gmail.com" },
+]
+description = "A simple tool to deploy the jre binary releases mirror."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "typing_extensions>=4.0.0",
+    "semantics.py3>=0.6.2",
+    "anson.py3>=0.6.3"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = {text = """Copyright (c) 2027 Ody Z. All rights reserved.
+
+This work is licensed under the terms of the MIT license.
+For a copy, see <https://opensource.org/licenses/MIT>.""" }
+
+[project.optional-dependencies]
+testing = [
+    "pytest",
+    "requests"
+]
+
+[tool.hatch.build]
+exclude = [
+  "/.venv*",
+  "/.git*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/T06B"]
+
+[project.urls]
+Homepage = "https://github.com/Acadynamo"
+Issues = "https://github.com/Acadynamo"

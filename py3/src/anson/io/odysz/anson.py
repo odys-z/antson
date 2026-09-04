@@ -11,12 +11,12 @@ import json
 from enum import Enum
 from importlib.util import find_spec
 from numbers import Number
-from typing import Union, Optional, List
+from typing import Union, Optional, List, cast
 
 from typing_extensions import get_args, get_origin
 
 java_src_path: str = 'semanticshare'
-
+java_src_paths: List[str] = ['semanticshare']
 
 def class4Name(m, clssn: str) -> type:
     """
@@ -27,19 +27,41 @@ def class4Name(m, clssn: str) -> type:
     :param clssn:
     :return class type:
     """
-    
+
+    # def adjustMoudlename(m: str):
+    #     def has_module(name: str):
+    #         try:
+    #             return find_spec(name) is not None
+    #         except Exception as exp:
+    #             if Anson.verbose: print(name, exp)
+    #
+    #     if len(m) == 0:
+    #         return java_src_path if has_module(java_src_path) else ''
+    #
+    #     return m if has_module(m) else f'{java_src_path}.{m}'
+
+    def has_module(name: str):
+        try:
+            return find_spec(name) is not None
+        except Exception as exp:
+            if Anson.verbose: print(name, exp)
+        return False
+
     def adjustMoudlename(m: str):
-        def has_module(name: str):
-            try:
-                return find_spec(name) is not None
-            except Exception as exp:
-                if Anson.verbose: print(name, exp)
-            
         if len(m) == 0:
-            return java_src_path if has_module(java_src_path) else ''
-        
-        return m if has_module(m) else f'{java_src_path}.{m}'
-    
+            for pkg in java_src_paths:
+                if has_module(pkg):
+                    return pkg
+            return ''
+
+        if has_module(m):
+            return m
+
+        for pkg in java_src_paths:
+            candidate = f'{pkg}.{m}'
+            if has_module(candidate):
+                return candidate
+
     module = __import__(adjustMoudlename(m), fromlist=[clssn])
     cls = getattr(module, clssn)
     cls.__type__=f'{m}.{clssn}'
@@ -63,8 +85,8 @@ def AnsonField(value):
     return decorator
 
 class AnsonFieldMeta:
-    metadata: dict
-    dataAnclass: str
+    metadata: Optional[dict]
+    dataAnclass: Optional[str]
     fieldname: str
 
     def __init__(self, **kwargs):
@@ -120,7 +142,7 @@ def value_type(v):
 
 
 def instanceof(clsname: Union[str, type], props: dict):
-    cls = getClass(clsname) if type(clsname) == str else clsname
+    cls = getClass(cast(str, clsname)) if type(clsname) == str else clsname
     try: obj = cls() 
     except Exception as e:
         print('Cannot create instance of', clsname, e)
@@ -151,15 +173,11 @@ def parse_type_(obj) -> Union[str, None]:
 def parse_forward(ref: Union[type, str]):
     return ref[0] if type(ref) == list else \
         get_args(ref)[0] if get_origin(ref) == list else \
-        getClass(ref) if type(ref) == str else \
+        getClass(cast(str, ref)) if type(ref) == str else \
         ref
 
 
 class JsonOpt:
-    # quotekey = True
-    #
-    # def quoteK(self):
-    #     return self.quotekey
     serialize_type: bool
     escape4DB: bool
     doubleFormat: str
@@ -167,9 +185,10 @@ class JsonOpt:
 
     # const map<string, string> astyps;
     astyps: dict[str, str]
-    # const map<string, string> primtypes;
-    # primtypes: dict[str, str]
-    # const AstMap *asts;
+
+    # from typing import TYPE_CHECKING
+    # if TYPE_CHECKING:
+    #     from semanticshare.io.odysz.reflect import AnsonAst
     asts: dict[str, 'AnsonAst']
 
     verbose: bool
@@ -206,6 +225,42 @@ class Anson(dict):
 
     def __getitem__(self, key):
         return self.__dict__[key]
+
+    @classmethod
+    def java_src(cls, src_root: str = 'src'):
+        """
+        Example
+        -------
+        To deserialize type: io.oz.syn.AppSettings for Python class src.io.oz.syn.AppSetting
+        from synode.py3, call::
+        ```python
+            Anson.java_src('src')
+
+        :param src_root: e. g. 'src',
+        :param requires
+        """
+        global java_src_path
+        java_src_path = src_root
+
+    @classmethod
+    def add_package(cls, names: Union[str, List[str]]):
+        '''
+        Register user pacakges.
+        Example
+        -------
+        ```python
+            Anson.add_package('myapp')
+            Anson.add_package(['myapp.ext', 'otherlib'])
+        ```
+        :param names:
+        '''
+        global java_src_paths
+        pkgs = [names] if isinstance(names, str) else list(names)
+        for p in reversed(pkgs):
+            if p in java_src_paths:
+                java_src_paths.remove(p)
+            java_src_paths.insert(0, p)
+        return cls
 
     @staticmethod
     def toList_(lst: list, ind: int, beautify):
@@ -258,7 +313,7 @@ class Anson(dict):
         '''
         self.toFile(json_path)
 
-    def toBlock_(self, ind: int, beautify, suggestype: type = None) -> str:
+    def toBlock_(self, ind: int, beautify, suggestype: Optional[type] = None) -> str:
         myfds = _fields(self)
         s = '{\n' if beautify else '{'
 
@@ -401,22 +456,6 @@ class Anson(dict):
             obj = json.load(file)
             an = Anson.from_envelope(obj)
             return an
-
-    @classmethod
-    def java_src(cls, src_root: str = 'src'):
-        """
-        Example
-        -------
-        To deserialize type: io.oz.syn.AppSettings for Python class src.io.oz.syn.AppSetting
-        from synode.py3, call::
-        ```python
-            Anson.java_src('src')
-
-        :param src_root: e. g. 'src',
-        :param requires
-        """
-        global java_src_path
-        java_src_path = src_root
 
     @classmethod
     def from_envelope(cls, obj: dict):
