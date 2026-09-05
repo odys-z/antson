@@ -237,7 +237,7 @@ class SynodeTask(Anson):
         :return: e.g. synode-0.8.0-jre17-alpha-pmking.zip or tar.gz
         '''
         dist_name = f'{self.jre_name if self.jre_name else "online"}-{self.deploy.market_id}-{self.deploy.orgid}'
-        return f'synode-{self.version}-{dist_name}.{"zip" if os.name != "nt" else "tar.gz"}'
+        return f'synode-{self.version}-{dist_name}.{"zip" if os.name == "nt" else "tar.gz"}'
 
     def get_apk_name(self):
         '''
