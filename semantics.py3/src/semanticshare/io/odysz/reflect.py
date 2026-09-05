@@ -26,8 +26,8 @@ Semantype = Literal['()', '=', 'ini']
 @dataclass
 class SemanExpr(Semantics):
     stype: Semantype
-    args: [str]
-    semantics: ['SemanExpr']
+    args: List[str]
+    semantics: List['SemanExpr']
     expect_result: str
 
     def __init__(self, **kwargs):
@@ -74,8 +74,8 @@ class SemanExpr(Semantics):
 @dataclass
 class AnCtor(Semantics):
     base: SemanExpr
-    args: [SemanExpr]
-    body: [SemanExpr]
+    args: List[SemanExpr]
+    body: List[SemanExpr]
 
     def __init__(self):
         super().__init__()

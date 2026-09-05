@@ -445,7 +445,7 @@ class Utils:
         :param dest:
         :param overwrite:
         :param log:
-        :return:
+        :return: final destination path
         '''
         if isinstance(src, (list, tuple)):
             dest_dir = Path(dest)
