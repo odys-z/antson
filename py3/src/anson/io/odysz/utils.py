@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import fnmatch
-from glob import glob
 import os
 import re
 
 from typing import List, Optional, Sequence, Union
+
+from .common import Utils
 
 def matches_patterns(filename, patterns):
     """
@@ -35,7 +36,10 @@ def zip2(distzip, resources, exclude_patterns=[]):
         err = False
         # resources
         for rk, rv in resources.items():
-            if "*" in rv:
+            if not rk or not rv:
+                Utils.warn(f"[WARNING] Resource key or value is empty: rk='{rk}', rv='{rv}'. Skipping.")
+                continue
+            if rv and "*" in rv:
                 count = 0
                 srcroot = re.sub('\\*$', '', rv.replace('\\', '/'))
                 for pth, _dir, fs in os.walk(srcroot):
@@ -73,63 +77,6 @@ def zip2(distzip, resources, exclude_patterns=[]):
           if not err else 'Errors while making target (creaded zip file)')
 
 
-# def targz2(disttargz, resources, exclude_patterns=[]):
-#     """
-#     example: targz2('registry-zsu.tar.gz', {"zsu": "registry-deploy/*"}, ['*.tar.gz', '*.zip'])
-#     :param disttargz: Output path ending in .tar.gz
-#     :param resources: Dictionary mapping archive subdirectories to source paths
-#     :param exclude_patterns: Patterns to exclude
-#     :return: None
-#     """
-#     import tarfile
-
-#     # Open with 'w:gz' to enforce gzip compression
-#     with tarfile.open(disttargz, 'w:gz') as tar:
-#         err = False
-#         # resources
-#         for rk, rv in resources.items():
-#             if "*" in rv:
-#                 count = 0
-#                 srcroot = re.sub('\\*$', '', rv.replace('\\', '/'))
-#                 for pth, _dir, fs in os.walk(srcroot):
-#                     for file in fs:
-#                         if not matches_patterns(file, exclude_patterns):
-#                             file_path = os.path.join(pth, file)
-#                             relative_path = os.path.relpath(file_path, srcroot)
-
-#                             # Handle symlinks (retained your exact logic)
-#                             visited = set()
-#                             while os.path.islink(file_path):
-#                                 if file_path in visited:
-#                                     raise ValueError(f"Cycle detected in symbolic links at {relative_path}")
-#                                 visited.add(file_path)
-#                                 print(file_path, '->', os.path.realpath(file_path))
-#                                 file_path = os.path.realpath(file_path)
-
-#                             relative_path = os.path.relpath(relative_path)
-#                             arcname = os.path.join(rk, relative_path)
-                            
-#                             # Equivalent replacement: tar.add instead of zipf.write
-#                             tar.add(file_path, arcname=arcname)
-#                             count += 1
-#                             print(f"Added to TAR.GZ: {relative_path} as {arcname}")
-#                 if count == 0:
-#                     err = True
-#                     raise FileNotFoundError(f'[ERROR] No files found in {rv}.')
-#             else:  # Handle single files
-#                 file = rk if rv == '.' else rv
-#                 if os.path.exists(file):
-#                     # Equivalent replacement: tar.add instead of zipf.write
-#                     tar.add(file, arcname=rk)
-#                     print(f"Added to TAR.GZ: {file} as {rk}")
-#                 else:
-#                     err = True
-#                     raise FileNotFoundError(f"[ERROR]: Resource '{rk}': '{file}' not found.")
-
-#     print(f'Created TAR.GZ file successfully: {disttargz}' \
-#           if not err else 'Errors while making target (created tar.gz file)')
-
-
 def gzip2(distpath, resources, exclude_patterns=[], tolerate_suffix=False):
     import tarfile
     import zipfile
@@ -157,6 +104,9 @@ def gzip2(distpath, resources, exclude_patterns=[], tolerate_suffix=False):
         err = False
         # resources
         for rk, rv in resources.items():
+            if not rk or not rv:
+                Utils.warn(f"[WARNING] Resource key or value is empty: rk='{rk}', rv='{rv}'. Skipping.")
+                continue
             if "*" in rv:
                 count = 0
                 srcroot = re.sub('\\*$', '', rv.replace('\\', '/'))

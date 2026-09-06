@@ -217,6 +217,17 @@ class SynodeTask(Anson):
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
 
+    def check_local_resource(self, local_path: str) -> str:
+        """
+        Check if the resource exists locally, if not, call sys.exit(-1).
+        Args:
+            local_path (str): Local path of the resource to check.
+        """
+        if not os.path.exists(local_path):
+            Utils.warn(f"Resource not found locally: {local_path}. Needing download to{local_path}...")
+            sys.exit(-1)
+        return local_path
+
     def config_central(self, central_settings: CentralSettings):
         print(central_settings.market)
         # MEMO set central_path to config.xml/c[k=regist-central]/v
@@ -250,7 +261,7 @@ class SynodeTask(Anson):
         :return: e.g. desktop-0.8.0-alpha-pmking.zip
         '''
         market_org = f'{self.deploy.market_id}-{self.deploy.orgid}'
-        return f'desktop-{self.version}-{market_org}.{"zip" if os.name != "nt" else "tar.gz"}'
+        return f'desktop-{self.version}-{market_org}.{"zip" if os.name == "nt" else "tar.gz"}'
 
     def get_distzip(self) -> str:
         return os.path.join(self.package_dir, self.zip_name())
