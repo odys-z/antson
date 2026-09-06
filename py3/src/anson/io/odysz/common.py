@@ -14,7 +14,7 @@ from typing import TextIO, Optional, TypeVar, Union, List, Tuple, Sequence, Any
 from dataclasses import dataclass
 
 
-def requir_pkg(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = None):
+def requir_pkg(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = None, tolerate: bool = False):
     '''
         :param pkg_name: package name, e.g. 'cryptography', 'anson.py3', 'semantics.py3', ...
         :type pkg_name: str
