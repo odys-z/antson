@@ -4,7 +4,7 @@ from anson.io.odysz.common import Utils
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-from dataclasses import dataclass, Field
+from dataclasses import dataclass, Field, field
 from pathlib import Path
 
 import json
@@ -199,7 +199,7 @@ class Anson(dict):
     __type__: str
     '''ansons.antson.Anson'''
 
-    comments: str
+    comments: str = field(metadata={'ignoreTo': True})
 
     def __init__(self):
         super().__init__()

@@ -252,10 +252,10 @@ class SynodeTask(Anson):
         market_org = f'{self.deploy.market_id}-{self.deploy.orgid}'
         return f'desktop-{self.version}-{market_org}.{"zip" if os.name != "nt" else "tar.gz"}'
 
-    def get_distzip(self) -> Path:
+    def get_distzip(self) -> str:
         return os.path.join(self.package_dir, self.zip_name())
 
-    def get_deskapp_zip(self) -> Path:
+    def get_deskapp_zip(self) -> str:
         '''
         @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.zip
                       .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.tar.gz
