@@ -8,7 +8,7 @@ import re
 import shutil
 import sys
 import os
-from typing import Union, List
+from typing import Union, List, Optional
 from pathlib import Path
 from invoke import Context
 
@@ -80,7 +80,7 @@ class BashCmd(Anson):
     vars: dict
     cmd: str
 
-    def __init__(self, cmd: str = None):
+    def __init__(self, cmd: str = ''):
         super().__init__()
         self.vars = {}
         self.cmd = cmd
@@ -129,7 +129,7 @@ class TaskCredentials():
             print('Task Credentials not found:', cred_path)
 
     
-    def find_pswd(self, scpcmd: ScpCmd = None):
+    def find_pswd(self, scpcmd: Optional[ScpCmd] = None):
         
         if scpcmd is not None and scpcmd.pswd is not None:
             return scpcmd.pswd
@@ -329,7 +329,7 @@ class SynodeTask(Anson):
         for cmd in self.deploy_scps:
             self.scp_push(local_path=local_path, cmd=cmd)
     
-    def scp_push(self, local_path: Path, cmd: ScpCmd):
+    def scp_push(self, local_path: str, cmd: ScpCmd):
         try:
             from paramiko import SSHClient
             from scp import SCPClient
@@ -430,7 +430,7 @@ class SynodeTask(Anson):
                 with open(local_path, 'r') as file:
                     return json.load(file)
                 
-        return None
+        # return None
 
     def restore_backups(self):
         for backed, backing in self.backings.items():
