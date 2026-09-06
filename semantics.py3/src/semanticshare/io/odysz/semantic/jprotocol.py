@@ -1,9 +1,10 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Tuple, Union
 from urllib.parse import urlparse
 import re
 
+import deprecated
 from anson.io.odysz.common import LangExt
 from anson.io.odysz.utils import Regexs
 from typing_extensions import Self
@@ -48,8 +49,38 @@ class AnsonHeader(Anson):
 
 
 @dataclass
+class AnsonBody(Anson):
+    uri: str
+    parent: Optional['AnsonMsg']
+    '''
+    @deprecated
+    '''
+    a: str
+    rs: dict
+    m: str
+    map: dict
+    opts: JsonOpt
+    addr: str
+    version: str
+    seq: int
+
+
+    def __init__(self, parent = None):
+        super().__init__()
+        self.uri = None
+        self.parent = parent
+
+    def A(self, a: str) -> Self:
+        self.a = a
+        return self
+
+    def Uri(self, func_uri):
+        self.uri = func_uri
+        return self
+
+@dataclass
 class AnsonMsg(Anson):
-    body: ['AnsonBody']
+    body: List[AnsonBody]
     header: AnsonHeader
 
     port: Optional[Port]
@@ -66,7 +97,7 @@ class AnsonMsg(Anson):
     def __init__(self, p: Enum = None):
         super().__init__()
         self.port = p
-        self.body = []
+        self.body: List[AnsonBody] = []
 
     def Header(self, h: AnsonHeader = None, ssinf: 'SessionInf' = None) -> Self:
         if h is not None:
@@ -78,7 +109,7 @@ class AnsonMsg(Anson):
             self.header.ssToken = ssinf.ssToken
         return self
 
-    def Body(self, bodyItem: 'AnsonBody'=None) -> Self:
+    def Body(self, bodyItem: Optional[AnsonBody]=None) -> Union[Self, AnsonBody, None]:
         if bodyItem is None:
             return None if LangExt.len(self.body) == 0 else self.body[0]
         else:
@@ -86,33 +117,7 @@ class AnsonMsg(Anson):
             return self
 
 
-@dataclass
-class AnsonBody(Anson):
-    uri: str
-    parent: Optional[AnsonMsg]
-    a: str
-    rs: dict
-    m: str
-    map: dict
-    opts: JsonOpt
-    addr: str
-    version: str
-    seq: int
-
-
-    def __init__(self, parent: AnsonMsg = None):
-        super().__init__()
-        self.uri = None
-        self.parent = parent
-        Anson.enclosinguardtypes.add(AnsonMsg)
-
-    def A(self, a: str) -> Self:
-        self.a = a
-        return self
-
-    def Uri(self, func_uri):
-        self.uri = func_uri
-        return self
+Anson.enclosinguardtypes.add(AnsonMsg)
 
 
 @dataclass
@@ -180,10 +185,10 @@ class JServUrl(Anson):
     def __init__(self,
                  jservurl: str = None,
                  https: bool=False,
-                 ip: str=None, port: int=80, iport: str = None,
+                 ip: str=None, port: Optional[int]=80, iport: Optional[Union[str, Tuple[str, int]]] = None,
                  protocolroot: str = '',
                  jprotocol: JProtocol = None,
-                 subpaths: List[str]=[]):
+                 subpaths: Optional[List[str]]=None):
         super().__init__()
 
         if jprotocol is None:
@@ -195,10 +200,14 @@ class JServUrl(Anson):
         self.ip = ip
         self.port = port
         if iport is not None:
-            host_port = iport.split(":")
-            self.ip = host_port[0]
-            self.port = int(host_port[1])
-        self.subpaths = subpaths
+            if isinstance(iport, tuple):
+                self.ip = iport[0]
+                self.port = iport[1]
+            else:
+                host_port = iport.split(":")
+                self.ip = host_port[0]
+                self.port = int(host_port[1])
+        self.subpaths = subpaths or []
         self.jservtime = '1911-10-10'
 
         if jservurl:

@@ -116,7 +116,7 @@ class LangExt:
         '''
 
     @staticmethod
-    def isblank(s, regex=None):
+    def isblank(s:Optional[Any], regex=None):
         """
         ::
         

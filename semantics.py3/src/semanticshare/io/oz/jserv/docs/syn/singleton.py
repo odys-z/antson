@@ -14,7 +14,7 @@ from semanticshare.io.oz.syn import Synode
 jserv_sep = ' '
 synode_sep = ':'
 
-implISettingsLoaded = 'io.oz.syntier.serv.WebsrvLocalExposer'
+implISettingsLoaded : str = 'io.oz.syntier.serv.WebsrvLocalExposer'
 
 syn_db = 'doc-jserv.db'
 sys_db = 'jserv-main.db'
@@ -135,7 +135,7 @@ class AppSettings(Anson):
         self.webProxyPort = 0
 
         self.envars = {}
-        self.startHandler = [implISettingsLoaded, 'web-dist/private/host.json']
+        self.startHandler: List[str] = [implISettingsLoaded, 'web-dist/private/host.json']
         self.webrootLocal = f'http://suppress.warning:{self.webport}'
 
         self.jserv_utc = None

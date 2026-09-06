@@ -199,10 +199,13 @@ class Anson(dict):
     __type__: str
     '''ansons.antson.Anson'''
 
+    comments: str
+
     def __init__(self):
         super().__init__()
         t = type(self)
         self.__type__ = f'{t.__module__}.{t.__name__}'
+        self.comments = ''
 
     def __setitem__(self, key, value):
         self.__dict__[key] = value
