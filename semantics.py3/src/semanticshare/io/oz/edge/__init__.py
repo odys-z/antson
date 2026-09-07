@@ -101,45 +101,48 @@ class Temurin17Release(JRERelease):
             self.mirroring.append(zip_gz)
         return zip_gz, zip_gz in self.resources, inmirror, self.extract_root
 
-def extract_check_jretree(gzip_path, target_dir):
-    '''
-    Extract the zip/tar.gz file to target_dir, and check if a valid JRE tree is present.
-    :param zip_path: path to the zip/tar.gz file
-    :param target_dir: directory to extract to
-    :return: root path of the extracted JRE tree, or None if not found.
-    '''
-    import os
-    import shutil
-    import tarfile
-    import zipfile
-
-    def guess_jretree(target_root):
+    @classmethod
+    def guess_jretree(cls, target_root):
+        import os
         '''
         Find java bin in target root. (only verified against JRE 17 tree)
         :param target_root:
-        :return: root path of the extracted JRE tree, or None if not found.
+        :return: root path of the extracted JRE tree, or None if not found. 
         '''
         for root, dirs, _ in os.walk(target_root):
             if "bin" in dirs and "lib" in dirs and "NOTICE" in _ and "release" in _:
                 return Path(root)
         return None
 
-    filename = Path(gzip_path).stem
 
-    target_dir = Path.joinpath(target_dir, filename + '-extract')
-    try: shutil.rmtree(target_dir)
-    except: pass
-
-    print(f"Extracting {filename} ...")
-    if filename.endswith(".zip"):
-        with zipfile.ZipFile(gzip_path, 'r') as z:
-            z.extractall(target_dir)
-    elif filename.endswith(".gz") or filename.endswith(".tgz"):
+    @classmethod
+    def extract_check_jretree(cls, gzip_path, target_dir):
+        '''
+        Extract the zip/tar.gz file to target_dir, and check if a valid JRE tree is present.
+        :param zip_path: path to the zip/tar.gz file
+        :param target_dir: directory to extract to
+        :return: root path of the extracted JRE tree, or None if not found.
+        '''
+        import shutil
         import tarfile
-        with tarfile.open(gzip_path, 'r:gz') as t:
-            t.extractall(target_dir)
+        import zipfile
 
-    ext_root = guess_jretree(target_dir)
-    if ext_root is None and (filename.endswith(".zip") or filename.endswith(".gz")):
-        raise RuntimeError("JRE extraction failed")
-    return ext_root
+        filename = Path(gzip_path).stem
+
+        target_dir = Path.joinpath(target_dir, filename + '-extract')
+        try: shutil.rmtree(target_dir)
+        except: pass
+
+        print(f"Extracting {filename} ...")
+        if filename.endswith(".zip"):
+            with zipfile.ZipFile(gzip_path, 'r') as z:
+                z.extractall(target_dir)
+        elif filename.endswith(".gz") or filename.endswith(".tgz"):
+            import tarfile
+            with tarfile.open(gzip_path, 'r:gz') as t:
+                t.extractall(target_dir)
+
+        ext_root = Temurin17Release.guess_jretree(target_dir)
+        if ext_root is None and (filename.endswith(".zip") or filename.endswith(".gz")):
+            raise RuntimeError("JRE extraction failed")
+        return ext_root
