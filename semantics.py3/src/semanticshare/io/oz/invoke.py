@@ -271,7 +271,7 @@ class SynodeTask(Anson):
         @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.zip
                       .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.tar.gz
         '''
-        return os.path.join(self.desktop_dir, self.desktop_dist_dir, self.deskzip_name())
+        return os.path.join(self.desktop_dir, self.package_dir, self.deskzip_name())
 
     def get_gradleprj_apk(self) -> Path:
         '''
