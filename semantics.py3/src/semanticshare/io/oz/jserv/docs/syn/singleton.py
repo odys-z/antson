@@ -101,9 +101,9 @@ class AppSettings(Anson):
     market_name: str
     regiserv: str
     envars: dict
-    startHandler: [str]
-    rootkey: Optional[str]    # | None # test 3.12
-    installkey: Optional[str] # test 3.9
+    startHandler: List[str]
+    rootkey: Optional[str]
+    installkey: Optional[str]
 
     volume: str
     vol_name: str
