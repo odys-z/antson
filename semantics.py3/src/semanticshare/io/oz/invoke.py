@@ -127,6 +127,7 @@ class TaskCredentials():
                 self.credentials = json.load(file)
         else:
             print('Task Credentials not found:', cred_path)
+            self.credentials = {}
 
     
     def find_pswd(self, scpcmd: Optional[ScpCmd] = None):
@@ -342,9 +343,10 @@ class SynodeTask(Anson):
     
     def scp_push(self, local_path: str, cmd: ScpCmd):
         try:
-            from paramiko import SSHClient
+            from paramiko import SSHClient, SSHException, WarningPolicy
             from scp import SCPClient
         except ImportError as e:
+            print("Only Tested on Python 3.12.9 or later")
             print('ERROR', e)
             print('Please install paramiko and scp packages to enable SCP post build:')
             print('pip install paramiko scp')
@@ -387,11 +389,23 @@ class SynodeTask(Anson):
 
         print(f'[SCP] {local_path} -> {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
 
-        password = task_credentials.find_pswd(cmd)
+        password = None
+        try: 
+            password = task_credentials.find_pswd(cmd)
+        except Exception as e:
+            Utils.warn("find_pswd failed: {}", e)
 
         with SSHClient() as ssh:
             ssh.load_system_host_keys()
-            ssh.connect(cmd.host, port=cmd.port, username=cmd.user, password=password)
+            ssh.set_missing_host_key_policy(WarningPolicy())
+            try:
+                ssh.connect(cmd.host, port=cmd.port, username=cmd.user, password=password)
+            except SSHException as e:
+                Utils.warn("SSHClient connection failed with auto accept host is false." +
+                           "\n\tHad you ever tried ssh connection to {} : {} ?",
+                           cmd.host, cmd.port)
+                Utils.warn(e)
+                sys.exit(-1)
 
             # Use SFTP to manage directories
             sftp_client = ssh.open_sftp()
