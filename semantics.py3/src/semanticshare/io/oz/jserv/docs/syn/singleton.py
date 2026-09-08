@@ -102,7 +102,7 @@ class AppSettings(Anson):
     regiserv: str
     envars: dict
     startHandler: [str]
-    rootkey: str    # | None # test 3.12
+    rootkey: Optional[str]    # | None # test 3.12
     installkey: Optional[str] # test 3.9
 
     volume: str
