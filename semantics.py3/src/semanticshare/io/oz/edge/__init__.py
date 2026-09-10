@@ -5,7 +5,7 @@ Helpers for deploy, networking, mirroring, etc.
 from dataclasses import dataclass
 from pathlib import Path
 import platform
-from typing import List
+from typing import List, Optional, Union
 
 from anson.io.odysz.anson import Anson
 
@@ -20,7 +20,7 @@ class Proxy(Anson):
 @dataclass
 class JRERelease(Anson):
     lazy_flag: str
-    proxy: str
+    proxy: Optional[str]
 
     def __init__(self):
         super().__init__()
@@ -102,7 +102,7 @@ class Temurin17Release(JRERelease):
         return zip_gz, zip_gz in self.resources, inmirror, self.extract_root
 
     @classmethod
-    def guess_jretree(cls, target_root):
+    def guess_jretree(cls, target_root) -> Optional[Path]:
         import os
         '''
         Find java bin in target root. (only verified against JRE 17 tree)
@@ -114,14 +114,13 @@ class Temurin17Release(JRERelease):
                 return Path(root)
         return None
 
-
     @classmethod
-    def extract_check_jretree(cls, gzip_path: str, target_dir: str):
+    def extract_check_jretree(cls, gzip_path: Union[str, Path], target_dir: Union[str, Path]) -> Path:
         '''
         Extract the zip/tar.gz file to target_dir, and check if a valid JRE tree is present.
         :param zip_path: path to the zip/tar.gz file
         :param target_dir: directory to extract to
-        :return: root path of the extracted JRE tree, or None if not found.
+        :return: root path of the extracted JRE tree, or FileNotFound exception
         '''
         import shutil
         import tarfile
@@ -145,5 +144,5 @@ class Temurin17Release(JRERelease):
 
         ext_root = cls.guess_jretree(target_dir)
         if ext_root is None: # raise failure on .7z etc.
-            raise RuntimeError("JRE extraction failed")
+            raise FileNotFoundError("JRE extraction failed")
         return ext_root
