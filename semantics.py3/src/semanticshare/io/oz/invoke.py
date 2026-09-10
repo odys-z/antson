@@ -218,7 +218,7 @@ class SynodeTask(Anson):
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
 
-    def check_local_resource(self, local_path: str) -> str:
+    def check_local_resource(self, local_path: Path) -> Path:
         """
         Check if the resource exists locally, if not, call sys.exit(-1).
         Args:

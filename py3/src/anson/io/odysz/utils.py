@@ -3,6 +3,7 @@ from __future__ import annotations
 import fnmatch
 import os
 import re
+from pathlib import Path
 
 from typing import List, Optional, Sequence, Union
 
@@ -77,13 +78,17 @@ def zip2(distzip, resources, exclude_patterns=[]):
           if not err else 'Errors while making target (creaded zip file)')
 
 
-def gzip2(distpath, resources, exclude_patterns=[], tolerate_suffix=False):
+def gzip2(distpath: Union[str, Path], resources, exclude_patterns=None, tolerate_suffix=False):
     import tarfile
     import zipfile
 
-    # tar = os.name == 'posix'
+    if exclude_patterns is None:
+        exclude_patterns = []
+
     is_posix = os.name == 'posix'
-    
+
+    if isinstance(distpath, Path):
+        distpath = distpath.as_posix()
     is_tar_suffix = distpath.lower().endswith(('.tar.gz', '.tgz'))
     is_zip_suffix = distpath.lower().endswith('.zip')
 
