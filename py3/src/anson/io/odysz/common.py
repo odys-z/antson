@@ -384,19 +384,26 @@ class Utils:
                 f.write('\n')
 
     @classmethod
-    def rm_any(cls, res: Union[str, Path]):
+    def rm_any(cls, res: Union[str, Path, List[Union[str, Path]]], verbose=True):
+        if isinstance(res, list):
+            for r in res:
+                cls.rm_any(r)
         try:
             if os.path.isfile(res):
+                if verbose: print("Removing file: ", res)
                 os.remove(res)
             else:
+                if verbose: print("Removing tree: ", res)
                 shutil.rmtree(res, ignore_errors=False)
             print(f"Successfully removed {res}")
         except FileNotFoundError:
+            if verbose: print("FileNotFoundError:", res)
             pass
         except PermissionError:
             print(f"Permission denied: Unable to remove {res}")
         except OSError as e:
             if e.errno != errno.ENOENT:  # Ignore "No such file or directory" errors
+                if verbose: print("OSError:", res)
                 pass
             else:
                 print(f"Path {res} does not exist")
