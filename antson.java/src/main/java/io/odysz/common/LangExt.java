@@ -173,7 +173,7 @@ public class LangExt {
 	}
 	
 	/**
-	 *	assertEquals("test.org-1", compact("test.org-", "1", -1));
+	 * assertEquals("test.org-1", compact("test.org-", "1", -1));
 	 * assertEquals("1", compact("test.org", "1", 1));
 	 * assertEquals("-1", compact("test.org", "-1", 2));
 	 * assertEquals("t-1", compact("test.org", "-1", 3));
