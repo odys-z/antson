@@ -201,6 +201,10 @@ Note that all envelopes in java are instances of io.odysz.anson.Anson.
 
 See the test case [AnsonTest#testFromJson_asonArr()](https://github.com/odys-z/antson/blob/master/antson.java/src/test/java/io/odysz/anson/AnsonTest.java).
 
+# Release Notes
+
+Since anson.java v1.1.0, using JDK 17 and JUNIT 6. v1.0.x will continue using JDK 1.8 and JUNIT 5. 
+
 # Known Issues
 
 ## 1. Needing provide an annotation if a type in List or Map is complicate
