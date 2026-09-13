@@ -9,13 +9,6 @@ Json (de)serialize module in Python 3.
 from anson.io.odysz.anson import Anson
 ```
 
-# Install from testpypi
-
-[//]: # (pip install --index-url https://test.pypi.org/simple --extra-index-url https://pypi.org/simple anson.py3)
-```
-pip install anson.py3
-```
-
 # Guide
 
 - Mapping Java vs Python package structure
