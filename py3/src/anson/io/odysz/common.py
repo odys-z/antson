@@ -347,7 +347,7 @@ class Utils:
         import re
         print('Updating Patterns ...', file)
 
-        with open(file, 'r', encoding='utf-8') as f:
+        with open(file, 'r', encoding='utf-8', newline='\n') as f:
             lines = f.readlines()
 
         cnt = 0
