@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "anson.py3"
-version = "0.6.7"
+version = "0.6.8"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
@@ -33,7 +33,19 @@ testing = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/anson"]
 
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/anson/**/*.py",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+]
+exclude = [
+    "**/__pycache__",
+    "**/*.pyc",
+    "**/.venv*",
+]
+
 [project.urls]
 Homepage = "https://github.com/odys-z/antson/py3"
 Issues = "https://github.com/odys-z/antson/issues"
-

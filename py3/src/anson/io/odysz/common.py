@@ -12,6 +12,8 @@ import sys
 from re import match
 from typing import TextIO, Optional, TypeVar, Union, List, Tuple, Sequence, Any
 from dataclasses import dataclass
+import json
+from packaging.version import Version
 
 
 def requir_pkg(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = None, tolerate: bool = False):
@@ -30,18 +32,37 @@ def requir_pkg(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = Non
             print(f'*** WARNING *** Please install {pkg_name} {require_ver}.')
 
 
+def check_verstr(pkg_version: str, require_ver: Optional[Union[str, List[str]]]) -> bool:
+    if not require_ver or require_ver == []:
+        return True
+
+    if isinstance(require_ver, str):
+        if Version(pkg_version) < Version(require_ver):
+            print(f'Please upgrade to version {require_ver} or above. Current version: {pkg_version}')
+            return False
+    elif isinstance(require_ver, list):
+        if len(require_ver) == 1:
+            if Version(pkg_version) != Version(require_ver[0]):
+                print(f'Please install version {require_ver[0]}. Current version: {pkg_version}')
+                return False
+        else:
+            if Version(pkg_version) < Version(require_ver[0]) or Version(pkg_version) > Version(require_ver[1]):
+                print(f'Please install version between {require_ver[0]} and {require_ver[1]}. Current version: {pkg_version}')
+                return False
+    return True
+
+
 def check_package(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = None) -> bool:
     '''
         Check if a package can be imported.
 
         :param pkg_name: package name, e.g. 'cryptography', 'anson.py3', 'semantics.py3', ...
-        :param require_ver: requred version, str for minimum version,
+        :param require_ver: required version, str for minimum version,
                             list for exact version or version range [min, max]
-        :return: True if the package can be imported, False otherwise.
+        :return: True if the package can be imported and matches version, False otherwise.
         @since 0.6.4
     '''
     from importlib.metadata import version, PackageNotFoundError
-    from packaging.version import Version
 
     try:
         pkg_version = version(pkg_name.replace('.', '_').replace('-', '_'))
@@ -49,22 +70,12 @@ def check_package(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = 
         print('Package not found:', pkg_name)
         return False
 
-    print(f"{pkg_name}: ", pkg_version)
+    print(f"{pkg_name}: {pkg_version}")
 
-    if isinstance(require_ver, str):
-        if Version(pkg_version) < Version(require_ver):
-            print(f'Please upgrade {pkg_name} to version {require_ver} or above. Current version: {pkg_version}')
-            return False
-    elif isinstance(require_ver, list):
-        if len(require_ver) == 1:
-            if Version(pkg_version) != Version(require_ver[0]):
-                print(f'Please install {pkg_name} version {require_ver[0]}. Current version: {pkg_version}')
-                return False
-        else:
-            if Version(pkg_version) < Version(require_ver[0]) or Version(pkg_version) > Version(require_ver[1]):
-                print(
-                    f'Please install {pkg_name} version between {require_ver[0]} and {require_ver[1]}. Current version: {pkg_version}')
-                return False
+    # FIX: Check the return value of check_verstr
+    if not check_verstr(pkg_version, require_ver):
+        return False
+
     print(f'{pkg_name} {require_ver}: Positive.')
     return True
 
@@ -80,6 +91,70 @@ def requir_executable(cmd: str, setup_hint: str, tolerate: bool = False):
         print(f"-> How to fix: {setup_hint}\n")
         if not tolerate:
             sys.exit(1)
+
+
+def requir_npm_package_lock(lock_file_path: Union[str, Path] = "", pkg_name: str = "",
+                            require_ver: Optional[Union[str, List[str]]] = None,
+                            tolerate: bool = False) -> None:
+    '''
+        Check if an npm package is present in package-lock.json and satisfies version requirements.
+
+        :param lock_file_path: Path to package-lock.json or project directory
+        :param pkg_name: npm package name, e.g. 'express', 'lodash'
+        :param require_ver: required version, str for minimum version,
+                            list for exact version or version range [min, max]
+        :return: True if package exists and satisfies version, False otherwise.
+    '''
+
+    path_obj = Path(lock_file_path) if lock_file_path else Path.cwd()
+    if path_obj.is_dir() or path_obj.name != 'package-lock.json':
+        lock_file_path = path_obj / 'package-lock.json'
+    else:
+        lock_file_path = path_obj
+
+    if not lock_file_path.exists():
+        print(f'File package-lock.json is not found: {lock_file_path}')
+        if not tolerate:
+            sys.exit(1)
+        return
+
+    if require_ver is None or require_ver == []:
+        return
+
+    with open(lock_file_path, 'r', encoding='utf-8') as f:
+        lock_data = json.load(f)
+
+    installed_version: Optional[str] = None
+
+    # 1. Check modern 'packages' structure (npm v7+)
+    packages = lock_data.get('packages', {})
+    target_key = f"node_modules/{pkg_name}"
+    if target_key in packages:
+        installed_version = packages[target_key].get('version')
+
+    # 2. Fallback to legacy top-level 'dependencies' structure if not found
+    if not installed_version:
+        dependencies = lock_data.get('dependencies', {})
+        if pkg_name in dependencies:
+            installed_version = dependencies[pkg_name].get('version')
+
+    if not installed_version:
+        if not tolerate:
+            sys.exit(1)
+        else:
+            print('Package not found in package-lock.json:', pkg_name)
+
+    installed_version: str = installed_version if installed_version else '' # already checked, suppress warning
+
+    print(f"{pkg_name}: {installed_version}")
+
+    if check_verstr(installed_version, require_ver):
+        print(f'{pkg_name} {require_ver}: Positive.')
+    else:
+        if not tolerate:
+            sys.exit(1)
+        else:
+            print('*** Error ***', f'{pkg_name} {require_ver}: Positive.')
 
 
 T = TypeVar('T')
@@ -137,7 +212,7 @@ class LangExt:
                 return len(s.strip()) == 0
             else:
                 return match(regex, s) is not None
-        try: return len(s) == 0
+        try: return LangExt.len(s) == 0
         except: pass
         return False
     
