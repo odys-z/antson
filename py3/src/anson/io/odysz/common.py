@@ -369,7 +369,7 @@ class Utils:
                 if len(updated) == len(patterns):
                     break
 
-        with open(file, 'w', encoding='utf-8') as f:
+        with open(file, 'w', encoding='utf-8', newline='\n') as f:
             f.writelines(lines)
 
         print(f'[{cnt / len(patterns)}] lines updated. Patterns updating finsied.', file)
@@ -378,7 +378,7 @@ class Utils:
 
     @classmethod
     def writeline_nl(cls, file: str, lines: list[str]):
-        with open(file, 'w+', encoding='utf-8') as f:
+        with open(file, 'w+', encoding='utf-8', newline='\n') as f:
             for l in lines:
                 f.write(l)
                 f.write('\n')

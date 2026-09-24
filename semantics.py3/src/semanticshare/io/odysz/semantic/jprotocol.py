@@ -4,12 +4,11 @@ from typing import Optional, List, Tuple, Union
 from urllib.parse import urlparse
 import re
 
-import deprecated
 from anson.io.odysz.common import LangExt
 from anson.io.odysz.utils import Regexs
 from typing_extensions import Self
 
-from anson.io.odysz.anson import JsonOpt, Anson, AnsonField
+from anson.io.odysz.anson import JsonOpt, Anson
 
 
 class MsgCode(Enum):
