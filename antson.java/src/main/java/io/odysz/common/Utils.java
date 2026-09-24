@@ -698,8 +698,10 @@ public class Utils {
 	}
 
 	/**
-	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
 	 * Wait until all lights turn into green (true), a helper for tests.
+	 * 
+	 * Similar to {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, but can turn lights on again.
+	 * 
 	 * @example <pre>
 	 * boolean[] lights = new boolean[] {true, false, false};
 	 * // running background threads, setting light if succeed.
@@ -731,8 +733,9 @@ public class Utils {
 	}
 	
 	/**
-	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
 	 * Wait on n-th light only.
+	 * 
+	 * Similar to {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, but can turn lights on again.
 	 * @see #awaitAll(boolean[], int...)
 	 * @param signals
 	 * @param n_th
@@ -745,8 +748,9 @@ public class Utils {
 	}
 	
 	/**
-	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
 	 * Turn lights to red,
+	 * 
+	 * Similar to {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, but can turn lights on again.
 	 * @see #awaitAll(boolean[], int...)
 	 * @param signals
 	 */
@@ -756,7 +760,8 @@ public class Utils {
 	}
 	
 	/**
-	 * @deprecated since 0.9.146, use the {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, instead.
+	 * 
+	 * Similar to {@link java.util.concurrent.CountDownLatch}, since jdk 1.5, but can turn lights on again.
 	 * @param signals
 	 * @param indx
 	 */

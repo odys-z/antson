@@ -35,11 +35,19 @@ testing = [
 exclude = [
   "/.venv*",
   "/.git*",
+  "**/.venv*",
+  "**/.venv314",
+  "**/__pycache__",
+  "**/*.pyc",
+    ]
+include = [
+  "T06B/**/*.py",
+  "pyproject.toml",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/T06B"]
 
 [project.urls]
-Homepage = "https://github.com/Acadynamo"
-Issues = "https://github.com/Acadynamo"
+Homepage = "https://github.com/odys-z/antson/py3"
+Issues = "https://github.com/odys-z/antson/issues"
