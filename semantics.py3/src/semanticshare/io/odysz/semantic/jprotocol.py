@@ -6,7 +6,6 @@ import re
 
 from anson.io.odysz.common import LangExt
 from anson.io.odysz.utils import Regexs
-from typing_extensions import Self
 
 from anson.io.odysz.anson import JsonOpt, Anson
 
@@ -69,7 +68,7 @@ class AnsonBody(Anson):
         self.uri = None
         self.parent = parent
 
-    def A(self, a: str) -> Self:
+    def A(self, a: str) -> 'AnsonBody':
         self.a = a
         return self
 
@@ -98,7 +97,7 @@ class AnsonMsg(Anson):
         self.port = p
         self.body: List[AnsonBody] = []
 
-    def Header(self, h: AnsonHeader = None, ssinf: 'SessionInf' = None) -> Self:
+    def Header(self, h: AnsonHeader = None, ssinf: 'SessionInf' = None) -> 'AnsonMsg':
         if h is not None:
             self.header = h
         if ssinf is not None:
@@ -108,7 +107,7 @@ class AnsonMsg(Anson):
             self.header.ssToken = ssinf.ssToken
         return self
 
-    def Body(self, bodyItem: Optional[AnsonBody]=None) -> Union[Self, AnsonBody, None]:
+    def Body(self, bodyItem: Optional[AnsonBody]=None) -> Union['AnsonMsg', AnsonBody, None]:
         if bodyItem is None:
             return None if LangExt.len(self.body) == 0 else self.body[0]
         else:
