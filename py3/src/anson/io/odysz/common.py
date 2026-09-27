@@ -93,6 +93,94 @@ def requir_executable(cmd: str, setup_hint: str, tolerate: bool = False):
             sys.exit(1)
 
 
+def requir_npm_package_resolve(start_path: Union[str, Path] = "", pkg_name: str = "",
+                                  require_ver: Optional[Union[str, List[str]]] = None,
+                                  tolerate: bool = False) -> None:
+    '''
+        Trace real module resolution for an npm package, the same way Node's require()
+        and webpack's default resolver do: starting from `start_path`, check
+        <dir>/node_modules/<pkg_name>/package.json, then walk up to each parent
+        directory and check again, until the filesystem root is reached.
+ 
+        This answers "which version will actually get imported" -- not "which version
+        does package-lock.json say should be installed here". A package version installed
+        by npm can not satisfy the required version - Webpack won't check version.
+ 
+        :param start_path: directory to start resolving from -- typically the directory
+                            containing the file that does the `import`/`require`, or the
+                            project root. Defaults to cwd.
+        :param pkg_name: npm package name, scoped names supported, e.g. '@anclient/anreact'
+        :param require_ver: required version, str for minimum version,
+                            list for exact version or version range [min, max]
+        :param tolerate: if True, report problems but don't sys.exit(1)
+        :return: None. Exits; non-zero (unless tolerate) if the version that would
+                 actually be resolved does not satisfy require_ver, or if the package
+                 isn't found anywhere along the resolution path.
+    '''
+ 
+    start = Path(start_path) if start_path else Path.cwd()
+    start = start.resolve()
+    current = start if start.is_dir() else start.parent
+ 
+    # Walk up the directory tree exactly as Node's resolver does, collecting
+    # every node_modules/<pkg_name> found along the way, closest first.
+    candidates: List[tuple] = []  # (node_modules_dir, package_json_path, version)
+    seen = set()
+    while True:
+        if current in seen:
+            break
+        seen.add(current)
+ 
+        pkg_json = current / 'node_modules' / pkg_name / 'package.json'
+        if pkg_json.exists():
+            version = None
+            try:
+                with open(pkg_json, 'r', encoding='utf-8') as f:
+                    version = json.load(f).get('version')
+            except (json.JSONDecodeError, OSError) as e:
+                print(f'*** Warning *** Could not read {pkg_json}: {e}')
+            candidates.append((current / 'node_modules', pkg_json, version))
+ 
+        parent = current.parent
+        if parent == current:
+            break
+        current = parent
+ 
+    if not candidates:
+        print(f'{pkg_name}: not found in any node_modules from {start} up to filesystem root')
+        if not tolerate:
+            sys.exit(1)
+        return
+ 
+    print(f'Resolution trace for {pkg_name} starting at {start}:')
+    for i, (nm_dir, pkg_json, version) in enumerate(candidates):
+        tag = '-> RESOLVED (this is what import/require actually gets)' if i == 0 else '   (shadowed, never reached)'
+        print(f'  [{i}] {nm_dir}  version={version}  {tag}')
+ 
+    resolved_dir, _pkg_json, resolved_version = candidates[0]
+    resolved_version = resolved_version or ''
+ 
+    print(f"{pkg_name}: {resolved_version} (resolved from {resolved_dir})")
+ 
+    if require_ver is None or require_ver == []:
+        return
+ 
+    if check_verstr(resolved_version, require_ver):
+        print(f'{pkg_name} {require_ver}: Positive.')
+    else:
+        print(f'*** Error *** {pkg_name} {require_ver}: resolved version is '
+              f'{resolved_version!r} from {resolved_dir}, which does not satisfy the requirement.')
+        # If a satisfying version exists deeper in the tree, it's being shadowed --
+        # worth calling out explicitly since that's an easy thing to miss.
+        for nm_dir, pkg_json, version in candidates[1:]:
+            if version and check_verstr(version, require_ver):
+                print(f'    Note: a satisfying version ({version}) exists at {nm_dir}, '
+                      f'but it is shadowed by the resolved copy above and will not be used.')
+                break
+        if not tolerate:
+            sys.exit(1)
+
+
 def requir_npm_package_lock(lock_file_path: Union[str, Path] = "", pkg_name: str = "",
                             require_ver: Optional[Union[str, List[str]]] = None,
                             tolerate: bool = False) -> None:
