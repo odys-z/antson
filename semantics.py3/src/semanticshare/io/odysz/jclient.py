@@ -16,6 +16,7 @@ class AnclientSettings (Anson):
     admin: str
     domain_token: str
     regiserv: str
+    centralUid: str
     centralPswd: str
     temp_dir: str
 
