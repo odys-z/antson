@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "anson.py3"
-version = "0.6.8"
+version = "0.6.9"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
@@ -47,5 +47,5 @@ exclude = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/odys-z/antson/py3"
+Homepage = "https://github.com/odys-z/antson/tree/master/py3"
 Issues = "https://github.com/odys-z/antson/issues"

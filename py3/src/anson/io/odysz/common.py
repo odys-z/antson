@@ -245,6 +245,171 @@ def requir_npm_package_lock(lock_file_path: Union[str, Path] = "", pkg_name: str
             print('*** Error ***', f'{pkg_name} {require_ver}: Positive.')
 
 
+class mvn:
+    '''
+        Maven helpers, e.g.
+
+            mvn.requir_installed('io.github.odys-z:semantic.jserv', '[1.5.0,2.0)')
+        
+        By Claude.ai, needing review
+    '''
+
+    qualifiers = {'alpha': 0, 'a': 0, 'beta': 1, 'b': 1, 'milestone': 2, 'm': 2,
+                  'rc': 3, 'cr': 3, 'snapshot': 4, '': 5, 'ga': 5, 'final': 5, 'release': 5, 'sp': 6}
+    _release = (1, 5, '')
+    _local_repo: Optional[Path] = None
+
+    @staticmethod
+    def version_key(v: str) -> tuple:
+        '''
+            Simplified Maven ComparableVersion ordering:
+            1.0-alpha < 1.0-beta < 1.0-milestone < 1.0-rc < 1.0-SNAPSHOT < 1.0 = 1.0.0 = 1.0-ga < 1.0-sp < 1.0.1
+        '''
+        import re
+        toks = re.findall(r'\d+|[a-z]+', v.lower())
+        items = [(2, int(t), '') if t.isdigit()
+                 else (1, mvn.qualifiers[t], '') if t in mvn.qualifiers
+                 else (1, 7, t) for t in toks]
+
+        # 1.0.0-rc1 -> 1-rc-1, 1.0.0 -> 1: drop zeros before a qualifier / at the end, and trailing release qualifiers
+        norm = []
+        for it in reversed(items):
+            nxt = norm[-1] if norm else None
+            if (it == (2, 0, '') or it == mvn._release) and (nxt is None or nxt[0] == 1):
+                continue
+            norm.append(it)
+        return tuple(reversed(norm))
+
+    @staticmethod
+    def compare(a: str, b: str) -> int:
+        ka, kb = mvn.version_key(a), mvn.version_key(b)
+        n = max(len(ka), len(kb))
+        ka += (mvn._release,) * (n - len(ka))
+        kb += (mvn._release,) * (n - len(kb))
+        return (ka > kb) - (ka < kb)
+
+    @staticmethod
+    def parse_range(spec: str) -> List[Tuple[Optional[str], bool, Optional[str], bool]]:
+        '''
+            Maven version range syntax -> [(low, low_inclusive, high, high_inclusive), ...]
+
+            "1.0"            -> x >= 1.0 (soft requirement, taken as minimum, like requir_pkg)
+            "[1.0]"          -> x == 1.0
+            "[1.0,2.0)"      -> 1.0 <= x < 2.0
+            "(,1.0],[1.2,)"  -> x <= 1.0 or x >= 1.2
+        '''
+        import re
+        spec = spec.strip()
+        if not spec.startswith(('[', '(')):
+            return [(spec, True, None, False)]
+
+        sets = re.findall(r'([\[(])([^\])]*)([\])])', spec)
+        if not sets:
+            raise ValueError(f'Invalid maven version range: {spec}')
+
+        ranges = []
+        for lb, body, rb in sets:
+            parts = [p.strip() for p in body.split(',')]
+            if len(parts) == 1:
+                if lb != '[' or rb != ']' or not parts[0]:
+                    raise ValueError(f'Invalid maven version range: {spec}')
+                ranges.append((parts[0], True, parts[0], True))
+            elif len(parts) == 2:
+                ranges.append((parts[0] or None, lb == '[', parts[1] or None, rb == ']'))
+            else:
+                raise ValueError(f'Invalid maven version range: {spec}')
+        return ranges
+
+    @staticmethod
+    def in_range(v: str, ranges: List[Tuple[Optional[str], bool, Optional[str], bool]]) -> bool:
+        for lo, lo_inc, hi, hi_inc in ranges:
+            if lo is not None:
+                c = mvn.compare(v, lo)
+                if c < 0 or c == 0 and not lo_inc:
+                    continue
+            if hi is not None:
+                c = mvn.compare(v, hi)
+                if c > 0 or c == 0 and not hi_inc:
+                    continue
+            return True
+        return False
+
+    @staticmethod
+    def local_repository() -> Path:
+        '''
+            Resolve the local repository as maven sees it (settings.xml, -Dmaven.repo.local in MAVEN_OPTS, ...),
+            falling back to ~/.m2/repository if mvn is unavailable or the evaluation fails. Cached.
+        '''
+        if mvn._local_repo is not None:
+            return mvn._local_repo
+
+        import subprocess
+        repo = Path.home() / '.m2' / 'repository'
+        exe = shutil.which('mvn')  # mvn.cmd on Windows; full path so CreateProcess can launch the batch file
+        if exe:
+            try:
+                r = subprocess.run(
+                    [exe, '-B', '-q', '-DforceStdout', '-Dexpression=settings.localRepository',
+                     'org.apache.maven.plugins:maven-help-plugin:3.4.0:evaluate'],
+                    capture_output=True, text=True, timeout=120, cwd=Path.home())
+                out = r.stdout.strip().splitlines()
+                if r.returncode == 0 and out and Path(out[-1].strip()).is_dir():
+                    repo = Path(out[-1].strip())
+                else:
+                    print('*** Warning *** mvn help:evaluate failed, falling back to ~/.m2/repository.', r.stderr.strip())
+            except (OSError, subprocess.TimeoutExpired) as e:
+                print('*** Warning *** mvn help:evaluate failed, falling back to ~/.m2/repository.', e)
+
+        mvn._local_repo = repo
+        return repo
+
+    @staticmethod
+    def requir_installed(coordinate: str, ver_range: Optional[str] = None,
+                         tolerate: bool = False, local_repo: Optional[Union[str, Path]] = None) -> Optional[str]:
+        '''
+            Check the local maven repository has an artifact installed with version in the range.
+
+            :param coordinate: 'group-id:artifact-id', e.g. 'io.github.odys-z:semantic.jserv'
+            :param ver_range: maven version range, e.g. '1.5.0', '[1.5.0]', '[1.5.0,2.0)', '(,1.0],[1.2,)';
+                              None for any version. A bare version is taken as minimum (like requir_pkg).
+            :param tolerate: if True, report problems but don't sys.exit(1)
+            :param local_repo: override the local repository path (skips calling mvn).
+            :return: the highest matching version installed, or None (only if tolerate).
+        '''
+        from functools import cmp_to_key
+
+        try:
+            group, artifact = [s.strip() for s in coordinate.split(':')[:2]]
+        except ValueError:
+            raise ValueError(f'Invalid maven coordinate, expecting group:artifact, got: {coordinate}')
+
+        repo = Path(local_repo) if local_repo is not None else mvn.local_repository()
+        art_dir = repo.joinpath(*group.split('.'), artifact)
+
+        installed = []
+        if art_dir.is_dir():
+            for d in art_dir.iterdir():
+                # a version folder may hold only *.lastUpdated / _remote.repositories after a failed download
+                if d.is_dir() and any(f.suffix in ('.jar', '.pom') for f in d.iterdir() if f.is_file()):
+                    installed.append(d.name)
+        installed.sort(key=cmp_to_key(mvn.compare))
+
+        ranges = mvn.parse_range(ver_range) if ver_range else None
+        matched = [v for v in installed if ranges is None or mvn.in_range(v, ranges)]
+
+        print(f'{coordinate}: {", ".join(installed) or "(not installed)"}')
+
+        if not matched:
+            print(f'\n[ERROR] {coordinate} {ver_range or ""} is not installed in {repo}.')
+            print(f'-> How to fix: mvn install the artifact, or mvn dependency:get -Dartifact={group}:{artifact}:<version>\n')
+            if not tolerate:
+                sys.exit(1)
+            return None
+
+        print(f'{coordinate} {ver_range or ""}: Positive. {matched[-1]}')
+        return matched[-1]
+
+
 T = TypeVar('T')
 
 passwd_allow_ext = ' @#!$%^&*()_+-=.<>,[]{}|?/:;'
