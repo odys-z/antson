@@ -34,6 +34,12 @@ class DeployInfo(Anson):
     task.json -> settings.json
     '''
     central_path: str
+    centralUid: str
+    '''
+    Central (registry) user id, task.json -> desktop app-settings.json/centralUid,
+    the same name as io.odysz.jclient.AnclientSettings.centralUid.
+    Defaults to 'admin' for task jsons before semantics.py3 0.6.11.
+    '''
     central_pswd: str
     web_port: int
     jserv_port: int
@@ -70,6 +76,7 @@ class DeployInfo(Anson):
         super().__init__()
         self.ui = 'ui_form.py'
         self.lang = 'en'
+        self.centralUid = 'github'
 
 @dataclass
 class BashCmd(Anson):
@@ -508,6 +515,8 @@ class SynodeTask(Anson):
 class CentralTask(Anson):
     '''
     The Portifolio 0.7 invoke tasks' configuration for central server
+
+    @deprecated since semantics.py3 0.6.11, central users are managed online.
     '''
 
     users: dict[str, JUser] # ISSUE/FIXME: Anson.py3 0.4.1 cannot handle types in dict.
