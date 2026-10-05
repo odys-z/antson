@@ -245,6 +245,191 @@ def requir_npm_package_lock(lock_file_path: Union[str, Path] = "", pkg_name: str
             print('*** Error ***', f'{pkg_name} {require_ver}: Positive.')
 
 
+def _read_cmake_cache(cache_file: Path) -> dict:
+    '''
+        Parse CMakeCache.txt entries of the form NAME:TYPE=VALUE into {NAME: VALUE}.
+    '''
+    entries = {}
+    with open(cache_file, 'r', encoding='utf-8', errors='replace') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#') or line.startswith('//'):
+                continue
+            key_type, sep, value = line.partition('=')
+            if sep:
+                entries[key_type.split(':', 1)[0]] = value
+    return entries
+
+
+def _find_cmake_cache(build_dir: Path) -> Optional[Path]:
+    '''
+        <build_dir>/CMakeCache.txt, or, for per-config layouts such as Qt Creator's
+        qt-build/Debug, the first <build_dir>/*/CMakeCache.txt.
+    '''
+    if (build_dir / 'CMakeCache.txt').exists():
+        return build_dir / 'CMakeCache.txt'
+    found = sorted(build_dir.glob('*/CMakeCache.txt'))
+    if len(found) > 1:
+        print(f'*** Warning *** Multiple CMakeCache.txt under {build_dir}, using {found[0]}: {[str(f) for f in found]}')
+    return found[0] if found else None
+
+
+def _cmake_src_version(src_dir: Path) -> Tuple[Optional[str], str]:
+    '''
+        Find the version of a CMake source tree:
+        1. project(<name> VERSION x.y.z ...) in its top-level CMakeLists.txt;
+        2. fallback: the nearest git tag.
+        Only strings matching version.VERSION_PATTERN are returned, so check_verstr() won't raise.
+
+        :return: (version or None, where it came from, plus the git commit if available)
+    '''
+    import re
+    import subprocess
+    from anson.io.odysz.version import VERSION_PATTERN
+
+    ver_regex = re.compile(r'\s*(' + VERSION_PATTERN + r')\s*', re.VERBOSE | re.IGNORECASE)
+    version: Optional[str] = None
+    origin = ''
+
+    top = src_dir / 'CMakeLists.txt'
+    if top.exists():
+        text = re.sub(r'#[^\n]*', '', top.read_text(encoding='utf-8', errors='replace'))
+        m = re.search(r'\bproject\s*\(([^)]*)\)', text, re.IGNORECASE | re.DOTALL)
+        if m:
+            v = re.search(r'\bVERSION\s+(\S+)', m.group(1), re.IGNORECASE)
+            if v and ver_regex.fullmatch(v.group(1)):
+                version, origin = v.group(1), 'project(VERSION)'
+
+    commit = ''
+    git = shutil.which('git')
+    if git and (src_dir / '.git').exists():
+        try:
+            r = subprocess.run([git, '-C', str(src_dir), 'rev-parse', '--short', 'HEAD'],
+                               capture_output=True, text=True, timeout=30)
+            if r.returncode == 0:
+                commit = r.stdout.strip()
+            if version is None:
+                r = subprocess.run([git, '-C', str(src_dir), 'describe', '--tags', '--abbrev=0'],
+                                   capture_output=True, text=True, timeout=30)
+                if r.returncode == 0 and ver_regex.fullmatch(r.stdout.strip()):
+                    version, origin = r.stdout.strip(), 'git tag'
+        except (OSError, subprocess.TimeoutExpired) as e:
+            print(f'*** Warning *** git query failed in {src_dir}: {e}')
+
+    if commit:
+        origin = f'{origin}, commit {commit}' if origin else f'commit {commit}'
+    return version, origin
+
+
+def requir_cmake_fetchcontent(build_dir: Union[str, Path], content_name: str,
+                              require_ver: Optional[Union[str, List[str]]] = None,
+                              tolerate: bool = False) -> None:
+    '''
+        Trace which source tree a CMake FetchContent dependency actually resolves to,
+        the same way FetchContent_MakeAvailable() does, and check its version:
+
+        1. FETCHCONTENT_SOURCE_DIR_<CONTENT_NAME> in CMakeCache.txt, if set -- a local
+           override; nothing is fetched and the downloaded copy is never used;
+        2. otherwise <FETCHCONTENT_BASE_DIR>/<content_name>-src, where FETCHCONTENT_BASE_DIR
+           is read from CMakeCache.txt (CMake's default is <binary dir>/_deps).
+
+        The version is read from project(... VERSION x.y.z) in the dependency's top-level
+        CMakeLists.txt, falling back to its nearest git tag.
+
+        Must be called after configuring, as both paths come from CMakeCache.txt.
+
+        :param build_dir: the cmake binary dir (-B), or its parent for per-config
+                          layouts, e.g. 'qt-build' with qt-build/Debug/CMakeCache.txt.
+                          Required, no default: a relative path resolves against cwd,
+                          which is usually another project's folder.
+        :param content_name: the name given to FetchContent_Declare(), e.g. 'anson.cmake'
+        :param require_ver: required version, str for minimum version,
+                            list for exact version or version range [min, max]
+        :param tolerate: if True, report problems but don't sys.exit(1)
+        @since 0.6.9
+    '''
+    if not build_dir or not content_name:
+        # Caller error, not a dependency problem -- fail regardless of tolerate.
+        print(f'*** Error *** requir_cmake_fetchcontent(): build_dir and content_name are required, '
+              f'got build_dir={build_dir!r}, content_name={content_name!r}.')
+        sys.exit(1)
+
+    build = Path(build_dir).resolve()
+    cache_file = _find_cmake_cache(build)
+    if cache_file is None:
+        print(f'{content_name}: no CMakeCache.txt in {build} or its sub-folders -- configure the project first.')
+        if not tolerate:
+            sys.exit(1)
+        return
+
+    binary_dir = cache_file.parent
+    cache = _read_cmake_cache(cache_file)
+    upper, lower = content_name.upper(), content_name.lower()
+    override_key = f'FETCHCONTENT_SOURCE_DIR_{upper}'
+
+    base_dir = Path(cache.get('FETCHCONTENT_BASE_DIR') or (binary_dir / '_deps'))
+    if not base_dir.is_absolute():
+        base_dir = binary_dir / base_dir
+
+    # Resolution order, the first existing one wins -- same as FetchContent.
+    paths: List[Tuple[str, Path]] = []
+    if cache.get(override_key):
+        paths.append((override_key, Path(cache[override_key])))
+    paths.append(('FETCHCONTENT_BASE_DIR' if cache.get('FETCHCONTENT_BASE_DIR') else 'default _deps',
+                  base_dir / f'{lower}-src'))
+
+    candidates = []  # (label, src_dir, version, origin)
+    for label, p in paths:
+        if p.is_dir():
+            v, origin = _cmake_src_version(p)
+            candidates.append((label, p, v, origin))
+        elif label == override_key:
+            print(f'*** Warning *** {override_key} is set to {p}, which does not exist.')
+
+    if not candidates:
+        print(f'{content_name}: no source tree found, using {cache_file}; '
+              f'looked at {[str(p) for _, p in paths]}')
+        strays = [str(p) for p in build.rglob(f'{lower}-src') if p.is_dir()]
+        if strays:
+            print(f'    Found by search, but not referenced by the cache: {strays}')
+        if not tolerate:
+            sys.exit(1)
+        return
+
+    print(f'Resolution trace for FetchContent {content_name} ({cache_file}):')
+    for i, (label, p, v, origin) in enumerate(candidates):
+        tag = '-> RESOLVED (this is what the build actually uses)' if i == 0 else '   (shadowed, never used)'
+        print(f'  [{i}] {p}  [{label}]  version={v} ({origin})  {tag}')
+
+    _label, resolved_dir, resolved_version, _origin = candidates[0]
+
+    print(f"{content_name}: {resolved_version} (resolved from {resolved_dir})")
+
+    if require_ver is None or require_ver == []:
+        return
+
+    if not resolved_version:
+        print(f'*** Error *** {content_name}: cannot determine the version of {resolved_dir}. '
+              f'Declare project(<name> VERSION x.y.z) in its top-level CMakeLists.txt, or tag the repo.')
+        if not tolerate:
+            sys.exit(1)
+        return
+
+    if check_verstr(resolved_version, require_ver):
+        print(f'{content_name} {require_ver}: Positive.')
+    else:
+        print(f'*** Error *** {content_name} {require_ver}: resolved version is '
+              f'{resolved_version!r} from {resolved_dir}, which does not satisfy the requirement.')
+        # If a satisfying version exists in the downloaded copy, it's being shadowed by the override.
+        for _label, src_dir, version, _origin in candidates[1:]:
+            if version and check_verstr(version, require_ver):
+                print(f'    Note: a satisfying version ({version}) exists at {src_dir}, '
+                      f'but it is shadowed by {override_key} and will not be used.')
+                break
+        if not tolerate:
+            sys.exit(1)
+
+
 class mvn:
     '''
         Maven helpers, e.g.
