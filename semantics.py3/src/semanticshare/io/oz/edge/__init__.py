@@ -111,7 +111,7 @@ class Temurin17Release(JRERelease):
         '''
         for root, dirs, _ in os.walk(target_root):
             if "bin" in dirs and "lib" in dirs and "NOTICE" in _ and "release" in _:
-                return Path(root)
+                return Path(str(root))
         return None
 
     @classmethod

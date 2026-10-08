@@ -250,9 +250,15 @@ class JServUrl(Anson):
         if LangExt.len(jserv) < 8 + len(rootpath):
             return False
 
-        parts = urlparse(jserv)
+        try:
+            parts = urlparse(jserv)
+            # raises ValueError for a non-numeric or out-of-range port, e.g. http://127.0.0.1:dddd/...
+            port = parts.port
+        except ValueError:
+            return False
+
         urlroot = re.sub('^/*', '', parts.path.removeprefix("/")) if LangExt.len(parts.path) > 0 else ''
-        return (parts.port is None or type(parts.port) == int and parts.port >= 1024) \
+        return (port is None or port >= 1024) \
             and (parts.scheme == "http" or parts.scheme == "https") \
             and rootpath == urlroot.split('/')[0]
 
