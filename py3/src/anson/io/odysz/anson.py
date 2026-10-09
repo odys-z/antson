@@ -129,6 +129,43 @@ def value_type(v):
                       ansontype=f'{t.__module__}.{t.__name__}')
 
 
+def is_comment(k) -> bool:
+    '''
+    JSON comments, ignored when deserializing: an object key, or a list element of string,
+    starting with "//", e.g. {"//": "a note", "// note 2": ...}, ["// a note", ...].
+    '''
+    return isinstance(k, str) and k.lstrip().startswith('//')
+
+
+def strip_comments(v):
+    '''
+    Remove comments (see is_comment()) from untyped json values, recursively, without other conversion.
+    '''
+    if isinstance(v, dict):
+        return {k: strip_comments(x) for k, x in v.items() if not is_comment(k)}
+    if isinstance(v, list):
+        return [strip_comments(x) for x in no_comment_items(v)]
+    return v
+
+
+_no_item = object()
+'''
+Sentinel of an exhausted iterator, as None is a valid list item.
+'''
+
+
+def no_comment_items(lst: list):
+    '''
+    Iterate a list's items, skipping (with a warning of the string) comment strings, see is_comment().
+    A generator, no copy of the list.
+    '''
+    for x in lst:
+        if is_comment(x):
+            Utils.warn('Comment string in list dropped: {}', x)
+        else:
+            yield x
+
+
 def instanceof(clsname: Union[str, type], props: dict):
     cls = getClass(cast(str, clsname)) if type(clsname) == str else clsname
     try: obj = cls() 
@@ -140,6 +177,8 @@ def instanceof(clsname: Union[str, type], props: dict):
 
     if hasattr(props, 'items'):
         for k, v in props.items():
+            if is_comment(k):
+                continue
             if k != 'type' and k not in fds:
                 missingAttrs.append(k)
             setattr(obj, k, Anson.from_value(fds[k].antype if k in fds else None, v))
@@ -367,7 +406,7 @@ class Anson(dict):
 
     @staticmethod
     def from_dict(v: dict, eletype: Union[type, str, None]) -> dict:
-        if eletype is None: return v
+        if eletype is None: return strip_comments(v)
 
         d = {}
         # d, fds = {}, None
@@ -379,6 +418,8 @@ class Anson(dict):
         #     fds = _fields(d, None)
 
         for k in v:
+            if is_comment(k):
+                continue
             # d[k] = Anson.from_value(None if fds is None else fds[k].antype, v[k])
             d[k] = Anson.from_value(eletype, v[k])
         return d
@@ -390,11 +431,18 @@ class Anson(dict):
             Utils.warn(f'Expection a list instance, but got "{v}"')
             return [v]
 
-        if len(v) > 0:
-            _type_ = parse_type_(v[0])
-            eletype = _type_ if _type_ is not None and len(_type_) > 0 else eletype
+        # one pass, comments skipped; the element type is decided by the first non-comment item
+        items = no_comment_items(v)
+        first = next(items, _no_item)
+        if first is _no_item:
+            return []
 
-        return 'null' if v is None else [Anson.from_value(eletype, x) for x in v]
+        _type_ = parse_type_(first)
+        eletype = _type_ if _type_ is not None and len(_type_) > 0 else eletype
+
+        lst = [Anson.from_value(eletype, first)]
+        lst.extend(Anson.from_value(eletype, x) for x in items)
+        return lst
 
     @staticmethod
     def from_obj(obj: dict, ansontype: Union[str, type]) -> Union['Anson', dict, None]:
