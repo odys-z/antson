@@ -154,6 +154,46 @@ task_credentials: TaskCredentials = TaskCredentials()
 
 _temp_ = 'temp'
 
+link_json = 'link-json'
+'''
+gitprjs key of a linked json file, whose gitprjs are included, e.g. {"link-json": "./tasks.0.8.0.json"}.
+'''
+
+_linked_gitprjs = {}
+'''
+Cache of linked json files' gitprjs, {abs-path: resolved gitprjs}.
+'''
+
+
+def resolve_gitprjs(gitprjs: dict, base: str = '.', _linking: tuple = ()) -> dict:
+    '''
+    Resolve gitprjs[link_json]: the linked json's gitprjs (which can link further), overridden by
+    the entries here. Keys of comments, starting with "//", are ignored.
+    :param gitprjs: SynodeTask.gitprjs, or a linked json's
+    :param base: folder the link path is relative to; '.' (the working folder) for the task json,
+                 or the linking json's folder for a linked one
+    :return: {project: path}, without link_json
+    '''
+    gitprjs = gitprjs or {}
+    resolved = {}
+    if link_json in gitprjs:
+        linked = os.path.abspath(os.path.join(base, gitprjs[link_json]))
+        if linked in _linking:
+            Utils.warn('Circular gitprjs[{}]: {}', link_json, ' -> '.join(_linking + (linked,)))
+            sys.exit(-1)
+        if linked not in _linked_gitprjs:
+            if not os.path.isfile(linked):
+                Utils.warn('gitprjs[{}] not found: {}', link_json, linked)
+                sys.exit(-1)
+            with open(linked, 'r', encoding='utf-8') as jf:
+                _linked_gitprjs[linked] = resolve_gitprjs(
+                    json.load(jf).get('gitprjs', {}), os.path.dirname(linked), _linking + (linked,))
+        resolved.update(_linked_gitprjs[linked])
+
+    resolved.update({k: v for k, v in gitprjs.items() if k != link_json and not k.lstrip().startswith('//')})
+    return resolved
+
+
 @dataclass
 class SynodeTask(Anson):
     '''
@@ -213,7 +253,8 @@ class SynodeTask(Anson):
     Source projects, {project: path}, where "{github}" in path is replaced with github, e.g.
     {"semantic-DA": "{github}/semantic-DA/semantic.DA", "album-web": "{github}/anclient/examples/example.js/album"}.
     A path is where the project's building file is, e.g. pom.xml, build.gradle, CMakeLists.txt, pyproject.toml.
-    Use git_prj() to get a project's (sub-)path.
+    {"link-json": "./tasks.0.8.0.json"} includes another json's gitprjs, see resolve_gitprjs().
+    Use prjs() for all the projects, and git_prj() to get a project's (sub-)path.
     '''
 
     deploy: DeployInfo
@@ -263,10 +304,17 @@ class SynodeTask(Anson):
         :return: e.g. with gitprjs = {"anclient.py3": "{github}/anclient/py3"},
                  git_prj('anclient.py3', 'dist') -> '../../anclient/py3/dist'
         '''
-        if self.gitprjs is None or prj not in self.gitprjs:
-            Utils.warn(f'Source project "{prj}" is not configured in gitprjs: {self.gitprjs}')
+        prjs = self.prjs()
+        if prj not in prjs:
+            Utils.warn('Source project "{}" is not configured in gitprjs: {}', prj, prjs)
             sys.exit(-1)
-        return os.path.join(self.gitprjs[prj].replace('{github}', self.github), *subpaths)
+        return os.path.join(prjs[prj].replace('{github}', self.github), *subpaths)
+
+    def prjs(self) -> dict:
+        '''
+        :return: gitprjs with link-json resolved, {project: path (with "{github}" not replaced)}
+        '''
+        return resolve_gitprjs(self.gitprjs)
 
     def check_local_resource(self, local_path: Path) -> Path:
         """
