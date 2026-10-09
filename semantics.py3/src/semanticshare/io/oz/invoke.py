@@ -187,6 +187,19 @@ class SynodeTask(Anson):
     desktop_dist_dir: str
     central_dir: str
     package_dir: str
+
+    github: str
+    '''
+    The local github root, the folder where all source projects are cloned, e.g. "../..".
+    Relative to the task json's folder, which is also the working folder of the invoke tasks.
+    '''
+    gitprjs: dict
+    '''
+    Source projects, {project: path-relative-to-github}, e.g.
+    {"antson": "antson", "anclient": "anclient", "semantic-jserv": "semantic-jserv"}.
+    Use git_prj() to get a project's (sub-)path.
+    '''
+
     deploy: DeployInfo
     '''
     E.g. x64_windows, used in final zip name for distinguished packages of different runtime.
@@ -221,9 +234,22 @@ class SynodeTask(Anson):
     def __init__(self):
         super().__init__()
         self.backings = {}
+        self.github = '../..'
+        self.gitprjs = {}
         self.web_root_dir = '../../anclient/examples/example.js/album'
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
+
+    def git_prj(self, prj: str, *subpaths: str) -> str:
+        '''
+        :param prj: key in gitprjs
+        :param subpaths: optional sub-paths in the project
+        :return: e.g. git_prj('anclient', 'py3') -> '../../anclient/py3'
+        '''
+        if self.gitprjs is None or prj not in self.gitprjs:
+            Utils.warn(f'Source project "{prj}" is not configured in gitprjs: {self.gitprjs}')
+            sys.exit(-1)
+        return os.path.join(self.github, self.gitprjs[prj], *subpaths)
 
     def check_local_resource(self, local_path: Path) -> Path:
         """
