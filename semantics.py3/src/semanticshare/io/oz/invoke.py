@@ -181,11 +181,26 @@ class SynodeTask(Anson):
     vol_resource: dict
     registry_dir: str
     web_root_dir: str
+    '''
+    @deprecated since semantics.py3 0.6.14, replaced by gitprjs['album-web']
+    '''
     android_dir: str
+    '''
+    @deprecated since semantics.py3 0.6.14, replaced by gitprjs['album-android']
+    '''
     ipcagent_dir: str
+    '''
+    @deprecated since semantics.py3 0.6.14, replaced by gitprjs['album-wsagent']
+    '''
     desktop_dir: str
+    '''
+    @deprecated since semantics.py3 0.6.14, replaced by gitprjs['album-desktop']
+    '''
     desktop_dist_dir: str
     central_dir: str
+    '''
+    @deprecated since semantics.py3 0.6.14, replaced by gitprjs['registry-central']
+    '''
     package_dir: str
 
     github: str
@@ -195,8 +210,9 @@ class SynodeTask(Anson):
     '''
     gitprjs: dict
     '''
-    Source projects, {project: path-relative-to-github}, e.g.
-    {"antson": "antson", "anclient": "anclient", "semantic-jserv": "semantic-jserv"}.
+    Source projects, {project: path}, where "{github}" in path is replaced with github, e.g.
+    {"semantic-DA": "{github}/semantic-DA/semantic.DA", "album-web": "{github}/anclient/examples/example.js/album"}.
+    A path is where the project's building file is, e.g. pom.xml, build.gradle, CMakeLists.txt, pyproject.toml.
     Use git_prj() to get a project's (sub-)path.
     '''
 
@@ -244,12 +260,13 @@ class SynodeTask(Anson):
         '''
         :param prj: key in gitprjs
         :param subpaths: optional sub-paths in the project
-        :return: e.g. git_prj('anclient', 'py3') -> '../../anclient/py3'
+        :return: e.g. with gitprjs = {"anclient.py3": "{github}/anclient/py3"},
+                 git_prj('anclient.py3', 'dist') -> '../../anclient/py3/dist'
         '''
         if self.gitprjs is None or prj not in self.gitprjs:
             Utils.warn(f'Source project "{prj}" is not configured in gitprjs: {self.gitprjs}')
             sys.exit(-1)
-        return os.path.join(self.github, self.gitprjs[prj], *subpaths)
+        return os.path.join(self.gitprjs[prj].replace('{github}', self.github), *subpaths)
 
     def check_local_resource(self, local_path: Path) -> Path:
         """
@@ -305,14 +322,14 @@ class SynodeTask(Anson):
         @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.zip
                       .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.tar.gz
         '''
-        return os.path.join(self.desktop_dir, self.package_dir, self.deskzip_name())
+        return os.path.join(self.git_prj('album-desktop'), self.package_dir, self.deskzip_name())
 
     def get_gradleprj_apk(self) -> Path:
         '''
-        :return: Path(self.android_dir) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
+        :return: Path(gitprjs['album-android']) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
         (must keep consist with gradle project settings)
         '''
-        return Path(self.android_dir) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
+        return Path(self.git_prj('album-android')) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
 
     def run_deploycmds(self, c: Context, verbose=True):
         '''
