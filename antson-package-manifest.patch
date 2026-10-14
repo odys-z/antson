@@ -1,0 +1,173 @@
+diff --git a/semantics.py3/pyproject.toml b/semantics.py3/pyproject.toml
+index 133f3de..30dd091 100644
+--- a/semantics.py3/pyproject.toml
++++ b/semantics.py3/pyproject.toml
+@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
+ 
+ [project]
+ name = "semantics.py3"
+-version = "0.6.16"
++version = "0.6.17"
+ authors = [
+   { name="Ody Z", email="odys.zhou@gmail.com" },
+ ]
+diff --git a/semantics.py3/src/semanticshare/io/oz/invoke.py b/semantics.py3/src/semanticshare/io/oz/invoke.py
+index 3ca3c14..a55be0b 100644
+--- a/semantics.py3/src/semanticshare/io/oz/invoke.py
++++ b/semantics.py3/src/semanticshare/io/oz/invoke.py
+@@ -15,6 +15,7 @@ from invoke import Context
+ from anson.io.odysz.anson import Anson
+ from anson.io.odysz.common import LangExt, Utils
+ from semanticshare.io.oz.register.central import CentralSettings
++from semanticshare.io.oz.syn.pkgresource import PkgResources
+ from semanticshare.io.odysz.semantic.jsession import JUser
+ 
+ 
+@@ -218,6 +219,14 @@ class SynodeTask(Anson):
+     desktop_ver: str
+     ipcagent_ver: str
+ 
++    upgrade_from: dict
++    '''
++    The installed versions the package can upgrade, {"min": "0.8.0", "max": "0.8.9"}, both inclusive
++    and optional, written into the package's manifest (PkgResources.upgrade_from, bin/resource.json).
++    Not configured: any version not newer than this package's.
++    @since semantics.py3 0.6.17
++    '''
++
+     web_inf_dir: str
+     '''
+         Synode 'WEB-INF': 'src/main/webapp/WEB-INF-0.7/*', 
+@@ -300,6 +309,7 @@ class SynodeTask(Anson):
+     def __init__(self):
+         super().__init__()
+         self.backings = {}
++        self.upgrade_from = {}
+         self.github = '../..'
+         self.gitprjs = {}
+         self.web_root_dir = '../../anclient/examples/example.js/album'
+@@ -320,6 +330,32 @@ class SynodeTask(Anson):
+         '''
+         return f'synode_py3-{self.synodepy3_ver()}-py3-none-any.whl'
+ 
++    def synode_jar(self) -> str:
++        '''
++        :return: the synode's (jserv-album) jar file name, jserv-album-{version}.jar
++        '''
++        return f'jserv-album-{self.version}.jar'
++
++    def htmlweb_jar(self) -> str:
++        '''
++        :return: the web service's (html-service) jar file name, html-web-{html_jar_v}.jar
++        '''
++        return f'html-web-{self.html_jar_v}.jar'
++
++    def pkg_res(self) -> PkgResources:
++        '''
++        The package's manifest, written to bin/resource.json while packing: the files' paths in the
++        package (the same names they are packed with), the versions, and upgrade_from.
++        @since semantics.py3 0.6.17
++        '''
++        return PkgResources(
++            files={'synode': f'bin/{self.synode_jar()}',
++                   'html-web': f'bin/{self.htmlweb_jar()}',
++                   'synode.py': f'bin/{self.synodepy3_whl()}'},
++            versions={'jar_ver': self.version, 'web_ver': self.web_ver,
++                      'html_srver': self.html_jar_v, 'synodepy3': self.synodepy3_ver()},
++            upgrade_from=dict(getattr(self, 'upgrade_from', None) or {}))
++
+     def git_prj(self, prj: str, *subpaths: str) -> str:
+         '''
+         :param prj: key in gitprjs
+diff --git a/semantics.py3/src/semanticshare/io/oz/syn/pkgresource.py b/semantics.py3/src/semanticshare/io/oz/syn/pkgresource.py
+new file mode 100644
+index 0000000..c6358cc
+--- /dev/null
++++ b/semantics.py3/src/semanticshare/io/oz/syn/pkgresource.py
+@@ -0,0 +1,86 @@
++'''
++The manifest of a Portfolio synode package, bin/resource.json in the package.
++
++Generated while packing (jserv-album/tasks.py package(), from SynodeTask.pkg_res()), and read by
++the installer and the upgrade (synodepy3 commands.update_srv()), which compares the installed
++package's manifest with the new one, and checks the new one accepts the installed version.
++
++It holds nothing private: the build configuration (SynodeTask, tasks.*.json) stays with the build.
++
++@since semantics.py3 0.6.17
++'''
++import re
++from dataclasses import dataclass
++from typing import Optional, Tuple
++
++from anson.io.odysz.anson import Anson
++
++
++def ver_tuple(v: str) -> Tuple[int, ...]:
++    '''
++    :param v: a version, e.g. "0.8.1", or "0.8.1-alpha" (only the numbers count)
++    :return: (0, 8, 1)
++    '''
++    return tuple(int(n) for n in re.findall(r'\d+', v or ''))
++
++
++def ver_cmp(a: str, b: str) -> int:
++    '''
++    :return: < 0, 0, > 0 as a is older than, the same as, newer than b ("0.8" == "0.8.0")
++    '''
++    ta, tb = ver_tuple(a), ver_tuple(b)
++    n = max(len(ta), len(tb))
++    ta, tb = ta + (0,) * (n - len(ta)), tb + (0,) * (n - len(tb))
++    return (ta > tb) - (ta < tb)
++
++
++@dataclass
++class PkgResources(Anson):
++    files: dict
++    '''
++    {item: file path relative to the installation folder}, items:
++    "synode": bin/jserv-album-#.jar, "html-web": bin/html-web-#.jar, "synode.py": bin/synode_py3-#.whl
++    '''
++
++    versions: dict
++    '''
++    {"jar_ver": the Portfolio version, of jserv-album-#.jar; "web_ver": web-dist's;
++     "html_srver": html-web-#.jar's; "synodepy3": synode.py3's}.
++    The Windows service names are made of jar_ver and web_ver.
++    '''
++
++    upgrade_from: dict
++    '''
++    The installed versions (jar_ver) this package can upgrade, {"min": "0.8.0", "max": "0.8.9"}, both
++    inclusive and optional. Empty: any version not newer than this one.
++    '''
++
++    def __init__(self, files: dict = None, versions: dict = None, upgrade_from: dict = None):
++        super().__init__()
++        self.files = files or {}
++        self.versions = versions or {}
++        self.upgrade_from = upgrade_from or {}
++
++    def file(self, item: str) -> Optional[str]:
++        return self.files.get(item)
++
++    def jar_ver(self) -> Optional[str]:
++        return self.versions.get('jar_ver')
++
++    def refuses(self, installed: str, force: bool = False) -> Optional[str]:
++        '''
++        Whether this package can upgrade an installation of version `installed` (its jar_ver).
++        :param force: accept anyway (support cases)
++        :return: None if it can, else why not
++        '''
++        if force:
++            return None
++        lo, hi = self.upgrade_from.get('min'), self.upgrade_from.get('max')
++        mine = self.jar_ver()
++        if lo and ver_cmp(installed, lo) < 0:
++            return f'the installed version {installed} is older than {lo}, the oldest this package {mine} upgrades'
++        if hi and ver_cmp(installed, hi) > 0:
++            return f'the installed version {installed} is newer than {hi}, the newest this package {mine} upgrades'
++        if mine and ver_cmp(installed, mine) > 0:
++            return f'the installed version {installed} is newer than this package {mine} (a downgrade)'
++        return None

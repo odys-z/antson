@@ -15,6 +15,7 @@ from invoke import Context
 from anson.io.odysz.anson import Anson
 from anson.io.odysz.common import LangExt, Utils
 from semanticshare.io.oz.register.central import CentralSettings
+from semanticshare.io.oz.syn.pkgresource import PkgResources
 from semanticshare.io.odysz.semantic.jsession import JUser
 
 
@@ -218,6 +219,14 @@ class SynodeTask(Anson):
     desktop_ver: str
     ipcagent_ver: str
 
+    upgrade_from: dict
+    '''
+    The installed versions the package can upgrade, {"min": "0.8.0", "max": "0.8.9"}, both inclusive
+    and optional, written into the package's manifest (PkgResources.upgrade_from, bin/resource.json).
+    Not configured: any version not newer than this package's.
+    @since semantics.py3 0.6.17
+    '''
+
     web_inf_dir: str
     '''
         Synode 'WEB-INF': 'src/main/webapp/WEB-INF-0.7/*', 
@@ -300,6 +309,7 @@ class SynodeTask(Anson):
     def __init__(self):
         super().__init__()
         self.backings = {}
+        self.upgrade_from = {}
         self.github = '../..'
         self.gitprjs = {}
         self.web_root_dir = '../../anclient/examples/example.js/album'
@@ -319,6 +329,32 @@ class SynodeTask(Anson):
                  pip reads the version from it, so it must be kept when the wheel is copied.
         '''
         return f'synode_py3-{self.synodepy3_ver()}-py3-none-any.whl'
+
+    def synode_jar(self) -> str:
+        '''
+        :return: the synode's (jserv-album) jar file name, jserv-album-{version}.jar
+        '''
+        return f'jserv-album-{self.version}.jar'
+
+    def htmlweb_jar(self) -> str:
+        '''
+        :return: the web service's (html-service) jar file name, html-web-{html_jar_v}.jar
+        '''
+        return f'html-web-{self.html_jar_v}.jar'
+
+    def pkg_res(self) -> PkgResources:
+        '''
+        The package's manifest, written to bin/resource.json while packing: the files' paths in the
+        package (the same names they are packed with), the versions, and upgrade_from.
+        @since semantics.py3 0.6.17
+        '''
+        return PkgResources(
+            files={'synode': f'bin/{self.synode_jar()}',
+                   'html-web': f'bin/{self.htmlweb_jar()}',
+                   'synode.py': f'bin/{self.synodepy3_whl()}'},
+            versions={'jar_ver': self.version, 'web_ver': self.web_ver,
+                      'html_srver': self.html_jar_v, 'synodepy3': self.synodepy3_ver()},
+            upgrade_from=dict(getattr(self, 'upgrade_from', None) or {}))
 
     def git_prj(self, prj: str, *subpaths: str) -> str:
         '''
