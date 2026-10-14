@@ -203,6 +203,15 @@ class SynodeTask(Anson):
     '''
 
     version: str
+    '''
+    The Portfolio (synode package) version, also of jserv-album-#.#.#.jar.
+    '''
+    ver_synodepy3: str
+    '''
+    The version of synode.py3 (package synodepy3, wheel synode_py3-#.#.#-py3-none-any.whl), which can be
+    released on its own, e.g. as the upgrade tool. If not configured, it's the version, see synodepy3_ver().
+    @since semantics.py3 0.6.16
+    '''
     apk_ver: str
     html_jar_v: str
     web_ver: str
@@ -296,6 +305,20 @@ class SynodeTask(Anson):
         self.web_root_dir = '../../anclient/examples/example.js/album'
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
+
+    def synodepy3_ver(self) -> str:
+        '''
+        :return: ver_synodepy3, or version for task jsons without it.
+        '''
+        v = getattr(self, 'ver_synodepy3', None)
+        return self.version if LangExt.isblank(v) else v
+
+    def synodepy3_whl(self) -> str:
+        '''
+        :return: the synode.py3 wheel's file name, synode_py3-{synodepy3_ver()}-py3-none-any.whl.
+                 pip reads the version from it, so it must be kept when the wheel is copied.
+        '''
+        return f'synode_py3-{self.synodepy3_ver()}-py3-none-any.whl'
 
     def git_prj(self, prj: str, *subpaths: str) -> str:
         '''
