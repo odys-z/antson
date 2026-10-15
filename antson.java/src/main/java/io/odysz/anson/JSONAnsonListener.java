@@ -229,14 +229,13 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 		if (stack.size() <= 1 || LangExt.isblank(type, "null"))
 			return null;
 
-		// trace back, guess with type for children could be in array or map
-		ParsingCtx p = stack.get(1);
-		int i = 2;
-		while (p != null) {
-			if (type.equals(p.enclosing.getClass()))
+		// trace back, guess with type for children could be in array or map.
+		// The parent field can be declared as a super class of the enclosing object,
+		// e.g. TreeIndenode.parent for an AnTreeNode, so match by instance, not by class.
+		for (int i = 1; i < stack.size(); i++) {
+			ParsingCtx p = stack.get(i);
+			if (p != null && type.isInstance(p.enclosing))
 				return p.enclosing;
-			p = stack.get(i);
-			i++;
 		}
 		return null;
 	}
