@@ -57,6 +57,13 @@ class DeployInfo(Anson):
     The domain initial nodes
     '''
 
+    domain: str
+    '''
+    The default domain of orgid, task.json -> registry/dictionary.json config.domain.
+    Blank: the installers select the community's first domain in the central.
+    @since 0.8.0
+    '''
+
     syn_admin_pswd: str
     '''
     deprecated since 0.5.6
@@ -78,6 +85,7 @@ class DeployInfo(Anson):
         self.ui = 'ui_form.py'
         self.lang = 'en'
         self.centralUid = 'github'
+        self.domain = ''
 
 @dataclass
 class BashCmd(Anson):
