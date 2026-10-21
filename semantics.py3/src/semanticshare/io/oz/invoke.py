@@ -128,6 +128,87 @@ class LandingSite(Anson):
     def __init__(self):
         super().__init__()
 
+@dataclass
+class GhRelease(Anson):
+    '''
+    The GitHub release the built packages are uploaded to with gh (GitHub CLI), see SynodeTask.gh_upload().
+    @since semantics.py3 0.6.17
+    '''
+
+    repo: str
+    '''
+    E.g. odys-z/semantic-jserv. Blank (the default): not to be uploaded. A package carries its task json's
+    central password and root key (tasks.py config, settings.json), so only a task json made for a public
+    release, e.g. tasks.closed-test.json, configures it.
+    '''
+    tag: str
+    '''
+    The release's tag, which is not mapped to the package version.
+    Blank: the repository's latest release (the newest published, not a prerelease or draft).
+    '''
+
+    def __init__(self):
+        super().__init__()
+        self.repo = ''
+        self.tag = ''
+
+
+def sha256_digest(f: Path) -> str:
+    '''
+    :return: 'sha256:<hex>', the format of a GitHub release asset's digest
+    '''
+    import hashlib
+    h = hashlib.sha256()
+    with open(f, 'rb') as fi:
+        for chunk in iter(lambda: fi.read(1 << 20), b''):
+            h.update(chunk)
+    return f'sha256:{h.hexdigest()}'
+
+
+def gh_upload_asset(upload_url: str, token: str, f: Path, name: str, proxy: str = '') -> dict:
+    '''
+    POST f to a GitHub release's upload_url as the asset name, printing the percentage (every 0.1%), size and speed.
+    :param upload_url: the release's upload_url, without the {?name,label} template
+    :param token: e.g. from gh auth token
+    :param proxy: e.g. http://127.0.0.1:7890, see SynodeTask.gh_proxy(); blank: no proxy (not the system's)
+    :return: the asset created (json)
+    @since semantics.py3 0.6.17
+    '''
+    import time
+    import urllib.parse
+    import urllib.request
+
+    size = f.stat().st_size
+
+    class Progress:
+        ''' The request body, read by http.client chunk by chunk while sending. '''
+        def __init__(self, fi):
+            self.fi, self.sent, self.shown, self.t0 = fi, 0, -1, time.monotonic()
+
+        def read(self, n: int = -1) -> bytes:
+            b = self.fi.read(n if n and n > 0 else 1 << 16)
+            self.sent += len(b)
+            permille = self.sent * 1000 // size if size else 1000  # updated every 0.1%
+            if permille != self.shown:
+                self.shown = permille
+                mib, secs = 1 << 20, max(time.monotonic() - self.t0, 1e-3)
+                print(f'\r  {permille / 10:5.1f}%  {self.sent / mib:7.1f} / {size / mib:.1f} MiB  {self.sent / mib / secs:5.1f} MiB/s',
+                      end='', flush=True)
+            return b
+
+    with open(f, 'rb') as fi:
+        req = urllib.request.Request(
+            f'{upload_url}?{urllib.parse.urlencode({"name": name})}', data=Progress(fi), method='POST',
+            headers={'Authorization': f'Bearer {token}', 'Accept': 'application/vnd.github+json',
+                     'Content-Type': 'application/octet-stream', 'Content-Length': str(size)})
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({'https': proxy} if proxy else {}))
+        try:
+            with opener.open(req) as resp:
+                return json.loads(resp.read().decode('utf-8'))
+        finally:
+            print()
+
+
 class TaskCredentials():
     credentials: dict
     '''
@@ -307,6 +388,12 @@ class SynodeTask(Anson):
 
     landings: List[LandingSite]
 
+    gh_release: GhRelease
+    '''
+    The GitHub release gh_upload() uploads dist_assets() to.
+    @since semantics.py3 0.6.17
+    '''
+
     backings: dict
     '''
     An ignored json field for deserilization.
@@ -323,6 +410,7 @@ class SynodeTask(Anson):
         self.web_root_dir = '../../anclient/examples/example.js/album'
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
+        self.gh_release = GhRelease()
 
     def synodepy3_ver(self) -> str:
         '''
@@ -445,6 +533,150 @@ class SynodeTask(Anson):
         (must keep consist with gradle project settings)
         '''
         return Path(self.git_prj('album-android')) / 'app' / 'build' / 'outputs' / 'apk' / 'release' / 'app-release.apk'
+
+    def dist_assets(self) -> List[Path]:
+        '''
+        The packages package() makes in package_dir, the folder of the final results (the clean task
+        runs first, so only one version is there), pushed by tasks.py run_scps() and uploaded by gh_upload().
+        @since semantics.py3 0.6.17
+        '''
+        files = [Path(self.get_distzip()), Path(self.package_dir) / self.get_apk_name()]
+        if os.name == 'nt':  # not posix 0.8.0
+            files.append(Path(self.package_dir) / self.deskzip_name())  # package() copies get_deskapp_zip() here
+        return files
+
+    @staticmethod
+    def gh_proxy() -> tuple:
+        '''
+        The proxy for gh and the uploading, the first configured of
+        "https_proxy" in ~/.tasksrc.json, $HTTPS_PROXY, git config https.proxy / http.proxy.
+        The Windows system proxy is not used (gh doesn't either).
+        :return: (proxy, where it's configured), ('', 'none') for no proxy
+        @since semantics.py3 0.6.17
+        '''
+        import subprocess
+
+        rc = task_credentials.credentials.get('https_proxy')
+        if not LangExt.isblank(rc):
+            return rc, f'{Path.home()}/.tasksrc.json'
+        for v in ('HTTPS_PROXY', 'https_proxy'):
+            if not LangExt.isblank(os.environ.get(v)):
+                return os.environ[v], f'${v}'
+        for k in ('https.proxy', 'http.proxy'):
+            r = subprocess.run(['git', 'config', '--get', k], capture_output=True, text=True)
+            if r.returncode == 0 and r.stdout.strip():
+                return r.stdout.strip(), f'git config {k}'
+        return '', 'none'
+
+    def gh_upload(self, dry_run: bool = False) -> int:
+        '''
+        Upload dist_assets() to the GitHub release gh_release, with gh (GitHub CLI, logged in with gh auth login).
+        An asset of the same name and sha256 digest is skipped. A changed one is replaced: the new file is
+        uploaded as "<name>.uploading" first (gh_upload_asset(), with the progress), and only then is the old
+        one deleted and the new one renamed, so a failed upload leaves the old asset in place.
+        Each uploaded asset is labelled "<name> @ <commit>", the git head of the working folder.
+        Assets of other versions in the release are not touched.
+        :param dry_run: only print the release and the plan
+        :return: 0 if ok
+        @since semantics.py3 0.6.17
+        '''
+        rel = self.gh_release
+        if LangExt.isblank(rel.repo):
+            Utils.warn('gh_release.repo is not configured: the packages of this task json are not to be uploaded.\n'
+                       'They carry its central password and root key; configure gh_release only for a public release, e.g.\n'
+                       '    "gh_release": {"type": "io.oz.invoke.GhRelease", "repo": "odys-z/semantic-jserv", "tag": ""}')
+            return -1
+
+        import subprocess
+
+        proxy, proxy_from = self.gh_proxy()
+        if proxy.lower().startswith('socks'):
+            Utils.warn('Proxy {} ({}): a socks proxy cannot be used for uploading, configure an http(s) one, e.g. in {}:\n'
+                       '    {{"https_proxy": "http://127.0.0.1:7890"}}', proxy, proxy_from, f'{Path.home()}/.tasksrc.json')
+            return -1
+        env = {k: v for k, v in os.environ.items() if k.lower() != 'https_proxy'}
+        if proxy:
+            env['HTTPS_PROXY'] = proxy
+
+        def gh(*args: str) -> subprocess.CompletedProcess:
+            return subprocess.run(['gh', *args], capture_output=True, text=True, encoding='utf-8', env=env)
+
+        try:
+            r = gh('--version')
+        except OSError as e:
+            r = subprocess.CompletedProcess(['gh', '--version'], -1, '', str(e))
+        if r.returncode != 0:
+            Utils.warn('gh (GitHub CLI) is needed for uploading the packages, but "gh --version" failed: {}\n'
+                       'Install it, then log in once with: gh auth login\n'
+                       '    Windows: winget install --id GitHub.cli\n'
+                       '    Ubuntu : sudo apt install gh\n'
+                       '    Others : https://cli.github.com',
+                       r.stderr.strip())
+            return -1
+        print(r.stdout.splitlines()[0])  # e.g. gh version 2.81.0 (2026-09-30)
+        print(f'Proxy: {proxy or "none"} ({proxy_from})')
+
+        api = f'repos/{rel.repo}/releases/' + ('latest' if LangExt.isblank(rel.tag) else f'tags/{rel.tag}')
+        r = gh('api', api)
+        if r.returncode != 0:
+            Utils.warn('Release not found: {}\n{}', api, r.stderr)
+            return -1
+
+        release = json.loads(r.stdout)
+        tag = release['tag_name']
+        remote = {a['name']: a for a in release['assets']}
+        print(f'Release: {tag} {release["html_url"]}')
+
+        commit = subprocess.run(['git', 'rev-parse', '--short', 'HEAD'],
+                                capture_output=True, text=True).stdout.strip()
+
+        plan = []
+        for f in self.dist_assets():
+            digest = sha256_digest(f)  # also fails loudly if package() didn't make it
+            a = remote.get(f.name)
+            action = 'same' if a and a.get('digest') == digest else 'replace' if a else 'new'
+            plan.append((f, action))
+            print(f'{action:<8} {f}')
+
+        if dry_run:
+            return 0
+
+        r = gh('auth', 'token')
+        if r.returncode != 0:
+            Utils.warn('gh is not logged in, run: gh auth login\n{}', r.stderr)
+            return -1
+        token = r.stdout.strip()
+        upload_url = release['upload_url'].split('{')[0]
+        assets = f'repos/{rel.repo}/releases/assets'
+
+        def gh_ok(*args: str) -> bool:
+            r = gh(*args)
+            if r.returncode != 0:
+                Utils.warn('gh {} failed:\n{}', ' '.join(args), r.stderr)
+            return r.returncode == 0
+
+        for f, action in plan:
+            if action == 'same':
+                continue
+            temp = f'{f.name}.uploading'
+            if temp in remote and not gh_ok('api', '-X', 'DELETE', f'{assets}/{remote[temp]["id"]}'):
+                return -1  # left by an aborted upload
+
+            print(f'Uploading {f} ...')
+            try:
+                asset = gh_upload_asset(upload_url, token, f, temp, proxy)
+            except Exception as e:
+                Utils.warn('Uploading {} failed: {}\n{}', f, e, e.read().decode('utf-8', 'replace') if hasattr(e, 'read') else '')
+                return -1
+
+            if action == 'replace' and not gh_ok('api', '-X', 'DELETE', f'{assets}/{remote[f.name]["id"]}'):
+                return -1
+            if not gh_ok('api', '-X', 'PATCH', f'{assets}/{asset["id"]}',
+                         '-f', f'name={f.name}', '-f', f'label={f.name} @ {commit}'):
+                return -1
+
+        print(f'Uploaded to {release["html_url"]}')
+        return 0
 
     def run_deploycmds(self, c: Context, verbose=True):
         '''
