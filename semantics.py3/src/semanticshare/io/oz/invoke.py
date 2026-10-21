@@ -388,7 +388,7 @@ class SynodeTask(Anson):
 
     landings: List[LandingSite]
 
-    gh_release: GhRelease
+    github_release: GhRelease
     '''
     The GitHub release gh_upload() uploads dist_assets() to.
     @since semantics.py3 0.6.17
@@ -410,7 +410,7 @@ class SynodeTask(Anson):
         self.web_root_dir = '../../anclient/examples/example.js/album'
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
-        self.gh_release = GhRelease()
+        self.github_release = GhRelease()
 
     def synodepy3_ver(self) -> str:
         '''
@@ -570,7 +570,7 @@ class SynodeTask(Anson):
 
     def gh_upload(self, dry_run: bool = False, no_proxy: bool = False) -> int:
         '''
-        Upload dist_assets() to the GitHub release gh_release, with gh (GitHub CLI, logged in with gh auth login).
+        Upload dist_assets() to the GitHub release github_release, with gh (GitHub CLI, logged in with gh auth login).
         An asset of the same name and sha256 digest is skipped. A changed one is replaced: the new file is
         uploaded as "<name>.uploading" first (gh_upload_asset(), with the progress), and only then is the old
         one deleted and the new one renamed, so a failed upload leaves the old asset in place.
@@ -581,11 +581,11 @@ class SynodeTask(Anson):
         :return: 0 if ok
         @since semantics.py3 0.6.17
         '''
-        rel = self.gh_release
+        rel = self.github_release
         if LangExt.isblank(rel.repo):
-            Utils.warn('gh_release.repo is not configured: the packages of this task json are not to be uploaded.\n'
-                       'They carry its central password and root key; configure gh_release only for a public release, e.g.\n'
-                       '    "gh_release": {"type": "io.oz.invoke.GhRelease", "repo": "odys-z/semantic-jserv", "tag": ""}')
+            Utils.warn('github_release.repo is not configured: the packages of this task json are not to be uploaded.\n'
+                       'They carry its central password and root key; configure github_release only for a public release, e.g.\n'
+                       '    "github_release": {"type": "io.oz.invoke.GhRelease", "repo": "odys-z/semantic-jserv", "tag": ""}')
             return -1
 
         import subprocess
