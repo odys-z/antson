@@ -568,7 +568,7 @@ class SynodeTask(Anson):
                 return r.stdout.strip(), f'git config {k}'
         return '', 'none'
 
-    def gh_upload(self, dry_run: bool = False) -> int:
+    def gh_upload(self, dry_run: bool = False, no_proxy: bool = False) -> int:
         '''
         Upload dist_assets() to the GitHub release gh_release, with gh (GitHub CLI, logged in with gh auth login).
         An asset of the same name and sha256 digest is skipped. A changed one is replaced: the new file is
@@ -577,6 +577,7 @@ class SynodeTask(Anson):
         Each uploaded asset is labelled "<name> @ <commit>", the git head of the working folder.
         Assets of other versions in the release are not touched.
         :param dry_run: only print the release and the plan
+        :param no_proxy: connect directly, not looking for a proxy (gh_proxy()), and not passing $HTTPS_PROXY to gh
         :return: 0 if ok
         @since semantics.py3 0.6.17
         '''
@@ -589,7 +590,7 @@ class SynodeTask(Anson):
 
         import subprocess
 
-        proxy, proxy_from = self.gh_proxy()
+        proxy, proxy_from = ('', 'no-proxy') if no_proxy else self.gh_proxy()
         if proxy.lower().startswith('socks'):
             Utils.warn('Proxy {} ({}): a socks proxy cannot be used for uploading, configure an http(s) one, e.g. in {}:\n'
                        '    {{"https_proxy": "http://127.0.0.1:7890"}}', proxy, proxy_from, f'{Path.home()}/.tasksrc.json')
