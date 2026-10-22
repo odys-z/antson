@@ -514,18 +514,33 @@ public class Utils {
 	}
 
 	/**
-	 * Load text from the dir/file.
+	 * Load text from the dir/file, with line breaks removed.
 	 * @param dir
 	 * @param file
 	 * @return the text buffer
 	 * @since 0.9.134
+	 * @see #loadTxt(String, String, String)
 	 */
 	public static StringBuffer loadTxt(String dir, String file) {
+		return loadTxt(dir, file, "");
+	}
+
+	/**
+	 * Load text from the dir/file.
+	 * @param dir
+	 * @param file
+	 * @param linebreak appended to each line, e.g. "\n", or "" for removing line breaks.
+	 * @return the text buffer
+	 * @since 1.1.3
+	 */
+	public static StringBuffer loadTxt(String dir, String file, String linebreak) {
            StringBuffer lines = new StringBuffer();
         try (BufferedReader reader = new BufferedReader(new FileReader(FilenameUtils.concat(dir, file)))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 lines.append(line);
+                if (linebreak != null)
+                    lines.append(linebreak);
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
