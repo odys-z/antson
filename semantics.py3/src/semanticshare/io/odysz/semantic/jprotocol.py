@@ -48,19 +48,46 @@ class AnsonHeader(Anson):
 
 @dataclass
 class AnsonBody(Anson):
+    '''
+    The same json structure as io.odysz.semantic.jprotocol.AnsonBody (Java), anson.cmake's
+    jprotocol.h and @anclient/semantier's AnsonBody: type, a, uri.
+    Fields marked deprecated are not fields of Java AnsonBody, see
+    ISSUE anson-body-fields, semantic-jserv/issues/anson-body-fields.md.
+    '''
     uri: str
     parent: Optional['AnsonMsg']
     '''
-    @deprecated
+    @deprecated since 0.6.17, ISSUE anson-body-fields: planned to be removed (ignored by Java, not in cpp).
     '''
     a: str
     rs: dict
+    '''
+    @deprecated since 0.6.17, ISSUE anson-body-fields: a field of Java AnsonResp, not AnsonBody.
+    '''
     m: str
+    '''
+    @deprecated since 0.6.17, ISSUE anson-body-fields: a field of Java AnsonResp, not AnsonBody.
+    '''
     map: dict
+    '''
+    @deprecated since 0.6.17, ISSUE anson-body-fields: a field of Java AnsonResp, not AnsonBody.
+    '''
     opts: JsonOpt
+    '''
+    @deprecated since 0.6.17, ISSUE anson-body-fields: a field of Java AnsonMsg, not AnsonBody.
+    '''
     addr: str
+    '''
+    @deprecated since 0.6.17, ISSUE anson-body-fields: a field of Java AnsonMsg, not AnsonBody.
+    '''
     version: str
+    '''
+    @deprecated since 0.6.17, ISSUE anson-body-fields: a field of Java AnsonMsg, not AnsonBody.
+    '''
     seq: int
+    '''
+    @deprecated since 0.6.17, ISSUE anson-body-fields: a field of Java AnsonMsg, not AnsonBody.
+    '''
 
 
     def __init__(self, parent = None):
