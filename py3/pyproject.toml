@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "anson.py3"
-version = "0.6.11"
+version = "0.6.12"
 authors = [
   { name="Ody Z", email="odys.zhou@gmail.com" },
 ]
@@ -24,10 +24,14 @@ This work is licensed under the terms of the MIT license.
 For a copy, see <https://opensource.org/licenses/MIT>.""" }
 
 [project.optional-dependencies]
+crypto = [
+    "cryptography>=41.0.0"
+]
 testing = [
     "pytest",
     "requests",
-    "semantics.py3"
+    "semantics.py3",
+    "cryptography>=41.0.0"
 ]
 
 [tool.hatch.build.targets.wheel]
