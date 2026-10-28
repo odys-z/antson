@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Optional, List, Tuple, Union
@@ -171,7 +172,22 @@ class AnsonResp(AnsonBody):
         return self
 
 
+class OnError:
+    """
+    Java io.odysz.semantic.jprotocol.JProtocol.OnError, err(MsgCode code, String msg, String ... args).
+    Moved from anclient.py3 jclient.py since semantics.py3 0.6.18.
+    """
+    err : Callable = None
+    def __call__(self, code: MsgCode, msg: str, *args: str) -> None:
+        return self.err(code, msg, args)
+
+    def __init__(self, on_err: Callable[[MsgCode, str, ...], None]):
+        self.err = on_err
+
+
 class JProtocol:
+    OnError = OnError
+
     urlroot: str = 'must call JProtocol.setup()'
     '''
     @deprecated
