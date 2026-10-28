@@ -5,17 +5,27 @@ from anson.io.odysz.anson import Anson
 
 @dataclass
 class SessionInf(Anson):
-    uid: str
-    pswd: str
+    """
+    Since semantics.py3 0.6.18, no pswd.
+    """
     ssid: str
-    ssToken: str
+    uid: str
+    roleId: str
+    userName: str
+    roleName: str
 
-    def __init__(self, uid: str = None, pswd: str = None):
+    ssToken: str
+    device: str
+
+    def __init__(self, ssid: str = None, uid: str = None, roleId: str = None):
         super().__init__()
+        self.ssid = ssid
         self.uid = uid
-        self.pswd = pswd
-        self.ssid = None
+        self.roleId = roleId
+        self.userName = None
+        self.roleName = None
         self.ssToken = None
+        self.device = None
 
 @dataclass
 class SemanticObject(Anson):
