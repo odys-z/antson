@@ -182,6 +182,13 @@ class Centralport(Enum):
     session  :str = "login.serv"
     regist   :str = "regist.serv"
     menu     :str = "menu.serv"
+    community:str = "community.serv"
+    domx     :str = "domx.serv"
+    admin    :str = "admin.serv"
+    signup   :str = "signup.serv"
+    '''
+    Since 0.1.9 (the central), signing up a new user, without a session, see SignupReq / SignupResp.
+    '''
 
 
 @dataclass
@@ -287,6 +294,91 @@ class RegistResp(AnsonResp):
 
     def domains(self):
         return self.orgDomains if self.orgDomains is not None else []
+
+
+@dataclass
+class SignupReq(AnsonBody):
+    """
+    Java io.oz.syn.registry.SignupReq, request of the central's sign-up tier (signup.serv,
+    Centralport.signup), the only port serving users without a session. The same as registry.ts'.
+
+    A new user signs up as a domain admin, role r01, of a new community, or joins an existing
+    community of the central's market. The password is sent as is, so the central must be served over https.
+
+    TODO move to AnSession's package for all languages, with SignupResp (reminded).
+    @since semantics.py3 0.6.18
+    """
+    class A:
+        signup  = "c/user"
+        '''
+        Sign up a user, into a new community (newOrg) or an existing one.
+        '''
+        market  = "r/market"
+        '''
+        The central's market, id and name (SignupResp.market, marketName).
+        '''
+        qryOrgs = "r/orgs"
+        '''
+        Communities of the market for users to join, replied in SignupResp.rs: orgId, orgName.
+        '''
+
+    class Condts:
+        '''
+        Names of the conditions in pageInf.
+        '''
+        orgName = "orgName"
+
+    uid: Optional[str]
+    userName: Optional[str]
+    pswd: Optional[str]
+    '''
+    Plain text, only sent by signing up.
+    '''
+    orgId: Optional[str]
+    '''
+    The community, a new one's if newOrg, otherwise an existing one to join.
+    '''
+    newOrg: bool
+    orgName: Optional[str]
+    pageInf: Optional[Anson]
+    '''
+    A.qryOrgs: Java io.odysz.transact.sql.PageInf, with condition Condts.orgName.
+    Not yet ported to py3; leave it None for all the communities of the market.
+    '''
+
+    def __init__(self, act: str = None, uri: str = None):
+        super().__init__()
+        self.a = act
+        self.uri = uri
+        self.uid = None
+        self.userName = None
+        self.pswd = None
+        self.orgId = None
+        self.newOrg = False
+        self.orgName = None
+        self.pageInf = None
+
+
+@dataclass
+class SignupResp(AnsonResp):
+    """
+    Java io.oz.syn.registry.SignupResp, reply of the central's sign-up tier.
+    @since semantics.py3 0.6.18
+    """
+    uid: Optional[str]
+    orgId: Optional[str]
+    '''
+    The user's community.
+    '''
+    market: Optional[str]
+    marketName: Optional[str]
+
+    def __init__(self):
+        super().__init__()
+        self.uid = None
+        self.orgId = None
+        self.market = None
+        self.marketName = None
 
 
 def loadYellowPages():

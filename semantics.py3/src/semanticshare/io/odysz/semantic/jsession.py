@@ -53,6 +53,35 @@ class AnSessionReq(AnsonBody):
 
 
 @dataclass
+class JProfile(Anson):
+    """
+    Java io.odysz.semantic.jsession.JProfile, the common profile of a session user, replied on login
+    in AnSessionResp.profile (IUser.profile()).
+    @since semantics.py3 0.6.18
+    """
+    home: Optional[str]
+    '''
+    The page to land on, decided by the server: the client router's path, e.g. "/home".
+    '''
+
+    orgId: Optional[str]
+    '''
+    The user's org, e.g. a_users.orgId; None for a user of no org, e.g. the central's super user (r00).
+    '''
+
+    customExt: Optional[str]
+    '''
+    A serialized Anson string, only a particular system / business understands or cares about.
+    '''
+
+    def __init__(self, home: str = None, orgId: str = None):
+        super().__init__()
+        self.home = home
+        self.orgId = orgId
+        self.customExt = None
+
+
+@dataclass
 class AnSessionResp(AnsonResp):
     """
     Java io.odysz.semantic.jsession.AnSessionResp, anson.cmake's AnSessionResp (gen/semantier.hpp).
@@ -62,7 +91,7 @@ class AnSessionResp(AnsonResp):
 
     profile: Optional[Anson]
     '''
-    IUser.profile() replied on login, any type of Anson, e.g. the page to land on.
+    IUser.profile() replied on login, a JProfile, which all clients understand.
     '''
 
     def __init__(self, ssInf: SessionInf = None):

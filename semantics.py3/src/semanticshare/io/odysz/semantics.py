@@ -15,6 +15,12 @@ class SessionInf(Anson):
     roleName: str
 
     ssToken: str
+
+    seq: int
+    '''
+    Last sequence, Java SessionInf.seq.
+    '''
+
     device: str
 
     def __init__(self, ssid: str = None, uid: str = None, roleId: str = None):
@@ -25,6 +31,7 @@ class SessionInf(Anson):
         self.userName = None
         self.roleName = None
         self.ssToken = None
+        self.seq = 0
         self.device = None
 
 @dataclass
