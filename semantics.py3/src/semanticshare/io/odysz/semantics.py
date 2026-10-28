@@ -34,4 +34,4 @@ class SemanticObject(Anson):
 
     def __init__(self):
         super().__init__()
-        props = {}
+        self.props = {}
