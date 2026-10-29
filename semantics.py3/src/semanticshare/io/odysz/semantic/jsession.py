@@ -89,9 +89,10 @@ class AnSessionResp(AnsonResp):
     """
     ssInf: SessionInf
 
-    profile: Optional[Anson]
+    profile: Optional[JProfile]
     '''
-    IUser.profile() replied on login, a JProfile, which all clients understand.
+    IUser.profile() replied on login, typed JProfile since semantic.jserv 1.5.19,
+    as clients don't support polymorphism yet; application data goes in JProfile.customExt.
     '''
 
     def __init__(self, ssInf: SessionInf = None):
