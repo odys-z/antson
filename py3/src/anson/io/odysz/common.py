@@ -76,7 +76,8 @@ def check_package(pkg_name: str, require_ver: Optional[Union[str, List[str]]] = 
     if not check_verstr(pkg_version, require_ver):
         return False
 
-    print(f'{pkg_name} {require_ver}: Positive.')
+    print(f'{pkg_name} {pkg_version}: accepted, ' +
+          ('Required version: None' if require_ver is None else f'required {require_ver}.'))
     return True
 
 

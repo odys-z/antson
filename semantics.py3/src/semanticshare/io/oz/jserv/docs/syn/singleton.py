@@ -123,6 +123,7 @@ class AppSettings(Anson):
 
     connIdleSnds: int
     centralPswd: str
+    sandbox: Optional[str]
 
     def __init__(self):
         super().__init__()
@@ -140,6 +141,13 @@ class AppSettings(Anson):
 
         self.jserv_utc = None
         self.centralPswd = None
+
+        self.sandbox = None
+        '''
+        Java AppSettings.sandbox: None for a real synode; 'no-central' or 'isolated' for debugging
+        a copy, which never contacts the central (nor, if 'isolated', the peers).
+        The installers never set it, and the upgrade refuses a sandbox. Since 0.8.1.
+        '''
 
     @overload
     def Volume(self):
