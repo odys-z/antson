@@ -957,6 +957,9 @@ public class LangExt {
 		return ("," + str + ",").indexOf("," + s + ",");
 	}
 	
+	/**
+     * @return index or -1 if dosen't find
+	 */
 	public static int indexIn(String target, String...ins) {
 		return isNull(ins) ? -1: indexOf(ins, target);
 	}
