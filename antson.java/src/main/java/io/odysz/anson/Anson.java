@@ -34,7 +34,7 @@ import io.odysz.common.Utils;
 /**
  * Base class for any user's type that can be transmitted over JServ protocol to AnClient.
  * 
- * @author odys-z@github.com
+ * @author odys
  */
 public class Anson implements IJsonable {
 	public static boolean verbose;

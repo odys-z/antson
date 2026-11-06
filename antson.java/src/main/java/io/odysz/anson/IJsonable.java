@@ -25,7 +25,7 @@ public interface IJsonable {
 		}
 	 }</pre>
 	 * </p>
-	 * @author odys-z@github.com
+	 * @author ody
 	 */
 	public interface JsonableFactory {
 		IJsonable fromJson(String json);

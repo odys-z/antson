@@ -17,7 +17,7 @@ import java.lang.annotation.*;
  * Reflection - Annotations</a>.
  * </p>
  * 
- * @author odys-z@github.com
+ * @author ody
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

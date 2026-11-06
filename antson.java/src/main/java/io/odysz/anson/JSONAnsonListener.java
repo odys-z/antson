@@ -40,7 +40,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * the element class of parsing stack.</p>
 	 * <p>Memo: The hard lesson learned from this is if you want parse a grammar,
 	 * you better follow the grammar structure.</p>
-	 * @author odys-z@github.com
+	 * @author ody
 	 */
 	public class ParsingCtx {
 		/**The json prop (object key) */
