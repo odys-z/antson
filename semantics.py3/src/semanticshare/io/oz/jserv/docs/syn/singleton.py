@@ -18,9 +18,13 @@ implISettingsLoaded : str = 'io.oz.syntier.serv.WebsrvLocalExposer'
 
 syn_db = 'doc-jserv.db'
 sys_db = 'jserv-main.db'
+# semantic-doc's doc-tree db in the volume, doctree.jserv's DoctreeDBHelper.dbfile
+doctree_db = 'doctree.db'
+
 syntity_json = 'syntity.json'
 
 webroot_hub = 'WEBROOT_HUB'
+
 
 # TODO replace with JProtocol.urlroot
 # jserv_url_path = 'jserv-album'
