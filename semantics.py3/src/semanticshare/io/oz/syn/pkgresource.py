@@ -8,15 +8,15 @@ package's manifest with the new one, and checks the new one accepts the installe
 It holds nothing private: the build configuration (SynodeTask, tasks.*.json) stays with the build.
 
 Since 0.6.20 the manifest is a source file of its own (jserv-album/src/main/resource.json): upgrade_from,
-upgrader and upgrades (ConfigUpgrades) are written by hand, only files and versions come from the build.
+upgrader and config_picks (ConfigPicks) are written by hand, only files and versions come from the build.
 
 @since semantics.py3 0.6.17
 '''
+import copy
 import json
-import os
 import re
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 from anson.io.odysz.anson import Anson
 
@@ -39,117 +39,99 @@ def ver_cmp(a: str, b: str) -> int:
     return (ta > tb) - (ta < tb)
 
 
-class ConfigUpgrades:
+class ConfigPicks:
     '''
-    Upgrades of an installation's configuration files, one entry of a manifest's "upgrades":
+    How an upgrade makes a configuration file, e.g. WEB-INF/html-service.json, of a manifest's
+    "config_picks": the new package's file, its template, with the installed file's values of the
+    fields picked.
 
-        {"since": "0.8.0",
-         "files": {"WEB-INF/html-service.json": {
-            "replace": {"io.oz.srv.ResPath": "io.oz.srv.StaticResource"},
-            "add": {"dynaResource": {"type": "io.oz.srv.DynaResource",
-                                     "synode": "http://127.0.0.1:{settings.port}/jserv-album"}}}}}
+        "config_picks": {
+          "WEB-INF/html-service.json": {
+            "welcomepages":           ["welcomepages"],
+            "dynaResource.syn_jserv": ["dynaResource.syn_jserv", "dynaResource.synode"]}}
 
-    An upgrade keeps the installed configuration files (settings.json, html-service.json), so what a
-    new version needs in them is told here, and applied to the kept files (PkgResources.upgrade_configs()).
+    {file path relative to the installation folder: {field: the names it ever had, the newest first}}.
+    A field is a path of keys, e.g. "dynaResource.syn_jserv". The first of its names found in the
+    installed file gives the value, so a renamed field gets its old name appended, and no version
+    of the installation is needed.
 
-    since: the minimum installed version: the entry applies to installations of this version or newer.
-    Entries accumulate, the oldest first, and are applied in that order, at every upgrade: applying one
-    again changes nothing.
+    So everything else is the new version's: new fields and their default values, renamed types,
+    fields removed. A file not in config_picks is kept as installed.
 
-    files: {file path relative to the installation folder: {"replace": {...}, "add": {...}}}
-    - replace {old: new}: a renamed value or key, e.g. a type; only whole json strings are replaced;
-    - add: values a new version needs. A missing key is added, with its value; an existing one is kept,
-      whatever its value, except: an object is completed the same way, key by key, and a list gets the
-      items it doesn't have. A string value can refer the installation's settings, as {settings.port}.
-
-    Plain json, not parsed as Anson: the values of "add" are other applications' types.
+    The installed file is read as plain json, never parsed as Anson: an old type name, or a field
+    no version knows now, can't fail it. A picked value is not taken if the template's value is of
+    another kind (object, list, text, number, bool), nor a null over the template's value.
 
     @since semantics.py3 0.6.20
     '''
-    since: str
-    files: dict
 
-    def __init__(self, since: str = None, files: dict = None):
-        self.since = since
-        self.files = files or {}
+    @staticmethod
+    def check(picks: dict):
+        '''
+        :param picks: a manifest's config_picks
+        :raise ValueError: not {path: {field: [names]}}
+        '''
+        if not isinstance(picks, dict):
+            raise ValueError('config_picks must be an object, {file path: {field: [its names]}}')
+        for path, fields in picks.items():
+            if not isinstance(fields, dict) or not all(
+                    isinstance(f, str) and isinstance(ns, list) and ns and all(isinstance(n, str) and n for n in ns)
+                    for f, ns in fields.items()):
+                raise ValueError(f'config_picks, {path}: must be an object, {{field: [its names, the newest first]}}')
 
-    def applies(self, installed: Optional[str]) -> bool:
+    @staticmethod
+    def get(obj, path: str) -> Tuple[bool, Any]:
         '''
-        :param installed: the installed version (jar_ver); unknown (None): every entry applies
+        :return: (found, value) of a field, a path of keys like "dynaResource.syn_jserv"
         '''
-        return not self.since or not installed or ver_cmp(installed, self.since) >= 0
+        for k in path.split('.'):
+            if not isinstance(obj, dict) or k not in obj:
+                return False, None
+            obj = obj[k]
+        return True, obj
 
-    def apply(self, basedir: str = '.', env: dict = None) -> List[str]:
+    @staticmethod
+    def set(obj: dict, path: str, v):
+        ''' Set a field, a path of keys; a missing object on the path is created. '''
+        keys = path.split('.')
+        for k in keys[:-1]:
+            if not isinstance(obj.get(k), dict):
+                obj[k] = {}
+            obj = obj[k]
+        obj[keys[-1]] = v
+
+    @staticmethod
+    def kind(v) -> str:
+        return 'null' if v is None else 'object' if isinstance(v, dict) else 'list' if isinstance(v, list) \
+            else 'bool' if isinstance(v, bool) else 'number' if isinstance(v, (int, float)) else 'text'
+
+    @staticmethod
+    def pick(template: dict, installed: dict, fields: dict) -> Tuple[dict, List[str], List[str]]:
         '''
-        Apply to the files in basedir. A file is written only if changed, and not at all if any of
-        its values can't be resolved; a missing file is skipped.
-        :param env: values of the installation, for values like "{settings.port}": {"settings.port": 8964}
-        :return: paths (as in files) of the files changed
-        :raise ValueError: a file is not json, or a value refers something not in env
+        :param template: the new package's file
+        :param installed: the installed file
+        :param fields: {field: [its names]}
+        :return: (the new file, the fields picked, the fields not picked, with why)
         '''
-        changed = []
-        for path, ops in self.files.items():
-            fpath = os.path.join(basedir, path)
-            if not os.path.isfile(fpath):
+        cfg = copy.deepcopy(template)
+        kept, skipped = [], []
+        for field, names in fields.items():
+            name, found, v = None, False, None
+            for name in names:
+                found, v = ConfigPicks.get(installed, name)
+                if found:
+                    break
+            if not found:
                 continue
-            with open(fpath, encoding='utf-8') as f:
-                text0 = f.read()
 
-            text = text0
-            for old, new in (ops.get('replace') or {}).items():
-                text = text.replace(json.dumps(old), json.dumps(new))
+            has, t = ConfigPicks.get(template, field)
+            if has and t is not None and ConfigPicks.kind(v) != ConfigPicks.kind(t):
+                skipped.append(f'{name} (yours is {ConfigPicks.kind(v)}, now {ConfigPicks.kind(t)})')
+                continue
 
-            add = ops.get('add')
-            if add:
-                try: cfg = json.loads(text)
-                except ValueError as e:
-                    raise ValueError(f'{path} is not json: {e}')
-                if ConfigUpgrades.complete(cfg, ConfigUpgrades.resolve(add, env or {}, path)):
-                    text = json.dumps(cfg, indent=2, ensure_ascii=False) + '\n'
-
-            if text != text0:
-                with open(fpath, 'w', encoding='utf-8') as f:
-                    f.write(text)
-                changed.append(path)
-        return changed
-
-    @staticmethod
-    def resolve(v, env: dict, path: str = '') -> dict:
-        '''
-        :return: v with "{name}" in its strings replaced by env[name]
-        :raise ValueError: a name is not in env
-        '''
-        if isinstance(v, dict):
-            return {k: ConfigUpgrades.resolve(x, env, path) for k, x in v.items()}
-        if isinstance(v, list):
-            return [ConfigUpgrades.resolve(x, env, path) for x in v]
-        if isinstance(v, str):
-            def val(m):
-                if m.group(1) not in env:
-                    raise ValueError(f'{path}: "{v}" refers {m.group(1)}, which is not a known value of the installation')
-                return str(env[m.group(1)])
-            return re.sub(r'\{([A-Za-z_][\w.]*)\}', val, v)
-        return v
-
-    @staticmethod
-    def complete(cfg: dict, add: dict) -> bool:
-        '''
-        Add what cfg doesn't have, see the class's doc.
-        :return: True if cfg is changed
-        '''
-        changed = False
-        for k, v in add.items():
-            if k not in cfg or cfg[k] is None and v is not None:
-                cfg[k] = v
-                changed = True
-            elif isinstance(v, dict) and isinstance(cfg[k], dict):
-                changed = ConfigUpgrades.complete(cfg[k], v) or changed
-            elif isinstance(v, list) and isinstance(cfg[k], list):
-                for item in v:
-                    if item not in cfg[k]:
-                        cfg[k].append(item)
-                        changed = True
-        return changed
+            ConfigPicks.set(cfg, field, copy.deepcopy(v))
+            kept.append(field if name == field else f'{field} (was {name})')
+        return cfg, kept, skipped
 
 
 @dataclass
@@ -176,35 +158,35 @@ class PkgResources(Anson):
     upgrader: dict
     '''
     The upgrade tool (synodepy3) this package needs, {"min": "0.8.2"}: an older tool doesn't know what
-    the package needs done, e.g. its upgrades. Empty: any.
+    the package needs done, e.g. its config_picks. Empty: any.
     @since semantics.py3 0.6.20
     '''
 
-    # upgrades: List[ConfigUpgrades], the upgrades of the installed configuration files, the oldest first.
-    # Not a field of the dataclass: it's plain json, read by load(), never parsed or written as Anson.
+    # config_picks: {path: {field: [names]}}, the configuration files an upgrade makes from the package's
+    # template, see ConfigPicks. Not a field of the dataclass: plain json, read by load(), never parsed as Anson.
 
     def __init__(self, files: dict = None, versions: dict = None, upgrade_from: dict = None,
-                 upgrader: dict = None, upgrades: list = None):
+                 upgrader: dict = None, config_picks: dict = None):
         super().__init__()
         self.files = files or {}
         self.versions = versions or {}
         self.upgrade_from = upgrade_from or {}
         self.upgrader = upgrader or {}
-        self.upgrades = upgrades or []
+        self.config_picks = config_picks or {}
 
     @staticmethod
     def load(path: str) -> 'PkgResources':
         '''
-        Load a manifest, bin/resource.json, with its upgrades (see ConfigUpgrades).
-        Use this, not Anson.from_file(), which would take the upgrades' values for its own types.
+        Load a manifest, bin/resource.json, with its config_picks (see ConfigPicks).
+        :raise ValueError: config_picks is written wrongly
         @since semantics.py3 0.6.20
         '''
         with open(path, encoding='utf-8') as f:
             obj = json.load(f)
-        upgrades = obj.pop('upgrades', None) or []
+        picks = obj.pop('config_picks', None) or {}
+        ConfigPicks.check(picks)
         res = Anson.from_envelope(obj)
-        res.upgrades = [ConfigUpgrades(u.get('since'), u.get('files')) for u in upgrades
-                        if isinstance(u, dict)]
+        res.config_picks = {p: fs for p, fs in picks.items() if not p.lstrip().startswith('//')}
         return res
 
     def refuses_upgrader(self, tool_ver: str) -> Optional[str]:
@@ -218,18 +200,37 @@ class PkgResources(Anson):
             return f'this upgrade tool {tool_ver} is older than {lo}, the oldest that installs package {self.jar_ver()}'
         return None
 
-    def upgrade_configs(self, installed: Optional[str], basedir: str = '.', env: dict = None) -> List[str]:
+    def pick_config(self, path: str, template: str, installed: str) -> Tuple[List[str], List[str]]:
         '''
-        Apply the upgrades of configuration files, to an installation of version `installed`, in
-        basedir: every entry since a version not newer than it, in order (see ConfigUpgrades).
-        :return: the files changed
+        Make a configuration file of config_picks: the template with the installed values picked,
+        written over the template (see ConfigPicks).
+        :param path: the file, a key of config_picks, e.g. "WEB-INF/html-service.json"
+        :param template: the new package's file, written with the result
+        :param installed: the installed file, e.g. its backup
+        :return: (the fields picked, the fields not picked, with why); an installed file that is not
+        a json object gives nothing
+        :raise ValueError: path is not in config_picks, or the template is not a json object
         @since semantics.py3 0.6.20
         '''
-        changed = []
-        for u in getattr(self, 'upgrades', None) or []:
-            if u.applies(installed):
-                changed += [f for f in u.apply(basedir, env) if f not in changed]
-        return changed
+        if path not in self.config_picks:
+            raise ValueError(f'{path} is not in config_picks')
+        with open(template, encoding='utf-8') as f:
+            tmpl = json.load(f)
+        if not isinstance(tmpl, dict):
+            raise ValueError(f'the package\'s {path} is not a json object')
+        try:
+            with open(installed, encoding='utf-8') as f:
+                mine = json.load(f)
+        except ValueError:
+            mine = None
+        if not isinstance(mine, dict):
+            return [], ['all (yours is not a json object)']
+
+        cfg, kept, skipped = ConfigPicks.pick(tmpl, mine, self.config_picks[path])
+        with open(template, 'w', encoding='utf-8') as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+            f.write('\n')
+        return kept, skipped
 
     def file(self, item: str) -> Optional[str]:
         return self.files.get(item)

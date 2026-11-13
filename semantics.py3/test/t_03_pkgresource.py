@@ -1,6 +1,8 @@
 '''
-The package manifest (bin/resource.json): the upgrade tool's version, and the upgrades of an
-installation's configuration files (ConfigUpgrades).
+Upgrading an installed synode 0.8.0 with the package 0.8.2, as synodepy3's upgrade does it
+(commands.update_srv()): the package brings bin/resource.json, the manifest, and its html-service.json,
+the template; the installed html-service.json is made of the template and the installed values its
+config_picks tell (ConfigPicks).
 
 working folder: semantics.py3
 '''
@@ -16,40 +18,40 @@ from anson.io.odysz.anson import Anson
 from semanticshare.io.oz.syn.pkgresource import PkgResources
 from semanticshare.io.oz.srv import WebConfig
 
-# a manifest as jserv-album/src/main/resource.json
-manifest = '''{
+# the package 0.8.2's manifest, as jserv-album/src/main/resource.json
+manifest_082 = '''{
   "type": "io.oz.syn.pkgresource.PkgResources",
-  "files": {"synode": "bin/jserv-album-0.8.2.jar"},
-  "versions": {"jar_ver": "0.8.2"},
+  "files": {"synode": "bin/jserv-album-0.8.2.jar", "html-web": "bin/html-web-0.2.1.jar"},
+  "versions": {"jar_ver": "0.8.2", "html_srver": "0.2.1"},
   "upgrade_from": {"min": "0.8.0"},
   "upgrader": {"min": "0.8.2"},
-  "upgrades": [
-    { "since": "0.8.0",
-      "files": {
-        "WEB-INF/html-service.json": {
-          "replace": {"io.oz.srv.ResPath": "io.oz.srv.StaticResource"},
-          "add": {
-            "dynaResource": {"type": "io.oz.srv.DynaResource", "handler": "io.oz.srv.ResPathsTier",
-                             "synode": "http://127.0.0.1:{settings.port}/jserv-album",
-                             "pollInterval_snd": 3600, "resource": "respaths", "danyroot": "pub", "allowDir": false},
-            "paths": [{"type": "io.oz.srv.StaticResource", "path": "/pub/_t/*", "resource": "web-dist/sdoc-template", "allowDir": false}]}},
-        "WEB-INF/settings.json": {"add": {"sdocTemplates": "web-dist/sdoc-template"}}}},
-    { "since": "0.9.0",
-      "files": {"WEB-INF/settings.json": {"add": {"a09": true}}}}
-  ]
+  "config_picks": {
+    "WEB-INF/html-service.json": {
+      "welcomepages":                  ["welcomepages"],
+      "dynaResource.syn_jserv":        ["dynaResource.syn_jserv", "dynaResource.synode"],
+      "dynaResource.pollInterval_snd": ["dynaResource.pollInterval_snd"]}}
 }'''
 
-# html-service.json of an installed 0.8.1
-html_081 = '''{
+# the package 0.8.2's html-service.json, as jserv-album/src/main/webapp/WEB-INF-0.8
+template_082 = '''{
   "type": "io.oz.srv.WebConfig",
   "port": 8900,
-  "paths": [{
-    "type": "io.oz.srv.ResPath",
-    "path": "/",
-    "resource": "web-dist",
-    "allowDir": false
-  }],
-  "startHandler": null
+  "paths": [{"type": "io.oz.srv.StaticResource", "path": "/*", "resource": "web-dist", "allowDir": false}],
+  "startHandler": ["io.oz.srv.JservLocalHandler", "private/host.json"],
+  "welcomepages": ["index.html"],
+  "dynaResource": {"type": "io.oz.srv.DynaResource", "handler": "io.oz.srv.ResPathsTier",
+                   "syn_jserv": null, "pollInterval_snd": 3600, "resource": "respaths",
+                   "danyroot": "pub", "allowDir": false}
+}'''
+
+# the installed 0.8.0's, written by its installer, and edited by the user
+html_080 = '''{
+  "type": "io.oz.srv.WebConfig",
+  "port": 8900,
+  "paths": [{"type": "io.oz.srv.ResPath", "path": "/", "resource": "web-dist", "allowDir": false}],
+  "startHandler": null,
+  "welcomepages": ["home.html"],
+  "json_path": "a field no version knows now"
 }'''
 
 
@@ -59,71 +61,68 @@ def write(path: str, text: str):
         f.write(text)
 
 
-def read(path: str) -> dict:
-    with open(path, encoding='utf-8') as f:
-        return json.load(f)
+class UpgradeTest(unittest.TestCase):
 
-
-class PkgResourcesTest(unittest.TestCase):
-    def setUp(self):
+    def testUpgrade080to082(self):
         Anson.java_src('semanticshare')
-        self.root = tempfile.mkdtemp(prefix='pkgres-')
-        write(os.path.join(self.root, 'bin', 'resource.json'), manifest)
-        write(os.path.join(self.root, 'WEB-INF', 'html-service.json'), html_081)
-        write(os.path.join(self.root, 'WEB-INF', 'settings.json'), '{"type": "x.AppSettings", "port": 8964, "sdocTemplates": "/opt/templates"}')
-        self.res = PkgResources.load(os.path.join(self.root, 'bin', 'resource.json'))
 
-    def testLoad(self):
-        self.assertEqual('0.8.2', self.res.jar_ver())
-        self.assertEqual(2, len(self.res.upgrades))
-        self.assertEqual('0.8.0', self.res.upgrades[0].since)
-        # the values to add stay json, e.g. html-service's types
-        self.assertEqual('io.oz.srv.DynaResource',
-                self.res.upgrades[0].files['WEB-INF/html-service.json']['add']['dynaResource']['type'])
+        # the installed 0.8.0, no manifest yet; the upgrade keeps its html-service.json in a backup
+        root = tempfile.mkdtemp(prefix='synode-0.8.0-')
+        backup = os.path.join(root, 'backup', 'WEB-INF', 'html-service.json')
+        write(backup, html_080)
+        self.assertFalse(os.path.exists(os.path.join(root, 'bin', 'resource.json')))
 
-    def testUpgrader(self):
-        self.assertIsNone(self.res.refuses_upgrader('0.8.2'))
-        self.assertIsNone(self.res.refuses_upgrader('0.9.0'))
-        self.assertIn('older than 0.8.2', self.res.refuses_upgrader('0.8.1'))
-        self.assertIsNone(PkgResources().refuses_upgrader('0.7.8'))
+        # 1. the package 0.8.2 is unpacked: bin/resource.json, and the template
+        resource_json = os.path.join(root, 'bin', 'resource.json')
+        html_json = os.path.join(root, 'WEB-INF', 'html-service.json')
+        write(resource_json, manifest_082)
+        write(html_json, template_082)
 
-    def testUpgradeConfigs(self):
-        env = {'settings.port': 8964}
+        pkg = PkgResources.load(resource_json)
+        self.assertIsNone(pkg.refuses_upgrader('0.8.2'))
+        self.assertIn('older than 0.8.2', pkg.refuses_upgrader('0.8.1'))
+        self.assertIsNone(pkg.refuses('0.8.0'))
 
-        # an installed 0.8.1: the entry since 0.8.0, not the one since 0.9.0
-        changed = self.res.upgrade_configs('0.8.1', self.root, env)
-        self.assertEqual(['WEB-INF/html-service.json'], changed)
+        # 2. html-service.json: the template, with the user's values picked
+        kept, skipped = pkg.pick_config('WEB-INF/html-service.json', html_json, backup)
+        self.assertEqual(['welcomepages'], kept)
+        self.assertEqual([], skipped)
 
-        html = read(os.path.join(self.root, 'WEB-INF', 'html-service.json'))
-        self.assertEqual(8900, html['port'])
+        with open(html_json, encoding='utf-8') as f:
+            html = json.load(f)
+        # the user's value
+        self.assertEqual(['home.html'], html['welcomepages'])
+        # the new version's: the paths, with the new type, the start handler
         self.assertEqual('io.oz.srv.StaticResource', html['paths'][0]['type'])
-        self.assertEqual(['/', '/pub/_t/*'], [p['path'] for p in html['paths']])
-        self.assertEqual('http://127.0.0.1:8964/jserv-album', html['dynaResource']['syn_jserv'])
+        self.assertEqual('/*', html['paths'][0]['path'])
+        self.assertEqual('io.oz.srv.JservLocalHandler', html['startHandler'][0])
+        # a missing field, with its default values
+        self.assertEqual('io.oz.srv.ResPathsTier', html['dynaResource']['handler'])
+        self.assertEqual(3600, html['dynaResource']['pollInterval_snd'])
+        self.assertEqual('pub', html['dynaResource']['danyroot'])
+        # a field no version knows now is gone
+        self.assertNotIn('json_path', html)
 
-        # what the user set is kept, and nothing of 0.9.0
-        settings = read(os.path.join(self.root, 'WEB-INF', 'settings.json'))
-        self.assertEqual('/opt/templates', settings['sdocTemplates'])
-        self.assertNotIn('a09', settings)
-
-        # html-service.json is html-service's, and the installer's
-        cfg = Anson.from_file(os.path.join(self.root, 'WEB-INF', 'html-service.json'))
+        # 3. it's html-web 0.2.1's configuration, for the installer to fill the computed values
+        cfg = Anson.from_file(html_json)
         self.assertIsInstance(cfg, WebConfig)
-        self.assertEqual('pub', cfg.dynaResource.danyroot)
+        self.assertIsNone(cfg.dynaResource.syn_jserv)
 
-        # again: nothing to change
-        self.assertEqual([], self.res.upgrade_configs('0.8.1', self.root, env))
+        # 4. a renamed field: a developer's 0.8.2 with dynaResource.synode, and a value of another kind
+        mine = json.loads(template_082)
+        mine['dynaResource'].pop('syn_jserv')
+        mine['dynaResource']['synode'] = 'http://127.0.0.1:8964/jserv-album'
+        mine['dynaResource']['pollInterval_snd'] = '1h'
+        write(backup, json.dumps(mine))
+        write(html_json, template_082)
 
-        # an installed 0.7.8 is older than every entry's since
-        write(os.path.join(self.root, 'WEB-INF', 'html-service.json'), html_081)
-        self.assertEqual([], self.res.upgrade_configs('0.7.8', self.root, env))
-
-    def testUnknownValue(self):
-        html = os.path.join(self.root, 'WEB-INF', 'html-service.json')
-        with self.assertRaises(ValueError):
-            self.res.upgrade_configs('0.8.1', self.root, {})
-        # nothing is written
-        with open(html, encoding='utf-8') as f:
-            self.assertEqual(html_081, f.read())
+        kept, skipped = pkg.pick_config('WEB-INF/html-service.json', html_json, backup)
+        self.assertEqual(['welcomepages', 'dynaResource.syn_jserv (was dynaResource.synode)'], kept)
+        self.assertEqual(['dynaResource.pollInterval_snd (yours is text, now number)'], skipped)
+        with open(html_json, encoding='utf-8') as f:
+            html = json.load(f)
+        self.assertEqual('http://127.0.0.1:8964/jserv-album', html['dynaResource']['syn_jserv'])
+        self.assertEqual(3600, html['dynaResource']['pollInterval_snd'])
 
 
 if __name__ == '__main__':
