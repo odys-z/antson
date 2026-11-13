@@ -26,8 +26,8 @@ class StaticResource(Anson):
 @dataclass
 class ResPath(StaticResource):
     '''
-    @deprecated html-web 0.2.1 renamed it StaticResource. Kept for reading a html-service.json not yet
-    upgraded (the manifest's upgrades rename the type, see io.oz.syn.pkgresource.ConfigUpgrades).
+    @deprecated html-web 0.2.1 renamed it StaticResource. Kept for reading a html-service.json of an older
+    version (an upgrade takes the new package's paths, see io.oz.syn.pkgresource.ConfigPicks).
     '''
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
