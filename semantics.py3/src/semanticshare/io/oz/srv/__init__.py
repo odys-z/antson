@@ -65,6 +65,10 @@ class WebConfig(Anson):
     startHandler: Optional[list[str]]
     welcomepages: Optional[list[str]]
     dynaResource: Optional[DynaResource]
+    notfound: Optional[str]
+    '''
+    The page of every 404, a path in the server, e.g. "/404.html"; None: Jetty's. html-web 0.2.1.
+    '''
 
     def __init__(self):
         super().__init__()
@@ -74,3 +78,4 @@ class WebConfig(Anson):
         self.startHandler = None
         self.welcomepages = None
         self.dynaResource = None
+        self.notfound = None

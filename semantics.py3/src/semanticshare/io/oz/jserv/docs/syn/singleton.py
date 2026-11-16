@@ -25,6 +25,27 @@ syntity_json = 'syntity.json'
 
 webroot_hub = 'WEBROOT_HUB'
 
+web_dist = 'web-dist'
+'''
+The web pages' folder in an installation, Java AppSettings.web_dist. html-service.json's paths can't refer
+it, and have it as is.
+'''
+
+sdoc_template_root = f'{web_dist}/sdoc-template'
+'''
+The folder of semantic-doc's Sphinx templates, one folder per template id, Java AppSettings.sdocTemplateRoot's default.
+'''
+
+sdoc_template_id = 'rtd-0.8'
+'''
+The template semantic-doc's html is built with, Java AppSettings.sdocTemplateId's default.
+'''
+
+sdoc_sphinx = 'sphinx-build'
+'''
+The Sphinx command semantic-doc's html is built with, Java AppSettings.sdocSphinx's default, found in PATH.
+'''
+
 
 # TODO replace with JProtocol.urlroot
 # jserv_url_path = 'jserv-album'
@@ -129,6 +150,21 @@ class AppSettings(Anson):
     centralPswd: str
     sandbox: Optional[str]
 
+    sdocTemplateRoot: str
+    '''
+    The folder of semantic-doc's Sphinx templates, <root>/<template id>/, relative to the
+    installation folder, or absolute. Since 0.8.2.
+    '''
+    sdocTemplateId: str
+    '''
+    The template a synode builds semantic-doc's html with. Since 0.8.2.
+    '''
+    sdocSphinx: str
+    '''
+    The Sphinx command semantic-doc's html is built with, e.g. <venv>/bin/sphinx-build, written by the
+    installer and the upgrade (ISSUE sdoc-sphinx-venv). Since 0.8.2.
+    '''
+
     def __init__(self):
         super().__init__()
         self.regiserv = None
@@ -140,7 +176,7 @@ class AppSettings(Anson):
         self.webProxyPort = 0
 
         self.envars = {}
-        self.startHandler: List[str] = [implISettingsLoaded, 'web-dist/private/host.json']
+        self.startHandler: List[str] = [implISettingsLoaded, f'{web_dist}/private/host.json']
         self.webrootLocal = f'http://suppress.warning:{self.webport}'
 
         self.jserv_utc = None
@@ -152,6 +188,10 @@ class AppSettings(Anson):
         a copy, which never contacts the central (nor, if 'isolated', the peers).
         The installers never set it, and the upgrade refuses a sandbox. Since 0.8.1.
         '''
+
+        self.sdocTemplateRoot = sdoc_template_root
+        self.sdocTemplateId = sdoc_template_id
+        self.sdocSphinx = sdoc_sphinx
 
     @overload
     def Volume(self):

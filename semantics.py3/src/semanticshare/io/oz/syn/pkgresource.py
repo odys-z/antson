@@ -16,7 +16,7 @@ import copy
 import json
 import re
 from dataclasses import dataclass
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, cast
 
 from anson.io.odysz.anson import Anson
 
@@ -162,8 +162,12 @@ class PkgResources(Anson):
     @since semantics.py3 0.6.20
     '''
 
-    # config_picks: {path: {field: [names]}}, the configuration files an upgrade makes from the package's
-    # template, see ConfigPicks. Not a field of the dataclass: plain json, read by load(), never parsed as Anson.
+    config_picks: dict
+    '''
+    {path: {field: [names]}}, the configuration files an upgrade makes of the package's template and
+    the installed values, see ConfigPicks.
+    @since semantics.py3 0.6.20
+    '''
 
     def __init__(self, files: dict = None, versions: dict = None, upgrade_from: dict = None,
                  upgrader: dict = None, config_picks: dict = None):
@@ -177,16 +181,12 @@ class PkgResources(Anson):
     @staticmethod
     def load(path: str) -> 'PkgResources':
         '''
-        Load a manifest, bin/resource.json, with its config_picks (see ConfigPicks).
+        Load a manifest, bin/resource.json.
         :raise ValueError: config_picks is written wrongly
         @since semantics.py3 0.6.20
         '''
-        with open(path, encoding='utf-8') as f:
-            obj = json.load(f)
-        picks = obj.pop('config_picks', None) or {}
-        ConfigPicks.check(picks)
-        res = Anson.from_envelope(obj)
-        res.config_picks = {p: fs for p, fs in picks.items() if not p.lstrip().startswith('//')}
+        res = cast(PkgResources, Anson.from_file(path))
+        ConfigPicks.check(res.config_picks)
         return res
 
     def refuses_upgrader(self, tool_ver: str) -> Optional[str]:
