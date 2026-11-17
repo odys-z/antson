@@ -235,6 +235,9 @@ class TaskCredentials():
         if self.credentials is not None and scpcmd.host in self.credentials:
             if scpcmd.user in self.credentials[scpcmd.host]:
                 return self.credentials[scpcmd.host][scpcmd.user]
+        elif f'{scpcmd.host}:{scpcmd.port}' in self.credentials:
+            if scpcmd.user in self.credentials[f'{scpcmd.host}:{scpcmd.port}']:
+                return self.credentials[f'{scpcmd.host}:{scpcmd.port}'][scpcmd.user]
 
         print(f'File {Path.home()}/.taskrs.json can be used for configuring remote password.')
         print('''Example: { "host": { "user": "pswd" } }''')
@@ -781,11 +784,11 @@ class SynodeTask(Anson):
 
         if sys.version_info.major < 3 or sys.version_info.minor < 10:
             print('SCP post command requires Python 3.10 or above. Use tasks.json/deploy_cmds for this task,\n'
-                    f'"deploy_cmds"   : ["scp build-0.7.7/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
+                    f'"deploy_cmds"   : ["scp build-#.#.#/{{zip_name}} [s{cmd.user}@{cmd.host}:{cmd.remote_dir}]"]\n'
                     '# Google AI sys it is widely reported that Python 3.9 has issues with scp packages.')
             return None
 
-        print(f'[SCP] {local_path} -> {cmd.user}@{cmd.host}:{cmd.remote_dir} ...')
+        print(f'[SCP] {local_path} -> {cmd.user}@{cmd.host}:{cmd.port}:{cmd.remote_dir} ...')
 
         password = None
         try: 
@@ -915,4 +918,3 @@ class CentralTask(Anson):
     def __init__(self):
         super().__init__()
         self.users = {}
-
