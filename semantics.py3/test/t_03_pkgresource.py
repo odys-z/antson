@@ -16,7 +16,7 @@ sys.path.insert(0, 'src')
 
 from anson.io.odysz.anson import Anson
 from semanticshare.io.oz.syn.pkgresource import PkgResources
-from semanticshare.io.oz.srv import WebConfig
+from semanticshare.io.oz.srv import WebConfig, WebAssets
 
 # the package 0.8.2's manifest, as jserv-album/src/main/resource.json
 manifest_082 = '''{
@@ -123,6 +123,51 @@ class UpgradeTest(unittest.TestCase):
             html = json.load(f)
         self.assertEqual('http://127.0.0.1:8964/jserv-album', html['dynaResource']['syn_jserv'])
         self.assertEqual(3600, html['dynaResource']['pollInterval_snd'])
+
+    def testWebAssets(self):
+        '''
+        The list of album-web's builds, web-dist/webpack-assets.json, as its webpack.config.js writes it:
+        the files packed as .gz only; and html-service.json's start handlers, kept by the installer.
+        '''
+        Anson.java_src('semanticshare')
+
+        with tempfile.TemporaryDirectory() as root:
+            lst = os.path.join(root, WebAssets.json)
+            with open(lst, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "type": "io.oz.srv.WebAssets",
+                    "development": ["fonts/a.ttf", "fonts/a.ttf.gz", "fonts/a.woff2",
+                                    "portfolio.min.js", "portfolio.min.js.gz", "portfolio.min.js.map"],
+                    "production": ["portfolio.prod.min.js", "portfolio.prod.min.js.gz"]}, f, indent=2)
+
+            assets: WebAssets = Anson.from_file(lst)
+            self.assertIsInstance(assets, WebAssets)
+            self.assertEqual(['fonts/a.ttf', 'portfolio.min.js', 'portfolio.prod.min.js'], assets.gz_only())
+            self.assertEqual(['web-dist/fonts/a.ttf', 'web-dist/portfolio.min.js', 'web-dist/portfolio.prod.min.js'],
+                             assets.gz_only('web-dist'))
+
+            # only one build
+            assets.production = None
+            self.assertEqual(['fonts/a.ttf', 'portfolio.min.js'], assets.gz_only())
+            self.assertEqual([], WebAssets().gz_only('web-dist'))
+
+            # html-service.json: the start handlers, a list of lists, are kept when the installer writes it
+            html = os.path.join(root, 'html-service.json')
+            with open(html, 'w', encoding='utf-8') as f:
+                f.write(template_082.replace(
+                    '"startHandler": ["io.oz.srv.JservLocalHandler", "private/host.json"]',
+                    '"startHandlers": [["io.oz.srv.WebAssetsHandler"], ["io.oz.srv.JservLocalHandler", "private/host.json"]]'))
+
+            cfg: WebConfig = Anson.from_file(html)
+            self.assertIsNone(cfg.startHandler)
+            cfg.port = 8901
+            cfg.toFile(html)
+
+            with open(html, encoding='utf-8') as f:
+                saved = json.load(f)
+            self.assertEqual([['io.oz.srv.WebAssetsHandler'], ['io.oz.srv.JservLocalHandler', 'private/host.json']],
+                             saved['startHandlers'])
+            self.assertEqual(8901, saved['port'])
 
 
 if __name__ == '__main__':

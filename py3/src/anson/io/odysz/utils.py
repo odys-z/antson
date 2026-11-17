@@ -23,6 +23,28 @@ def matches_patterns(filename, patterns):
     return any(fnmatch.fnmatch(os.path.basename(filename), pattern) for pattern in patterns)
 
 
+def matches_arc_patterns(arcname, patterns):
+    """
+    Check if a file to be packed matches any of the given patterns, by its path in the package.
+    A pattern with a '/' is matched with the path in the package, e.g. "web-dist/fonts/a.ttf" or
+    "web-dist/*.map" (fnmatch: '*' also matches '/'), so the files named the same of other
+    resources are not matched; a pattern without '/' is matched with the file name, as
+    matches_patterns() does.
+
+    Args:
+        arcname (str): The file's path in the package, e.g. "web-dist/fonts/a.ttf".
+        patterns (list): List of patterns (e.g., ["*.log", "web-dist/portfolio.min.js"]).
+
+    Returns:
+        bool: True if the file matches any pattern, False otherwise.
+
+    @since 0.6.13
+    """
+    arcname = arcname.replace('\\', '/')
+    return any(fnmatch.fnmatch(arcname if '/' in pattern else os.path.basename(arcname), pattern)
+               for pattern in patterns)
+
+
 def zip2(distzip, resources, exclude_patterns=[]):
     """
     example: zip2('registry-zsu.zip', {"zsu": "registry-deploy/*"}, ['*.zip'])
@@ -79,6 +101,17 @@ def zip2(distzip, resources, exclude_patterns=[]):
 
 
 def gzip2(distpath: Union[str, Path], resources, exclude_patterns=None, tolerate_suffix=False):
+    """
+    Pack resources into a .tar.gz (POSIX) or .zip (Windows).
+    example: gzip2('synode.tar.gz', {"web-dist": "album/web-dist/*", "bin/a.jar": "target/a.jar"},
+                   ['*.log', 'web-dist/portfolio.min.js'])
+    :param distpath: the package, .zip, .tar.gz or .tgz
+    :param resources: {path in the package: source}, a source ending with '*' is a folder's files
+    :param exclude_patterns: files of the folders not to be packed. A pattern with a '/' is matched
+        with the file's path in the package, so only that resource's file is left out; a pattern
+        without '/' is matched with the file name, of any resource (matches_arc_patterns(), since 0.6.13).
+    :param tolerate_suffix: pack anyway if the suffix isn't the OS's
+    """
     import tarfile
     import zipfile
 
@@ -117,9 +150,10 @@ def gzip2(distpath: Union[str, Path], resources, exclude_patterns=None, tolerate
                 srcroot = re.sub('\\*$', '', rv.replace('\\', '/'))
                 for pth, _dir, fs in os.walk(srcroot):
                     for file in fs:
-                        if not matches_patterns(file, exclude_patterns):
-                            file_path = os.path.join(pth, file)
-                            relative_path = os.path.relpath(file_path, srcroot)
+                        file_path = os.path.join(pth, file)
+                        relative_path = os.path.relpath(file_path, srcroot)
+                        # excluded by the path in the package, see matches_arc_patterns()
+                        if not matches_arc_patterns(os.path.join(rk, relative_path), exclude_patterns):
 
                             visited = set()
                             while os.path.islink(file_path):

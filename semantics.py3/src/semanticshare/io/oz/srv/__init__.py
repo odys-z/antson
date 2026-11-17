@@ -63,6 +63,12 @@ class WebConfig(Anson):
     port: int
     paths: list[StaticResource]
     startHandler: Optional[list[str]]
+    startHandlers: Optional[list[list[str]]]
+    '''
+    The handlers run when the service starts, in this order, each [class name, args...], e.g.
+    [["io.oz.srv.WebAssetsHandler"], ["io.oz.srv.JservLocalHandler", "private/host.json"]].
+    startHandler, the only one before, is still run, first. html-web 0.2.2, semantics.py3 0.6.21.
+    '''
     welcomepages: Optional[list[str]]
     dynaResource: Optional[DynaResource]
     notfound: Optional[str]
@@ -76,6 +82,49 @@ class WebConfig(Anson):
         self.port = 8900
         self.paths = [StaticResource(path='/', resource='web-dist')]
         self.startHandler = None
+        self.startHandlers = None
         self.welcomepages = None
         self.dynaResource = None
         self.notfound = None
+
+
+@dataclass
+class WebAssets(Anson):
+    '''
+    The list of the files the web pages' build emits, [web root]/webpack-assets.json, io.oz.srv.WebAssets,
+    written by the pages' webpack.config.js (AssetsListPlugin), one list for each build, e.g.
+    { "type": "io.oz.srv.WebAssets",
+      "development": ["login.min.js", "login.min.js.gz", ...], "production": [...] }
+
+    A package carries a listed file with a listed .gz as the .gz only (gz_only(), used by jserv-album's
+    tasks.py); html-service unzips these when it starts (io.oz.srv.WebAssetsHandler).
+    @since semantics.py3 0.6.21 (html-web 0.2.2)
+    '''
+    development: Optional[list[str]]
+    production: Optional[list[str]]
+
+    json = 'webpack-assets.json'
+    ''' the list's file name, in a web root '''
+
+    def __init__(self):
+        super().__init__()
+        self.development = None
+        self.production = None
+
+    def names(self) -> set:
+        '''
+        :return: the files of all the builds, paths in the web root, e.g. fonts/a.ttf
+        '''
+        return {n for build in (self.development, self.production) if build is not None for n in build}
+
+    def gz_only(self, webroot: Optional[str] = None) -> list:
+        '''
+        The files to be packed as their .gz only: the listed files, each with a listed .gz - the
+        same files io.oz.srv.WebAssets.restore() unzips.
+        :param webroot: the web root's path in the package, e.g. "web-dist"; None: paths in the web root
+        :return: the files' paths, sorted, e.g. ["web-dist/fonts/a.ttf", "web-dist/portfolio.min.js"],
+                 to be excluded by anson.py3's gzip2() (0.6.13, patterns with a '/')
+        '''
+        names = self.names()
+        return sorted(n if webroot is None else f'{webroot}/{n}'
+                      for n in names if not n.endswith('.gz') and f'{n}.gz' in names)

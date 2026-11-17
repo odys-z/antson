@@ -290,8 +290,11 @@ class Anson(dict):
 
     @staticmethod
     def toList_(lst: list, ind: int, beautify):
+        # a list in a list, e.g. [["a"], ["b", "c"]], is written the same way (since 0.6.13),
+        # not as Python prints it, with single quotes
         return  '[' + ', '.join([e.toBlock_(ind + 0, beautify) if isinstance(e, Anson) \
                else f'"{e}"' if isinstance(e, str) and e is not None \
+               else Anson.toList_(e, ind, beautify) if isinstance(e, list) \
                else str(e) for e in lst]) + ']'
 
     @staticmethod
