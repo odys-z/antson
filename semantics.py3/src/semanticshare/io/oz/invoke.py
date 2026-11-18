@@ -17,6 +17,7 @@ from anson.io.odysz.common import LangExt, Utils
 from semanticshare.io.oz.register.central import CentralSettings
 from semanticshare.io.oz.syn.pkgresource import PkgResources
 from semanticshare.io.odysz.semantic.jsession import JUser
+from semanticshare.io.oz.anclient.app import UIResources
 
 
 @dataclass
@@ -151,6 +152,128 @@ class GhRelease(Anson):
         super().__init__()
         self.repo = ''
         self.tag = ''
+
+
+shortcut_ref = re.compile(r'^\{([^{}]*)\}([^#]+)#(.+)$')
+'''
+A shortcut name referring to a resource, {prj}<path>#<key> or {prj}<path>#/<json pointer>.
+'''
+
+winname_invalid = re.compile(r'[\\/:*?"<>|\x00-\x1f]')
+'''
+Characters not allowed in a Windows file name (and so a .lnk or Start Menu folder name).
+'''
+
+
+@dataclass
+class ShortcutConfig(Anson):
+    '''
+    The desktop app's shortcut names, resolved by name() while building the desktop (Anclient
+    examples/example.slint, tasks.py shallow-pack) and generated into its shortcut scripts.
+
+    Each name in res.langs[lang] (and root) is either a literal, CJK etc. allowed, or a reference:
+
+    * {prj}<path>#<key>: res.lang's string of key in the UIResources json file <path> of project prj,
+      langs[lang][key], falling back to langs['en'][key];
+    * {prj}<path>#/<json pointer>: the string at the JSON Pointer (RFC 6901) in the raw json file.
+
+    prj is a key of SynodeTask.gitprjs, or blank, {}, for the current project, e.g.
+    "{}/app/res/shortcuts.json#desktop", "{synode.py}/src/synodepy3/synode.json#app_name".
+
+    @since semantics.py3 0.6.22
+    '''
+
+    root: str
+    '''
+    The Start Menu folder of synodes' shortcuts, Programs/<root>/<synode-id>/. Literal or reference.
+    '''
+
+    res: UIResources
+    '''
+    The names, {lang: {"desktop": name, "setup": name}}, with lang (only "en" for now).
+    '''
+
+    def __init__(self):
+        super().__init__()
+        self.root = 'Portfolio'
+        self.res = UIResources()
+        self.res.lang = 'en'
+        self.res.langs = {'en': {'desktop': '{}/app/res/shortcuts.json#desktop',
+                                 'setup'  : '{}/app/res/shortcuts.json#setup'}}
+
+    def name(self, task: 'SynodeTask', key: str, fallback: str, cur_prj: Union[str, Path] = '.') -> str:
+        '''
+        Resolve the shortcut name of key ('root', 'desktop', 'setup').
+        :param task: for resolving {prj} with git_prj()
+        :param fallback: used, with a warning, if the name is not configured or the reference can't be resolved
+        :param cur_prj: the current project's folder, for {}
+        :return: the name
+        :raise ValueError: if the name has characters not allowed in a Windows file name
+        '''
+        lang = self.res.lang if not LangExt.isblank(getattr(self.res, 'lang', None)) else 'en'
+        if key == 'root':
+            v = self.root
+        else:
+            langs = self.res.langs if isinstance(self.res.langs, dict) else {}
+            v = (langs.get(lang) or {}).get(key) or (langs.get('en') or {}).get(key)
+
+        if not LangExt.isblank(v):
+            v = self.resolve(task, v, lang, cur_prj)
+
+        if LangExt.isblank(v):
+            Utils.warn('Shortcut name "{}" is not resolved, using "{}".', key, fallback)
+            v = fallback
+
+        if winname_invalid.search(v) or v.strip() != v or v.endswith('.'):
+            raise ValueError(f'Shortcut name "{key}" is not a valid file name: "{v}"')
+        return v
+
+    @staticmethod
+    def resolve(task: 'SynodeTask', v: str, lang: str = 'en', cur_prj: Union[str, Path] = '.') -> Optional[str]:
+        '''
+        :return: v if it's a literal, or the referred string, or None if the reference can't be resolved.
+        '''
+        m = shortcut_ref.match(v)
+        if m is None:
+            return v
+
+        prj, path, frag = m.group(1).strip(), m.group(2).lstrip('/\\'), m.group(3)
+        if prj == '':
+            base = str(cur_prj)
+        elif task is not None and prj in task.prjs():
+            base = task.git_prj(prj)
+        else:
+            Utils.warn('Shortcut name {}: project "{}" is not configured in gitprjs.', v, prj)
+            return None
+
+        f = Path(base) / path
+        try:
+            with open(f, encoding='utf-8') as jf:
+                doc = json.load(jf)
+        except (OSError, ValueError) as e:
+            Utils.warn('Shortcut name {}: cannot load {}: {}', v, f, e)
+            return None
+
+        if frag.startswith('/'):
+            val = doc
+            for tok in frag[1:].split('/'):
+                tok = tok.replace('~1', '/').replace('~0', '~')
+                if isinstance(val, dict) and tok in val:
+                    val = val[tok]
+                elif isinstance(val, list) and tok.isdigit() and int(tok) < len(val):
+                    val = val[int(tok)]
+                else:
+                    val = None
+                    break
+        else:
+            langs = doc.get('langs') if isinstance(doc, dict) else None
+            langs = langs if isinstance(langs, dict) else {}
+            val = (langs.get(lang) or {}).get(frag) or (langs.get('en') or {}).get(frag)
+
+        if not isinstance(val, str):
+            Utils.warn('Shortcut name {}: not found in {}', v, f)
+            return None
+        return val
 
 
 def sha256_digest(f: Path) -> str:
@@ -397,6 +520,12 @@ class SynodeTask(Anson):
     @since semantics.py3 0.6.17
     '''
 
+    shortcuts: ShortcutConfig
+    '''
+    The desktop app's shortcut names.
+    @since semantics.py3 0.6.22
+    '''
+
     backings: dict
     '''
     An ignored json field for deserilization.
@@ -414,6 +543,7 @@ class SynodeTask(Anson):
         self.desktop_dist_dir = 'qt-build/dist'
         self.package_dir = f'build-{self.version if hasattr(self, "version") and not LangExt.isblank(self.version) else "1.0.0"}'
         self.github_release = GhRelease()
+        self.shortcuts = ShortcutConfig()
 
     def synodepy3_ver(self) -> str:
         '''
