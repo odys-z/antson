@@ -499,16 +499,6 @@ class SynodeTask(Anson):
     '''
     The final zip (relativ-)path.file-name.zip. This is a runtime value and not configurable.
     '''
-    download_root: str
-    '''
-    Used for compose the download url of the built zip in host.json:
-    {synodesetups: {
-        "orgid": [
-        "download 0, {download_root}/zip_name, e.g. http://127.0.0.1/html-service-synodes/synode-0.7.8-x64-windows-alpha-zsu.zip",
-        ...]} } 
-    
-    TODO: move 'resources.apk' in host.json/resources to clients.apk?
-    '''
     deploy_cmds: List[BashCmd]
     deploy_scps: List[ScpCmd]
 
