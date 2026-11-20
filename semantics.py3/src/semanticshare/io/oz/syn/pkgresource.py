@@ -7,8 +7,10 @@ package's manifest with the new one, and checks the new one accepts the installe
 
 It holds nothing private: the build configuration (SynodeTask, tasks.*.json) stays with the build.
 
-Since 0.6.20 the manifest is a source file of its own (jserv-album/src/main/resource.json): upgrade_from,
-upgrader and config_picks (ConfigPicks) are written by hand, only files and versions come from the build.
+Since 0.6.20 the manifest is a source file of its own (jserv-album/src/main/resource.json): files and
+versions come from the build; upgrade_from and upgrader are written by hand; config_picks (ConfigPicks)
+are generated (by Claude) and merged at each upgrade, each field marked JSON-PICKING-<version> in the
+sources, checked by io.oz.syn.dbpicks.DbPicks.check_marks() (since 0.6.24).
 
 @since semantics.py3 0.6.17
 '''
