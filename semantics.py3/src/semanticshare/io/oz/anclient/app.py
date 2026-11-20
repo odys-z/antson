@@ -5,16 +5,16 @@ from semanticshare.io.odysz.jclient import AnclientSettings
 
 @dataclass
 class DesktopSettings (AnclientSettings):
-    # market: str
-    org: str
-    market_name: str
+
+    org: str          # JSON-PICKING-0.8.2 desktop/settings/app-settings.json#org
+    market_name: str  # JSON-PICKING-0.8.2 desktop/settings/app-settings.json#market_name
     org_name: str
-    java_path: str
+    java_path: str    # JSON-PICKING-0.8.2 desktop/settings/app-settings.json#java_path
     wsagent_jar: str
-    synode_id: str
-    synode_vol: str
-    synode_jserv: str
-    album_web: str
+    synode_id: str    # JSON-PICKING-0.8.2 desktop/settings/app-settings.json#synode_id
+    synode_vol: str   # JSON-PICKING-0.8.2 desktop/settings/app-settings.json#synode_vol
+    synode_jserv: str # JSON-PICKING-0.8.2 desktop/settings/app-settings.json#synode_jserv
+    album_web: str    # JSON-PICKING-0.8.2 desktop/settings/app-settings.json#album_web
     wshost: str
     wsport: int
     wstimeout: int
