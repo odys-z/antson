@@ -198,6 +198,7 @@ class AnsonAst(Anson):
 
     ctorsemantics: List[AnCtor]
 
+
     def __init__(self):
         super().__init__()
         self.base = 'io.odysz.anson.Anson'
@@ -220,6 +221,7 @@ class AnsonAst(Anson):
         self.dataAnclass = ''
 
         self.ctorsemantics = []
+        self.javaClass = None
 
     def c_class(self) -> str:
         return self.dataAnclass.split('.')[-1]
@@ -294,6 +296,11 @@ class PeerSettings(Anson):
     anRequests: List[str]
     cpp_include: List[str]
     cpp_gen: str
+    java_gen: str
+    '''
+    Optional, the Java source root for generated data classes, e.g. "src/main/java".
+    No Java peers are generated if blank.
+    '''
 
     def __init__(self):
         super().__init__()
@@ -307,6 +314,7 @@ class PeerSettings(Anson):
         self.anRequests = []
         self.cpp_include= []
         self.cpp_gen    = 'semantier.gen.h'
+        self.java_gen   = None
 
 
 def init_asts(ast_folder: str = None):
