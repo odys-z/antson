@@ -307,7 +307,7 @@ public class EnvelopeBeautifier {
 		else if (fdClz.isEnum())
 			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes(StandardCharsets.UTF_8));
 		else if (v instanceof Number)
-			stream.write(v.toString().getBytes());
+			stream.write(v.toString().getBytes(StandardCharsets.UTF_8));
 		else {
 			if (Anson.verbose)
 				Utils.warn("Don't know how to serialize object.\n\ttype: %s\n\tvalue: %s", vclz.getName(), v.toString());

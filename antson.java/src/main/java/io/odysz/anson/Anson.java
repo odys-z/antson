@@ -376,7 +376,7 @@ public class Anson implements IJsonable {
 		else if (fdClz.isEnum())
 			stream.write(("\"" + ((Enum<?>)v).name() + "\"").getBytes(StandardCharsets.UTF_8));
 		else if (v instanceof Number)
-			stream.write(v.toString().getBytes());
+			stream.write(v.toString().getBytes(StandardCharsets.UTF_8));
 		else {
 			if (verbose)
 				Utils.warn("Don't know how to serialize object.\n\ttype: %s\n\tvalue: %s",
@@ -458,7 +458,7 @@ public class Anson implements IJsonable {
 				b.append("\'\'");
 			else b.append((char)c);
 		});
-		return b.toString().getBytes();
+		return b.toString().getBytes(StandardCharsets.UTF_8);
 	}
 	
 	/**

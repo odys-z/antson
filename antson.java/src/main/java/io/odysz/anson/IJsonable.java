@@ -38,7 +38,7 @@ public interface IJsonable {
 	 * But typically, IPort implementation should handle this specially like
 	 * <pre>
 	 	stream.write('\"');
-		stream.write(name().getBytes());
+		stream.write(name().getBytes(StandardCharsets.UTF_8));
 		stream.write('\"');
 		return this;
 	 </pre> 
