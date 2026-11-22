@@ -459,6 +459,9 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	 * @return the prop value in string
 	 */
 	private static String getProp(PairContext ctx) {
+		if (ctx.propname() == null) // TYPE_KEY value, since 1.2.0: type, TYPE, "type" or "TYPE", with ':'
+			return ctx.TYPE_KEY().getText().replaceAll("[\\s:\"]", "");
+
 		TerminalNode p = ctx.propname().IDENTIFIER();
 
 		String prop = p == null ?
@@ -508,11 +511,8 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 	| 'true'
 	| 'false'
 	| 'null'
-	| 'type'
-    | 'TYPE'
-    | '"type"'
-    | '"TYPE"'
 	;</pre>
+	 * Since 1.2.0, "type" is a STRING, unless it's a key (TYPE_KEY).
 	 * @param top parsing context. Since 0.9.90, this method also set value type into it.
 	 * @param ctx
 	 * @return simple value (STRING, NUMBER, 'true', 'false', null)
@@ -560,12 +560,6 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
 			top.valType = Boolean.class.getName();
 			return Boolean.valueOf(false);
 		}
-		else if (  txt != null 
-				&&(txt.toLowerCase().startsWith("type")
-				|| txt.toLowerCase().startsWith("\"type\""))
-				&&(txt.toLowerCase().endsWith("type")
-				|| txt.toLowerCase().endsWith("\"type\"")))
-			return txt;
 		return null;
 	}
 

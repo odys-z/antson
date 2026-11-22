@@ -56,6 +56,50 @@ class AnsonTest {
 		assertEquals("1\t 2\n 3\" 4\\", Anson.unescape(value));
 	}
 	
+	/**
+	 * Since 1.2.0, "type" is only the type key when followed by ':' (JSON.g4, TYPE_KEY).
+	 * A value "type" was lexed as the keyword '"type"', and parsed with the quotes.
+	 */
+	@Test
+	void testTypeValue() throws Exception {
+		AnsT1 t = new AnsT1();
+		t.ver = "type";
+		t.m = new AnsT1.AnsM1();
+		t.m.name = "TYPE";
+
+		AnsT1 back = (AnsT1) Anson.fromJson(t.toBlock());
+		assertEquals("type", back.ver);
+		assertEquals("TYPE", back.m.name);
+
+		// unquoted keys
+		back = (AnsT1) Anson.fromJson(t.toBlock(new JsonOpt().quotKey(false)));
+		assertEquals("type", back.ver);
+		assertEquals("TYPE", back.m.name);
+
+		back = (AnsT1) Anson.fromJson("{type: io.odysz.anson.AnsT1, ver: \"type\"}");
+		assertEquals("type", back.ver);
+	}
+
+	/**
+	 * Since 1.2.0, "type" can be a map's key, at any position but the first,
+	 * which makes an object an envelope.
+	 */
+	@Test
+	void testTypeKey() throws Exception {
+		AnsTMap m = new AnsTMap();
+		m.map.put("a", "1");
+		m.map.put("type", "x");
+		m.map.put("TYPE", "y");
+		m.map.put("Type", "z");
+
+		AnsTMap back = (AnsTMap) Anson.fromJson(
+				"{\"type\": \"io.odysz.anson.AnsTMap\", \"map\": {\"a\": \"1\", \"type\": \"x\", \"TYPE\" : \"y\", \"Type\": \"z\"}}");
+		assertEquals(m.map, back.map);
+
+		back = (AnsTMap) Anson.fromJson(m.toBlock());
+		assertEquals(m.map, back.map);
+	}
+
 	@Test
 	void testToJson() throws Exception {
 		AnsT1 anson = new AnsT1();

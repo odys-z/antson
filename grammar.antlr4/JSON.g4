@@ -36,8 +36,10 @@ json
 	: envelope (',' envelope)*
 	;
 
+// ody: an object of which the first key is "type" is an envelope, see TYPE_KEY.
+// envelope must be tried before obj in value, as an obj's first pair can also be TYPE_KEY value.
 envelope // top obj
-	: type_pair (',' pair)* '}'
+	: '{' type_pair (',' pair)* '}'
 	;
 
 obj
@@ -53,7 +55,7 @@ type_pair
 	// Type can't specified as a list because it's a type_pair also a property of object {}.
 	// Object can not be an array.
 	// : TYPE ':' ('[' qualifiedName ']' | qualifiedName)	// [] means it's a list
-	: type ':' qualifiedName
+	: TYPE_KEY qualifiedName
 	;
 
 qualifiedName
@@ -67,6 +69,7 @@ qualifiedName
 
 pair
 	: propname ':' value
+	| TYPE_KEY value	// "type" as a key, not the first one, e.g. in a map
 	;
 
 propname
@@ -82,24 +85,24 @@ array
 value
 	: STRING
 	| NUMBER
+	| envelope	// before obj, see envelope
 	| obj		// all array's obj value can't parsed as Anson, taken as HashMap - TODO doc: known issue
-	| envelope
 	| array
 	| 'true'
 	| 'false'
 	| 'null'
-    | ('type' | 'TYPE' | '"type"' | '"TYPE"')+
 	;
 
 
 // section: type name extension
 // ody: for grammar, see
 // https://github.com/antlr/grammars-v4/blob/master/java/JavaLexer.g4
-type
-	: '{' 'TYPE'
-	| '{' '"TYPE"'
-	| '{' 'type'
-	| '{' '"type"'
+
+// The type key, with the colon, so a "type" not followed by ':' is a STRING, e.g. {"ver": "type"}.
+// The lexer has no context: if 'type' / '"type"' were literals, they would beat STRING / IDENTIFIER everywhere.
+// Since antson 1.2.0.
+TYPE_KEY
+	: ('"type"' | '"TYPE"' | 'type' | 'TYPE') [ \t\n\r]* ':'
 	;
 
 // \- since - means "range" inside [...]
