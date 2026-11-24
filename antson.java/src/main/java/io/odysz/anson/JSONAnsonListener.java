@@ -938,7 +938,12 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
                         		ft.getTypeName(), top.parsedVal);
                     f.set(enclosing, ctor.newInstance(top.parsedVal));
                 }
-                else if (Anson.class.isAssignableFrom(ft))
+				// 1.2.1
+                // an Anson, or an IJsonable parsed from its envelope, e.g. semantic.DA's DocRef's subclasses
+				// ft.isInstance(top.parsedVal) means: if the object built from the envelope is of the field's type, assign it.
+				// That's what AnDbField's own toBlock() produces, since it writes Anson.toEnvelope(this, …).
+				// So a DocRef or any subclass is now read back the way it was written, like an Anson, without a factory.
+                else if (Anson.class.isAssignableFrom(ft) || ft.isInstance(top.parsedVal))
 					f.set(enclosing, top.parsedVal);
 				else {
 					// Subclass of IJsonable must registered
