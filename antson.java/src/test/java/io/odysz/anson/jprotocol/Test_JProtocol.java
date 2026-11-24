@@ -344,7 +344,9 @@ class Test_JProtocol {
 				+ "\"body\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\","
 				+ "\"a\":\"I\",\"parent\":\"io.odysz.semantic.jprotocol.test.T_AnsonMsg\",\"uri\":\"/c/myconn\","
 				// This is what 0.9.57 fixed
-				+ "\"nvs\":[[\"type\"\"type\",\"type\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.oz.album.tier.PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"],[\"shareFlag\",\"priv\"],[\"shareby\",\"Ody\"]],"
+				// + "\"nvs\":[[\"type\"\"type\",\"type\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.oz.album.tier.PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"],[\"shareFlag\",\"priv\"],[\"shareby\",\"Ody\"]],"
+				// This is what 1.2.0 fixed -> type""type
+				+ "\"nvs\":[[\"type\\\"\\\"type\",\"type\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.oz.album.tier.PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"],[\"shareFlag\",\"priv\"],[\"shareby\",\"Ody\"]],"
 				+ "\"postUpds\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnUpdateReq\",\"a\":\"D\",\"uri\":\"/c/myconn\",\"mtabl\":\"h_photo_orgs\",\"nvs\":[],\"where\":[[\"=\",\"org\",\"'C0000001'\"]],"
 				+ "\"postUpds\":[{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\",\"a\":\"I\",\"uri\":null,\"mtabl\":\"h_photo_orgs\",\"nvs\":[],\"nvss\":[[[\"\",null],[\"pid\",\"C0000001\"]],[[\"\",null],[\"pid\",\"C0000001\"]],[[\"\",null],[\"pid\",\"C0000001\"]]],\"cols\":[\"\",\"pid\"]}]}],"
 				+ "\"cols\":[\"shareFlag\"]}]}";
@@ -354,8 +356,12 @@ class Test_JProtocol {
 		assertNotNull(msg.body(0));
 		assertNotNull(msg.body(0).postUpds);
 		assertNotNull(msg.body(0).postUpds.get(0));
-		assertEquals ("\"type\"\"type\"", msg.body(0).nvs.get(0)[0]);
-		assertEquals ("\"type\"", msg.body(0).nvs.get(0)[1]);
+		// change in 1.2.0
+		// assertEquals ("\"type\"\"type\"", msg.body(0).nvs.get(0)[0]);
+		// assertEquals ("\"type\"", msg.body(0).nvs.get(0)[1]);
+		assertEquals ("type\"\"type", msg.body(0).nvs.get(0)[0]);
+		assertEquals ("type", msg.body(0).nvs.get(0)[1]);
+
 		assertNotNull(msg.body(0).postUpds.get(0).postUpds);
 		assertNotNull(msg.body(0).postUpds.get(0).postUpds.get(0).nvss);
 		assertEquals("", msg.body(0).postUpds.get(0).postUpds.get(0).nvss.get(0).get(0)[0]);
@@ -382,8 +388,12 @@ class Test_JProtocol {
 				+ "}";
 
 		T_AnInsertReq req = (T_AnInsertReq) Anson.fromJson(jblock);
-		assertEquals ("\"type\"\"type\"", req.nvs.get(0)[0]);
-		assertEquals ("\"type\"", req.nvs.get(0)[1]);
+
+		// changed since 1.2.0:
+		// assertEquals ("\"type\"\"type\"", req.nvs.get(0)[0]);
+		// assertEquals ("\"type\"", req.nvs.get(0)[1]);
+		assertEquals ("type", req.nvs.get(0)[0]);
+		assertEquals ("type", req.nvs.get(0)[1]);
 
 		assertEquals ("0-0-0.0 0-0-0.1", req.nvss.get(0).get(0)[0]);
 		assertEquals ("0-0-2", req.nvss.get(0).get(0)[2]);
@@ -393,15 +403,22 @@ class Test_JProtocol {
 	@Test
 	void test_NoSql() {
 		String jblock = "{\"type\":\"io.odysz.semantic.jprotocol.test.U.T_AnInsertReq\","
-				+ "\"nvs\":[[\"type\"\"type\",\"type\",\"generic string\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.odysz.semantic.T_PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"]],"
+				// before 1.2.0
+				// "\"nvs\":[[\"type\"\"type\",\"type\",\"generic string\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.odysz.semantic.T_PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"]],"
+				// change in 1.2.0:
+				+ "\"nvs\":[[\"type\\\"\\\"type\",\"type\",\"generic string\",\"io.oz.album.tier.PhotoRec\"],[\"css\",\"{\\\"type\\\":\\\"io.odysz.semantic.T_PhotoCSS\\\", \\\"size\\\":[4,3,3,4]}\"]],"
 				+ "\"nvss\": [[[\"0-0-0.0,0-0-0.1\",\"0-0-1\"],[\"0-1-0\"]]]"
 				+ "}";
 
 		T_AnInsertReq req = (T_AnInsertReq) Anson.fromJson(jblock);
 
-		// ISSUE FIXME shouldn't be 'type\"\"type'?
-		assertEquals("\"type\"\"type\"", req.nvs.get(0)[0], "shouldn't be 'type\"\"type'?");
-		assertEquals("\"type\"", req.nvs.get(0)[1], "shouldn't be 'type'?");
+		// before 1.2.0:
+		// assertEquals("type\"\"type", req.nvs.get(0)[0], "shouldn't be 'type\"\"type'?");
+		// assertEquals("\"type\"", req.nvs.get(0)[1], "shouldn't be 'type'?");
+		// change in 1.2.0:
+		assertEquals("type\"\"type", req.nvs.get(0)[0], "shouldn't be 'type\"\"type'?");
+		assertEquals("type", req.nvs.get(0)[1], "shouldn't be 'type'?");
+
 		assertEquals("generic string", req.nvs.get(0)[2], "generic string");
 
 		T_PhotoCSS css = (T_PhotoCSS)Anson.fromJson((String) req.nvs.get(1)[1]);
