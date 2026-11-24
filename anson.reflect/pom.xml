@@ -2,6 +2,13 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
+  <parent>
+    <groupId>io.github.odys-z</groupId>
+    <artifactId>semantics.java</artifactId>
+    <version>0.0.1</version>
+    <relativePath>../semantics.java</relativePath>
+  </parent>
+
   <groupId>io.github.odys-z</groupId>
   <artifactId>anson.reflect</artifactId>
   <version>0.0.1</version>
@@ -11,28 +18,7 @@
   <url>http://github.com/odys-z/antson</url>
   <description>List a module's types, fields and the types they use into anson-types.json, for generating Anson peers.</description>
 
-  <licenses>
-    <license>
-    	<name>MIT License</name>
-    	<url>http://www.opensource.org/licenses/mit-license.php</url>
-    </license>
-  </licenses>
-
-  <developers>
-    <developer>
-      <name>Ody Zhou</name>
-      <email>odys.zhou@gmail.com</email>
-      <organization>odys-z.github.io</organization>
-      <organizationUrl>https://odys-z.github.io</organizationUrl>
-    </developer>
-  </developers>
-
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-	<maven.compiler.source>17</maven.compiler.source>
-	<maven.compiler.target>17</maven.compiler.target>
-
 	<maven.version>3.9.11</maven.version>
 	<plugin-tools.version>3.15.1</plugin-tools.version>
 	<antson.version>1.2.0</antson.version>
@@ -94,40 +80,14 @@
 	</dependency>
   </dependencies>
 
-  <scm>
-  	<connection>scm:git:git://github.com/odys-z/antson.git</connection>
-  	<developerConnection>scm:git:odys-z@github.com:odys-z/antson.git</developerConnection>
-  	<url>https://github.com/odys-z/antson</url>
-  	<tag>HEAD</tag>
-  </scm>
-
   <build>
     <plugins>
       <!-- generates META-INF/maven/plugin.xml from the annotations; mvn anson:types -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
-        <version>${plugin-tools.version}</version>
         <configuration>
           <goalPrefix>anson</goalPrefix>
-        </configuration>
-      </plugin>
-
-      <plugin>
-      	<groupId>org.apache.maven.plugins</groupId>
-      	<artifactId>maven-surefire-plugin</artifactId>
-      	<version>3.5.4</version>
-      	<configuration>
-      		<argLine>-Dfile.encoding=UTF-8</argLine>
-        </configuration>
-      </plugin>
-
-      <plugin>
-      	<artifactId>maven-compiler-plugin</artifactId>
-        <version>3.13.0</version>
-        <configuration>
-          <source>17</source>
-          <target>17</target>
         </configuration>
       </plugin>
     </plugins>
