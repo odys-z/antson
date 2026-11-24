@@ -25,12 +25,13 @@ m2-offline). This pom pins the plugin versions once for all projects.
 | Release plugins | source, javadoc, gpg, central-publishing |
 | Others | shade, assembly, dependency, plugin-plugin (maven-plugin packaging) |
 | Properties | UTF-8 encodings, Java 17 (`maven.compiler.source` / `target`) |
+| Test dependencies | JUnit, by importing `junit-bom` (`junit.version`) |
 | Metadata | url, licenses, developers, scm, snapshot repository |
 
 The versions are properties, see `<properties>` in [pom.xml](pom.xml).
 
-It does **not** manage dependencies: the projects depend on each other at
-different versions, so dependency versions stay in each project's pom.
+Apart from JUnit it does **not** manage dependencies: the projects depend on each
+other at different versions, so those versions stay in each project's pom.
 
 ## Use it in a project
 
@@ -44,7 +45,16 @@ different versions, so dependency versions stay in each project's pom.
 ```
 
 Then remove the `<version>` of the plugins listed above, and the metadata the
-parent already has. Keep each project's own plugin configuration (manifest, shade
+parent already has. Declare JUnit without a version:
+
+```xml
+<dependency>
+  <groupId>org.junit.jupiter</groupId>
+  <artifactId>junit-jupiter-engine</artifactId>
+  <scope>test</scope>
+</dependency>
+```
+ Keep each project's own plugin configuration (manifest, shade
 setup, executions, ...).
 
 A project needing another version overrides the property, e.g.

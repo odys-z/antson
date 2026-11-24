@@ -3,8 +3,9 @@
   semantics.java: the parent of all odys-z java projects (antson, semantic.transact,
   semantic.DA, semantic.jserv, anclient.jserv, doctree.jserv, html-service, ...).
 
-  It manages build plugin versions and shares the publishing metadata; it does not
-  manage dependencies, as our modules depend on each other at different versions.
+  It manages build plugin versions, the JUnit version, and shares the publishing
+  metadata; it does not manage other dependencies, as our modules depend on each
+  other at different versions.
 
   Child pom:
     <parent>
@@ -84,7 +85,24 @@
 	<assembly-plugin.version>3.7.1</assembly-plugin.version>
 	<dependency-plugin.version>3.7.0</dependency-plugin.version>
 	<plugin-tools.version>3.15.1</plugin-tools.version>
+
+	<!-- test dependencies, managed by junit-bom -->
+	<junit.version>6.1.0</junit.version>
   </properties>
+
+  <!-- Only versions: a child still declares the dependencies it uses, e.g.
+       junit-jupiter-engine (test scope) without <version>. -->
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <distributionManagement>
 	<snapshotRepository>
