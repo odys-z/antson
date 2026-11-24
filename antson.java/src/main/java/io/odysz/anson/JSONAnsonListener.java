@@ -938,7 +938,7 @@ public class JSONAnsonListener extends JSONBaseListener implements JSONListener 
                         		ft.getTypeName(), top.parsedVal);
                     f.set(enclosing, ctor.newInstance(top.parsedVal));
                 }
-				// 1.2.1
+				// v 1.2.1, 615d5db6190824fe5190949e7f8cf1bdd076c8ac
                 // an Anson, or an IJsonable parsed from its envelope, e.g. semantic.DA's DocRef's subclasses
 				// ft.isInstance(top.parsedVal) means: if the object built from the envelope is of the field's type, assign it.
 				// That's what AnDbField's own toBlock() produces, since it writes Anson.toEnvelope(this, …).
