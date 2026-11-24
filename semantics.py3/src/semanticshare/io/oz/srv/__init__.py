@@ -1,30 +1,29 @@
 """
-html-service's configuration, WEB-INF/html-service.json: the types of io.oz.srv (github odys-z/html-service).
+html-service's types of io.oz.srv (github odys-z/html-service): WebAssets.
+
+WebConfig, StaticResource and DynaResource are semantic.jserv's since package 0.8.3, see
+semanticshare.io.odysz.semantic.jserv; the classes here, of the same names, only read a
+html-service.json of an earlier version, its types io.oz.srv.* (an upgrade takes the new package's
+file, with the user's values picked, see io.oz.syn.pkgresource.ConfigPicks).
 """
 from dataclasses import dataclass
 from typing import Optional
 
 from anson.io.odysz.anson import Anson
+from semanticshare.io.odysz.semantic import jserv
 
 
 @dataclass
-class StaticResource(Anson):
+class StaticResource(jserv.StaticResource):
     '''
-    A static resource path, io.oz.srv.StaticResource (ResPath before html-web 0.2.1).
-    @since semantics.py3 0.6.20
+    @deprecated package 0.8.3, io.odysz.semantic.jserv.StaticResource. For reading an earlier version's file.
     '''
-    path: str
-    resource: str
-    allowDir: bool
-
     def __init__(self, **kwargs):
-        super().__init__()
-        self.path, self.resource = kwargs.get('path', '/'), kwargs.get('resource', 'web-dist')
-        self.allowDir = kwargs.get('allowDir', False)
+        super().__init__(**kwargs)
 
 
 @dataclass
-class ResPath(StaticResource):
+class ResPath(jserv.StaticResource):
     '''
     @deprecated html-web 0.2.1 renamed it StaticResource. Kept for reading a html-service.json of an older
     version (an upgrade takes the new package's paths, see io.oz.syn.pkgresource.ConfigPicks).
@@ -34,58 +33,21 @@ class ResPath(StaticResource):
 
 
 @dataclass
-class DynaResource(Anson):
+class DynaResource(jserv.DynaResource):
     '''
-    Dynamic resources, io.oz.srv.DynaResource: the docs published by the local synode.
-    @since semantics.py3 0.6.20 (html-web 0.2.1)
+    @deprecated package 0.8.3, io.odysz.semantic.jserv.DynaResource. For reading an earlier version's file.
     '''
-    help: str
-    handler: str
-    syn_jserv: str
-    resource: str
-    pollInterval_snd: int
-    allowDir: bool
-    danyroot: str
-
     def __init__(self):
         super().__init__()
-        self.help = None
-        self.handler = 'io.oz.sdoc.htmlsrv.ResPathsTier'
-        self.syn_jserv = None
-        self.resource = 'respaths'
-        self.pollInterval_snd = 3600
-        self.allowDir = False
-        self.danyroot = 'pub'
 
 
 @dataclass
-class WebConfig(Anson):
-    port: int
-    paths: list[StaticResource]
-    startHandler: Optional[list[str]]
-    startHandlers: Optional[list[list[str]]]
+class WebConfig(jserv.WebConfig):
     '''
-    The handlers run when the service starts, in this order, each [class name, args...], e.g.
-    [["io.oz.srv.WebAssetsHandler"], ["io.oz.srv.JservLocalHandler", "private/host.json"]].
-    startHandler, the only one before, is still run, first. html-web 0.2.2, semantics.py3 0.6.21.
+    @deprecated package 0.8.3, io.odysz.semantic.jserv.WebConfig. For reading an earlier version's file.
     '''
-    welcomepages: Optional[list[str]]
-    dynaResource: Optional[DynaResource]
-    notfound: Optional[str]
-    '''
-    The page of every 404, a path in the server, e.g. "/404.html"; None: Jetty's. html-web 0.2.1.
-    '''
-
     def __init__(self):
         super().__init__()
-
-        self.port = 8900
-        self.paths = [StaticResource(path='/', resource='web-dist')]
-        self.startHandler = None
-        self.startHandlers = None
-        self.welcomepages = None
-        self.dynaResource = None
-        self.notfound = None
 
 
 @dataclass

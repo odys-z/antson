@@ -16,7 +16,9 @@ sys.path.insert(0, 'src')
 
 from anson.io.odysz.anson import Anson
 from semanticshare.io.oz.syn.pkgresource import PkgResources
-from semanticshare.io.oz.srv import WebConfig, WebAssets
+from semanticshare.io.odysz.semantic.jserv import WebConfig
+from semanticshare.io.oz.srv import WebAssets
+from semanticshare.io.oz import srv
 
 # the package 0.8.2's manifest, as jserv-album/src/main/resource.json
 manifest_082 = '''{
@@ -32,14 +34,15 @@ manifest_082 = '''{
       "dynaResource.pollInterval_snd": ["dynaResource.pollInterval_snd"]}}
 }'''
 
-# the package 0.8.2's html-service.json, as jserv-album/src/main/webapp/WEB-INF-0.8
+# the package's html-service.json, as jserv-album/src/main/webapp/WEB-INF-0.8, the types semantic.jserv's
+# since 0.8.3
 template_082 = '''{
-  "type": "io.oz.srv.WebConfig",
+  "type": "io.odysz.semantic.jserv.WebConfig",
   "port": 8900,
-  "paths": [{"type": "io.oz.srv.StaticResource", "path": "/*", "resource": "web-dist", "allowDir": false}],
+  "paths": [{"type": "io.odysz.semantic.jserv.StaticResource", "path": "/*", "resource": "web-dist", "allowDir": false}],
   "startHandler": ["io.oz.srv.JservLocalHandler", "private/host.json"],
   "welcomepages": ["index.html"],
-  "dynaResource": {"type": "io.oz.srv.DynaResource", "handler": "io.oz.sdoc.htmlsrv.ResPathsTier",
+  "dynaResource": {"type": "io.odysz.semantic.jserv.DynaResource", "handler": "io.oz.sdoc.htmlsrv.ResPathsTier",
                    "syn_jserv": null, "pollInterval_snd": 3600, "resource": "respaths",
                    "danyroot": "pub", "allowDir": false}
 }'''
@@ -93,7 +96,7 @@ class UpgradeTest(unittest.TestCase):
         # the user's value
         self.assertEqual(['home.html'], html['welcomepages'])
         # the new version's: the paths, with the new type, the start handler
-        self.assertEqual('io.oz.srv.StaticResource', html['paths'][0]['type'])
+        self.assertEqual('io.odysz.semantic.jserv.StaticResource', html['paths'][0]['type'])
         self.assertEqual('/*', html['paths'][0]['path'])
         self.assertEqual('io.oz.srv.JservLocalHandler', html['startHandler'][0])
         # a missing field, with its default values
@@ -107,6 +110,13 @@ class UpgradeTest(unittest.TestCase):
         cfg = Anson.from_file(html_json)
         self.assertIsInstance(cfg, WebConfig)
         self.assertIsNone(cfg.dynaResource.syn_jserv)
+
+        # an earlier version's file, its types io.oz.srv.*, still read (e.g. the installed one, before upgraded)
+        write(backup + '.old', html_080)
+        old = Anson.from_file(backup + '.old')
+        self.assertIsInstance(old, WebConfig)
+        self.assertIsInstance(old, srv.WebConfig)
+        self.assertEqual(['home.html'], old.welcomepages)
 
         # 4. a renamed field: a developer's 0.8.2 with dynaResource.synode, and a value of another kind
         mine = json.loads(template_082)
