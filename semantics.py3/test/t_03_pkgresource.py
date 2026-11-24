@@ -39,7 +39,7 @@ template_082 = '''{
   "paths": [{"type": "io.oz.srv.StaticResource", "path": "/*", "resource": "web-dist", "allowDir": false}],
   "startHandler": ["io.oz.srv.JservLocalHandler", "private/host.json"],
   "welcomepages": ["index.html"],
-  "dynaResource": {"type": "io.oz.srv.DynaResource", "handler": "io.oz.srv.ResPathsTier",
+  "dynaResource": {"type": "io.oz.srv.DynaResource", "handler": "io.oz.sdoc.htmlsrv.ResPathsTier",
                    "syn_jserv": null, "pollInterval_snd": 3600, "resource": "respaths",
                    "danyroot": "pub", "allowDir": false}
 }'''
@@ -97,7 +97,7 @@ class UpgradeTest(unittest.TestCase):
         self.assertEqual('/*', html['paths'][0]['path'])
         self.assertEqual('io.oz.srv.JservLocalHandler', html['startHandler'][0])
         # a missing field, with its default values
-        self.assertEqual('io.oz.srv.ResPathsTier', html['dynaResource']['handler'])
+        self.assertEqual('io.oz.sdoc.htmlsrv.ResPathsTier', html['dynaResource']['handler'])
         self.assertEqual(3600, html['dynaResource']['pollInterval_snd'])
         self.assertEqual('pub', html['dynaResource']['danyroot'])
         # a field no version knows now is gone

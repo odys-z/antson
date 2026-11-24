@@ -50,7 +50,7 @@ class DynaResource(Anson):
     def __init__(self):
         super().__init__()
         self.help = None
-        self.handler = 'io.oz.srv.ResPathsTier'
+        self.handler = 'io.oz.sdoc.htmlsrv.ResPathsTier'
         self.syn_jserv = None
         self.resource = 'respaths'
         self.pollInterval_snd = 3600
