@@ -11,7 +11,7 @@
     <parent>
       <groupId>io.github.odys-z</groupId>
       <artifactId>semantics.java</artifactId>
-      <version>0.0.1</version>
+      <version>0.0.3</version>
       <relativePath/>   <!- - ../semantics.java for antson.java and anson.reflect - ->
     </parent>
 
@@ -29,7 +29,7 @@
 
   <groupId>io.github.odys-z</groupId>
   <artifactId>semantics.java</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.3</version>
   <packaging>pom</packaging>
   <name>semantics.java</name>
 
@@ -81,6 +81,7 @@
 	<javadoc-plugin.version>3.5.0</javadoc-plugin.version>
 	<gpg-plugin.version>3.2.8</gpg-plugin.version>
 	<central-publishing.version>0.8.0</central-publishing.version>
+	<flatten-plugin.version>1.7.3</flatten-plugin.version>
 	<shade-plugin.version>3.6.0</shade-plugin.version>
 	<assembly-plugin.version>3.7.1</assembly-plugin.version>
 	<dependency-plugin.version>3.7.0</dependency-plugin.version>
@@ -173,6 +174,32 @@
           <groupId>org.sonatype.central</groupId>
           <artifactId>central-publishing-maven-plugin</artifactId>
           <version>${central-publishing.version}</version>
+        </plugin>
+
+        <!-- Publishes a self-contained pom: parent removed, licenses, developers, scm and
+             managed versions (e.g. JUnit) written in. Central validates the deployed pom
+             as is, without following <parent>. A child lists it in <plugins> by
+             groupId and artifactId only. Not run for this pom, which must stay a parent. -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>${flatten-plugin.version}</version>
+          <configuration>
+            <flattenMode>ossrh</flattenMode>
+            <updatePomFile>true</updatePomFile>
+          </configuration>
+          <executions>
+            <execution>
+              <id>flatten</id>
+              <phase>process-resources</phase>
+              <goals><goal>flatten</goal></goals>
+            </execution>
+            <execution>
+              <id>flatten-clean</id>
+              <phase>clean</phase>
+              <goals><goal>clean</goal></goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

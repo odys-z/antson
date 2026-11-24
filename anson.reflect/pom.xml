@@ -5,7 +5,7 @@
   <parent>
     <groupId>io.github.odys-z</groupId>
     <artifactId>semantics.java</artifactId>
-    <version>0.0.1</version>
+    <version>[0.0.3,)</version>
     <relativePath>../semantics.java</relativePath>
   </parent>
 
@@ -81,6 +81,10 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+      </plugin>
       <!-- generates META-INF/maven/plugin.xml from the annotations; mvn anson:types -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

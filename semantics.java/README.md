@@ -7,7 +7,7 @@ The parent pom of the odys-z java projects: antson, semantic.transact, semantic.
 semantic.jserv, anclient.jserv, doctree.jserv, html-service, and others.
 
 ```
-io.github.odys-z:semantics.java:0.0.1   (packaging pom)
+io.github.odys-z:semantics.java:0.0.3   (packaging pom)
 ```
 
 ## Why
@@ -22,7 +22,7 @@ m2-offline). This pom pins the plugin versions once for all projects.
 | | |
 |---|---|
 | Lifecycle plugins | clean, resources, compiler, surefire, jar, install, deploy |
-| Release plugins | source, javadoc, gpg, central-publishing |
+| Release plugins | source, javadoc, gpg, central-publishing, flatten |
 | Others | shade, assembly, dependency, plugin-plugin (maven-plugin packaging) |
 | Properties | UTF-8 encodings, Java 17 (`maven.compiler.source` / `target`) |
 | Test dependencies | JUnit, by importing `junit-bom` (`junit.version`) |
@@ -39,9 +39,24 @@ other at different versions, so those versions stay in each project's pom.
 <parent>
   <groupId>io.github.odys-z</groupId>
   <artifactId>semantics.java</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.3</version>
   <relativePath/>     <!-- ../semantics.java for antson.java and anson.reflect -->
 </parent>
+```
+
+Add the flatten plugin, so the pom deployed to Central is self-contained. Central
+validates the deployed pom without following `<parent>`, and rejects it when the
+licenses, developers, scm or a dependency version come from the parent:
+
+```xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>flatten-maven-plugin</artifactId>
+    </plugin>
+  </plugins>
+</build>
 ```
 
 Then remove the `<version>` of the plugins listed above, and the metadata the
