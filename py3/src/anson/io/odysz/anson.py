@@ -331,8 +331,14 @@ class Anson(dict):
         '''
         return self.toBlock_(0, beautify)
 
-    def toFile(self, path: Union[str, Path]):
-        with open(path, 'w+', encoding="utf-8") as jf:
+    def toFile(self, path: Union[str, Path], newline: str = '\n'):
+        '''
+        Write toBlock() to a file.
+        :param newline: the line ending written, '\\n' (LF) by default, also on Windows;
+        '\\r\\n' for CRLF; None for the platform's (before 0.6.14)
+        @since 0.6.14 newline
+        '''
+        with open(path, 'w+', encoding="utf-8", newline=newline) as jf:
             jf.write(self.toBlock(True))
 
     def save(self, json_path):
