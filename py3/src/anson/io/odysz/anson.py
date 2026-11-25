@@ -333,9 +333,6 @@ class Anson(dict):
 
     def toFile(self, path: Union[str, Path], newline: str = '\n'):
         '''
-        Write toBlock() to a file.
-        :param newline: the line ending written, '\\n' (LF) by default, also on Windows;
-        '\\r\\n' for CRLF; None for the platform's (before 0.6.14)
         @since 0.6.14 newline
         '''
         with open(path, 'w+', encoding="utf-8", newline=newline) as jf:
