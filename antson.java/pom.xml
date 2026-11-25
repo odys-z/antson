@@ -9,7 +9,6 @@
     <relativePath>../semantics.java</relativePath>
   </parent>
 
-  <groupId>io.github.odys-z</groupId>
   <artifactId>antson</artifactId>
   <version>1.2.1</version>
   <packaging>jar</packaging>
