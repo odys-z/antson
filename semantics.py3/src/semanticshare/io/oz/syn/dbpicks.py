@@ -19,6 +19,10 @@ checks, both ways:
   every db pick and every config_picks field has a mark in the marks file, and every mark there has one;
   every mark is in its source file, once.
 
+A change of the tables or configurations that needs no picking item, e.g. a new column whose DDL default
+is right, is marked "IGNORE-PICKING-<package version> <what> -- <reason>" at its source line, and listed in
+the marks file as the others, for reviewing; check_marks() ignores these marks.
+
 Used by a package's build, e.g. jserv-album/tasks.py package():
 
     checked = DbPicks.load('src/main/doctree-picks.json').check_marks(
@@ -45,6 +49,9 @@ from anson.io.odysz.anson import Anson
 
 mark_prefix = 'DB-PICKING-'
 '''the marks' prefix of a db picking list's items, followed by the package version'''
+
+ignore_prefix = 'IGNORE-PICKING-'
+'''the marks' prefix of changes needing no picking item, ignored by DbPicks.check_marks()'''
 
 db_mark = re.compile(r'^DB-PICKING-\d+(\.\d+)*\s+\S+$')
 json_mark = re.compile(r'^JSON-PICKING-\d+(\.\d+)*\s+(\S+#\S+)$')
@@ -178,6 +185,8 @@ class DbPicks(Anson):
 
         with open(marks, encoding='utf-8') as f:
             mk = json.load(f).get('marks', {})
+        # changes needing no picking item, listed for reviewing only
+        mk = {m: src for m, src in mk.items() if not m.startswith(ignore_prefix)}
 
         # the items' marks
         items = set()

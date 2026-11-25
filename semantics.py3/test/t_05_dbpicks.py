@@ -92,7 +92,8 @@ class DbPicksTest(unittest.TestCase):
             'DB-PICKING-0.8.2 t.b': 'repo/Meta.java',             # marked twice in the source
             'DB-PICKING-0.8.2 t.e': 'repo/Meta.java',             # no item, not in the source
             'JSON-PICKING-0.8.2 x.json#f': 'repo/Meta.java',      # f, not its prefix of ff
-            'JSON-PICKING-0.8.2 x.json#h': 'other/Gone.java'}})   # no such field, no such file
+            'JSON-PICKING-0.8.2 x.json#h': 'other/Gone.java',     # no such field, no such file
+            'IGNORE-PICKING-0.8.3 t.g': 'other/Gone.java'}})      # ignored: no item, no such file
 
         checked = picks.check_marks(str(self.dir), mk, config_picks, strict=True)
         errors = '\n'.join(checked.errors)
@@ -106,6 +107,7 @@ class DbPicksTest(unittest.TestCase):
         self.assertIn('other/Gone.java', errors)
         self.assertNotIn('JSON-PICKING-0.8.2 x.json#f is marked', errors)
         self.assertNotIn('DB-PICKING-0.8.2 t.a ', errors)
+        self.assertNotIn('IGNORE-PICKING', errors)
 
         # not strict: a missing source file is skipped
         checked = picks.check_marks(str(self.dir), mk, config_picks, strict=False)
