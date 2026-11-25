@@ -1,0 +1,26 @@
+diff --git a/semantics.py3/pyproject.toml b/semantics.py3/pyproject.toml
+index 5d39f5f..b59dcc0 100644
+--- a/semantics.py3/pyproject.toml
++++ b/semantics.py3/pyproject.toml
+@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
+ 
+ [project]
+ name = "semantics.py3"
+-version = "0.6.24"
++version = "0.6.25"
+ authors = [
+   { name="Ody Z", email="odys.zhou@gmail.com" },
+ ]
+diff --git a/semantics.py3/src/semanticshare/io/oz/syn/dbpicks.py b/semantics.py3/src/semanticshare/io/oz/syn/dbpicks.py
+index 8fe279f..b232bb3 100644
+--- a/semantics.py3/src/semanticshare/io/oz/syn/dbpicks.py
++++ b/semantics.py3/src/semanticshare/io/oz/syn/dbpicks.py
+@@ -51,7 +51,7 @@ mark_prefix = 'DB-PICKING-'
+ '''the marks' prefix of a db picking list's items, followed by the package version'''
+ 
+ ignore_prefix = 'IGNORE-PICKING-'
+-'''the marks' prefix of changes needing no picking item, ignored by DbPicks.check_marks()'''
++'''the marks' prefix of changes needing no picking item, ignored by DbPicks.check_marks() (since 0.6.25)'''
+ 
+ db_mark = re.compile(r'^DB-PICKING-\d+(\.\d+)*\s+\S+$')
+ json_mark = re.compile(r'^JSON-PICKING-\d+(\.\d+)*\s+(\S+#\S+)$')

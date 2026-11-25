@@ -51,7 +51,7 @@ mark_prefix = 'DB-PICKING-'
 '''the marks' prefix of a db picking list's items, followed by the package version'''
 
 ignore_prefix = 'IGNORE-PICKING-'
-'''the marks' prefix of changes needing no picking item, ignored by DbPicks.check_marks()'''
+'''the marks' prefix of changes needing no picking item, ignored by DbPicks.check_marks() (since 0.6.25)'''
 
 db_mark = re.compile(r'^DB-PICKING-\d+(\.\d+)*\s+\S+$')
 json_mark = re.compile(r'^JSON-PICKING-\d+(\.\d+)*\s+(\S+#\S+)$')
