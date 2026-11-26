@@ -643,6 +643,21 @@ class SynodeTask(Anson):
     def get_distzip(self) -> str:
         return os.path.join(self.package_dir, self.zip_name())
 
+    def upgrader_name(self) -> str:
+        '''
+        Get the Windows upgrade tool name.
+        :return: e.g. synode-upgrade-0.8.5-closed-test.exe
+        @since semantics.py3 0.6.26
+        '''
+        return f'synode-upgrade-{self.synodepy3_ver()}-{self.deploy.market_id}-{self.deploy.orgid}.exe'
+
+    def get_upgrader(self) -> Path:
+        '''
+        :return: package_dir / upgrader_name(), copied there by jserv-album tasks.py package()
+        @since semantics.py3 0.6.26
+        '''
+        return Path(self.package_dir) / self.upgrader_name()
+
     def get_deskapp_zip(self) -> str:
         '''
         @return: e.g. .../example.slint/app/build-0.8.0/desktop-0.8.0-alpha-pmking.zip
@@ -666,6 +681,7 @@ class SynodeTask(Anson):
         files = [Path(self.get_distzip()), Path(self.package_dir) / self.get_apk_name()]
         if os.name == 'nt':  # not posix 0.8.0
             files.append(Path(self.package_dir) / self.deskzip_name())  # package() copies get_deskapp_zip() here
+            files.append(self.get_upgrader())  # since 0.6.26, Linux: synode.py3 from PyPI
         return files
 
     @staticmethod
