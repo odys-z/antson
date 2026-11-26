@@ -38,6 +38,7 @@ class UIResources(Anson):
         self.langs = dict()
 
     def signup_prompt(self, defl = None):
+        from antson.py3.src.anson.io.odysz.common import LangExt
         return LangExt.ifblank(self.langs[self.lang].signup_prompt, defl)
 
     def langstr(self, res):
@@ -55,3 +56,21 @@ class UIResources(Anson):
     def langstrf(self, res, **args):
         return self.langstr(res).format(**args)
 
+
+@dataclass
+class DesknownPaths(Anson):
+    '''
+    User's home path, etc.
+    @since 0.6.26
+    '''
+    home: str             # need JSON-PIKING-0.8.3 ?
+    desktop: str          # need JSON-PIKING-0.8.3 ?
+    desktop_settings: str # need JSON-PIKING-0.8.3 ?
+    download: str         # need JSON-PIKING-0.8.3 ?
+    documents: str        # need JSON-PIKING-0.8.3 ?
+    pictures: str         # need JSON-PIKING-0.8.3 ?
+    music: str            # need JSON-PIKING-0.8.3 ?
+    video: str            # need JSON-PIKING-0.8.3 ?
+
+    def __init__(self):
+        super().__init__()
