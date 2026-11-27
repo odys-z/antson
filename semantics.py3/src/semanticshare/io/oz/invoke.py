@@ -646,10 +646,10 @@ class SynodeTask(Anson):
     def upgrader_name(self) -> str:
         '''
         Get the Windows upgrade tool name.
-        :return: e.g. synode-upgrade-0.8.5-closed-test.exe
+        :return: e.g. synode-upgrade-0.8.3-alpha.exe
         @since semantics.py3 0.6.26
         '''
-        return f'synode-upgrade-{self.synodepy3_ver()}-{self.deploy.market_id}-{self.deploy.orgid}.exe'
+        return f'synode-upgrade-{self.version}-{self.deploy.market_id}.exe'
 
     def get_upgrader(self) -> Path:
         '''
